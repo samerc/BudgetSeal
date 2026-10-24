@@ -513,5 +513,16 @@
   "web_fund_copied": "Payments added: {n}",
   "web_fund_need_category": "Link a category to this fund (in the app) so payments come out of it.",
   "web_fund_in_days": "in {n} days",
-  "web_fund_saving_chip": "Saving · {saved} of {total}"
+  "web_fund_saving_chip": "Saving · {saved} of {total}",
+  "web_bill_ask_first": "Ask before posting",
+  "web_bill_ask_first_hint": "For bills that change: confirm the amount each time",
+  "web_bill_remind": "Remind me",
+  "web_bill_remind_default": "{n} days before (default)",
+  "web_bill_remind_off": "Don't remind me",
+  "web_bill_remind_on_day": "On the day",
+  "web_bill_remind_one": "1 day before",
+  "web_bill_remind_n": "{n} days before",
+  "web_bill_confirm_post": "Confirm and post",
+  "web_bill_confirm_desc": "Amount this time",
+  "web_bill_to_confirm": "confirm the amount"
 }

@@ -15659,6 +15659,186 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Saving · {saved} of {total}'**
   String sinkSavingChip(String saved, String total);
+
+  /// Bills: ask before posting, reminders
+  ///
+  /// In en, this message translates to:
+  /// **'Ask before posting'**
+  String get billAskFirst;
+
+  /// Bills: ask before posting, reminders
+  ///
+  /// In en, this message translates to:
+  /// **'For bills that change: confirm the amount each time'**
+  String get billAskFirstHint;
+
+  /// Bills: ask before posting, reminders
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me'**
+  String get billRemindLabel;
+
+  /// Bills: ask before posting, reminders
+  ///
+  /// In en, this message translates to:
+  /// **'{n} days before (default)'**
+  String billRemindDefault(int n);
+
+  /// Bills: ask before posting, reminders
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t remind me'**
+  String get billRemindOff;
+
+  /// Bills: ask before posting, reminders
+  ///
+  /// In en, this message translates to:
+  /// **'On the day'**
+  String get billRemindOnDay;
+
+  /// Bills: ask before posting, reminders
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 day before} other{{n} days before}}'**
+  String billRemindDaysBefore(int n);
+
+  /// Bills: ask before posting, reminders
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the amount'**
+  String get billToConfirm;
+
+  /// Bills: ask before posting, reminders
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm amount and post'**
+  String get billConfirmPost;
+
+  /// Bills: ask before posting, reminders
+  ///
+  /// In en, this message translates to:
+  /// **'Enter what you paid this time'**
+  String get billConfirmPostDesc;
+
+  /// Bills: ask before posting, reminders
+  ///
+  /// In en, this message translates to:
+  /// **'Log it'**
+  String get billNotifLogIt;
+
+  /// Bills: ask before posting, reminders
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me tomorrow'**
+  String get billNotifSnooze;
+
+  /// Bills: ask before posting, reminders
+  ///
+  /// In en, this message translates to:
+  /// **'Bill reminders'**
+  String get billNotifChannel;
+
+  /// Bills: ask before posting, reminders
+  ///
+  /// In en, this message translates to:
+  /// **'A reminder before each bill is due'**
+  String get billNotifChannelDesc;
+
+  /// Bills: ask before posting, reminders
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} is due today.'**
+  String billNotifDueToday(String amount);
+
+  /// Bills: ask before posting, reminders
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} is due tomorrow.'**
+  String billNotifDueTomorrow(String amount);
+
+  /// Bills: ask before posting, reminders
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} is due in {n} days.'**
+  String billNotifDueInDays(String amount, int n);
+
+  /// Bills: ask before posting, reminders
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} was due {n, plural, =1{yesterday} other{{n} days ago}}.'**
+  String billNotifOverdue(String amount, int n);
+
+  /// Bills: ask before posting, reminders
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the amount to post it.'**
+  String get billNotifConfirm;
+
+  /// Web Companion: bill options
+  ///
+  /// In en, this message translates to:
+  /// **'Ask before posting'**
+  String get webBillAskFirst;
+
+  /// Web Companion: bill options
+  ///
+  /// In en, this message translates to:
+  /// **'For bills that change: confirm the amount each time'**
+  String get webBillAskFirstHint;
+
+  /// Web Companion: bill options
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me'**
+  String get webBillRemind;
+
+  /// Web Companion: bill options
+  ///
+  /// In en, this message translates to:
+  /// **'{n} days before (default)'**
+  String webBillRemindDefault(int n);
+
+  /// Web Companion: bill options
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t remind me'**
+  String get webBillRemindOff;
+
+  /// Web Companion: bill options
+  ///
+  /// In en, this message translates to:
+  /// **'On the day'**
+  String get webBillRemindOnDay;
+
+  /// Web Companion: bill options
+  ///
+  /// In en, this message translates to:
+  /// **'1 day before'**
+  String get webBillRemindOne;
+
+  /// Web Companion: bill options
+  ///
+  /// In en, this message translates to:
+  /// **'{n} days before'**
+  String webBillRemindN(int n);
+
+  /// Web Companion: bill options
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm and post'**
+  String get webBillConfirmPost;
+
+  /// Web Companion: bill options
+  ///
+  /// In en, this message translates to:
+  /// **'Amount this time'**
+  String get webBillConfirmDesc;
+
+  /// Web Companion: bill options
+  ///
+  /// In en, this message translates to:
+  /// **'confirm the amount'**
+  String get webBillToConfirm;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

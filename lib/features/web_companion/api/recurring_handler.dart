@@ -51,6 +51,10 @@ Future<Response> listRecurring(Ref ref, {required bool subscriptions}) async {
   }
 }
 
+/// Reminder lead days: null = default, -1 = off, 0–30 days before.
+int? _remindDays(Object? v) =>
+    v is num ? v.toInt().clamp(-1, 30) : null;
+
 // ── POST /api/recurring ───────────────────────────────────────────────────────
 
 Handler createRecurringHandler(Ref ref) => (Request request) async {
@@ -145,6 +149,8 @@ Future<Response> createRecurring(Ref ref, Map<String, dynamic> body,
           endDate: endDate,
           note: truncate(optString(body, 'note') ?? '', kMaxNoteLength),
           isSubscription: subscription,
+          askFirst: optBool(body, 'askFirst') ?? false,
+          remindDays: _remindDays(body['remindDays']),
         );
     return created({'id': id});
   } catch (e) {
@@ -266,6 +272,12 @@ Future<Response> updateRecurring(Ref ref, Request request,
       anchorDay: nextDue != null ? Value(nextDue.day) : const Value.absent(),
       enabled: optBool(body, 'enabled') != null
           ? Value(optBool(body, 'enabled')!)
+          : const Value.absent(),
+      askFirst: optBool(body, 'askFirst') != null
+          ? Value(optBool(body, 'askFirst')!)
+          : const Value.absent(),
+      remindDays: body.containsKey('remindDays')
+          ? Value(_remindDays(body['remindDays']))
           : const Value.absent(),
       priceHistory: priceHistory != existing.priceHistory
           ? Value(priceHistory)

@@ -104,7 +104,8 @@ POST /api/envelopes/:id/fund           → add funding
 POST /api/envelopes/move               → { fromId?, toId?, amount, currency } (null side = Ready to assign; AllocationEngine.moveMoney; 400 if the source envelope lacks it)
 
 GET  /api/upcoming?days=30             → bill occurrences (recurring + subscriptions) with dueDate, daysUntil, occurrence, amount on that date
-POST /api/recurring/:id/post-now       → RecurringEngine.postNow (records today, advances)
+POST /api/recurring/:id/post-now       → { amount? } RecurringEngine.postNow (records today, advances; amount = an ask-first bill's confirmed amount)
+(recurring/subscription create + PUT also take askFirst (bool) and remindDays (null | -1 | 0–30); recurringToJson returns both)
 POST /api/recurring/:id/skip           → RecurringEngine.skipNext
 GET  /api/planned                      → planned payments (status 'planned'), oldest first
 POST /api/planned · PUT /api/planned/:id → { type, accountId, destinationAccountId?, amount, categoryId?, note?, date }

@@ -18,6 +18,8 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
 import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/calculator_amount_field.dart'
+    show showCalculatorSheet;
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/large_title_header.dart';
@@ -26,12 +28,15 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_icons.dart';
 import '../../shared/widgets/skeleton_loader.dart';
 import 'recurring_format.dart';
+import 'recurring_screen.dart' show EditRecurringSheet;
 import '../../shared/utils/calendar_days.dart';
 
 /// Shows recurring transactions sorted by next due date,
 /// with visual urgency indicators for overdue / due soon items.
 class UpcomingBillsScreen extends ConsumerStatefulWidget {
-  const UpcomingBillsScreen({super.key});
+  /// A bill to open on arrival (a notification's "Log it" button).
+  final String? openBillId;
+  const UpcomingBillsScreen({super.key, this.openBillId});
 
   @override
   ConsumerState<UpcomingBillsScreen> createState() =>
@@ -43,6 +48,7 @@ class _UpcomingBillsScreenState
   List<RecurringTransaction> _bills = [];
   bool _loading = true;
   Object? _error;
+  late String? _pendingOpen = widget.openBillId;
 
   @override
   void initState() {
@@ -72,6 +78,10 @@ class _UpcomingBillsScreenState
           _loading = false;
           _error = null;
         });
+        final open = _pendingOpen;
+        _pendingOpen = null;
+        final bill = items.where((b) => b.id == open).firstOrNull;
+        if (bill != null) _showBillActions(bill);
       }
     } catch (e) {
       debugPrint('[UpcomingBills] Error: $e');
@@ -98,8 +108,10 @@ class _UpcomingBillsScreenState
             SheetTitle(bill.title.isNotEmpty ? bill.title : tr.subUntitled),
             ListTile(
               leading: const Icon(AppIcons.checkCircle),
-              title: Text(tr.upcomingPostNow),
-              subtitle: Text(tr.upcomingPostNowDesc),
+              title: Text(bill.askFirst ? tr.billConfirmPost : tr.upcomingPostNow),
+              subtitle: Text(bill.askFirst
+                  ? tr.billConfirmPostDesc
+                  : tr.upcomingPostNowDesc),
               onTap: () => Navigator.pop(ctx, 'post'),
             ),
             ListTile(
@@ -125,9 +137,16 @@ class _UpcomingBillsScreenState
     );
     if (action == null || !mounted) return;
     if (action == 'edit') {
-      await context.push(bill.isSubscription
-          ? '/subscriptions/${bill.id}'
-          : '/recurring');
+      if (bill.isSubscription) {
+        await context.push('/subscriptions/${bill.id}');
+      } else {
+        await showModalBottomSheet<bool>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => EditRecurringSheet(item: bill),
+        );
+      }
       _load();
       return;
     }
@@ -146,16 +165,24 @@ class _UpcomingBillsScreenState
       );
       if (paidOn == null || !mounted) return;
     }
+    // Ask-first bills: confirm this time's amount (starts on the usual one).
+    double? amount;
+    if (bill.askFirst && action != 'skip') {
+      amount = await showCalculatorSheet(
+          context, recurringAmountOn(bill, bill.nextDueDate));
+      if (amount == null || amount <= 0 || !mounted) return;
+    }
     try {
       final engine = ref.read(recurringEngineProvider);
       if (action == 'post' || action == 'post-on') {
-        await engine.postNow(bill.id, on: paidOn);
+        await engine.postNow(bill.id, on: paidOn, amount: amount);
       } else {
         await engine.skipNext(bill.id);
       }
       ref.invalidate(transactionEntriesProvider);
       ref.invalidate(monthlyTransactionsProvider);
       ref.invalidate(allocationsProvider);
+      rescheduleBillReminders(ref);
       messenger.showSnackBar(SnackBar(
         content: Text(action == 'skip' ? tr.upcomingSkipped : tr.upcomingPosted),
         behavior: SnackBarBehavior.floating,
@@ -244,7 +271,10 @@ class _BillCard extends ConsumerWidget {
         isOverdue ? AppColors.billOverdue : AppColors.billUpcoming;
 
     final tr = S.of(context);
-    final urgencyLabel = isOverdue
+    final toConfirm = bill.askFirst && daysUntil <= 0;
+    final urgencyLabel = toConfirm
+        ? tr.billToConfirm
+        : isOverdue
         ? tr.upcomingOverdue(-daysUntil)
         : daysUntil == 0
             ? tr.upcomingDueToday
@@ -324,20 +354,28 @@ class _BillCard extends ConsumerWidget {
             child: Row(
               children: [
                 Icon(
-                  isOverdue ? AppIcons.warningFill : AppIcons.clock,
+                  toConfirm
+                      ? AppIcons.pencilSimple
+                      : isOverdue
+                          ? AppIcons.warningFill
+                          : AppIcons.clock,
                   size: 14,
                   color: urgencyColor,
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  urgencyLabel,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: urgencyColor,
+                Expanded(
+                  child: Text(
+                    urgencyLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: urgencyColor,
+                    ),
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 Text(
                   formatDate(due),
                   style: TextStyle(

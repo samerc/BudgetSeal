@@ -9064,4 +9064,125 @@ class SAr extends S {
   String sinkSavingChip(String saved, String total) {
     return 'ادخار · $saved من $total';
   }
+
+  @override
+  String get billAskFirst => 'اسألني قبل التسجيل';
+
+  @override
+  String get billAskFirstHint => 'للفواتير المتغيرة: أكّد المبلغ في كل مرة';
+
+  @override
+  String get billRemindLabel => 'ذكّرني';
+
+  @override
+  String billRemindDefault(int n) {
+    return 'قبل $n يوم (افتراضي)';
+  }
+
+  @override
+  String get billRemindOff => 'لا تذكّرني';
+
+  @override
+  String get billRemindOnDay => 'في يوم الاستحقاق';
+
+  @override
+  String billRemindDaysBefore(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'قبل $n يوم',
+      few: 'قبل $n أيام',
+      two: 'قبل يومين',
+      one: 'قبل يوم واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get billToConfirm => 'أكّد المبلغ';
+
+  @override
+  String get billConfirmPost => 'أكّد المبلغ وسجّل';
+
+  @override
+  String get billConfirmPostDesc => 'أدخل ما دفعته هذه المرة';
+
+  @override
+  String get billNotifLogIt => 'سجّلها';
+
+  @override
+  String get billNotifSnooze => 'ذكّرني غداً';
+
+  @override
+  String get billNotifChannel => 'تذكيرات الفواتير';
+
+  @override
+  String get billNotifChannelDesc => 'تذكير قبل استحقاق كل فاتورة';
+
+  @override
+  String billNotifDueToday(String amount) {
+    return '$amount مستحق اليوم.';
+  }
+
+  @override
+  String billNotifDueTomorrow(String amount) {
+    return '$amount مستحق غداً.';
+  }
+
+  @override
+  String billNotifDueInDays(String amount, int n) {
+    return '$amount مستحق بعد $n يوم.';
+  }
+
+  @override
+  String billNotifOverdue(String amount, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'قبل $n يوم',
+      two: 'قبل يومين',
+      one: 'أمس',
+    );
+    return '$amount كان مستحقاً $_temp0.';
+  }
+
+  @override
+  String get billNotifConfirm => 'أكّد المبلغ لتسجيلها.';
+
+  @override
+  String get webBillAskFirst => 'اسألني قبل التسجيل';
+
+  @override
+  String get webBillAskFirstHint => 'للفواتير المتغيرة: أكّد المبلغ في كل مرة';
+
+  @override
+  String get webBillRemind => 'ذكّرني';
+
+  @override
+  String webBillRemindDefault(int n) {
+    return 'قبل $n يوم (افتراضي)';
+  }
+
+  @override
+  String get webBillRemindOff => 'لا تذكّرني';
+
+  @override
+  String get webBillRemindOnDay => 'في يوم الاستحقاق';
+
+  @override
+  String get webBillRemindOne => 'قبل يوم واحد';
+
+  @override
+  String webBillRemindN(int n) {
+    return 'قبل $n يوم';
+  }
+
+  @override
+  String get webBillConfirmPost => 'أكّد وسجّل';
+
+  @override
+  String get webBillConfirmDesc => 'المبلغ هذه المرة';
+
+  @override
+  String get webBillToConfirm => 'أكّد المبلغ';
 }

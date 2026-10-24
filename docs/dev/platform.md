@@ -4,7 +4,7 @@ Developer notes moved out of CLAUDE.md (Oct 2026). Read before changing this are
 
 ## Resume Work
 
-On every resume `app.dart` runs `_processDueWork()`: `processRecurring()` (invalidates transaction/balance providers if anything posted) then `NotificationService.runChecks()` (each check keeps its 24h cooldown). `MainScreen` shows the one welcome tip (`dashboard_welcome`, on whichever tab opens first), then asks for the Android 13+ notification permission once (`NotificationService.requestPermissionOnce`) via `afterHints()`. First-visit tips go through `showHintIfNeeded()` (`shared/widgets/hint_banner.dart`), which queues them — never two dialogs (or a dialog and the system prompt) at once. Upcoming-bill views use `recurringAmountOn(rec, date)` so subscription price changes show before they post.
+On every resume `app.dart` runs `_processDueWork()`: `processRecurring()` (invalidates transaction/balance providers if anything posted) then `NotificationService.runChecks()` (envelope checks keep their 24h cooldown; bill reminders are rescheduled — see budget.md "Bill reminders"). `MainScreen` shows the one welcome tip (`dashboard_welcome`, on whichever tab opens first), then asks for the Android 13+ notification permission once (`NotificationService.requestPermissionOnce`) via `afterHints()`. First-visit tips go through `showHintIfNeeded()` (`shared/widgets/hint_banner.dart`), which queues them — never two dialogs (or a dialog and the system prompt) at once. Upcoming-bill views use `recurringAmountOn(rec, date)` so subscription price changes show before they post.
 
 ## Daily Reminder Timezone
 Must call `tz.setLocalLocation()` after `initializeTimeZones()`. Without it everything runs as UTC. Use `flutter_timezone` to get the device identifier.

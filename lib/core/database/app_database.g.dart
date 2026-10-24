@@ -5582,6 +5582,22 @@ class $RecurringTransactionsTable extends RecurringTransactions
   late final GeneratedColumn<String> priceHistory = GeneratedColumn<String>(
       'price_history', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _askFirstMeta =
+      const VerificationMeta('askFirst');
+  @override
+  late final GeneratedColumn<bool> askFirst = GeneratedColumn<bool>(
+      'ask_first', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("ask_first" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _remindDaysMeta =
+      const VerificationMeta('remindDays');
+  @override
+  late final GeneratedColumn<int> remindDays = GeneratedColumn<int>(
+      'remind_days', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -5629,6 +5645,8 @@ class $RecurringTransactionsTable extends RecurringTransactions
         enabled,
         isSubscription,
         priceHistory,
+        askFirst,
+        remindDays,
         createdAt,
         lastModified,
         deleted
@@ -5749,6 +5767,16 @@ class $RecurringTransactionsTable extends RecurringTransactions
           priceHistory.isAcceptableOrUnknown(
               data['price_history']!, _priceHistoryMeta));
     }
+    if (data.containsKey('ask_first')) {
+      context.handle(_askFirstMeta,
+          askFirst.isAcceptableOrUnknown(data['ask_first']!, _askFirstMeta));
+    }
+    if (data.containsKey('remind_days')) {
+      context.handle(
+          _remindDaysMeta,
+          remindDays.isAcceptableOrUnknown(
+              data['remind_days']!, _remindDaysMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -5811,6 +5839,10 @@ class $RecurringTransactionsTable extends RecurringTransactions
           .read(DriftSqlType.bool, data['${effectivePrefix}is_subscription'])!,
       priceHistory: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}price_history']),
+      askFirst: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}ask_first'])!,
+      remindDays: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}remind_days']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       lastModified: attachedDatabase.typeMapping.read(
@@ -5869,6 +5901,14 @@ class RecurringTransaction extends DataClass
   /// Format: [{"amount": 15.0, "from": "2025-01-01"}, {"amount": 18.0, "from": "2026-06-01"}]
   /// When generating transactions, the engine uses the price active on the due date.
   final String? priceHistory;
+
+  /// Ask before posting: a due bill waits (shown as "to confirm") until the
+  /// user confirms its amount, for bills that change every time.
+  final bool askFirst;
+
+  /// Days before the due date to remind (0 = on the day). Null = the default
+  /// (2 days); -1 = no reminder for this bill.
+  final int? remindDays;
   final DateTime createdAt;
 
   /// Bumped on every edit so changes propagate across synced devices
@@ -5897,6 +5937,8 @@ class RecurringTransaction extends DataClass
       required this.enabled,
       required this.isSubscription,
       this.priceHistory,
+      required this.askFirst,
+      this.remindDays,
       required this.createdAt,
       required this.lastModified,
       required this.deleted});
@@ -5933,6 +5975,10 @@ class RecurringTransaction extends DataClass
     map['is_subscription'] = Variable<bool>(isSubscription);
     if (!nullToAbsent || priceHistory != null) {
       map['price_history'] = Variable<String>(priceHistory);
+    }
+    map['ask_first'] = Variable<bool>(askFirst);
+    if (!nullToAbsent || remindDays != null) {
+      map['remind_days'] = Variable<int>(remindDays);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['last_modified'] = Variable<DateTime>(lastModified);
@@ -5973,6 +6019,10 @@ class RecurringTransaction extends DataClass
       priceHistory: priceHistory == null && nullToAbsent
           ? const Value.absent()
           : Value(priceHistory),
+      askFirst: Value(askFirst),
+      remindDays: remindDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remindDays),
       createdAt: Value(createdAt),
       lastModified: Value(lastModified),
       deleted: Value(deleted),
@@ -6004,6 +6054,8 @@ class RecurringTransaction extends DataClass
       enabled: serializer.fromJson<bool>(json['enabled']),
       isSubscription: serializer.fromJson<bool>(json['isSubscription']),
       priceHistory: serializer.fromJson<String?>(json['priceHistory']),
+      askFirst: serializer.fromJson<bool>(json['askFirst']),
+      remindDays: serializer.fromJson<int?>(json['remindDays']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       lastModified: serializer.fromJson<DateTime>(json['lastModified']),
       deleted: serializer.fromJson<bool>(json['deleted']),
@@ -6032,6 +6084,8 @@ class RecurringTransaction extends DataClass
       'enabled': serializer.toJson<bool>(enabled),
       'isSubscription': serializer.toJson<bool>(isSubscription),
       'priceHistory': serializer.toJson<String?>(priceHistory),
+      'askFirst': serializer.toJson<bool>(askFirst),
+      'remindDays': serializer.toJson<int?>(remindDays),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'lastModified': serializer.toJson<DateTime>(lastModified),
       'deleted': serializer.toJson<bool>(deleted),
@@ -6058,6 +6112,8 @@ class RecurringTransaction extends DataClass
           bool? enabled,
           bool? isSubscription,
           Value<String?> priceHistory = const Value.absent(),
+          bool? askFirst,
+          Value<int?> remindDays = const Value.absent(),
           DateTime? createdAt,
           DateTime? lastModified,
           bool? deleted}) =>
@@ -6086,6 +6142,8 @@ class RecurringTransaction extends DataClass
         isSubscription: isSubscription ?? this.isSubscription,
         priceHistory:
             priceHistory.present ? priceHistory.value : this.priceHistory,
+        askFirst: askFirst ?? this.askFirst,
+        remindDays: remindDays.present ? remindDays.value : this.remindDays,
         createdAt: createdAt ?? this.createdAt,
         lastModified: lastModified ?? this.lastModified,
         deleted: deleted ?? this.deleted,
@@ -6122,6 +6180,9 @@ class RecurringTransaction extends DataClass
       priceHistory: data.priceHistory.present
           ? data.priceHistory.value
           : this.priceHistory,
+      askFirst: data.askFirst.present ? data.askFirst.value : this.askFirst,
+      remindDays:
+          data.remindDays.present ? data.remindDays.value : this.remindDays,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       lastModified: data.lastModified.present
           ? data.lastModified.value
@@ -6152,6 +6213,8 @@ class RecurringTransaction extends DataClass
           ..write('enabled: $enabled, ')
           ..write('isSubscription: $isSubscription, ')
           ..write('priceHistory: $priceHistory, ')
+          ..write('askFirst: $askFirst, ')
+          ..write('remindDays: $remindDays, ')
           ..write('createdAt: $createdAt, ')
           ..write('lastModified: $lastModified, ')
           ..write('deleted: $deleted')
@@ -6180,6 +6243,8 @@ class RecurringTransaction extends DataClass
         enabled,
         isSubscription,
         priceHistory,
+        askFirst,
+        remindDays,
         createdAt,
         lastModified,
         deleted
@@ -6207,6 +6272,8 @@ class RecurringTransaction extends DataClass
           other.enabled == this.enabled &&
           other.isSubscription == this.isSubscription &&
           other.priceHistory == this.priceHistory &&
+          other.askFirst == this.askFirst &&
+          other.remindDays == this.remindDays &&
           other.createdAt == this.createdAt &&
           other.lastModified == this.lastModified &&
           other.deleted == this.deleted);
@@ -6233,6 +6300,8 @@ class RecurringTransactionsCompanion
   final Value<bool> enabled;
   final Value<bool> isSubscription;
   final Value<String?> priceHistory;
+  final Value<bool> askFirst;
+  final Value<int?> remindDays;
   final Value<DateTime> createdAt;
   final Value<DateTime> lastModified;
   final Value<bool> deleted;
@@ -6257,6 +6326,8 @@ class RecurringTransactionsCompanion
     this.enabled = const Value.absent(),
     this.isSubscription = const Value.absent(),
     this.priceHistory = const Value.absent(),
+    this.askFirst = const Value.absent(),
+    this.remindDays = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.lastModified = const Value.absent(),
     this.deleted = const Value.absent(),
@@ -6282,6 +6353,8 @@ class RecurringTransactionsCompanion
     this.enabled = const Value.absent(),
     this.isSubscription = const Value.absent(),
     this.priceHistory = const Value.absent(),
+    this.askFirst = const Value.absent(),
+    this.remindDays = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.lastModified = const Value.absent(),
     this.deleted = const Value.absent(),
@@ -6314,6 +6387,8 @@ class RecurringTransactionsCompanion
     Expression<bool>? enabled,
     Expression<bool>? isSubscription,
     Expression<String>? priceHistory,
+    Expression<bool>? askFirst,
+    Expression<int>? remindDays,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? lastModified,
     Expression<bool>? deleted,
@@ -6340,6 +6415,8 @@ class RecurringTransactionsCompanion
       if (enabled != null) 'enabled': enabled,
       if (isSubscription != null) 'is_subscription': isSubscription,
       if (priceHistory != null) 'price_history': priceHistory,
+      if (askFirst != null) 'ask_first': askFirst,
+      if (remindDays != null) 'remind_days': remindDays,
       if (createdAt != null) 'created_at': createdAt,
       if (lastModified != null) 'last_modified': lastModified,
       if (deleted != null) 'deleted': deleted,
@@ -6367,6 +6444,8 @@ class RecurringTransactionsCompanion
       Value<bool>? enabled,
       Value<bool>? isSubscription,
       Value<String?>? priceHistory,
+      Value<bool>? askFirst,
+      Value<int?>? remindDays,
       Value<DateTime>? createdAt,
       Value<DateTime>? lastModified,
       Value<bool>? deleted,
@@ -6391,6 +6470,8 @@ class RecurringTransactionsCompanion
       enabled: enabled ?? this.enabled,
       isSubscription: isSubscription ?? this.isSubscription,
       priceHistory: priceHistory ?? this.priceHistory,
+      askFirst: askFirst ?? this.askFirst,
+      remindDays: remindDays ?? this.remindDays,
       createdAt: createdAt ?? this.createdAt,
       lastModified: lastModified ?? this.lastModified,
       deleted: deleted ?? this.deleted,
@@ -6459,6 +6540,12 @@ class RecurringTransactionsCompanion
     if (priceHistory.present) {
       map['price_history'] = Variable<String>(priceHistory.value);
     }
+    if (askFirst.present) {
+      map['ask_first'] = Variable<bool>(askFirst.value);
+    }
+    if (remindDays.present) {
+      map['remind_days'] = Variable<int>(remindDays.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -6496,6 +6583,8 @@ class RecurringTransactionsCompanion
           ..write('enabled: $enabled, ')
           ..write('isSubscription: $isSubscription, ')
           ..write('priceHistory: $priceHistory, ')
+          ..write('askFirst: $askFirst, ')
+          ..write('remindDays: $remindDays, ')
           ..write('createdAt: $createdAt, ')
           ..write('lastModified: $lastModified, ')
           ..write('deleted: $deleted, ')
@@ -14111,6 +14200,8 @@ typedef $$RecurringTransactionsTableCreateCompanionBuilder
   Value<bool> enabled,
   Value<bool> isSubscription,
   Value<String?> priceHistory,
+  Value<bool> askFirst,
+  Value<int?> remindDays,
   Value<DateTime> createdAt,
   Value<DateTime> lastModified,
   Value<bool> deleted,
@@ -14137,6 +14228,8 @@ typedef $$RecurringTransactionsTableUpdateCompanionBuilder
   Value<bool> enabled,
   Value<bool> isSubscription,
   Value<String?> priceHistory,
+  Value<bool> askFirst,
+  Value<int?> remindDays,
   Value<DateTime> createdAt,
   Value<DateTime> lastModified,
   Value<bool> deleted,
@@ -14262,6 +14355,12 @@ class $$RecurringTransactionsTableFilterComposer
 
   ColumnFilters<String> get priceHistory => $composableBuilder(
       column: $table.priceHistory, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get askFirst => $composableBuilder(
+      column: $table.askFirst, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get remindDays => $composableBuilder(
+      column: $table.remindDays, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -14410,6 +14509,12 @@ class $$RecurringTransactionsTableOrderingComposer
       column: $table.priceHistory,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get askFirst => $composableBuilder(
+      column: $table.askFirst, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get remindDays => $composableBuilder(
+      column: $table.remindDays, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -14555,6 +14660,12 @@ class $$RecurringTransactionsTableAnnotationComposer
   GeneratedColumn<String> get priceHistory => $composableBuilder(
       column: $table.priceHistory, builder: (column) => column);
 
+  GeneratedColumn<bool> get askFirst =>
+      $composableBuilder(column: $table.askFirst, builder: (column) => column);
+
+  GeneratedColumn<int> get remindDays => $composableBuilder(
+      column: $table.remindDays, builder: (column) => column);
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -14695,6 +14806,8 @@ class $$RecurringTransactionsTableTableManager extends RootTableManager<
             Value<bool> enabled = const Value.absent(),
             Value<bool> isSubscription = const Value.absent(),
             Value<String?> priceHistory = const Value.absent(),
+            Value<bool> askFirst = const Value.absent(),
+            Value<int?> remindDays = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),
             Value<bool> deleted = const Value.absent(),
@@ -14720,6 +14833,8 @@ class $$RecurringTransactionsTableTableManager extends RootTableManager<
             enabled: enabled,
             isSubscription: isSubscription,
             priceHistory: priceHistory,
+            askFirst: askFirst,
+            remindDays: remindDays,
             createdAt: createdAt,
             lastModified: lastModified,
             deleted: deleted,
@@ -14745,6 +14860,8 @@ class $$RecurringTransactionsTableTableManager extends RootTableManager<
             Value<bool> enabled = const Value.absent(),
             Value<bool> isSubscription = const Value.absent(),
             Value<String?> priceHistory = const Value.absent(),
+            Value<bool> askFirst = const Value.absent(),
+            Value<int?> remindDays = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),
             Value<bool> deleted = const Value.absent(),
@@ -14770,6 +14887,8 @@ class $$RecurringTransactionsTableTableManager extends RootTableManager<
             enabled: enabled,
             isSubscription: isSubscription,
             priceHistory: priceHistory,
+            askFirst: askFirst,
+            remindDays: remindDays,
             createdAt: createdAt,
             lastModified: lastModified,
             deleted: deleted,

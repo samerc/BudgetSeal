@@ -145,6 +145,8 @@ Map<String, dynamic> recurringToJson(
       'endDate': r.endDate?.toIso8601String(),
       'enabled': r.enabled,
       'isSubscription': r.isSubscription,
+      'askFirst': r.askFirst,
+      'remindDays': r.remindDays,
       'priceHistory': r.priceHistory,
       'note': r.note,
       'accountId': r.accountId,

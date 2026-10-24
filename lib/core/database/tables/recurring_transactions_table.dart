@@ -52,6 +52,14 @@ class RecurringTransactions extends Table {
   /// When generating transactions, the engine uses the price active on the due date.
   TextColumn get priceHistory => text().nullable()();
 
+  /// Ask before posting: a due bill waits (shown as "to confirm") until the
+  /// user confirms its amount, for bills that change every time.
+  BoolColumn get askFirst => boolean().withDefault(const Constant(false))();
+
+  /// Days before the due date to remind (0 = on the day). Null = the default
+  /// (2 days); -1 = no reminder for this bill.
+  IntColumn get remindDays => integer().nullable()();
+
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   /// Bumped on every edit so changes propagate across synced devices

@@ -9150,4 +9150,125 @@ class SFr extends S {
   String sinkSavingChip(String saved, String total) {
     return 'Épargne · $saved sur $total';
   }
+
+  @override
+  String get billAskFirst => 'Demander avant d\'enregistrer';
+
+  @override
+  String get billAskFirstHint =>
+      'Pour les factures variables : confirmez le montant à chaque fois';
+
+  @override
+  String get billRemindLabel => 'Me rappeler';
+
+  @override
+  String billRemindDefault(int n) {
+    return '$n jours avant (par défaut)';
+  }
+
+  @override
+  String get billRemindOff => 'Ne pas me rappeler';
+
+  @override
+  String get billRemindOnDay => 'Le jour même';
+
+  @override
+  String billRemindDaysBefore(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n jours avant',
+      one: '1 jour avant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get billToConfirm => 'Confirmez le montant';
+
+  @override
+  String get billConfirmPost => 'Confirmer le montant et enregistrer';
+
+  @override
+  String get billConfirmPostDesc =>
+      'Saisissez ce que vous avez payé cette fois';
+
+  @override
+  String get billNotifLogIt => 'L\'enregistrer';
+
+  @override
+  String get billNotifSnooze => 'Me rappeler demain';
+
+  @override
+  String get billNotifChannel => 'Rappels de factures';
+
+  @override
+  String get billNotifChannelDesc => 'Un rappel avant chaque échéance';
+
+  @override
+  String billNotifDueToday(String amount) {
+    return '$amount à payer aujourd\'hui.';
+  }
+
+  @override
+  String billNotifDueTomorrow(String amount) {
+    return '$amount à payer demain.';
+  }
+
+  @override
+  String billNotifDueInDays(String amount, int n) {
+    return '$amount à payer dans $n jours.';
+  }
+
+  @override
+  String billNotifOverdue(String amount, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'il y a $n jours',
+      one: 'hier',
+    );
+    return '$amount était à payer $_temp0.';
+  }
+
+  @override
+  String get billNotifConfirm => 'Confirmez le montant pour l\'enregistrer.';
+
+  @override
+  String get webBillAskFirst => 'Demander avant d\'enregistrer';
+
+  @override
+  String get webBillAskFirstHint =>
+      'Pour les factures variables : confirmez le montant à chaque fois';
+
+  @override
+  String get webBillRemind => 'Me rappeler';
+
+  @override
+  String webBillRemindDefault(int n) {
+    return '$n jours avant (par défaut)';
+  }
+
+  @override
+  String get webBillRemindOff => 'Ne pas me rappeler';
+
+  @override
+  String get webBillRemindOnDay => 'Le jour même';
+
+  @override
+  String get webBillRemindOne => '1 jour avant';
+
+  @override
+  String webBillRemindN(int n) {
+    return '$n jours avant';
+  }
+
+  @override
+  String get webBillConfirmPost => 'Confirmer et enregistrer';
+
+  @override
+  String get webBillConfirmDesc => 'Montant cette fois';
+
+  @override
+  String get webBillToConfirm => 'confirmez le montant';
 }

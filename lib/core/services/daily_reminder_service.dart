@@ -144,7 +144,7 @@ class DailyReminderService {
 
   static Future<void> _schedule() async {
     await _ensureInitialized();
-    await _ensureTz();
+    await ensureTz();
 
     final androidPlugin = _plugin
         .resolvePlatformSpecificImplementation<
@@ -215,7 +215,7 @@ class DailyReminderService {
 
   /// Ensure timezone data is loaded and local timezone is set.
   static bool _tzInitialized = false;
-  static Future<void> _ensureTz() async {
+  static Future<void> ensureTz() async {
     if (!_tzInitialized) {
       tz_data.initializeTimeZones();
       try {

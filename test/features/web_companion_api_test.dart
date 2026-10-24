@@ -447,6 +447,37 @@ void main() {
     expect((await balances())['usd'], -30);
   });
 
+  test('an ask-first bill posts the confirmed amount', () async {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, now.day - 1)
+        .toIso8601String()
+        .substring(0, 10);
+    final bill = await call(createRecurringHandler(ref), 'POST', body: {
+      'type': 'expense',
+      'title': 'Electricity',
+      'accountId': 'usd',
+      'amount': 40,
+      'frequency': 'monthly',
+      'startDate': start,
+      'askFirst': true,
+      'remindDays': 0,
+    });
+    final rid = bill['id'] as String;
+    final up = await call(upcomingBillsHandler(ref), 'GET', query: '?days=30');
+    final item = (up['items'] as List).firstWhere((i) => i['id'] == rid);
+    expect(item['askFirst'], isTrue);
+    expect(item['remindDays'], 0);
+    expect(
+        (await call(recurringActionHandler(ref, post: true), 'POST',
+            id: rid, body: {'amount': -5}))['status'],
+        400);
+    expect(
+        (await call(recurringActionHandler(ref, post: true), 'POST',
+            id: rid, body: {'amount': 52.5}))['status'],
+        200);
+    expect((await balances())['usd'], -52.5);
+  });
+
   test('planned payments: create, edit, post, delete; no effect until posted',
       () async {
     final a = await call(createPlannedHandler(ref), 'POST', body: {

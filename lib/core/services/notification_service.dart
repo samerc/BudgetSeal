@@ -1,12 +1,31 @@
+import 'dart:convert';
+import 'dart:ui' show DartPluginRegistrant;
+
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/data/latest_all.dart' as tz_data;
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../l10n/s_lookup.dart';
 import '../database/app_database.dart';
 import '../database/daos/allocations_dao.dart';
 import '../database/daos/ledger_dao.dart';
+import '../engine/recurring_engine.dart' show recurringAmountOn;
+import '../../features/recurring/recurring_format.dart' show billRemindDefault;
+import '../../shared/utils/calendar_days.dart';
+import '../../shared/utils/format_number.dart';
+import 'daily_reminder_service.dart';
+
+/// A notification action tapped while the app wasn't in the foreground
+/// ("Remind me tomorrow" never opens the app). Runs in its own isolate.
+@pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse r) {
+  if (r.actionId != NotificationService.actionSnooze) return;
+  DartPluginRegistrant.ensureInitialized();
+  NotificationService.snoozeBill(r, FlutterLocalNotificationsPlugin());
+}
 
 class NotificationService {
   static final _plugin = FlutterLocalNotificationsPlugin();
@@ -33,11 +52,9 @@ class NotificationService {
   }
 
   static const _envelopeNotifId = 1001;
-  static const _billNotifId = 1002;
   static const _budgetWarningNotifId = 1003;
 
   static const _envelopeCooldownKey = 'notif_last_check_envelopes';
-  static const _billCooldownKey = 'notif_last_check_bills';
   static const _budgetWarningCooldownKey = 'notif_last_check_budget_warning';
   static const _cooldownHours = 24;
 
@@ -54,12 +71,24 @@ class NotificationService {
 
   static Future<void> init() async {
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const ios = DarwinInitializationSettings();
+    final ios = DarwinInitializationSettings(notificationCategories: [
+      DarwinNotificationCategory(billCategory, actions: [
+        DarwinNotificationAction.plain(actionLog, currentS().billNotifLogIt,
+            options: {DarwinNotificationActionOption.foreground}),
+        DarwinNotificationAction.plain(
+            actionSnooze, currentS().billNotifSnooze),
+      ]),
+    ]);
     await _plugin.initialize(
-      settings: const InitializationSettings(android: android, iOS: ios),
+      settings: InitializationSettings(android: android, iOS: ios),
       onDidReceiveNotificationResponse: (r) {
-        if (r.payload?.startsWith('/') ?? false) openRoute.value = r.payload;
+        if (r.actionId == actionSnooze) {
+          snoozeBill(r, _plugin);
+        } else if (r.payload?.startsWith('/') ?? false) {
+          openRoute.value = r.payload;
+        }
       },
+      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
     // Cold start from a notification tap.
     final launch = await _plugin.getNotificationAppLaunchDetails();
@@ -70,12 +99,13 @@ class NotificationService {
     }
   }
 
-  /// All alert checks (each has its own 24h cooldown) — at launch and on
-  /// every resume, so a phone that keeps the app in memory still gets them.
+  /// All alert checks (envelope alerts have a 24h cooldown; bill reminders
+  /// are rescheduled) — at launch and on every resume, so a phone that keeps
+  /// the app in memory still gets them.
   static Future<void> runChecks(AppDatabase db, String householdId) async {
     await checkEnvelopes(db, householdId);
     await checkBudgetWarnings(db, householdId);
-    await checkRecurring(db, householdId);
+    await scheduleBills(db, householdId);
   }
 
   static const _permissionAskedKey = 'notif_permission_asked';
@@ -237,41 +267,218 @@ class NotificationService {
     );
   }
 
-  /// Check upcoming bills and show a single grouped notification.
-  static Future<void> checkRecurring(
-      AppDatabase db, String householdId) async {
-    if (!await _shouldCheck(_billCooldownKey)) return;
+  // ---------------------------------------------------------------------------
+  // Bill reminders: one notification per bill on its lead day (the bill's
+  // "Remind me"), with "Log it" and "Remind me tomorrow".
+  // ---------------------------------------------------------------------------
 
-    final now = DateTime.now();
-    final cutoff = now.add(const Duration(days: 2));
+  static const _billChannelId = 'budgetseal_bills';
+  static const _billState = 'notif_bill_state';
+  static const _billLabels = 'notif_bill_labels';
+  static const _billBaseId = 20000;
+  static const _billHour = 9;
+  static const billCategory = 'bill';
+  static const actionLog = 'log';
+  static const actionSnooze = 'snooze';
+
+  /// Stable notification id per bill (FNV-1a of its id).
+  static int billNotifId(String billId) {
+    var h = 0x811c9dc5;
+    for (final c in billId.codeUnits) {
+      h = ((h ^ c) * 0x01000193) & 0xffffffff;
+    }
+    return _billBaseId + h % 50000;
+  }
+
+  /// [labels]: Log it, Remind me tomorrow, channel name, channel description
+  /// (saved so the background snooze can build the same notification).
+  static NotificationDetails _billDetails(List<String> labels) =>
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          _billChannelId,
+          labels[2],
+          channelDescription: labels[3],
+          importance: Importance.high,
+          priority: Priority.high,
+          actions: [
+            AndroidNotificationAction(actionLog, labels[0],
+                showsUserInterface: true, cancelNotification: true),
+            AndroidNotificationAction(actionSnooze, labels[1],
+                cancelNotification: true),
+          ],
+        ),
+        iOS: const DarwinNotificationDetails(categoryIdentifier: billCategory),
+      );
+
+  /// The text of one bill's reminder, as read on [day].
+  static String billReminderBody(
+      RecurringTransaction r, DateTime due, DateTime day) {
+    final l = currentS();
+    final amount =
+        formatAmount(recurringAmountOn(r, due), currency: r.currency);
+    final days = calendarDaysBetween(day, due);
+    final when = days < 0
+        ? l.billNotifOverdue(amount, -days)
+        : days == 0
+            ? l.billNotifDueToday(amount)
+            : days == 1
+                ? l.billNotifDueTomorrow(amount)
+                : l.billNotifDueInDays(amount, days);
+    return r.askFirst ? '$when ${l.billNotifConfirm}' : when;
+  }
+
+  static Map<String, dynamic> _readBillState(SharedPreferences prefs) {
+    try {
+      return Map<String, dynamic>.from(
+          jsonDecode(prefs.getString(_billState) ?? '{}') as Map);
+    } catch (_) {
+      return {};
+    }
+  }
+
+  /// Schedules every bill's next reminder, and shows now the ones whose time
+  /// passed without one (the app wasn't running, or the bill was just
+  /// added). Runs at launch and on every resume. Each occurrence of a bill
+  /// is reminded once, plus its snoozes.
+  static Future<void> scheduleBills(
+      AppDatabase db, String householdId) async {
+    await DailyReminderService.ensureTz();
+    final prefs = await SharedPreferences.getInstance();
+    final l = currentS();
+    final labels = [
+      l.billNotifLogIt,
+      l.billNotifSnooze,
+      l.billNotifChannel,
+      l.billNotifChannelDesc,
+    ];
+    await prefs.setStringList(_billLabels, labels);
+    final state = _readBillState(prefs);
 
     final rows = await (db.select(db.recurringTransactions)
-          ..where((t) => t.householdId.equals(householdId))
-          ..where((t) => t.enabled.equals(true))
-          ..where((t) => t.deleted.equals(false))
-          ..where((t) => t.nextDueDate.isSmallerOrEqualValue(cutoff)))
+          ..where((t) =>
+              t.householdId.equals(householdId) &
+              t.enabled.equals(true) &
+              t.deleted.equals(false)))
         .get();
 
-    if (rows.isEmpty) return;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final live = rows.map((r) => r.id).toSet();
+    // Bills deleted or turned off: drop their pending reminder.
+    for (final id in state.keys) {
+      if (!live.contains(id)) await _plugin.cancel(id: billNotifId(id));
+    }
 
-    final titles = rows
-        .map((r) => r.title.isNotEmpty ? r.title : r.type)
-        .toList();
+    final next = <String, dynamic>{};
+    for (final r in rows) {
+      final notifId = billNotifId(r.id);
+      final due = DateTime(
+          r.nextDueDate.year, r.nextDueDate.month, r.nextDueDate.day);
+      if (r.remindDays == -1 ||
+          (r.endDate != null && due.isAfter(r.endDate!))) {
+        await _plugin.cancel(id: notifId);
+        continue;
+      }
+      final occurrence = due.toIso8601String().substring(0, 10);
+      final prev = state[r.id] is Map
+          ? Map<String, dynamic>.from(state[r.id] as Map)
+          : <String, dynamic>{};
+      final same = prev['due'] == occurrence;
+      final prevAt = DateTime.tryParse(prev['at'] as String? ?? '');
+      if (same && prevAt != null && !prevAt.isAfter(now)) {
+        next[r.id] = prev; // already reminded for this occurrence
+        continue;
+      }
+      final lead = r.remindDays ?? billRemindDefault;
+      final snoozed = same && prev['snooze'] == true && prevAt != null;
+      final at = snoozed
+          ? prevAt
+          : DateTime(due.year, due.month, due.day - lead, _billHour);
+      final title = r.title.isNotEmpty ? r.title : l.subUntitled;
+      if (at.isAfter(now)) {
+        if (at.difference(now).inDays > 60) continue; // a later run does it
+        final body =
+            billReminderBody(r, due, DateTime(at.year, at.month, at.day));
+        await _plugin.zonedSchedule(
+          id: notifId,
+          title: title,
+          body: body,
+          payload: _billPayload(r.id),
+          scheduledDate: tz.TZDateTime.from(at, tz.local),
+          notificationDetails: _billDetails(labels),
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        );
+        next[r.id] = {
+          'due': occurrence,
+          'at': at.toIso8601String(),
+          't': title,
+          'b': body,
+          if (snoozed) 'snooze': true,
+        };
+      } else {
+        // Missed while the app was closed (or just added): remind now.
+        // Bills more than a week overdue are left to Upcoming bills.
+        if (!due.isBefore(today.subtract(const Duration(days: 7)))) {
+          final body = billReminderBody(r, due, today);
+          await _plugin.show(
+            id: notifId,
+            title: title,
+            body: body,
+            payload: _billPayload(r.id),
+            notificationDetails: _billDetails(labels),
+          );
+        }
+        next[r.id] = {
+          'due': occurrence,
+          'at': now.toIso8601String(),
+          't': title,
+          'b': billReminderBody(r, due, today),
+        };
+      }
+    }
+    await prefs.setString(_billState, jsonEncode(next));
+  }
 
-    final l = currentS();
-    final body = titles.length == 1
-        ? l.notifSingleDue(titles.first)
-        : l.notifMultipleDue(
-            titles.length,
-            titles.take(3).join(', '),
-            titles.length > 3 ? l.notifBillsAndMore : '');
+  static String _billPayload(String billId) =>
+      Uri(path: routeUpcomingBills, queryParameters: {'bill': billId})
+          .toString();
 
-    await _plugin.show(
-      id: _billNotifId,
-      title: l.notifUpcomingBillsTitle,
-      body: body,
-      payload: routeUpcomingBills,
-      notificationDetails: _alertDetails(),
-    );
+  /// "Remind me tomorrow": the same reminder again in 24 hours. Also runs
+  /// in the background isolate (the button doesn't open the app), so it only
+  /// uses the plugin and SharedPreferences; the next [scheduleBills] keeps
+  /// the snoozed time.
+  static Future<void> snoozeBill(
+      NotificationResponse r, FlutterLocalNotificationsPlugin plugin) async {
+    try {
+      final billId = Uri.tryParse(r.payload ?? '')?.queryParameters['bill'];
+      if (billId == null) return;
+      final prefs = await SharedPreferences.getInstance();
+      final labels = prefs.getStringList(_billLabels);
+      if (labels == null || labels.length < 4) return;
+      final state = _readBillState(prefs);
+      final prev = state[billId] is Map
+          ? Map<String, dynamic>.from(state[billId] as Map)
+          : <String, dynamic>{};
+      final title = prev['t'] as String?;
+      if (title == null) return;
+      // Same clock time tomorrow (a 24h Duration drifts across DST).
+      final now = DateTime.now();
+      final at = DateTime(
+          now.year, now.month, now.day + 1, now.hour, now.minute, now.second);
+      tz_data.initializeTimeZones();
+      await plugin.zonedSchedule(
+        id: r.id ?? billNotifId(billId),
+        title: title,
+        body: prev['b'] as String?,
+        payload: r.payload,
+        scheduledDate: tz.TZDateTime.from(at.toUtc(), tz.UTC),
+        notificationDetails: _billDetails(labels),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      );
+      state[billId] = {...prev, 'at': at.toIso8601String(), 'snooze': true};
+      await prefs.setString(_billState, jsonEncode(state));
+    } catch (e) {
+      debugPrint('[Notifications] Snooze failed: $e');
+    }
   }
 }

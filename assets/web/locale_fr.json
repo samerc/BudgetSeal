@@ -513,5 +513,16 @@
   "web_fund_copied": "Paiements ajoutés : {n}",
   "web_fund_need_category": "Liez une catégorie à ce fonds (dans l'app) pour que les paiements en sortent.",
   "web_fund_in_days": "dans {n} jours",
-  "web_fund_saving_chip": "Épargne · {saved} sur {total}"
+  "web_fund_saving_chip": "Épargne · {saved} sur {total}",
+  "web_bill_ask_first": "Demander avant d'enregistrer",
+  "web_bill_ask_first_hint": "Pour les factures variables : confirmez le montant à chaque fois",
+  "web_bill_remind": "Me rappeler",
+  "web_bill_remind_default": "{n} jours avant (par défaut)",
+  "web_bill_remind_off": "Ne pas me rappeler",
+  "web_bill_remind_on_day": "Le jour même",
+  "web_bill_remind_one": "1 jour avant",
+  "web_bill_remind_n": "{n} jours avant",
+  "web_bill_confirm_post": "Confirmer et enregistrer",
+  "web_bill_confirm_desc": "Montant cette fois",
+  "web_bill_to_confirm": "confirmez le montant"
 }

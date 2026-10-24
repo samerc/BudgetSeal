@@ -2932,3 +2932,33 @@ web_fund_need_category,Web Companion: sinking funds,Link a category to this fund
 web_fund_in_days,Web Companion: sinking funds,in {n} days,بعد {n} يوم,dans {n} jours
 web_fund_saving_chip,Web Companion: sinking funds,Saving · {saved} of {total},ادخار · {saved} من {total},Épargne · {saved} sur {total}
 sink_saving_chip,Subscription row: a sinking fund saves for this bill,Saving · {saved} of {total},ادخار · {saved} من {total},Épargne · {saved} sur {total}
+bill_ask_first,"Bills: ask before posting, reminders",Ask before posting,اسألني قبل التسجيل,Demander avant d'enregistrer
+bill_ask_first_hint,"Bills: ask before posting, reminders",For bills that change: confirm the amount each time,للفواتير المتغيرة: أكّد المبلغ في كل مرة,Pour les factures variables : confirmez le montant à chaque fois
+bill_remind_label,"Bills: ask before posting, reminders",Remind me,ذكّرني,Me rappeler
+bill_remind_default,"Bills: ask before posting, reminders",{n} days before (default),قبل {n} يوم (افتراضي),{n} jours avant (par défaut)
+bill_remind_off,"Bills: ask before posting, reminders",Don't remind me,لا تذكّرني,Ne pas me rappeler
+bill_remind_on_day,"Bills: ask before posting, reminders",On the day,في يوم الاستحقاق,Le jour même
+bill_remind_days_before,"Bills: ask before posting, reminders","{n, plural, =1{1 day before} other{{n} days before}}","{n, plural, =1{قبل يوم واحد} =2{قبل يومين} few{قبل {n} أيام} other{قبل {n} يوم}}","{n, plural, =1{1 jour avant} other{{n} jours avant}}"
+bill_to_confirm,"Bills: ask before posting, reminders",Confirm the amount,أكّد المبلغ,Confirmez le montant
+bill_confirm_post,"Bills: ask before posting, reminders",Confirm amount and post,أكّد المبلغ وسجّل,Confirmer le montant et enregistrer
+bill_confirm_post_desc,"Bills: ask before posting, reminders",Enter what you paid this time,أدخل ما دفعته هذه المرة,Saisissez ce que vous avez payé cette fois
+bill_notif_log_it,"Bills: ask before posting, reminders",Log it,سجّلها,L'enregistrer
+bill_notif_snooze,"Bills: ask before posting, reminders",Remind me tomorrow,ذكّرني غداً,Me rappeler demain
+bill_notif_channel,"Bills: ask before posting, reminders",Bill reminders,تذكيرات الفواتير,Rappels de factures
+bill_notif_channel_desc,"Bills: ask before posting, reminders",A reminder before each bill is due,تذكير قبل استحقاق كل فاتورة,Un rappel avant chaque échéance
+bill_notif_due_today,"Bills: ask before posting, reminders",{amount} is due today.,{amount} مستحق اليوم.,{amount} à payer aujourd'hui.
+bill_notif_due_tomorrow,"Bills: ask before posting, reminders",{amount} is due tomorrow.,{amount} مستحق غداً.,{amount} à payer demain.
+bill_notif_due_in_days,"Bills: ask before posting, reminders",{amount} is due in {n} days.,{amount} مستحق بعد {n} يوم.,{amount} à payer dans {n} jours.
+bill_notif_overdue,"Bills: ask before posting, reminders","{amount} was due {n, plural, =1{yesterday} other{{n} days ago}}.","{amount} كان مستحقاً {n, plural, =1{أمس} =2{قبل يومين} other{قبل {n} يوم}}.","{amount} était à payer {n, plural, =1{hier} other{il y a {n} jours}}."
+bill_notif_confirm,"Bills: ask before posting, reminders",Confirm the amount to post it.,أكّد المبلغ لتسجيلها.,Confirmez le montant pour l'enregistrer.
+web_bill_ask_first,Web Companion: bill options,Ask before posting,اسألني قبل التسجيل,Demander avant d'enregistrer
+web_bill_ask_first_hint,Web Companion: bill options,For bills that change: confirm the amount each time,للفواتير المتغيرة: أكّد المبلغ في كل مرة,Pour les factures variables : confirmez le montant à chaque fois
+web_bill_remind,Web Companion: bill options,Remind me,ذكّرني,Me rappeler
+web_bill_remind_default,Web Companion: bill options,{n} days before (default),قبل {n} يوم (افتراضي),{n} jours avant (par défaut)
+web_bill_remind_off,Web Companion: bill options,Don't remind me,لا تذكّرني,Ne pas me rappeler
+web_bill_remind_on_day,Web Companion: bill options,On the day,في يوم الاستحقاق,Le jour même
+web_bill_remind_one,Web Companion: bill options,1 day before,قبل يوم واحد,1 jour avant
+web_bill_remind_n,Web Companion: bill options,{n} days before,قبل {n} يوم,{n} jours avant
+web_bill_confirm_post,Web Companion: bill options,Confirm and post,أكّد وسجّل,Confirmer et enregistrer
+web_bill_confirm_desc,Web Companion: bill options,Amount this time,المبلغ هذه المرة,Montant cette fois
+web_bill_to_confirm,Web Companion: bill options,confirm the amount,أكّد المبلغ,confirmez le montant

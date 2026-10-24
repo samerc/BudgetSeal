@@ -219,7 +219,10 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
         GoRoute(
           path: '/upcoming-bills',
           pageBuilder: (_, state) =>
-              slideUpPage(child: const UpcomingBillsScreen(), state: state),
+              slideUpPage(
+                  child: UpcomingBillsScreen(
+                      openBillId: state.uri.queryParameters['bill']),
+                  state: state),
         ),
         GoRoute(
           path: '/templates',

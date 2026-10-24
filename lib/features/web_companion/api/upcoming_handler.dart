@@ -109,7 +109,15 @@ Handler recurringActionHandler(Ref ref, {required bool post}) {
       if (rec == null) return notFound();
       final engine = ref.read(recurringEngineProvider);
       if (post) {
-        await engine.postNow(id);
+        // An ask-first bill posts the amount the user confirmed.
+        final body = await parseBody(request) ?? const {};
+        final amount = body['amount'] is num
+            ? (body['amount'] as num).toDouble()
+            : null;
+        if (amount != null && (amount <= 0 || amount > kMaxAmount)) {
+          return badRequest('amount must be a positive number');
+        }
+        await engine.postNow(id, amount: amount);
       } else {
         await engine.skipNext(id);
       }

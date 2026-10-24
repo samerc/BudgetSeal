@@ -490,6 +490,8 @@ class SyncEngine {
         'enabled': r.enabled,
         'isSubscription': r.isSubscription,
         'priceHistory': r.priceHistory,
+        'askFirst': r.askFirst,
+        'remindDays': r.remindDays,
         'createdAt': r.createdAt.toUtc().toIso8601String(),
         'lastModified': r.lastModified.toUtc().toIso8601String(),
         'deleted': r.deleted,
@@ -674,6 +676,8 @@ class SyncEngine {
         enabled: Value(m['enabled'] as bool? ?? true),
         isSubscription: Value(m['isSubscription'] as bool? ?? false),
         priceHistory: Value(m['priceHistory'] as String?),
+        askFirst: Value(m['askFirst'] as bool? ?? false),
+        remindDays: Value(m['remindDays'] as int?),
         lastModified: Value(_parseDate(m['lastModified']) ?? DateTime.now()),
         deleted: Value(m['deleted'] as bool? ?? false),
       );

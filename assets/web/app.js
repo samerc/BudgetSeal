@@ -3015,7 +3015,7 @@ async function renderUpcoming(quiet) {
     return `<div class="row${first ? ' clickable' : ' dim'}"${first ? ` data-action="bill" data-id="${esc(b.id)}" tabindex="0"` : ''}>
       ${isT ? transferChip() : catChip(b)}
       <div class="row-main"><div class="row-title">${esc(b.title || b.categoryName || t(`type_${b.type}`))}${b.isSubscription ? ` <span class="tag accent">${esc(t('web_up_sub_tag'))}</span>` : ''}</div>
-        <div class="row-sub">${dueSpan(b.daysUntil)}${rest ? ` · ${esc(rest)}` : ''}</div></div>
+        <div class="row-sub">${dueSpan(b.daysUntil)}${b.askFirst && b.daysUntil <= 0 ? ` · <span class="fund-warn">${esc(t('web_bill_to_confirm'))}</span>` : ''}${rest ? ` · ${esc(rest)}` : ''}</div></div>
       <div class="row-end"><div class="row-amount ${cls}">${esc(fmtSigned(b.amount, b.currency, b.type))}</div></div>
     </div>`;
   };
@@ -3072,8 +3072,13 @@ async function renderUpcoming(quiet) {
 function openBill(id) {
   const b = (cache.bills || []).find(x => x.id === id && x.occurrence === 0);
   if (!b) return;
-  const act = async post => {
-    const r = await api(`/api/recurring/${encodeURIComponent(id)}/${post ? 'post-now' : 'skip'}`, { method: 'POST', body: {} });
+  const act = async (post, f) => {
+    const body = {};
+    if (post && b.askFirst && f) {
+      body.amount = parseAmount(f.querySelector('#bill-amount').value);
+      if (!(body.amount > 0)) { toast(t('web_val_valid_amount'), true); return false; }
+    }
+    const r = await api(`/api/recurring/${encodeURIComponent(id)}/${post ? 'post-now' : 'skip'}`, { method: 'POST', body });
     if (!r) return false;
     toast(post ? t('web_up_posted') : t('web_up_skipped'));
     closeModal();
@@ -3082,12 +3087,14 @@ function openBill(id) {
   };
   openModal({
     title: b.title || b.categoryName || t(`type_${b.type}`), narrow: true,
-    submit: t('web_up_post_now'),
+    submit: b.askFirst ? t('web_bill_confirm_post') : t('web_up_post_now'),
     extra: { label: t('web_up_skip'), run: () => act(false) },
     body: `<div class="goal-hero">${b.type === 'transfer' ? transferChip('lg') : catChip(b, 'lg')}
         <div><div class="env-amount num ${typeCls(b.type)}">${esc(fmtSigned(b.amount, b.currency, b.type))}</div><div class="env-kind">${dueSpan(b.daysUntil)} · ${esc(fmtDate(b.dueDate, true))}</div></div></div>
-      <p class="help" style="margin-top:14px">${esc(t('web_up_post_help'))}</p>`,
-    onSubmit: () => act(true),
+      ${b.askFirst ? `<div class="field" style="margin-top:14px"><label class="label" for="bill-amount">${esc(t('web_bill_confirm_desc'))}</label>
+        <div class="input-cur"><input id="bill-amount" class="input amount num" inputmode="decimal" autocomplete="off" value="${esc(amountInputValue(b.amount, b.currency))}" autofocus><span class="cur">${esc(b.currency)}</span></div></div>`
+        : `<p class="help" style="margin-top:14px">${esc(t('web_up_post_help'))}</p>`}`,
+    onSubmit: f => act(true, f),
   });
 }
 
@@ -3250,6 +3257,14 @@ async function renderRecurring(subs, quiet) {
     ${section(t('web_sub_cancelled'), cancelled)}`);
 }
 
+/** A bill's "Remind me" choice (null = the default 2 days, -1 = off). */
+function remindLabel(d) {
+  if (d === null) return t('web_bill_remind_default', { n: 2 });
+  if (d === -1) return t('web_bill_remind_off');
+  if (d === 0) return t('web_bill_remind_on_day');
+  return d === 1 ? t('web_bill_remind_one') : t('web_bill_remind_n', { n: d });
+}
+
 function openRecurringForm(subs, r = null) {
   const { accounts, categories } = { accounts: cache.accounts || [], categories: cache.categories || [] };
   if (!accounts.length) { toast(t('web_need_account'), true); return; }
@@ -3283,6 +3298,12 @@ function openRecurringForm(subs, r = null) {
         <div class="field"><label class="label" for="r-date">${esc(r ? t('web_form_next_due') : t('web_form_first_date'))}</label><input id="r-date" type="date" class="input" value="${esc(r ? dayKey(r.nextDueDate) : dayKey())}"></div>
       </div>
       <div class="field"><label class="label" for="r-note">${esc(t('web_form_note'))}</label><input id="r-note" class="input" maxlength="500" value="${esc(r?.note || '')}" placeholder="${esc(t('web_form_optional'))}"></div>
+      <div class="field-row">
+        <div class="field"><label class="label" for="r-remind">${esc(t('web_bill_remind'))}</label><select id="r-remind" class="input">
+          ${[null, 0, 1, 3, 7, -1].map(d => `<option value="${d ?? ''}"${(r?.remindDays ?? null) === d ? ' selected' : ''}>${esc(remindLabel(d))}</option>`).join('')}</select></div>
+        <div class="field" style="align-self:end"><label class="check"><input type="checkbox" id="r-ask"${r?.askFirst ? ' checked' : ''}> ${esc(t('web_bill_ask_first'))}</label>
+          <div class="help">${esc(t('web_bill_ask_first_hint'))}</div></div>
+      </div>
       ${!r ? `<p class="help" id="r-past"></p>` : ''}`,
     onOpen: f => {
       const $ = s => f.querySelector(s);
@@ -3321,6 +3342,8 @@ function openRecurringForm(subs, r = null) {
         title: $('#r-title').value.trim(), amount, accountId: $('#r-account').value,
         frequency: $('#r-freq').value, interval: Math.max(1, Math.min(365, parseInt($('#r-interval').value, 10) || 1)),
         note: $('#r-note').value.trim(),
+        askFirst: $('#r-ask').checked,
+        remindDays: $('#r-remind').value === '' ? null : Number($('#r-remind').value),
       };
       if (type === 'transfer') {
         body.destinationAccountId = $('#r-dest').value;

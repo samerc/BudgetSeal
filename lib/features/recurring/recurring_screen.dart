@@ -433,6 +433,8 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
   DateTime? _endDate;
   String? _categoryId;
   late bool _isSubscription = widget.forceSubscription;
+  bool _askFirst = false;
+  int? _remindDays;
   bool _saving = false;
   bool _submitted = false;
 
@@ -545,6 +547,8 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
                 ButtonSegment(value: 'monthly', label: Text(S.of(context).freqMonthly)),
                 ButtonSegment(value: 'yearly', label: Text(S.of(context).freqYearly)),
               ],
+              // The check mark squeezes "Weekly" onto two lines at 360dp.
+              showSelectedIcon: false,
               selected: {_frequency},
               onSelectionChanged: (s) =>
                   setState(() => _frequency = s.first),
@@ -607,6 +611,13 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
               ),
             ],
             const SizedBox(height: 12),
+            BillOptionsFields(
+              askFirst: _askFirst,
+              remindDays: _remindDays,
+              onAskFirst: (v) => setState(() => _askFirst = v),
+              onRemindDays: (v) => setState(() => _remindDays = v),
+            ),
+            const SizedBox(height: 12),
             FilledButton(
               onPressed: _saving ? null : _save,
               child: _saving
@@ -662,8 +673,11 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
         startDate: _startDate,
         endDate: _endDate,
         isSubscription: _isSubscription,
+        askFirst: _askFirst,
+        remindDays: _remindDays,
       );
       if (mounted) {
+        rescheduleBillReminders(ref);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(S.of(context).recurringCreated),
@@ -721,6 +735,8 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
   late DateTime? _endDate;
   late String? _categoryId;
   late bool _isSubscription;
+  late bool _askFirst;
+  late int? _remindDays;
   bool _saving = false;
   bool _submitted = false;
 
@@ -737,6 +753,8 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
     _endDate = item.endDate;
     _categoryId = item.categoryId;
     _isSubscription = item.isSubscription;
+    _askFirst = item.askFirst;
+    _remindDays = item.remindDays;
   }
 
   @override
@@ -821,6 +839,8 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
                 ButtonSegment(value: 'monthly', label: Text(S.of(context).freqMonthly)),
                 ButtonSegment(value: 'yearly', label: Text(S.of(context).freqYearly)),
               ],
+              // The check mark squeezes "Weekly" onto two lines at 360dp.
+              showSelectedIcon: false,
               selected: {_frequency},
               onSelectionChanged: (s) => setState(() => _frequency = s.first),
             ),
@@ -878,6 +898,13 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
               value: _isSubscription,
               onChanged: (v) => setState(() => _isSubscription = v),
               activeTrackColor: AppColors.accent,
+            ),
+            const SizedBox(height: 12),
+            BillOptionsFields(
+              askFirst: _askFirst,
+              remindDays: _remindDays,
+              onAskFirst: (v) => setState(() => _askFirst = v),
+              onRemindDays: (v) => setState(() => _remindDays = v),
             ),
             const SizedBox(height: 12),
             Row(
@@ -966,9 +993,12 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
         anchorDay: Value(_startDate.day),
         endDate: Value(_endDate),
         isSubscription: Value(_isSubscription),
+        askFirst: Value(_askFirst),
+        remindDays: Value(_remindDays),
         lastModified: Value(DateTime.now()),
       ));
       if (mounted) {
+        rescheduleBillReminders(ref);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(S.of(context).recurringUpdated),

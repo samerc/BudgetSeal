@@ -53,7 +53,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 21;
+  int get schemaVersion => 22;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -195,6 +195,13 @@ class AppDatabase extends _$AppDatabase {
           if (from < 21) {
             // Sinking funds: how to catch up when one falls behind.
             await _addColumnIfMissing(m, allocations, allocations.behindMode);
+          }
+          if (from < 22) {
+            // Bills: ask before posting, and per-bill reminder lead days.
+            await _addColumnIfMissing(
+                m, recurringTransactions, recurringTransactions.askFirst);
+            await _addColumnIfMissing(
+                m, recurringTransactions, recurringTransactions.remindDays);
           }
         },
         beforeOpen: (_) => _ensureSyncTriggers(),

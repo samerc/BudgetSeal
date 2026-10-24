@@ -95,6 +95,9 @@ class RecurringEngine {
 
     int generated = 0;
     for (final rec in due) {
+      // Ask-first bills wait for the user to confirm the amount (Upcoming
+      // bills → Confirm); they stay due and show as "to confirm".
+      if (rec.askFirst) continue;
       final baseCurrency = baseCurrencyMap[rec.householdId] ?? 'USD';
       // Generate all missed occurrences (e.g. user hasn't opened app in weeks).
       var currentDue = rec.nextDueDate;
@@ -143,7 +146,10 @@ class RecurringEngine {
   /// the due date on (paying a bill early).
   /// [on] = the day it was paid (an overdue bill paid on its due date, or
   /// yesterday's payment); today when null. Another day is recorded at noon.
-  Future<void> postNow(String recurringId, {DateTime? on}) async {
+  /// [amount] replaces the bill's amount for this one payment (confirming
+  /// an ask-first bill whose amount changes).
+  Future<void> postNow(String recurringId,
+      {DateTime? on, double? amount}) async {
     final rec = await (_db.select(_db.recurringTransactions)
           ..where((r) => r.id.equals(recurringId)))
         .getSingle();
@@ -154,7 +160,8 @@ class RecurringEngine {
         : DateTime(on.year, on.month, on.day, 12);
     // Keyed on the occurrence it pays, so the other device can't post
     // that occurrence again before it has synced the new due date.
-    await _generateTransaction(rec, paid, null, occurrence: rec.nextDueDate);
+    await _generateTransaction(rec, paid, null,
+        occurrence: rec.nextDueDate, amount: amount);
     await _advance(rec);
   }
 
@@ -189,11 +196,12 @@ class RecurringEngine {
       '-${due.day.toString().padLeft(2, '0')}';
 
   Future<void> _generateTransaction(RecurringTransaction rec, DateTime forDate,
-      String? baseCurrencyOverride, {required DateTime occurrence}) async {
+      String? baseCurrencyOverride,
+      {required DateTime occurrence, double? amount}) async {
     final householdId = rec.householdId;
     final id = occurrenceId(rec.id, occurrence);
     final effectiveDate = forDate;
-    final amount = recurringAmountOn(rec, effectiveDate);
+    amount ??= recurringAmountOn(rec, effectiveDate);
 
     // Use pre-fetched base currency, or fall back to household query.
     final String baseCurrency;
@@ -290,6 +298,8 @@ class RecurringEngine {
     String note = '',
     bool isSubscription = false,
     String? priceHistory,
+    bool askFirst = false,
+    int? remindDays,
   }) async {
     final id = _uuid.v4();
     await _db.into(_db.recurringTransactions).insert(
@@ -311,6 +321,8 @@ class RecurringEngine {
             endDate: Value(endDate),
             isSubscription: Value(isSubscription),
             priceHistory: Value(priceHistory),
+            askFirst: Value(askFirst),
+            remindDays: Value(remindDays),
           ),
         );
     return id;
@@ -331,6 +343,18 @@ class RecurringEngine {
           ..where((r) => r.id.equals(id)))
         .write(RecurringTransactionsCompanion(
             enabled: Value(enabled), lastModified: Value(DateTime.now())));
+  }
+
+  /// Bill settings: ask before posting, and reminder lead days (null =
+  /// default, -1 = off). Moves last_modified so it syncs.
+  Future<void> setBillOptions(String id,
+      {required bool askFirst, required int? remindDays}) async {
+    await (_db.update(_db.recurringTransactions)
+          ..where((r) => r.id.equals(id)))
+        .write(RecurringTransactionsCompanion(
+            askFirst: Value(askFirst),
+            remindDays: Value(remindDays),
+            lastModified: Value(DateTime.now())));
   }
 
   /// Set (or clear, with null) the last date a recurring item runs — a

@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../core/providers/database_provider.dart';
+import '../../core/providers/household_provider.dart';
+import '../../core/services/notification_service.dart';
 
 import '../../core/providers/date_format_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/app_icons.dart';
 import '../../shared/theme/design_tokens.dart';
 
 /// Shared wording and widgets for recurring items (Recurring, Subscriptions,
@@ -247,4 +253,71 @@ class RecurringRow extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Reminder lead days a bill can pick (null = the default, 2 days; -1 = off).
+const billRemindChoices = <int?>[null, 0, 1, 3, 7, -1];
+
+/// Default lead days when a bill has no choice of its own.
+const billRemindDefault = 2;
+
+String billRemindLabel(S tr, int? days) => switch (days) {
+      null => tr.billRemindDefault(billRemindDefault),
+      -1 => tr.billRemindOff,
+      0 => tr.billRemindOnDay,
+      _ => tr.billRemindDaysBefore(days),
+    };
+
+/// "Ask before posting" switch + "Remind me" picker, shared by the add and
+/// edit bill sheets (subscriptions edit through the same sheet).
+class BillOptionsFields extends StatelessWidget {
+  final bool askFirst;
+  final int? remindDays;
+  final ValueChanged<bool> onAskFirst;
+  final ValueChanged<int?> onRemindDays;
+  const BillOptionsFields({
+    super.key,
+    required this.askFirst,
+    required this.remindDays,
+    required this.onAskFirst,
+    required this.onRemindDays,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tr = S.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SwitchListTile.adaptive(
+          contentPadding: EdgeInsets.zero,
+          title: Text(tr.billAskFirst, style: const TextStyle(fontSize: 14)),
+          subtitle: Text(tr.billAskFirstHint,
+              style: TextStyle(fontSize: 12, color: AppColors.th(context))),
+          value: askFirst,
+          onChanged: onAskFirst,
+          activeTrackColor: AppColors.accent,
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<int?>(
+          icon: AppIcons.dropdown,
+          initialValue: billRemindChoices.contains(remindDays) ? remindDays : null,
+          decoration: InputDecoration(labelText: tr.billRemindLabel),
+          items: [
+            for (final d in billRemindChoices)
+              DropdownMenuItem(value: d, child: Text(billRemindLabel(tr, d))),
+          ],
+          onChanged: onRemindDays,
+        ),
+      ],
+    );
+  }
+}
+
+/// After a bill is added, edited, posted or skipped: move its reminder.
+void rescheduleBillReminders(WidgetRef ref) {
+  final householdId = ref.read(currentHouseholdIdProvider);
+  if (householdId == null) return;
+  NotificationService.scheduleBills(ref.read(databaseProvider), householdId)
+      .catchError((Object e) => debugPrint('[Bills] Reminders failed: $e'));
 }

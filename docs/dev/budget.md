@@ -67,7 +67,13 @@ Envelopes can hold balances in multiple currencies. The fund sheet offers a curr
 `withdrawFromAllocation()` checks sufficient balance before debiting. Throws `StateError` if the allocation doesn't have enough in the requested currency. Callers must catch and show an error.
 
 ## Notification Grouping
-`NotificationService` groups multiple low-envelope alerts into one notification and multiple upcoming-bill alerts into one. Uses fixed notification IDs (1001, 1002) so each check replaces the previous. 24-hour cooldown between checks via SharedPreferences. Overspent detection checks each currency independently (never sums across currencies).
+`NotificationService` groups multiple low-envelope alerts into one notification (fixed id 1001, budget warnings 1003; 24-hour cooldown per check via SharedPreferences). Overspent detection checks each currency independently (never sums across currencies).
+
+## Bill reminders
+`NotificationService.scheduleBills()` (runs in `runChecks` at launch/resume, and via `rescheduleBillReminders(ref)` after a bill is added, edited, posted or skipped) gives each enabled bill its own notification on channel `budgetseal_bills`, id `billNotifId(billId)` (20000 + FNV hash):
+- Lead time per bill: `recurring_transactions.remindDays` (null = `billRemindDefault` 2 days, 0 = on the day, -1 = off; choices in `billRemindChoices`), at 09:00 local via `zonedSchedule` (inexact).
+- Each occurrence is reminded once: SharedPreferences `notif_bill_state` maps bill → `{due, at, t, b, snooze?}`. A reminder whose time passed without firing (app closed, bill just added) shows at once, unless the bill is more than 7 days overdue.
+- Buttons: **Log it** (opens `/upcoming-bills?bill=<id>`, which opens that bill's sheet) and **Remind me tomorrow** — `snoozeBill()`, run by the top-level `notificationTapBackground` entry point in a background isolate (no UI): it reschedules the same text at the same clock time tomorrow (UTC, from the saved labels `notif_bill_labels`) and marks the state `snooze` so the next `scheduleBills` keeps it. iOS uses the `bill` notification category.
 
 ## Envelope Currency Handling
 - **Line currency = account currency**: `recordTransaction()` runs `_toAccountCurrencies()` first — a line entered in another currency (€50 on a USD account) is converted with its own rate or the latest cached rate (`latestCachedRate()` in fx_service.dart) and the original amount is appended to the line note. No rate at all → `CurrencyConversionException` (UI text via `txSaveErrorText()` in `shared/utils/save_errors.dart`). Account balances sum line amounts, so they never mix currencies.
@@ -83,7 +89,8 @@ Envelopes can hold balances in multiple currencies. The fund sheet offers a curr
 
 ## Bills, Reports & Around the App (Oct 2026)
 
-- `RecurringEngine.postNow(id, {on})` (record today — or on the day picked in "Paid on another day", at noon, never after today — keyed on the occurrence it pays, then advance) / `skipNext(id)` (advance only) from Upcoming Bills (tap a bill). `RecurringEngine.postedNotice` (ValueNotifier) counts auto-posted items; `MainScreen` shows "N recurring items posted".
+- **Ask before posting** (`recurring_transactions.askFirst`): `processRecurring()` skips these, so a due one waits; Upcoming bills labels it "Confirm the amount" and its first action is "Confirm amount and post", which opens the calculator on the usual amount and calls `postNow(id, amount:)` (that payment only; the bill's amount stays). Set in the add/edit bill sheet (`BillOptionsFields` in `recurring_format.dart`, with the "Remind me" picker); `RecurringEngine.setBillOptions()` for code.
+- `RecurringEngine.postNow(id, {on, amount})` (record today — or on the day picked in "Paid on another day", at noon, never after today — keyed on the occurrence it pays, then advance) / `skipNext(id)` (advance only) from Upcoming Bills (tap a bill). `RecurringEngine.postedNotice` (ValueNotifier) counts auto-posted items; `MainScreen` shows "N recurring items posted".
 - Reports: `reportsByPeriodProvider` (pref `reports_budget_period`) → `reportsStartDayProvider` (null unless the period start day ≠ 1); `reportBucketFor()` / `reportRangeFor()` in report_stats_provider.dart; the hub sets module-level `_reportsStartDay` and all month getters use `_reportMonth()`. Toggle: calendar icon by the Reports title.
 - Reconcile (account ⋮ → Reconcile balance): live difference preview, "matches" just marks reconciled; last date in prefs `reconciled_<accountId>`.
 - CSV import: Debit/Credit roles (`_rowAmount` = credit − debit), duplicate skip (account|day|amount|type vs existing lines), category guess from past titles contained in the description.
@@ -219,7 +226,8 @@ A sinking fund is an envelope with `type = 'sinking'` (periodicity `permanent`, 
 
 - **Urgency indicators**: Cashew blues — indigo `#6577E0` "Overdue by N days", blue `#58A4C2` "Due today/tomorrow/in N days" (lighter variants in dark mode). No red/amber/green alarm colors.
 - Displays frequency, amount, type icon per bill
-- Route: `/upcoming-bills`, accessible from More > Upcoming Bills
+- Route: `/upcoming-bills` (`?bill=<id>` opens that bill's actions — the reminder's Log it), accessible from More > Upcoming Bills
+- Edit opens the bill's edit sheet in place (subscriptions open their detail screen)
 
 ## Archived Envelopes
 

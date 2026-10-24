@@ -513,5 +513,16 @@
   "web_fund_copied": "الدفعات المضافة: {n}",
   "web_fund_need_category": "اربط فئة بهذا الصندوق (في التطبيق) لتُدفع المصاريف منه.",
   "web_fund_in_days": "بعد {n} يوم",
-  "web_fund_saving_chip": "ادخار · {saved} من {total}"
+  "web_fund_saving_chip": "ادخار · {saved} من {total}",
+  "web_bill_ask_first": "اسألني قبل التسجيل",
+  "web_bill_ask_first_hint": "للفواتير المتغيرة: أكّد المبلغ في كل مرة",
+  "web_bill_remind": "ذكّرني",
+  "web_bill_remind_default": "قبل {n} يوم (افتراضي)",
+  "web_bill_remind_off": "لا تذكّرني",
+  "web_bill_remind_on_day": "في يوم الاستحقاق",
+  "web_bill_remind_one": "قبل يوم واحد",
+  "web_bill_remind_n": "قبل {n} يوم",
+  "web_bill_confirm_post": "أكّد وسجّل",
+  "web_bill_confirm_desc": "المبلغ هذه المرة",
+  "web_bill_to_confirm": "أكّد المبلغ"
 }

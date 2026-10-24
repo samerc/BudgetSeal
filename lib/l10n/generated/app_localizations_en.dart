@@ -9052,4 +9052,124 @@ class SEn extends S {
   String sinkSavingChip(String saved, String total) {
     return 'Saving · $saved of $total';
   }
+
+  @override
+  String get billAskFirst => 'Ask before posting';
+
+  @override
+  String get billAskFirstHint =>
+      'For bills that change: confirm the amount each time';
+
+  @override
+  String get billRemindLabel => 'Remind me';
+
+  @override
+  String billRemindDefault(int n) {
+    return '$n days before (default)';
+  }
+
+  @override
+  String get billRemindOff => 'Don\'t remind me';
+
+  @override
+  String get billRemindOnDay => 'On the day';
+
+  @override
+  String billRemindDaysBefore(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n days before',
+      one: '1 day before',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get billToConfirm => 'Confirm the amount';
+
+  @override
+  String get billConfirmPost => 'Confirm amount and post';
+
+  @override
+  String get billConfirmPostDesc => 'Enter what you paid this time';
+
+  @override
+  String get billNotifLogIt => 'Log it';
+
+  @override
+  String get billNotifSnooze => 'Remind me tomorrow';
+
+  @override
+  String get billNotifChannel => 'Bill reminders';
+
+  @override
+  String get billNotifChannelDesc => 'A reminder before each bill is due';
+
+  @override
+  String billNotifDueToday(String amount) {
+    return '$amount is due today.';
+  }
+
+  @override
+  String billNotifDueTomorrow(String amount) {
+    return '$amount is due tomorrow.';
+  }
+
+  @override
+  String billNotifDueInDays(String amount, int n) {
+    return '$amount is due in $n days.';
+  }
+
+  @override
+  String billNotifOverdue(String amount, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n days ago',
+      one: 'yesterday',
+    );
+    return '$amount was due $_temp0.';
+  }
+
+  @override
+  String get billNotifConfirm => 'Confirm the amount to post it.';
+
+  @override
+  String get webBillAskFirst => 'Ask before posting';
+
+  @override
+  String get webBillAskFirstHint =>
+      'For bills that change: confirm the amount each time';
+
+  @override
+  String get webBillRemind => 'Remind me';
+
+  @override
+  String webBillRemindDefault(int n) {
+    return '$n days before (default)';
+  }
+
+  @override
+  String get webBillRemindOff => 'Don\'t remind me';
+
+  @override
+  String get webBillRemindOnDay => 'On the day';
+
+  @override
+  String get webBillRemindOne => '1 day before';
+
+  @override
+  String webBillRemindN(int n) {
+    return '$n days before';
+  }
+
+  @override
+  String get webBillConfirmPost => 'Confirm and post';
+
+  @override
+  String get webBillConfirmDesc => 'Amount this time';
+
+  @override
+  String get webBillToConfirm => 'confirm the amount';
 }
