@@ -152,6 +152,7 @@ abstract final class AppIcons {
   static const slidersHorizontal = IconData(0xe434, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const smiley = IconData(0xe436, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const sortAscending = IconData(0xe444, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
+  static const sortDescending = IconData(0xe446, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const squaresFour = IconData(0xe464, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const squaresFourFill = IconData(0xe464, fontFamily: 'PhosphorFill', fontPackage: 'phosphor_flutter');
   static const stopCircle = IconData(0xe46e, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');

@@ -3144,7 +3144,7 @@
   "@exportTransTitle": {
     "description": "Card title"
   },
-  "exportTransDesc": "Exportez toutes vos transactions en fichier CSV. Vous pouvez l'ouvrir dans Excel, Google Sheets ou toute application de tableur.",
+  "exportTransDesc": "Exportez vos transactions en fichier CSV — toutes, ou une période, un compte ou une catégorie. Chaque montant reste dans sa devise. S'ouvre dans Excel, Google Sheets ou tout tableur.",
   "@exportTransDesc": {
     "description": "Card description"
   },
@@ -5855,5 +5855,17 @@
   "webBillConfirmDesc": "Montant cette fois",
   "webBillToConfirm": "confirmez le montant",
   "tmplPickerEmpty": "Aucun modèle pour l'instant. Enregistrez-en un depuis le menu ⋮ d'une transaction, ou ajoutez-le dans Modèles.",
-  "tmplPickerManage": "Gérer les modèles"
+  "tmplPickerManage": "Gérer les modèles",
+  "txSortLargest": "Plus gros d'abord",
+  "txSortLargestHeader": "{n, plural, =1{1 résultat, plus gros d'abord} other{{n} résultats, plus gros d'abord}}",
+  "settingsSearchHint": "Rechercher dans les réglages",
+  "settingsSearchNone": "Aucun réglage ne correspond",
+  "exportPeriod": "Période",
+  "exportAllTime": "Depuis le début",
+  "exportLastMonth": "Le mois dernier",
+  "exportCustomRange": "Période personnalisée…",
+  "exportRangeLabel": "{from} – {to}",
+  "exportCount": "{n, plural, =1{1 transaction sera exportée} other{{n} transactions seront exportées}}",
+  "exportNone": "Rien à exporter avec ces filtres",
+  "exportFailed": "L'export a échoué. Réessayez."
 }

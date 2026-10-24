@@ -4747,7 +4747,7 @@ class SAr extends S {
 
   @override
   String get exportTransDesc =>
-      'صدّر جميع معاملاتك كملف CSV. يمكنك فتحه في Excel أو Google Sheets أو أي تطبيق جداول بيانات.';
+      'صدّر معاملاتك كملف CSV — كلها، أو فترة أو حساباً أو فئة. كل مبلغ بعملته. يُفتح في Excel أو Google Sheets أو أي تطبيق جداول بيانات.';
 
   @override
   String get exportReportTitle => 'تصدير التقرير';
@@ -9192,4 +9192,62 @@ class SAr extends S {
 
   @override
   String get tmplPickerManage => 'إدارة القوالب';
+
+  @override
+  String get txSortLargest => 'الأكبر أولاً';
+
+  @override
+  String txSortLargestHeader(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n نتيجة، الأكبر أولاً',
+      few: '$n نتائج، الأكبر أولاً',
+      two: 'نتيجتان، الأكبر أولاً',
+      one: 'نتيجة واحدة، الأكبر أولاً',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsSearchHint => 'ابحث في الإعدادات';
+
+  @override
+  String get settingsSearchNone => 'لا إعدادات مطابقة';
+
+  @override
+  String get exportPeriod => 'الفترة';
+
+  @override
+  String get exportAllTime => 'كل الفترات';
+
+  @override
+  String get exportLastMonth => 'الشهر الماضي';
+
+  @override
+  String get exportCustomRange => 'فترة مخصصة…';
+
+  @override
+  String exportRangeLabel(String from, String to) {
+    return '$from – $to';
+  }
+
+  @override
+  String exportCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'سيتم تصدير $n معاملة',
+      few: 'سيتم تصدير $n معاملات',
+      two: 'سيتم تصدير معاملتين',
+      one: 'سيتم تصدير معاملة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get exportNone => 'لا شيء للتصدير بهذه الفلاتر';
+
+  @override
+  String get exportFailed => 'فشل التصدير. حاول مرة أخرى.';
 }

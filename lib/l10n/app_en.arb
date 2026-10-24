@@ -3394,7 +3394,7 @@
   "@exportTransTitle": {
     "description": "Card title"
   },
-  "exportTransDesc": "Export all your transactions as a CSV file. You can open it in Excel, Google Sheets, or any spreadsheet app.",
+  "exportTransDesc": "Export your transactions as a CSV file — all of them, or one period, account or category. Each amount is in its own currency. Opens in Excel, Google Sheets or any spreadsheet app.",
   "@exportTransDesc": {
     "description": "Card description"
   },
@@ -6876,5 +6876,29 @@
   "tmplPickerEmpty": "No templates yet. Save one from a transaction's ⋮ menu, or add it in Templates.",
   "@tmplPickerEmpty": {"description": "Add form: template picker"},
   "tmplPickerManage": "Manage templates",
-  "@tmplPickerManage": {"description": "Add form: template picker"}
+  "@tmplPickerManage": {"description": "Add form: template picker"},
+  "txSortLargest": "Largest first",
+  "@txSortLargest": {"description": "Search, settings search, export filters"},
+  "txSortLargestHeader": "{n, plural, =1{1 result, largest first} other{{n} results, largest first}}",
+  "@txSortLargestHeader": {"description": "Search, settings search, export filters", "placeholders": {"n": {"type": "int"}}},
+  "settingsSearchHint": "Search settings",
+  "@settingsSearchHint": {"description": "Search, settings search, export filters"},
+  "settingsSearchNone": "No settings match",
+  "@settingsSearchNone": {"description": "Search, settings search, export filters"},
+  "exportPeriod": "Period",
+  "@exportPeriod": {"description": "Search, settings search, export filters"},
+  "exportAllTime": "All time",
+  "@exportAllTime": {"description": "Search, settings search, export filters"},
+  "exportLastMonth": "Last month",
+  "@exportLastMonth": {"description": "Search, settings search, export filters"},
+  "exportCustomRange": "Custom range…",
+  "@exportCustomRange": {"description": "Search, settings search, export filters"},
+  "exportRangeLabel": "{from} – {to}",
+  "@exportRangeLabel": {"description": "Search, settings search, export filters", "placeholders": {"from": {"type": "String"}, "to": {"type": "String"}}},
+  "exportCount": "{n, plural, =1{1 transaction will be exported} other{{n} transactions will be exported}}",
+  "@exportCount": {"description": "Search, settings search, export filters", "placeholders": {"n": {"type": "int"}}},
+  "exportNone": "Nothing to export with these filters",
+  "@exportNone": {"description": "Search, settings search, export filters"},
+  "exportFailed": "Export failed. Try again.",
+  "@exportFailed": {"description": "Search, settings search, export filters"}
 }

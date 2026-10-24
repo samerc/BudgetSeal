@@ -8347,7 +8347,7 @@ abstract class S {
   /// Card description
   ///
   /// In en, this message translates to:
-  /// **'Export all your transactions as a CSV file. You can open it in Excel, Google Sheets, or any spreadsheet app.'**
+  /// **'Export your transactions as a CSV file — all of them, or one period, account or category. Each amount is in its own currency. Opens in Excel, Google Sheets or any spreadsheet app.'**
   String get exportTransDesc;
 
   /// AppBar title
@@ -15851,6 +15851,78 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Manage templates'**
   String get tmplPickerManage;
+
+  /// Search, settings search, export filters
+  ///
+  /// In en, this message translates to:
+  /// **'Largest first'**
+  String get txSortLargest;
+
+  /// Search, settings search, export filters
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 result, largest first} other{{n} results, largest first}}'**
+  String txSortLargestHeader(int n);
+
+  /// Search, settings search, export filters
+  ///
+  /// In en, this message translates to:
+  /// **'Search settings'**
+  String get settingsSearchHint;
+
+  /// Search, settings search, export filters
+  ///
+  /// In en, this message translates to:
+  /// **'No settings match'**
+  String get settingsSearchNone;
+
+  /// Search, settings search, export filters
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get exportPeriod;
+
+  /// Search, settings search, export filters
+  ///
+  /// In en, this message translates to:
+  /// **'All time'**
+  String get exportAllTime;
+
+  /// Search, settings search, export filters
+  ///
+  /// In en, this message translates to:
+  /// **'Last month'**
+  String get exportLastMonth;
+
+  /// Search, settings search, export filters
+  ///
+  /// In en, this message translates to:
+  /// **'Custom range…'**
+  String get exportCustomRange;
+
+  /// Search, settings search, export filters
+  ///
+  /// In en, this message translates to:
+  /// **'{from} – {to}'**
+  String exportRangeLabel(String from, String to);
+
+  /// Search, settings search, export filters
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 transaction will be exported} other{{n} transactions will be exported}}'**
+  String exportCount(int n);
+
+  /// Search, settings search, export filters
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to export with these filters'**
+  String get exportNone;
+
+  /// Search, settings search, export filters
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed. Try again.'**
+  String get exportFailed;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

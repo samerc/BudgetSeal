@@ -3144,7 +3144,7 @@
   "@exportTransTitle": {
     "description": "Card title"
   },
-  "exportTransDesc": "صدّر جميع معاملاتك كملف CSV. يمكنك فتحه في Excel أو Google Sheets أو أي تطبيق جداول بيانات.",
+  "exportTransDesc": "صدّر معاملاتك كملف CSV — كلها، أو فترة أو حساباً أو فئة. كل مبلغ بعملته. يُفتح في Excel أو Google Sheets أو أي تطبيق جداول بيانات.",
   "@exportTransDesc": {
     "description": "Card description"
   },
@@ -5855,5 +5855,17 @@
   "webBillConfirmDesc": "المبلغ هذه المرة",
   "webBillToConfirm": "أكّد المبلغ",
   "tmplPickerEmpty": "لا قوالب بعد. احفظ واحداً من قائمة ⋮ في أي معاملة، أو أضفه من القوالب.",
-  "tmplPickerManage": "إدارة القوالب"
+  "tmplPickerManage": "إدارة القوالب",
+  "txSortLargest": "الأكبر أولاً",
+  "txSortLargestHeader": "{n, plural, =1{نتيجة واحدة، الأكبر أولاً} =2{نتيجتان، الأكبر أولاً} few{{n} نتائج، الأكبر أولاً} other{{n} نتيجة، الأكبر أولاً}}",
+  "settingsSearchHint": "ابحث في الإعدادات",
+  "settingsSearchNone": "لا إعدادات مطابقة",
+  "exportPeriod": "الفترة",
+  "exportAllTime": "كل الفترات",
+  "exportLastMonth": "الشهر الماضي",
+  "exportCustomRange": "فترة مخصصة…",
+  "exportRangeLabel": "{from} – {to}",
+  "exportCount": "{n, plural, =1{سيتم تصدير معاملة واحدة} =2{سيتم تصدير معاملتين} few{سيتم تصدير {n} معاملات} other{سيتم تصدير {n} معاملة}}",
+  "exportNone": "لا شيء للتصدير بهذه الفلاتر",
+  "exportFailed": "فشل التصدير. حاول مرة أخرى."
 }

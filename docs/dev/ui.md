@@ -158,6 +158,7 @@ Bill Splitter is also accessible from: Dashboard quick actions ("Split" button),
 - **DATA**: Cloud Sync, Share Household, Backup & Restore, Import & Export, Notifications, Health Check
 - **PREFERENCES**: Household Name, Base Currency, Period Start Day, Currency Symbols, Number Format, Date Format
 - **SECURITY**: Biometric Lock
+- **Search** (Oct 24 2026): a field at the top filters the rows. Each top-level child of the list is wrapped in `_Find(keys: (t) => [t.title, t.sub…])` (section headers and gaps in `_Find.section`, hidden while searching); the query (`SearchQuery` from `shared/utils/search_match.dart`, so accents and Arabic letter forms are ignored) reaches them through the `_SettingsQuery` inherited widget. `_settingsKeys` repeats every row's keys so `_SettingsNoMatch` can say "No settings match" — **a new Settings row needs both its `_Find` wrapper and an entry in `_settingsKeys`**.
 
 
 ## Onboarding

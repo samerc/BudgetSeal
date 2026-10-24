@@ -580,7 +580,7 @@
 
 <p><strong>Classic mode</strong> shows all fields on one screen — useful for complex entries with multiple items, notes, or foreign currencies.</p>
 
-<p>To switch modes: go to <strong>More</strong> → <strong>Settings</strong> → <strong>Entry mode</strong>.</p>
+<p>To switch modes: go to <strong>More</strong> → <strong>Settings</strong> → <strong>Entry mode</strong>. (Settings has a search box at the top — type a word like <em>dark</em>, <em>currency</em> or <em>backup</em> to find a setting.)</p>
 
 <h3>Faster Logging</h3>
 <ul>
@@ -651,7 +651,7 @@
   <li><strong>Delete</strong> — swipe left on a transaction, delete it from its detail screen, or select one or more and tap the delete icon. You get a few seconds to tap <em>Undo</em></li>
   <li><strong>Duplicate</strong> — select a single transaction and tap the copy icon (or <strong>Duplicate</strong> on its detail screen). Splits and transfers are copied with all their lines and accounts</li>
   <li><strong>No rate</strong> — an amber tag on a transaction means a foreign-currency amount was saved without an exchange rate, so totals and reports leave it out. Open it and add a rate, or set one in Settings → Exchange rates</li>
-  <li><strong>Search</strong> — tap the search icon on the Activity tab. Searching (or setting a date range) looks through every month, not just the one open</li>
+  <li><strong>Search</strong> — tap the search icon on the Activity tab. Searching (or setting a date range) looks through every month, not just the one open. Every word you type must match (title, note, account or category), in any order; accents and Arabic letter forms don't matter (<em>cafe</em> finds <em>Café</em>, <em>قهوه</em> finds <em>قهوة</em>). Add an amount condition like <strong>&gt;50</strong>, <strong>&lt;20</strong> or <strong>=12.5</strong> (e.g. <em>fuel &gt;40</em>). The sort button next to the search box lists the results largest first, each with its date</li>
   <li><strong>Filter</strong> — by type (All/Income/Expense/Transfer), account, category (includes its subcategories), date range, or amount range (<code>1,200</code> works). Active filters show as chips under the month tabs: tap a chip to remove that filter, or <strong>Clear all</strong></li>
   <li><strong>See all</strong> — on an account or envelope, opens the Activity tab filtered to it across all months</li>
   <li><strong>Bulk changes</strong> — select transactions, then ⋮ for <strong>Select all</strong>, <strong>Change category</strong>, <strong>Change account</strong>, <strong>Change date</strong> or <strong>Export CSV</strong>. Envelope balances update; transfers only take a new date</li>
@@ -1337,7 +1337,7 @@
 <p>Import transactions from a bank CSV file. The app guides you through mapping columns to BudgetSeal fields. Dates can be <code>2026-03-04</code> or slash style (<code>04/03/2026</code>); the app works out day/month order from the whole file. Amounts can use either convention (<code>1,234.56</code>, <code>1.234,56</code>, <code>12,50</code>), and <code>(5.00)</code> counts as negative. Rows with an unreadable date or amount are skipped and counted, never dated today. Importing into a foreign-currency account uses its current exchange rate. Banks that split money in and out can map <strong>Debit</strong> and <strong>Credit</strong> columns instead of one Amount. Rows already in the app (same account, day, amount and type) are skipped, so overlapping statements don't double up, and rows without a category get one from past transactions with a matching title. Imported expenses in a category linked to an envelope spend from that envelope, just like manual entries.</p>
 
 <h3>Export CSV</h3>
-<p>Export all transactions as a CSV spreadsheet for use in Excel, Google Sheets, etc.</p>
+<p>Export your transactions as a CSV spreadsheet for Excel, Google Sheets, etc. — everything, or narrow it to a period (this month, last month, this year or your own dates), one account, or one category (with its subcategories). The screen shows how many transactions will be exported. Each row is one line of a transaction, in that line's own currency.</p>
 
 <h3>Export Report</h3>
 <p>Generate a formatted HTML report for a selected month. Open in a browser and print to PDF.</p>

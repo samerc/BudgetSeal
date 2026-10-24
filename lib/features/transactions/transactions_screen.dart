@@ -20,6 +20,7 @@ import '../../core/providers/categories_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
+import '../../shared/utils/search_match.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/widgets/faded_edges.dart';
 import '../../core/providers/tx_list_settings_provider.dart';
@@ -64,6 +65,8 @@ class TransactionsScreen extends ConsumerStatefulWidget {
 class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     with AutomaticKeepAliveClientMixin {
   String _searchQuery = '';
+  /// Search results by amount (largest first) instead of by day.
+  bool _sortLargest = false;
   String? _typeFilter;
   bool _showSearch = false;
   bool _showFilters = false;
@@ -889,6 +892,17 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               ),
             ),
             IconButton(
+              tooltip: S.of(context).txSortLargest,
+              isSelected: _sortLargest,
+              icon: Icon(AppIcons.sortDescending,
+                  size: 22,
+                  color: _sortLargest ? AppColors.accentText(context) : null),
+              onPressed: () {
+                hapticSelection();
+                setState(() => _sortLargest = !_sortLargest);
+              },
+            ),
+            IconButton(
               tooltip: S.of(context).txCloseSearch,
               icon: const Icon(AppIcons.x, size: 22),
               onPressed: () {
@@ -1657,8 +1671,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     final hasTypeFilter = _typeFilter != null;
     final hasCategoryFilter = _categoryFilter != null;
     final hasAmountFilter = _amountMin != null || _amountMax != null;
-    final hasSearch = _searchQuery.isNotEmpty;
-    final q = hasSearch ? _searchQuery.toLowerCase() : '';
+    final query = SearchQuery.parse(_searchQuery);
+    final hasSearch = !query.isEmpty;
     final hasAccountFilter = _accountFilter != null;
     final hasAnyFilter = hasDateFilter || hasTypeFilter || hasCategoryFilter ||
         hasAmountFilter || hasSearch || hasAccountFilter;
@@ -1699,19 +1713,24 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               if (_amountMin != null && amt < _amountMin!) return false;
               if (_amountMax != null && amt > _amountMax!) return false;
             }
-            // Search
+            // Search: every word somewhere in the row (accents and Arabic
+            // letter forms ignored), amount conditions on the row's own
+            // currency amount.
             if (hasSearch) {
-              if (e.tx.note.toLowerCase().contains(q)) return true;
-              if (e.accountName.toLowerCase().contains(q)) return true;
-              if (e.tx.amount.toStringAsFixed(2).contains(q)) return true;
+              final text = StringBuffer()
+                ..write(e.tx.note)
+                ..write(' ')
+                ..write(e.accountName)
+                ..write(' ')
+                ..write(e.tx.amount.toStringAsFixed(2));
               final cat = e.tx.categoryId != null ? categoryMap[e.tx.categoryId] : null;
-              if (cat != null && cat.name.toLowerCase().contains(q)) return true;
+              if (cat != null) text.write(' ${cat.name}');
               for (final line in e.lines) {
-                if (line.note.toLowerCase().contains(q)) return true;
+                text.write(' ${line.note} ${line.amount.toStringAsFixed(2)}');
                 final lineCat = line.categoryId != null ? categoryMap[line.categoryId] : null;
-                if (lineCat != null && lineCat.name.toLowerCase().contains(q)) return true;
+                if (lineCat != null) text.write(' ${lineCat.name}');
               }
-              return false;
+              return query.matches(foldForSearch(text.toString()), _rowAmount(e));
             }
             return true;
           }).toList()
@@ -1797,7 +1816,17 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
 
     final baseCurrency =
         ref.read(householdProvider).value?.baseCurrency ?? 'USD';
-    final groups = _buildGroups(filtered);
+    final sortLargest = _sortLargest && hasSearch;
+    final groups = sortLargest
+        ? const <({DateTime date, double dayTotal, String baseCurrency, List<TransactionEntry> entries})>[]
+        : _buildGroups(filtered);
+    // Largest first: tx.amount is in the base currency (a transfer's is
+    // its sent amount, and its rate is the transfer rate, not to base) —
+    // ordering only; rows show their own currency.
+    final byAmount = sortLargest
+        ? (filtered.toList()
+          ..sort((a, b) => b.tx.amount.abs().compareTo(a.tx.amount.abs())))
+        : const <TransactionEntry>[];
     final net = monthIncome - monthExpense;
     final showDayTotal =
         ref.watch(txListSettingsProvider).dateBannerTotal == 'dayTotal';
@@ -1867,8 +1896,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                   ),
                 ),
               ),
-              // Planned payments section (dimmed, above real transactions)
-              if (_plannedTxs.isNotEmpty)
+              // Planned payments section (dimmed, above real transactions);
+              // not while searching or filtering — it isn't filtered.
+              if (_plannedTxs.isNotEmpty && !hasAnyFilter)
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
@@ -1878,6 +1908,33 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                       accountMap: _plannedAccountMap,
                       categoryMap: _plannedCategoryMap,
                       onRefresh: _loadPlanned,
+                    ),
+                  ),
+                ),
+              if (sortLargest)
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+                  sliver: SliverToBoxAdapter(
+                    child: _DayCard(
+                      header: Padding(
+                        padding:
+                            const EdgeInsetsDirectional.fromSTEB(16, 10, 16, 2),
+                        child: Text(
+                          S.of(context).txSortLargestHeader(byAmount.length),
+                          style: TextStyle(
+                            fontFamily: TypographyTokens.displayFamily,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.tp(context),
+                          ),
+                        ),
+                      ),
+                      rows: [
+                        for (var i = 0; i < byAmount.length; i++)
+                          _buildTxRow(context, byAmount[i], byAmount, i,
+                              categoryMap,
+                              showDate: true),
+                      ],
                     ),
                   ),
                 ),
@@ -1927,6 +1984,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     );
   }
 
+  /// A row's amount in its own currency (its lines; a transfer's sent side).
+  double _rowAmount(TransactionEntry e) {
+    if (e.lines.isEmpty) return e.tx.amount;
+    if (e.tx.type == 'transfer') return e.lines.first.amount.abs();
+    return e.lines.fold<double>(0, (a, l) => a + l.amount);
+  }
+
   void _toggleSelected(String id) {
     hapticSelection();
     setState(() {
@@ -1944,7 +2008,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   /// One transaction row: selection highlight (Cashew merges adjacent
   /// selected rows into one block), animated check, swipe actions.
   Widget _buildTxRow(BuildContext context, TransactionEntry e,
-      List<TransactionEntry> siblings, int i, Map<String, Category> categoryMap) {
+      List<TransactionEntry> siblings, int i, Map<String, Category> categoryMap,
+      {bool showDate = false}) {
     final isSelected = _selectedIds.contains(e.tx.id);
     // Rows fill their day card edge to edge (the card clips the corners),
     // so adjacent selected rows read as one block.
@@ -1986,6 +2051,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 entry: e,
                 categoryMap: categoryMap,
                 balanceAccountId: _accountFilter,
+                showDate: showDate,
                 onCategoryTap: _selectionMode
                     ? null
                     : (catId, catName) {

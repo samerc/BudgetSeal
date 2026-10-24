@@ -58,6 +58,14 @@ When adding a transaction via the classic form, the new transaction ID is passed
 
 Transaction search uses a 400ms `Timer` debounce to avoid excessive `setState` calls during typing. Timer is properly disposed.
 
+## Search matching (Oct 24 2026)
+
+`shared/utils/search_match.dart`: `foldForSearch()` lowercases and drops Latin accents, Arabic tashkeel/tatweel, folds أ/إ/آ/ٱ → ا, ة → ه, ى/ئ → ي, ؤ → و and Arabic/Persian digits; `SearchQuery.parse()` splits the box into words (all must appear in the row's folded text: title/note, account, category names, line notes, amounts) and amount terms (`>50`, `<20`, `>=`, `<=`, `=12,5`; checked against `_rowAmount()` — the lines' total in their own currency, a transfer's sent amount; sign ignored). The search bar's sort button (`_sortLargest`) shows the results as one card, largest first by `tx.amount` (base for non-transfers), each row with its date (`TxTile.showDate`). The Planned section hides while searching or filtering (it isn't filtered). Settings search uses the same matcher.
+
+## Export screen (Settings › Import & Export › Export)
+
+`settings/export_screen.dart`: Period (All time, This month, Last month, This year, Custom range… → `showDateRangePicker`), Account (either side of a transfer or any line), top-level Category (with its subcategories); a live count; Export shares `shareEntriesCsv()` (one row per line in its own currency — it used to write `tx.amount`, the base amount, with the line currency).
+
 ## Filter Persistence
 
 Transaction type filter (All/Income/Expense/Transfer) is saved to SharedPreferences and restored on screen init. Persists across sessions.

@@ -30,6 +30,7 @@ import '../../core/providers/premium_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
 import '../../core/sync/google_drive_provider.dart';
 import '../../features/transactions/widgets/currency_sheet.dart';
+import '../../shared/utils/search_match.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/widgets/large_title_header.dart';
 import '../../shared/theme/design_tokens.dart';
@@ -999,11 +1000,26 @@ class _EntryModeCard extends StatelessWidget {
 // Settings Detail Screen — all configuration options
 // ═══════════════════════════════════════════════════════════════════════════
 
-class SettingsDetailScreen extends ConsumerWidget {
+class SettingsDetailScreen extends ConsumerStatefulWidget {
   const SettingsDetailScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsDetailScreen> createState() =>
+      _SettingsDetailScreenState();
+}
+
+class _SettingsDetailScreenState extends ConsumerState<SettingsDetailScreen> {
+  final _searchCtrl = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final household = ref.watch(householdProvider).value;
 
     final l = S.of(context);
@@ -1014,343 +1030,486 @@ class SettingsDetailScreen extends ConsumerWidget {
       _ => l.themeSystem,
     };
 
+    final query = SearchQuery.parse(_query);
     return Scaffold(
       appBar: AppBar(title: Text(l.settingsTitle)),
-      body: ListView(
+      body: _SettingsQuery(
+        query: query,
+        child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
-          // ── Appearance ──
-          _SectionHeader(title: l.settingsAppearanceSection),
-          _SettingsTile(icon: AppIcons.circleHalf, title: l.tileTheme,
-              subtitle: themeLabel, iconColor: AppColors.accent,
-              onTap: () => _showThemePicker(context, ref)),
-          Builder(builder: (context) {
-            final accentVal = ref.watch(accentColorProvider);
-            final accentLabel = accentVal == 'system'
-                ? S.of(context).accentColorSystemLabel
-                : accentPairName(S.of(context), accentVal);
-            return _SettingsTile(icon: AppIcons.eyedropper, title: S.of(context).tileAccentColor,
-                subtitle: accentLabel, iconColor: AppColors.accent,
-                onTap: () => _showAccentColorPicker(context, ref));
-          }),
-          _SettingsTile(icon: AppIcons.palette, title: l.tileColors,
-              subtitle: l.tileColorsSub, iconColor: SettingsRowStyle.hue(340),
-              onTap: () => _showColorConfig(context, ref)),
-          Builder(builder: (context) {
-            final mode = ref.watch(entryModeProvider);
-            return _SettingsTile(icon: AppIcons.handTap, title: S.of(context).tileEntryMode,
-                subtitle: switch (mode) {
-                  'one' => S.of(context).entryModeOne,
-                  'assisted' => S.of(context).entryModeAssistedShort,
-                  _ => S.of(context).entryModeClassicShort,
-                },
-                iconColor: SettingsRowStyle.hue(207),
-                onTap: () => _showEntryModePicker(context, ref));
-          }),
-          _SettingsTile(
-            icon: AppIcons.magicWand,
-            title: l.tileAutofill,
-            subtitle: l.tileAutofillSub,
-            iconColor: SettingsRowStyle.hue(174),
-            onTap: () => _showAutofillSettings(context, ref),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: TextField(
+              controller: _searchCtrl,
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                hintText: l.settingsSearchHint,
+                prefixIcon: const Icon(AppIcons.magnifyingGlass, size: 20),
+                suffixIcon: _query.isEmpty
+                    ? null
+                    : IconButton(
+                        tooltip: l.txCloseSearch,
+                        icon: const Icon(AppIcons.x, size: 18),
+                        onPressed: () => setState(() {
+                          _searchCtrl.clear();
+                          _query = '';
+                        }),
+                      ),
+              ),
+              onChanged: (v) => setState(() => _query = v),
+            ),
           ),
-          Builder(builder: (context) {
-            final homeTab = ref.watch(homeTabProvider);
-            final sl = S.of(context);
-            final homeTabLabel = [sl.tabHome, sl.tabActivity, sl.tabBudget, sl.tabReports, sl.tabMore][homeTab];
-            return _SettingsTile(icon: AppIcons.house, title: sl.tileStartScreen,
-                subtitle: homeTabLabel,
-                iconColor: SettingsRowStyle.hue(174),
-                onTap: () => _showHomeTabPicker(context, ref));
-          }),
-          Builder(builder: (context) {
-            final font = ref.watch(fontProvider);
-            return _SettingsTile(icon: AppIcons.textAa, title: S.of(context).tileFont,
-                subtitle: font, iconColor: SettingsRowStyle.hue(262),
-                onTap: () => _showFontPicker(context, ref));
-          }),
-          Builder(builder: (context) {
-            final scale = ref.watch(textScaleProvider);
-            final sl = S.of(context);
-            final scaleLabels = <double, String>{0.85: sl.textScaleSmall, 1.0: sl.textScaleDefault, 1.15: sl.textScaleLarge, 1.3: sl.textScaleExtraLarge};
-            final label = scaleLabels[scale] ?? '${(scale * 100).round()}%';
-            return _SettingsTile(icon: AppIcons.textAa, title: sl.tileTextSize,
-                subtitle: label, iconColor: SettingsRowStyle.hue(231),
-                onTap: () => _showTextSizePicker(context, ref));
-          }),
-          Builder(builder: (context) {
-            final localeCode = ref.watch(localeProvider);
-            final langLabel = switch (localeCode) {
-              'en' => S.of(context).languageEnglish,
-              'ar' => S.of(context).languageArabic,
-              'fr' => S.of(context).languageFrench,
-              _ => S.of(context).languageSystem,
-            };
-            return _SettingsTile(icon: AppIcons.globe, title: S.of(context).tileLanguage,
-                subtitle: langLabel, iconColor: SettingsRowStyle.hue(174),
-                onTap: () => _showLanguagePicker(context, ref));
-          }),
+          if (!query.isEmpty)
+            _SettingsNoMatch(query: query),
+          // ── Appearance ──
+          _Find.section(child: _SectionHeader(title: l.settingsAppearanceSection)),
+          _Find(keys: (t) => [t.tileTheme, t.themeDark, t.themeLight],
+              child: _SettingsTile(icon: AppIcons.circleHalf, title: l.tileTheme,
+                subtitle: themeLabel, iconColor: AppColors.accent,
+                onTap: () => _showThemePicker(context, ref))),
+          _Find(keys: (t) => [t.tileAccentColor],
+              child: Builder(builder: (context) {
+              final accentVal = ref.watch(accentColorProvider);
+              final accentLabel = accentVal == 'system'
+                  ? S.of(context).accentColorSystemLabel
+                  : accentPairName(S.of(context), accentVal);
+              return _SettingsTile(icon: AppIcons.eyedropper, title: S.of(context).tileAccentColor,
+                  subtitle: accentLabel, iconColor: AppColors.accent,
+                  onTap: () => _showAccentColorPicker(context, ref));
+            })),
+          _Find(keys: (t) => [t.tileColors, t.tileColorsSub],
+              child: _SettingsTile(icon: AppIcons.palette, title: l.tileColors,
+                subtitle: l.tileColorsSub, iconColor: SettingsRowStyle.hue(340),
+                onTap: () => _showColorConfig(context, ref))),
+          _Find(keys: (t) => [t.tileEntryMode],
+              child: Builder(builder: (context) {
+              final mode = ref.watch(entryModeProvider);
+              return _SettingsTile(icon: AppIcons.handTap, title: S.of(context).tileEntryMode,
+                  subtitle: switch (mode) {
+                    'one' => S.of(context).entryModeOne,
+                    'assisted' => S.of(context).entryModeAssistedShort,
+                    _ => S.of(context).entryModeClassicShort,
+                  },
+                  iconColor: SettingsRowStyle.hue(207),
+                  onTap: () => _showEntryModePicker(context, ref));
+            })),
+          _Find(keys: (t) => [t.tileAutofill, t.tileAutofillSub],
+              child: _SettingsTile(
+              icon: AppIcons.magicWand,
+              title: l.tileAutofill,
+              subtitle: l.tileAutofillSub,
+              iconColor: SettingsRowStyle.hue(174),
+              onTap: () => _showAutofillSettings(context, ref),
+            )),
+          _Find(keys: (t) => [t.tileStartScreen],
+              child: Builder(builder: (context) {
+              final homeTab = ref.watch(homeTabProvider);
+              final sl = S.of(context);
+              final homeTabLabel = [sl.tabHome, sl.tabActivity, sl.tabBudget, sl.tabReports, sl.tabMore][homeTab];
+              return _SettingsTile(icon: AppIcons.house, title: sl.tileStartScreen,
+                  subtitle: homeTabLabel,
+                  iconColor: SettingsRowStyle.hue(174),
+                  onTap: () => _showHomeTabPicker(context, ref));
+            })),
+          _Find(keys: (t) => [t.tileFont],
+              child: Builder(builder: (context) {
+              final font = ref.watch(fontProvider);
+              return _SettingsTile(icon: AppIcons.textAa, title: S.of(context).tileFont,
+                  subtitle: font, iconColor: SettingsRowStyle.hue(262),
+                  onTap: () => _showFontPicker(context, ref));
+            })),
+          _Find(keys: (t) => [t.tileTextSize],
+              child: Builder(builder: (context) {
+              final scale = ref.watch(textScaleProvider);
+              final sl = S.of(context);
+              final scaleLabels = <double, String>{0.85: sl.textScaleSmall, 1.0: sl.textScaleDefault, 1.15: sl.textScaleLarge, 1.3: sl.textScaleExtraLarge};
+              final label = scaleLabels[scale] ?? '${(scale * 100).round()}%';
+              return _SettingsTile(icon: AppIcons.textAa, title: sl.tileTextSize,
+                  subtitle: label, iconColor: SettingsRowStyle.hue(231),
+                  onTap: () => _showTextSizePicker(context, ref));
+            })),
+          _Find(keys: (t) => [t.tileLanguage],
+              child: Builder(builder: (context) {
+              final localeCode = ref.watch(localeProvider);
+              final langLabel = switch (localeCode) {
+                'en' => S.of(context).languageEnglish,
+                'ar' => S.of(context).languageArabic,
+                'fr' => S.of(context).languageFrench,
+                _ => S.of(context).languageSystem,
+              };
+              return _SettingsTile(icon: AppIcons.globe, title: S.of(context).tileLanguage,
+                  subtitle: langLabel, iconColor: SettingsRowStyle.hue(174),
+                  onTap: () => _showLanguagePicker(context, ref));
+            })),
           // Arabic-Indic digits toggle — only visible when Arabic locale
-          Builder(builder: (context) {
-            final localeNow = ref.watch(localeProvider);
-            final resolvedLocale = localeNow ?? WidgetsBinding.instance.platformDispatcher.locale.languageCode;
-            if (resolvedLocale != 'ar') return const SizedBox.shrink();
-            final useArabic = ref.watch(arabicDigitsProvider);
-            return SettingsSwitchRow(
-              icon: AppIcons.listNumbers,
-              iconColor: SettingsRowStyle.hue(174),
-              title: S.of(context).tileArabicDigits,
-              subtitle: useArabic ? '٠١٢٣٤٥٦٧٨٩' : '0123456789',
-              value: useArabic,
-              onChanged: (_) => ref.read(arabicDigitsProvider.notifier).toggle(),
-            );
-          }),
-          _SettingsTile(icon: AppIcons.rows, title: l.tileTxList,
-              subtitle: l.tileTxListSub,
-              iconColor: SettingsRowStyle.hue(207),
-              onTap: () => context.push('/tx-list-settings')),
-          const SizedBox(height: Spacing.sectionGap),
-
+          _Find(keys: (t) => [t.tileArabicDigits],
+              child: Builder(builder: (context) {
+              final localeNow = ref.watch(localeProvider);
+              final resolvedLocale = localeNow ?? WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+              if (resolvedLocale != 'ar') return const SizedBox.shrink();
+              final useArabic = ref.watch(arabicDigitsProvider);
+              return SettingsSwitchRow(
+                icon: AppIcons.listNumbers,
+                iconColor: SettingsRowStyle.hue(174),
+                title: S.of(context).tileArabicDigits,
+                subtitle: useArabic ? '٠١٢٣٤٥٦٧٨٩' : '0123456789',
+                value: useArabic,
+                onChanged: (_) => ref.read(arabicDigitsProvider.notifier).toggle(),
+              );
+            })),
+          _Find(keys: (t) => [t.tileTxList, t.tileTxListSub],
+              child: _SettingsTile(icon: AppIcons.rows, title: l.tileTxList,
+                subtitle: l.tileTxListSub,
+                iconColor: SettingsRowStyle.hue(207),
+                onTap: () => context.push('/tx-list-settings'))),
+          _Find.section(child: const SizedBox(height: Spacing.sectionGap)),
           // ── Data & Sync ──
-          _SectionHeader(title: l.settingsDataSection),
+          _Find.section(child: _SectionHeader(title: l.settingsDataSection)),
           // Shows the live sync state instead of a fixed description.
-          Builder(builder: (context) {
-            final sync = ref.watch(syncProvider);
-            final String subtitle;
-            if (sync.activeProvider == null) {
-              subtitle = l.tileCloudSyncSub;
-            } else if (sync.status == SyncStatus.syncing) {
-              subtitle = l.syncStatusSyncing;
-            } else if (sync.status == SyncStatus.error) {
-              subtitle = l.syncStatusFailed;
-            } else if (sync.lastSyncTime != null) {
-              subtitle = l.syncStatusLast(formatDateSmart(sync.lastSyncTime!.toLocal()));
-            } else {
-              subtitle = l.tileCloudSyncSub;
-            }
-            return _SettingsTile(icon: AppIcons.arrowsClockwise, title: l.tileCloudSync,
-                subtitle: subtitle,
-                iconColor: sync.status == SyncStatus.error
-                    ? AppColors.overspent
-                    : AppColors.accent,
+          _Find(keys: (t) => [t.tileCloudSync],
+              child: Builder(builder: (context) {
+              final sync = ref.watch(syncProvider);
+              final String subtitle;
+              if (sync.activeProvider == null) {
+                subtitle = l.tileCloudSyncSub;
+              } else if (sync.status == SyncStatus.syncing) {
+                subtitle = l.syncStatusSyncing;
+              } else if (sync.status == SyncStatus.error) {
+                subtitle = l.syncStatusFailed;
+              } else if (sync.lastSyncTime != null) {
+                subtitle = l.syncStatusLast(formatDateSmart(sync.lastSyncTime!.toLocal()));
+              } else {
+                subtitle = l.tileCloudSyncSub;
+              }
+              return _SettingsTile(icon: AppIcons.arrowsClockwise, title: l.tileCloudSync,
+                  subtitle: subtitle,
+                  iconColor: sync.status == SyncStatus.error
+                      ? AppColors.overspent
+                      : AppColors.accent,
+                  onTap: () {
+                    if (!checkPremiumAccess(context, ref, PremiumFeature.sync)) return;
+                    context.push('/sync');
+                  });
+            })),
+          _Find(keys: (t) => [t.tileShareHousehold],
+              child: Builder(builder: (context) {
+              final syncState = ref.watch(syncProvider);
+              final isConnected = syncState.activeProvider is GoogleDriveProvider;
+              return _SettingsTile(
+                icon: AppIcons.users,
+                title: S.of(context).tileShareHousehold,
+                subtitle: isConnected
+                    ? S.of(context).tileShareHouseholdConnected
+                    : S.of(context).tileShareHouseholdDisconnected,
+                iconColor: SettingsRowStyle.hue(262),
                 onTap: () {
-                  if (!checkPremiumAccess(context, ref, PremiumFeature.sync)) return;
-                  context.push('/sync');
-                });
-          }),
-          Builder(builder: (context) {
-            final syncState = ref.watch(syncProvider);
-            final isConnected = syncState.activeProvider is GoogleDriveProvider;
-            return _SettingsTile(
-              icon: AppIcons.users,
-              title: S.of(context).tileShareHousehold,
-              subtitle: isConnected
-                  ? S.of(context).tileShareHouseholdConnected
-                  : S.of(context).tileShareHouseholdDisconnected,
-              iconColor: SettingsRowStyle.hue(262),
-              onTap: () {
-                if (isConnected) {
-                  _showShareHousehold(context, ref);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(S.of(context).tileShareHouseholdSnackbar),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
-              },
-            );
-          }),
-          _SettingsTile(icon: AppIcons.cloudArrowUp, title: l.tileBackupRestore,
-              subtitle: l.tileBackupRestoreSub, iconColor: SettingsRowStyle.hue(207),
-              onTap: () => context.push('/backup')),
-          _SettingsTile(icon: AppIcons.arrowsDownUp, title: l.tileImportExport,
-              subtitle: l.tileImportExportSub, iconColor: SettingsRowStyle.hue(123),
-              onTap: () => context.push('/import-export')),
-          _SettingsTile(
-              icon: AppIcons.bellRinging,
-              title: l.tileNotifications,
-              subtitle: l.tileNotificationsSub,
-              iconColor: SettingsRowStyle.hue(36),
-              onTap: () => context.push('/notifications')),
-          _SettingsTile(
-              icon: AppIcons.heartbeat,
-              title: l.tileHealthCheck,
-              subtitle: l.tileHealthCheckSub,
-              iconColor: SettingsRowStyle.hue(174),
-              onTap: () => context.push('/health-check')),
+                  if (isConnected) {
+                    _showShareHousehold(context, ref);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(S.of(context).tileShareHouseholdSnackbar),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
+              );
+            })),
+          _Find(keys: (t) => [t.tileBackupRestore, t.tileBackupRestoreSub],
+              child: _SettingsTile(icon: AppIcons.cloudArrowUp, title: l.tileBackupRestore,
+                subtitle: l.tileBackupRestoreSub, iconColor: SettingsRowStyle.hue(207),
+                onTap: () => context.push('/backup'))),
+          _Find(keys: (t) => [t.tileImportExport, t.tileImportExportSub],
+              child: _SettingsTile(icon: AppIcons.arrowsDownUp, title: l.tileImportExport,
+                subtitle: l.tileImportExportSub, iconColor: SettingsRowStyle.hue(123),
+                onTap: () => context.push('/import-export'))),
+          _Find(keys: (t) => [t.tileNotifications, t.tileNotificationsSub],
+              child: _SettingsTile(
+                icon: AppIcons.bellRinging,
+                title: l.tileNotifications,
+                subtitle: l.tileNotificationsSub,
+                iconColor: SettingsRowStyle.hue(36),
+                onTap: () => context.push('/notifications'))),
+          _Find(keys: (t) => [t.tileHealthCheck, t.tileHealthCheckSub],
+              child: _SettingsTile(
+                icon: AppIcons.heartbeat,
+                title: l.tileHealthCheck,
+                subtitle: l.tileHealthCheckSub,
+                iconColor: SettingsRowStyle.hue(174),
+                onTap: () => context.push('/health-check'))),
           // ── Receipt Sync toggle ──
-          Builder(builder: (context) {
-            final syncState = ref.watch(syncProvider);
-            final isCloudConnected = syncState.activeProvider != null;
-            if (!isCloudConnected) return const SizedBox.shrink();
-            final receiptSyncEnabled = ref.watch(receiptSyncProvider);
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SettingsSwitchRow(
-                  icon: AppIcons.images,
-                  iconColor: SettingsRowStyle.hue(262),
-                  title: S.of(context).tileSyncReceipts,
-                  subtitle: receiptSyncEnabled
-                      ? S.of(context).tileSyncReceiptsOn
-                      : S.of(context).tileSyncReceiptsOff,
-                  value: receiptSyncEnabled,
-                  onChanged: (_) =>
-                      ref.read(receiptSyncProvider.notifier).toggle(),
-                ),
-                if (!receiptSyncEnabled)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
-                    child: Row(
-                      children: [
-                        Icon(AppIcons.warning,
-                            size: 14, color: AppColors.caution),
-                        const SizedBox(width: 6),
-                        Text(S.of(context).tileSyncReceiptsOff,
-                            style: TextStyle(
-                                fontSize: TypographyTokens.overlineSize,
-                                color: AppColors.caution)),
-                      ],
-                    ),
+          _Find(keys: (t) => [t.tileSyncReceipts],
+              child: Builder(builder: (context) {
+              final syncState = ref.watch(syncProvider);
+              final isCloudConnected = syncState.activeProvider != null;
+              if (!isCloudConnected) return const SizedBox.shrink();
+              final receiptSyncEnabled = ref.watch(receiptSyncProvider);
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SettingsSwitchRow(
+                    icon: AppIcons.images,
+                    iconColor: SettingsRowStyle.hue(262),
+                    title: S.of(context).tileSyncReceipts,
+                    subtitle: receiptSyncEnabled
+                        ? S.of(context).tileSyncReceiptsOn
+                        : S.of(context).tileSyncReceiptsOff,
+                    value: receiptSyncEnabled,
+                    onChanged: (_) =>
+                        ref.read(receiptSyncProvider.notifier).toggle(),
                   ),
-              ],
-            );
-          }),
-          const SizedBox(height: Spacing.sectionGap),
-
+                  if (!receiptSyncEnabled)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+                      child: Row(
+                        children: [
+                          Icon(AppIcons.warning,
+                              size: 14, color: AppColors.caution),
+                          const SizedBox(width: 6),
+                          Text(S.of(context).tileSyncReceiptsOff,
+                              style: TextStyle(
+                                  fontSize: TypographyTokens.overlineSize,
+                                  color: AppColors.caution)),
+                        ],
+                      ),
+                    ),
+                ],
+              );
+            })),
+          _Find.section(child: const SizedBox(height: Spacing.sectionGap)),
           // ── Preferences ──
-          _SectionHeader(title: l.settingsPreferencesSection),
-          _SettingsTile(
-            icon: AppIcons.house,
-            title: l.householdNameTitle,
-            subtitle: household?.name ?? 'BudgetSeal',
-            iconColor: AppColors.accent,
-            onTap: () => _editText(context, ref,
-                title: l.householdNameTitle,
-                currentValue: household?.name ?? '',
-                onSave: (val) async {
+          _Find.section(child: _SectionHeader(title: l.settingsPreferencesSection)),
+          _Find(keys: (t) => [t.householdNameTitle],
+              child: _SettingsTile(
+              icon: AppIcons.house,
+              title: l.householdNameTitle,
+              subtitle: household?.name ?? 'BudgetSeal',
+              iconColor: AppColors.accent,
+              onTap: () => _editText(context, ref,
+                  title: l.householdNameTitle,
+                  currentValue: household?.name ?? '',
+                  onSave: (val) async {
+                    final db = ref.read(databaseProvider);
+                    try {
+                      await (db.update(db.households)
+                            ..where((h) => h.id.equals(household!.id)))
+                          .write(HouseholdsCompanion(
+                              name: Value(val),
+                              lastModified: Value(DateTime.now())));
+                      if (context.mounted) _snack(context, l.householdNameSaved);
+                    } catch (e) {
+                      debugPrint('[Settings] Rename household failed: $e');
+                      if (context.mounted) {
+                        _snack(context, l.commonSomethingWentWrong);
+                      }
+                    }
+                  }),
+            )),
+          _Find(keys: (t) => [t.tileBaseCurrency],
+              child: _SettingsTile(
+              icon: AppIcons.coins,
+              title: l.tileBaseCurrency,
+              subtitle: household?.baseCurrency ?? 'USD',
+              iconColor: SettingsRowStyle.hue(35),
+              onTap: () async {
+                final result = await showModalBottomSheet<String>(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (_) => CurrencySheet(
+                      current: household?.baseCurrency ?? 'USD'),
+                );
+                if (result != null &&
+                    household != null &&
+                    result != household.baseCurrency) {
                   final db = ref.read(databaseProvider);
                   try {
                     await (db.update(db.households)
-                          ..where((h) => h.id.equals(household!.id)))
+                          ..where((h) => h.id.equals(household.id)))
                         .write(HouseholdsCompanion(
-                            name: Value(val),
+                            baseCurrency: Value(result),
                             lastModified: Value(DateTime.now())));
-                    if (context.mounted) _snack(context, l.householdNameSaved);
+                    if (context.mounted) {
+                      _snack(context, l.baseCurrencySaved(result));
+                    }
                   } catch (e) {
-                    debugPrint('[Settings] Rename household failed: $e');
+                    debugPrint('[Settings] Change base currency failed: $e');
                     if (context.mounted) {
                       _snack(context, l.commonSomethingWentWrong);
                     }
                   }
-                }),
-          ),
-          _SettingsTile(
-            icon: AppIcons.coins,
-            title: l.tileBaseCurrency,
-            subtitle: household?.baseCurrency ?? 'USD',
-            iconColor: SettingsRowStyle.hue(35),
-            onTap: () async {
-              final result = await showModalBottomSheet<String>(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (_) => CurrencySheet(
-                    current: household?.baseCurrency ?? 'USD'),
-              );
-              if (result != null &&
-                  household != null &&
-                  result != household.baseCurrency) {
-                final db = ref.read(databaseProvider);
-                try {
-                  await (db.update(db.households)
-                        ..where((h) => h.id.equals(household.id)))
-                      .write(HouseholdsCompanion(
-                          baseCurrency: Value(result),
-                          lastModified: Value(DateTime.now())));
-                  if (context.mounted) {
-                    _snack(context, l.baseCurrencySaved(result));
-                  }
-                } catch (e) {
-                  debugPrint('[Settings] Change base currency failed: $e');
-                  if (context.mounted) {
-                    _snack(context, l.commonSomethingWentWrong);
-                  }
                 }
-              }
-            },
-          ),
-          _SettingsTile(
-            icon: AppIcons.currencyCircleDollar,
-            title: l.tileExchangeRates,
-            subtitle: l.tileExchangeRatesSub,
-            iconColor: SettingsRowStyle.hue(35),
-            onTap: () => context.push('/exchange-rates'),
-          ),
-          _SettingsTile(
-            icon: AppIcons.calendarBlank,
-            title: l.tilePeriodStartDay,
-            subtitle: l.onboardDayN(household?.periodStartDay ?? 1),
-            iconColor: SettingsRowStyle.hue(35),
-            onTap: () => _editNumber(context, ref,
-                title: l.tilePeriodStartDay,
-                currentValue: household?.periodStartDay ?? 1,
-                min: 1, max: 28,
-                description: l.tilePeriodStartDayDesc,
-                onSave: (val) async {
-                  final db = ref.read(databaseProvider);
-                  await (db.update(db.households)
-                        ..where((h) => h.id.equals(household!.id)))
-                      .write(HouseholdsCompanion(
-                          periodStartDay: Value(val),
-                          lastModified: Value(DateTime.now())));
-                }),
-          ),
-          _SettingsTile(
-            icon: AppIcons.currencyDollar,
-            title: l.tileCurrencySymbols,
-            subtitle: l.tileCurrencySymbolsSub,
-            iconColor: SettingsRowStyle.hue(174),
-            onTap: () => _showCurrencySymbolEditor(context, ref),
-          ),
-          Builder(builder: (context) {
-            ref.watch(numberFormatProvider);
-            final preview = formatAmount(1234567.89);
-            return _SettingsTile(
-              icon: AppIcons.listNumbers,
-              title: l.tileNumberFormat,
-              subtitle: l.settingsPreview(preview),
-              iconColor: SettingsRowStyle.hue(231),
-              onTap: () => _showNumberFormatEditor(context, ref),
-            );
-          }),
-          Builder(builder: (context) {
-            final dateFmt = ref.watch(dateFormatProvider);
-            final preview = DateFormat(dateFmt).format(DateTime.now());
-            return _SettingsTile(
-              icon: AppIcons.calendar,
-              title: l.tileDateFormat,
-              subtitle: preview,
-              iconColor: SettingsRowStyle.hue(262),
-              onTap: () => _showDateFormatPicker(context, ref),
-            );
-          }),
-          const SizedBox(height: Spacing.sectionGap),
-
+              },
+            )),
+          _Find(keys: (t) => [t.tileExchangeRates, t.tileExchangeRatesSub],
+              child: _SettingsTile(
+              icon: AppIcons.currencyCircleDollar,
+              title: l.tileExchangeRates,
+              subtitle: l.tileExchangeRatesSub,
+              iconColor: SettingsRowStyle.hue(35),
+              onTap: () => context.push('/exchange-rates'),
+            )),
+          _Find(keys: (t) => [t.tilePeriodStartDay],
+              child: _SettingsTile(
+              icon: AppIcons.calendarBlank,
+              title: l.tilePeriodStartDay,
+              subtitle: l.onboardDayN(household?.periodStartDay ?? 1),
+              iconColor: SettingsRowStyle.hue(35),
+              onTap: () => _editNumber(context, ref,
+                  title: l.tilePeriodStartDay,
+                  currentValue: household?.periodStartDay ?? 1,
+                  min: 1, max: 28,
+                  description: l.tilePeriodStartDayDesc,
+                  onSave: (val) async {
+                    final db = ref.read(databaseProvider);
+                    await (db.update(db.households)
+                          ..where((h) => h.id.equals(household!.id)))
+                        .write(HouseholdsCompanion(
+                            periodStartDay: Value(val),
+                            lastModified: Value(DateTime.now())));
+                  }),
+            )),
+          _Find(keys: (t) => [t.tileCurrencySymbols, t.tileCurrencySymbolsSub],
+              child: _SettingsTile(
+              icon: AppIcons.currencyDollar,
+              title: l.tileCurrencySymbols,
+              subtitle: l.tileCurrencySymbolsSub,
+              iconColor: SettingsRowStyle.hue(174),
+              onTap: () => _showCurrencySymbolEditor(context, ref),
+            )),
+          _Find(keys: (t) => [t.tileNumberFormat],
+              child: Builder(builder: (context) {
+              ref.watch(numberFormatProvider);
+              final preview = formatAmount(1234567.89);
+              return _SettingsTile(
+                icon: AppIcons.listNumbers,
+                title: l.tileNumberFormat,
+                subtitle: l.settingsPreview(preview),
+                iconColor: SettingsRowStyle.hue(231),
+                onTap: () => _showNumberFormatEditor(context, ref),
+              );
+            })),
+          _Find(keys: (t) => [t.tileDateFormat],
+              child: Builder(builder: (context) {
+              final dateFmt = ref.watch(dateFormatProvider);
+              final preview = DateFormat(dateFmt).format(DateTime.now());
+              return _SettingsTile(
+                icon: AppIcons.calendar,
+                title: l.tileDateFormat,
+                subtitle: preview,
+                iconColor: SettingsRowStyle.hue(262),
+                onTap: () => _showDateFormatPicker(context, ref),
+              );
+            })),
+          _Find.section(child: const SizedBox(height: Spacing.sectionGap)),
           // ── Security ──
-          _SectionHeader(title: l.settingsSecuritySection),
-          _BiometricTile(),
-          const SizedBox(height: Spacing.sectionGap),
-
+          _Find.section(child: _SectionHeader(title: l.settingsSecuritySection)),
+          _Find(keys: (t) => [t.tileBiometricLock, t.tileBiometricSub],
+              child: _BiometricTile()),
+          _Find.section(child: const SizedBox(height: Spacing.sectionGap)),
           // ── Danger zone ──
-          _SettingsTile(icon: AppIcons.trash, title: l.tileResetEverything,
-              subtitle: l.tileResetSub, iconColor: AppColors.overspent,
-              onTap: () => _confirmReset(context, ref)),
+          _Find(keys: (t) => [t.tileResetEverything, t.tileResetSub],
+              child: _SettingsTile(icon: AppIcons.trash, title: l.tileResetEverything,
+                subtitle: l.tileResetSub, iconColor: AppColors.overspent,
+                onTap: () => _confirmReset(context, ref))),
         ],
+        ),
       ),
     );
+  }
+}
+
+/// Settings search: the parsed query for the [_Find] rows below it.
+class _SettingsQuery extends InheritedWidget {
+  final SearchQuery query;
+  const _SettingsQuery({required this.query, required super.child});
+
+  static SearchQuery of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<_SettingsQuery>()?.query ??
+      const SearchQuery([], []);
+
+  @override
+  bool updateShouldNotify(_SettingsQuery old) =>
+      old.query.words.join(' ') != query.words.join(' ');
+}
+
+/// Keywords of a settings row, in the current language.
+typedef _Keys = List<String> Function(S t);
+
+/// Every searchable settings row's keywords (same as its [_Find]), so the
+/// screen can say when nothing matches.
+final _settingsKeys = <_Keys>[
+  (t) => [t.tileTheme, t.themeDark, t.themeLight],
+  (t) => [t.tileAccentColor],
+  (t) => [t.tileColors, t.tileColorsSub],
+  (t) => [t.tileEntryMode],
+  (t) => [t.tileAutofill, t.tileAutofillSub],
+  (t) => [t.tileStartScreen],
+  (t) => [t.tileFont],
+  (t) => [t.tileTextSize],
+  (t) => [t.tileLanguage],
+  (t) => [t.tileArabicDigits],
+  (t) => [t.tileTxList, t.tileTxListSub],
+  (t) => [t.tileCloudSync],
+  (t) => [t.tileShareHousehold],
+  (t) => [t.tileBackupRestore, t.tileBackupRestoreSub],
+  (t) => [t.tileImportExport, t.tileImportExportSub],
+  (t) => [t.tileNotifications, t.tileNotificationsSub],
+  (t) => [t.tileHealthCheck, t.tileHealthCheckSub],
+  (t) => [t.tileSyncReceipts],
+  (t) => [t.householdNameTitle],
+  (t) => [t.tileBaseCurrency],
+  (t) => [t.tileExchangeRates, t.tileExchangeRatesSub],
+  (t) => [t.tilePeriodStartDay],
+  (t) => [t.tileCurrencySymbols, t.tileCurrencySymbolsSub],
+  (t) => [t.tileNumberFormat],
+  (t) => [t.tileDateFormat],
+  (t) => [t.tileBiometricLock, t.tileBiometricSub],
+  (t) => [t.tileResetEverything, t.tileResetSub],
+];
+
+class _SettingsNoMatch extends StatelessWidget {
+  final SearchQuery query;
+  const _SettingsNoMatch({required this.query});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = S.of(context);
+    if (_settingsKeys.any((k) => _Find.matches(query, t, k))) {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Text(t.settingsSearchNone,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColors.ts(context))),
+    );
+  }
+}
+
+/// A settings row shown only when every search word is in its [keys]
+/// (title, description); [_Find.section] (headers, gaps) hides while
+/// searching.
+class _Find extends StatelessWidget {
+  final _Keys? keys;
+  final Widget child;
+  const _Find({required this.keys, required this.child});
+  const _Find.section({required this.child}) : keys = null;
+
+  static bool matches(SearchQuery q, S t, _Keys keys) =>
+      q.matches(foldForSearch(keys(t).join(' ')), 0);
+
+  @override
+  Widget build(BuildContext context) {
+    final q = _SettingsQuery.of(context);
+    if (q.isEmpty) return child;
+    final k = keys;
+    if (k == null || !matches(q, S.of(context), k)) {
+      return const SizedBox.shrink();
+    }
+    return child;
   }
 }
 

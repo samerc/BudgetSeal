@@ -4777,7 +4777,7 @@ class SFr extends S {
 
   @override
   String get exportTransDesc =>
-      'Exportez toutes vos transactions en fichier CSV. Vous pouvez l\'ouvrir dans Excel, Google Sheets ou toute application de tableur.';
+      'Exportez vos transactions en fichier CSV — toutes, ou une période, un compte ou une catégorie. Chaque montant reste dans sa devise. S\'ouvre dans Excel, Google Sheets ou tout tableur.';
 
   @override
   String get exportReportTitle => 'Exporter le rapport';
@@ -9278,4 +9278,58 @@ class SFr extends S {
 
   @override
   String get tmplPickerManage => 'Gérer les modèles';
+
+  @override
+  String get txSortLargest => 'Plus gros d\'abord';
+
+  @override
+  String txSortLargestHeader(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n résultats, plus gros d\'abord',
+      one: '1 résultat, plus gros d\'abord',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsSearchHint => 'Rechercher dans les réglages';
+
+  @override
+  String get settingsSearchNone => 'Aucun réglage ne correspond';
+
+  @override
+  String get exportPeriod => 'Période';
+
+  @override
+  String get exportAllTime => 'Depuis le début';
+
+  @override
+  String get exportLastMonth => 'Le mois dernier';
+
+  @override
+  String get exportCustomRange => 'Période personnalisée…';
+
+  @override
+  String exportRangeLabel(String from, String to) {
+    return '$from – $to';
+  }
+
+  @override
+  String exportCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n transactions seront exportées',
+      one: '1 transaction sera exportée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get exportNone => 'Rien à exporter avec ces filtres';
+
+  @override
+  String get exportFailed => 'L\'export a échoué. Réessayez.';
 }
