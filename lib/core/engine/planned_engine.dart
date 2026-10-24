@@ -8,8 +8,20 @@ import 'allocation_engine.dart';
 /// Looks up a `from → to` exchange rate; null when none is known.
 typedef RateLookup = Future<double?> Function(String from, String to);
 
-/// Planned payments: transactions with `status = 'planned'`, one line, in
-/// the (source) account's currency at rate 1.0, no ledger rows. Shared by
+/// One currency part of a planned expense (school fees paid partly in USD
+/// from the bank and partly in LBP cash): its own line, never converted.
+class PlanPart {
+  final double amount;
+  final String currency;
+  final String accountId;
+
+  const PlanPart(
+      {required this.amount, required this.currency, required this.accountId});
+}
+
+/// Planned payments: transactions with `status = 'planned'`, one line per
+/// part (usually one), each in its account's currency at rate 1.0, no
+/// ledger rows. Shared by
 /// the phone screens (`features/planned/`) and the Web Companion.
 class PlannedEngine {
   final AppDatabase _db;
@@ -24,6 +36,8 @@ class PlannedEngine {
 
   /// Creates a plan, or replaces [replaceId] (soft-deleted, its lines
   /// removed) — all in one db transaction. Returns the new plan's id.
+  /// [parts] (expenses only) gives one line per currency; the header then
+  /// takes the first part.
   Future<String> save({
     String? replaceId,
     required String householdId,
@@ -37,7 +51,17 @@ class PlannedEngine {
     required DateTime date,
     required String createdBy,
     required String deviceId,
+    List<PlanPart> parts = const [],
   }) async {
+    if (parts.isNotEmpty && type != 'transfer') {
+      accountId = parts.first.accountId;
+      amount = parts.first.amount;
+      currency = parts.first.currency;
+    } else {
+      parts = [
+        PlanPart(amount: amount, currency: currency, accountId: accountId)
+      ];
+    }
     final id = _uuid.v4();
     final now = DateTime.now();
     final isTransfer = type == 'transfer';
@@ -69,17 +93,19 @@ class PlannedEngine {
             status: const Value('planned'),
             lastModified: Value(now),
           ));
-      await _db.into(_db.transactionLines).insert(
-            TransactionLinesCompanion.insert(
-              id: _uuid.v4(),
-              transactionId: id,
-              amount: amount,
-              currency: currency,
-              categoryId: Value(isTransfer ? null : categoryId),
-              accountId: Value(accountId),
-              exchangeRateToBase: const Value(1.0),
-            ),
-          );
+      for (final part in parts) {
+        await _db.into(_db.transactionLines).insert(
+              TransactionLinesCompanion.insert(
+                id: _uuid.v4(),
+                transactionId: id,
+                amount: part.amount,
+                currency: part.currency,
+                categoryId: Value(isTransfer ? null : categoryId),
+                accountId: Value(part.accountId),
+                exchangeRateToBase: const Value(1.0),
+              ),
+            );
+      }
     });
     return id;
   }

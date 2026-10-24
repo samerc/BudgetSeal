@@ -8584,4 +8584,284 @@ class SAr extends S {
     );
     return 'من $_temp0';
   }
+
+  @override
+  String get sinkTypeTitle => 'صندوق ادخار مجدول';
+
+  @override
+  String get sinkTypeShort => 'مجدول';
+
+  @override
+  String get sinkTypeDesc =>
+      'ادّخر قليلاً كل شهر لدفعات في مواعيد محددة: فواتير سنوية، أقساط مدرسية.';
+
+  @override
+  String get sinkSection => 'صناديق الادخار المجدولة';
+
+  @override
+  String sinkThisMonth(String amount) {
+    return '$amount هذا الشهر';
+  }
+
+  @override
+  String sinkNext(String date) {
+    return 'التالي: $date';
+  }
+
+  @override
+  String get sinkOnTrack => 'على المسار';
+
+  @override
+  String get sinkOnTrackCap => 'على المسار';
+
+  @override
+  String get sinkCatchingUp => 'يلحق بالخطة';
+
+  @override
+  String get sinkFundedThisMonth => 'مموَّل لهذا الشهر';
+
+  @override
+  String sinkBehindBy(String amount) {
+    return 'متأخر بمبلغ $amount';
+  }
+
+  @override
+  String sinkBehindChoose(String amount) {
+    return 'متأخر بمبلغ $amount · اختر طريقة اللحاق';
+  }
+
+  @override
+  String get sinkNoPayments => 'لا دفعات مخططة بعد';
+
+  @override
+  String get sinkNoPaymentsHelp =>
+      'أضف الدفعات التي يدّخر لها هذا الصندوق (التواريخ والمبالغ)، وسيحسب ما تضعه جانباً كل شهر.';
+
+  @override
+  String sinkOf(String saved, String total) {
+    return '$saved من $total';
+  }
+
+  @override
+  String sinkOfTotal(String total) {
+    return 'من $total';
+  }
+
+  @override
+  String sinkSavingFor(String date, String title) {
+    return 'ادخار لـ $date · $title';
+  }
+
+  @override
+  String get sinkThisMonthLabel => 'هذا الشهر';
+
+  @override
+  String get sinkFundThisMonth => 'موّل هذا الشهر';
+
+  @override
+  String get sinkMonthlyPlan => 'الخطة الشهرية';
+
+  @override
+  String get sinkPlanNote =>
+      'يُعاد حسابها كل شهر بحسب المدَّخر والمستحق التالي.';
+
+  @override
+  String get sinkPayments => 'الدفعات';
+
+  @override
+  String get sinkPaid => 'مدفوعة';
+
+  @override
+  String sinkInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'بعد $count يوم',
+      one: 'غداً',
+      zero: 'اليوم',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sinkRecurringBill => 'فاتورة متكررة';
+
+  @override
+  String get sinkAddPayment => 'إضافة دفعة';
+
+  @override
+  String get sinkEditPayment => 'تعديل الدفعة';
+
+  @override
+  String get sinkCopyLastYear => 'نسخ من العام الماضي';
+
+  @override
+  String get sinkWhenBehind => 'عند التأخر';
+
+  @override
+  String get sinkWhenBehindHelp =>
+      'إذا فات شهر: ارفع الأشهر التالية، أو الحق بالخطة دفعة واحدة.';
+
+  @override
+  String get sinkModeAsk => 'اسألني';
+
+  @override
+  String get sinkModeSpread => 'توزيعه على الأشهر';
+
+  @override
+  String get sinkModeTopUp => 'التعويض الآن';
+
+  @override
+  String get sinkNeedsCategory => 'اربط فئة لتُدفع المصاريف من هذا الصندوق.';
+
+  @override
+  String get sinkCatchUpTitle => 'اللحاق بالخطة';
+
+  @override
+  String sinkBehindExplain(String name, String amount) {
+    return 'ينقص $name مبلغ $amount عن خطته.';
+  }
+
+  @override
+  String get sinkSpreadSub =>
+      'خطوات أصغر: يرتفع المبلغ الشهري حتى موعد الدفعة.';
+
+  @override
+  String sinkTopUpNow(String now, String steady) {
+    return '$now الآن، ثم $steady شهرياً';
+  }
+
+  @override
+  String get sinkTopUpSub =>
+      'تعود إلى المسار اليوم؛ ويبقى المبلغ الشهري ثابتاً.';
+
+  @override
+  String get sinkAlways => 'افعل هذا دائماً لهذا الصندوق';
+
+  @override
+  String sinkFundAmount(String amount) {
+    return 'موّل $amount';
+  }
+
+  @override
+  String get sinkFromAccount => 'الدفع من';
+
+  @override
+  String get sinkPaymentName => 'الاسم';
+
+  @override
+  String get sinkPaymentNameHint => 'مثال: القسط الثاني';
+
+  @override
+  String get sinkDueOn => 'تاريخ الاستحقاق';
+
+  @override
+  String get sinkPickDate => 'اختر تاريخاً';
+
+  @override
+  String get sinkAmountLabel => 'المبلغ';
+
+  @override
+  String get sinkAddAmount => 'إضافة مبلغ';
+
+  @override
+  String get sinkAddCurrency => 'إضافة عملة أخرى';
+
+  @override
+  String get sinkRemovePart => 'إزالة هذه العملة';
+
+  @override
+  String get sinkPartsNote => 'يُدَّخر كل جزء ويُدفع بعملته، دون تحويل.';
+
+  @override
+  String get sinkOnePartPerCurrency => 'استخدم مبلغاً واحداً لكل عملة.';
+
+  @override
+  String get sinkSavePayment => 'حفظ الدفعة';
+
+  @override
+  String get sinkPaymentSaved => 'تم حفظ الدفعة';
+
+  @override
+  String get sinkPaymentDeleted => 'تم حذف الدفعة';
+
+  @override
+  String get sinkDeletePaymentTitle => 'حذف هذه الدفعة؟';
+
+  @override
+  String get sinkDeletePaymentMsg =>
+      'ستُزال من الجدول؛ لا يُدفع أو يُسترد شيء.';
+
+  @override
+  String get sinkCopyHelp =>
+      'دفعات العام الماضي بعد سنة. عدّلها للمبالغ الجديدة بعد الإضافة، أو ارفعها هنا.';
+
+  @override
+  String get sinkRaiseAll => 'رفع كل المبالغ';
+
+  @override
+  String get sinkAlreadyPlanned => 'مخطط مسبقاً';
+
+  @override
+  String sinkLastYear(String amount) {
+    return 'العام الماضي $amount';
+  }
+
+  @override
+  String get sinkCopyNote =>
+      'استخدم هذا عند تحديد الجدول الجديد؛ لا يُنسخ شيء تلقائياً. تبقى كل دفعة قابلة للتعديل حتى تُدفع.';
+
+  @override
+  String sinkCopyAdd(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'إضافة $count دفعات',
+      one: 'إضافة دفعة واحدة',
+      zero: 'إضافة الدفعات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sinkCopyNothing => 'لا دفعات من العام الماضي لنسخها.';
+
+  @override
+  String sinkCopied(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'أضيفت $count دفعات',
+      one: 'أضيفت دفعة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sinkBillOfferTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count فواتير سنوية بلا ادخار بعد',
+      one: 'فاتورة سنوية واحدة بلا ادخار بعد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sinkBillOfferBody(
+      String name, String amount, String date, String monthly) {
+    return '$name ($amount، $date): نحو $monthly شهرياً';
+  }
+
+  @override
+  String get sinkSaveMonthly => 'ادّخر شهرياً';
+
+  @override
+  String get sinkFundCreated => 'تم إنشاء صندوق الادخار';
+
+  @override
+  String sinkSavingForDate(String date) {
+    return 'ادخار لـ $date';
+  }
 }

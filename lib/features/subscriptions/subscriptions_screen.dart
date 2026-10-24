@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/engine/sinking_fund.dart';
 import '../../core/providers/database_provider.dart';
+import '../../core/providers/date_format_provider.dart';
+import '../../core/providers/sinking_fund_provider.dart';
+import '../allocations/sinking_fund_widgets.dart' show createFundForBill;
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
@@ -141,6 +145,104 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
           ? (st == 'active' || st == 'ending_soon')
           : st == _statusFilter;
     }).toList();
+  }
+
+  /// Active yearly / quarterly subscriptions no sinking fund saves for,
+  /// each with about what a month takes to have it ready on time.
+  Widget _fundOffer(BuildContext context, S tr) {
+    final funds = ref.watch(sinkingFundsProvider).value;
+    if (funds == null) return const SizedBox.shrink();
+    final saved = {
+      for (final f in funds.values)
+        for (final p in f.plan.upcoming)
+          if (p.recurringId != null) p.recurringId!,
+    };
+    final startDay = ref.watch(householdProvider).value?.periodStartDay ?? 1;
+    final now = DateTime.now();
+    final offers = <(Map<String, dynamic>, DateTime, double)>[];
+    for (final sub in _subs) {
+      final id = sub['id']?.toString() ?? '';
+      final st = _status(sub);
+      if (saved.contains(id) || (st != 'active' && st != 'ending_soon')) {
+        continue;
+      }
+      if (sub['type'] != 'expense' ||
+          !isFundBill('${sub['frequency']}',
+              (sub['interval'] as num?)?.toInt() ?? 1)) {
+        continue;
+      }
+      final next = _parseDate(sub['next_due_date']);
+      final amount = (sub['amount'] as num?)?.toDouble() ?? 0;
+      final currency = '${sub['currency']}';
+      if (next == null || amount <= 0) continue;
+      final plan = planSinkingFund(
+        payments: [
+          FundPayment(title: '', date: next, amounts: {currency: amount})
+        ],
+        balanceAtStart: const {},
+        funded: const {},
+        anchor: now,
+        balanceAtAnchor: const {},
+        startDay: startDay,
+        now: now,
+      );
+      offers.add((sub, next, plan.spread[currency] ?? amount));
+    }
+    if (offers.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+        decoration: BoxDecoration(
+          color: AppColors.pastel(context, AppColors.caution,
+              light: 0.85, dark: 0.78),
+          borderRadius: CardTokens.borderRadius,
+        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Text(tr.sinkBillOfferTitle(offers.length),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
+          for (final (sub, next, monthly) in offers) ...[
+            const SizedBox(height: 6),
+            Text(
+                tr.sinkBillOfferBody(
+                    '${sub['title']}',
+                    formatAmount((sub['amount'] as num).toDouble(),
+                        currency: '${sub['currency']}'),
+                    formatDate(next),
+                    formatAmount(monthly, currency: '${sub['currency']}')),
+                style: const TextStyle(fontSize: 13)),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton.icon(
+                onPressed: () => _saveMonthly('${sub['id']}'),
+                icon: const Icon(AppIcons.calendarCheck, size: 16),
+                label: Text(tr.sinkSaveMonthly),
+              ),
+            ),
+          ],
+        ]),
+      ),
+    );
+  }
+
+  Future<void> _saveMonthly(String recurringId) async {
+    final tr = S.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final router = GoRouter.of(context);
+    try {
+      final id = await createFundForBill(ref, recurringId);
+      if (id == null) return;
+      messenger.showSnackBar(SnackBar(
+          content: Text(tr.sinkFundCreated),
+          behavior: SnackBarBehavior.floating));
+      _load();
+      router.push('/allocations/$id');
+    } catch (e) {
+      debugPrint('[Subscriptions] fund failed: $e');
+      messenger.showSnackBar(SnackBar(
+          content: Text(tr.subCouldNotUpdate),
+          behavior: SnackBarBehavior.floating));
+    }
   }
 
   @override
@@ -306,6 +408,9 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                   ]),
                 ),
               ),
+
+            // ── Yearly bills not saved for yet: offer a sinking fund ──
+            SliverToBoxAdapter(child: _fundOffer(context, tr)),
 
             // ── Status filter chips ──
             if (_subs.isNotEmpty)

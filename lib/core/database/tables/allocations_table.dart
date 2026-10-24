@@ -10,7 +10,8 @@ class Allocations extends Table {
   // Legacy 1:1 link. New model: categories reference allocations via
   // categories.allocationId (many categories → one envelope).
   TextColumn get categoryId => text()();
-  // Purpose: 'spending' | 'saving' | 'flexible'
+  // Purpose: 'spending' | 'saving' | 'flexible' | 'sinking' (a fund saved
+  // monthly for scheduled payments; permanent, no target of its own)
   TextColumn get type => text().withDefault(const Constant('spending'))();
   // Behaviour: 'periodic' (resets) | 'permanent' (accumulates)
   TextColumn get periodicity => text().withDefault(const Constant('periodic'))();
@@ -28,6 +29,9 @@ class Allocations extends Table {
   /// Manual position on the Budget tab (drag to reorder). Null = after the
   /// ordered ones, by name.
   IntColumn get sortOrder => integer().nullable()();
+  /// Sinking fund that fell behind: 'spread' (raise the monthly amount),
+  /// 'topup' (catch up now), null = ask each time.
+  TextColumn get behindMode => text().nullable()();
   TextColumn get deviceId => text()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get lastModified => dateTime().withDefault(currentDateAndTime)();

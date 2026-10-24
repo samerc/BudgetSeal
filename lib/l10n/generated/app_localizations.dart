@@ -14902,6 +14902,427 @@ abstract class S {
   /// In en, this message translates to:
   /// **'of {count, plural, =1{1 day} other{{count} days}}'**
   String rptOfDays(int count);
+
+  /// Envelope type: saves monthly for payments on set dates
+  ///
+  /// In en, this message translates to:
+  /// **'Sinking fund'**
+  String get sinkTypeTitle;
+
+  /// Short label of the sinking fund type in the type selector
+  ///
+  /// In en, this message translates to:
+  /// **'Sinking'**
+  String get sinkTypeShort;
+
+  /// Sinking fund type description
+  ///
+  /// In en, this message translates to:
+  /// **'Put a little aside each month for payments on set dates: yearly bills, school fees.'**
+  String get sinkTypeDesc;
+
+  /// Budget tab section title for sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Sinking funds'**
+  String get sinkSection;
+
+  /// What a sinking fund takes this month
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} this month'**
+  String sinkThisMonth(String amount);
+
+  /// Next payment date of a sinking fund
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {date}'**
+  String sinkNext(String date);
+
+  /// Sinking fund status, lowercase after a dot
+  ///
+  /// In en, this message translates to:
+  /// **'on track'**
+  String get sinkOnTrack;
+
+  /// Sinking fund status on its own line
+  ///
+  /// In en, this message translates to:
+  /// **'On track'**
+  String get sinkOnTrackCap;
+
+  /// Sinking fund status while spreading a shortfall
+  ///
+  /// In en, this message translates to:
+  /// **'catching up'**
+  String get sinkCatchingUp;
+
+  /// Sinking fund got its share this month
+  ///
+  /// In en, this message translates to:
+  /// **'Funded for this month'**
+  String get sinkFundedThisMonth;
+
+  /// Sinking fund shortfall
+  ///
+  /// In en, this message translates to:
+  /// **'Behind by {amount}'**
+  String sinkBehindBy(String amount);
+
+  /// Budget tab row of a fund that fell behind
+  ///
+  /// In en, this message translates to:
+  /// **'Behind by {amount} · choose how to catch up'**
+  String sinkBehindChoose(String amount);
+
+  /// Sinking fund with no schedule
+  ///
+  /// In en, this message translates to:
+  /// **'No payments planned yet'**
+  String get sinkNoPayments;
+
+  /// Fund screen hero when no payments
+  ///
+  /// In en, this message translates to:
+  /// **'Add the payments this fund saves for (dates and amounts), and it works out what to put aside each month.'**
+  String get sinkNoPaymentsHelp;
+
+  /// Saved toward a payment, e.g. $0 of $1,500
+  ///
+  /// In en, this message translates to:
+  /// **'{saved} of {total}'**
+  String sinkOf(String saved, String total);
+
+  /// After the saved amount in the fund hero
+  ///
+  /// In en, this message translates to:
+  /// **'of {total}'**
+  String sinkOfTotal(String total);
+
+  /// Fund hero: next payment
+  ///
+  /// In en, this message translates to:
+  /// **'Saving for {date} · {title}'**
+  String sinkSavingFor(String date, String title);
+
+  /// Fund hero label
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get sinkThisMonthLabel;
+
+  /// Fund hero button
+  ///
+  /// In en, this message translates to:
+  /// **'Fund this month'**
+  String get sinkFundThisMonth;
+
+  /// Fund screen section
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly plan'**
+  String get sinkMonthlyPlan;
+
+  /// Under the monthly plan
+  ///
+  /// In en, this message translates to:
+  /// **'Recalculated every month from what\'s saved and what\'s due next.'**
+  String get sinkPlanNote;
+
+  /// Fund screen section
+  ///
+  /// In en, this message translates to:
+  /// **'Payments'**
+  String get sinkPayments;
+
+  /// A fund payment already paid
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get sinkPaid;
+
+  /// When a fund payment is due
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{today} =1{tomorrow} other{in {count} days}}'**
+  String sinkInDays(int count);
+
+  /// Tag on a fund payment that comes from a recurring bill
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring bill'**
+  String get sinkRecurringBill;
+
+  /// Fund screen button / payment screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Add payment'**
+  String get sinkAddPayment;
+
+  /// Payment screen title when editing
+  ///
+  /// In en, this message translates to:
+  /// **'Edit payment'**
+  String get sinkEditPayment;
+
+  /// Fund screen button and screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Copy from last year'**
+  String get sinkCopyLastYear;
+
+  /// Fund setting
+  ///
+  /// In en, this message translates to:
+  /// **'When behind'**
+  String get sinkWhenBehind;
+
+  /// Help under When behind
+  ///
+  /// In en, this message translates to:
+  /// **'If a month is missed: raise the next months, or catch up at once.'**
+  String get sinkWhenBehindHelp;
+
+  /// When behind option
+  ///
+  /// In en, this message translates to:
+  /// **'Ask me'**
+  String get sinkModeAsk;
+
+  /// When behind option
+  ///
+  /// In en, this message translates to:
+  /// **'Spread it out'**
+  String get sinkModeSpread;
+
+  /// When behind option
+  ///
+  /// In en, this message translates to:
+  /// **'Top up now'**
+  String get sinkModeTopUp;
+
+  /// Fund with no linked category
+  ///
+  /// In en, this message translates to:
+  /// **'Link a category so payments come out of this fund.'**
+  String get sinkNeedsCategory;
+
+  /// Catch-up sheet title and button
+  ///
+  /// In en, this message translates to:
+  /// **'Catch up'**
+  String get sinkCatchUpTitle;
+
+  /// Catch-up sheet explanation
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is {amount} short of its plan.'**
+  String sinkBehindExplain(String name, String amount);
+
+  /// Spread option detail
+  ///
+  /// In en, this message translates to:
+  /// **'Smaller steps: the monthly amount goes up until the payment.'**
+  String get sinkSpreadSub;
+
+  /// Top up option detail
+  ///
+  /// In en, this message translates to:
+  /// **'{now} now, then {steady} a month'**
+  String sinkTopUpNow(String now, String steady);
+
+  /// Top up option detail
+  ///
+  /// In en, this message translates to:
+  /// **'Back on track today; the monthly amount stays steady.'**
+  String get sinkTopUpSub;
+
+  /// Catch-up sheet checkbox
+  ///
+  /// In en, this message translates to:
+  /// **'Always do this for this fund'**
+  String get sinkAlways;
+
+  /// Catch-up sheet button
+  ///
+  /// In en, this message translates to:
+  /// **'Fund {amount}'**
+  String sinkFundAmount(String amount);
+
+  /// Account picker title for a payment part
+  ///
+  /// In en, this message translates to:
+  /// **'Pay from'**
+  String get sinkFromAccount;
+
+  /// Payment name label
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get sinkPaymentName;
+
+  /// Payment name hint
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 2nd installment'**
+  String get sinkPaymentNameHint;
+
+  /// Payment due date label
+  ///
+  /// In en, this message translates to:
+  /// **'Due on'**
+  String get sinkDueOn;
+
+  /// Due date placeholder / error
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date'**
+  String get sinkPickDate;
+
+  /// Payment amount label
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get sinkAmountLabel;
+
+  /// Add the first currency part
+  ///
+  /// In en, this message translates to:
+  /// **'Add an amount'**
+  String get sinkAddAmount;
+
+  /// Add a currency part
+  ///
+  /// In en, this message translates to:
+  /// **'Add another currency'**
+  String get sinkAddCurrency;
+
+  /// Tooltip on a part's remove button
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this currency'**
+  String get sinkRemovePart;
+
+  /// Under the payment parts
+  ///
+  /// In en, this message translates to:
+  /// **'Each part is saved and paid in its own currency, never converted.'**
+  String get sinkPartsNote;
+
+  /// Validation: two parts in one currency
+  ///
+  /// In en, this message translates to:
+  /// **'Use one amount per currency.'**
+  String get sinkOnePartPerCurrency;
+
+  /// Payment screen button
+  ///
+  /// In en, this message translates to:
+  /// **'Save payment'**
+  String get sinkSavePayment;
+
+  /// Snackbar
+  ///
+  /// In en, this message translates to:
+  /// **'Payment saved'**
+  String get sinkPaymentSaved;
+
+  /// Snackbar
+  ///
+  /// In en, this message translates to:
+  /// **'Payment deleted'**
+  String get sinkPaymentDeleted;
+
+  /// Confirm title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this payment?'**
+  String get sinkDeletePaymentTitle;
+
+  /// Confirm message
+  ///
+  /// In en, this message translates to:
+  /// **'It leaves the schedule; nothing is paid or refunded.'**
+  String get sinkDeletePaymentMsg;
+
+  /// Copy screen help
+  ///
+  /// In en, this message translates to:
+  /// **'Last year\'s payments, one year later. Change them to the new amounts after adding, or raise them here.'**
+  String get sinkCopyHelp;
+
+  /// Copy screen: percent per currency
+  ///
+  /// In en, this message translates to:
+  /// **'Raise all amounts'**
+  String get sinkRaiseAll;
+
+  /// Copy row that matches an existing plan
+  ///
+  /// In en, this message translates to:
+  /// **'already planned'**
+  String get sinkAlreadyPlanned;
+
+  /// Copy row: the original amount
+  ///
+  /// In en, this message translates to:
+  /// **'last year {amount}'**
+  String sinkLastYear(String amount);
+
+  /// Copy screen footnote
+  ///
+  /// In en, this message translates to:
+  /// **'Use this when the new schedule is decided; nothing is copied on its own. Each payment stays editable until it\'s paid.'**
+  String get sinkCopyNote;
+
+  /// Copy screen button
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Add payments} =1{Add 1 payment} other{Add {count} payments}}'**
+  String sinkCopyAdd(int count);
+
+  /// Copy screen empty
+  ///
+  /// In en, this message translates to:
+  /// **'No payments from the past year to copy.'**
+  String get sinkCopyNothing;
+
+  /// Copy snackbar
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment added} other{{count} payments added}}'**
+  String sinkCopied(int count);
+
+  /// Subscriptions offer card title
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 yearly bill isn\'t saved for yet} other{{count} yearly bills aren\'t saved for yet}}'**
+  String sinkBillOfferTitle(int count);
+
+  /// Subscriptions offer line
+  ///
+  /// In en, this message translates to:
+  /// **'{name} ({amount}, {date}): about {monthly} a month'**
+  String sinkBillOfferBody(
+      String name, String amount, String date, String monthly);
+
+  /// Subscriptions offer button
+  ///
+  /// In en, this message translates to:
+  /// **'Save monthly'**
+  String get sinkSaveMonthly;
+
+  /// Snackbar after Save monthly
+  ///
+  /// In en, this message translates to:
+  /// **'Sinking fund created'**
+  String get sinkFundCreated;
+
+  /// Fund hero when the payment is named like the fund
+  ///
+  /// In en, this message translates to:
+  /// **'Saving for {date}'**
+  String sinkSavingForDate(String date);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

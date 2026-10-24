@@ -38,6 +38,8 @@ import '../../shared/widgets/section_header.dart';
 import '../../shared/theme/app_icons.dart';
 import '../../core/providers/seal_provider.dart';
 import '../../shared/widgets/seal_mark.dart';
+import '../transactions/widgets/category_sheet.dart' show categoryPresetColors;
+import 'sinking_fund_widgets.dart';
 
 class AllocationDetailScreen extends ConsumerStatefulWidget {
   final String allocationId;
@@ -59,6 +61,8 @@ class _AllocationDetailScreenState
   double _targetAmount = 0;
   final _targetCurrencyController = TextEditingController();
   String _type = 'spending';
+  /// The type as saved (the settings form edits [_type]).
+  String? _storedType;
   String _periodicity = 'periodic';
   bool _rollover = false;
   bool _autoReset = true;
@@ -98,6 +102,7 @@ class _AllocationDetailScreenState
       setState(() {
         _nameController.text = alloc.name;
         _type = alloc.type;
+        _storedType = alloc.type;
         _periodicity = alloc.periodicity;
         _rollover = alloc.rollover;
         _autoReset = alloc.autoReset;
@@ -291,7 +296,17 @@ class _AllocationDetailScreenState
           children: [
             // For existing envelopes: balance hero + fund + recent
             if (!_isNew) ...[
-              _buildBalanceHero(),
+              if (_storedType == 'sinking')
+                SinkingFundPanel(
+                  fundId: widget.allocationId,
+                  color: _linkedCategories.isNotEmpty
+                      ? AppColors.fromHex(_linkedCategories.first.colorHex)
+                      : AppColors.accent,
+                  linkedCategories: _linkedCategories,
+                  onLinkCategory: _showLinkCategorySheet,
+                )
+              else
+                _buildBalanceHero(),
               const SizedBox(height: 12),
             ],
             // Settings (always shown for new, toggled for existing)
@@ -414,6 +429,17 @@ class _AllocationDetailScreenState
                     _periodicity = 'permanent';
                   }),
                 ),
+                const SizedBox(height: 8),
+                OptionCard(
+                  icon: AppIcons.calendarCheck,
+                  title: l.sinkTypeTitle,
+                  subtitle: l.sinkTypeDesc,
+                  selected: _type == 'sinking',
+                  onTap: () => setState(() {
+                    _type = 'sinking';
+                    _periodicity = 'permanent';
+                  }),
+                ),
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.all(12),
@@ -447,6 +473,7 @@ class _AllocationDetailScreenState
                   options: [
                     ('spending', l.allocSpendingTitle, AppIcons.shoppingBag),
                     ('flexible', l.allocFlexibleTitle, AppIcons.slidersHorizontal),
+                    ('sinking', l.sinkTypeShort, AppIcons.calendarCheck),
                   ],
                   selected: _type == 'saving' ? 'flexible' : _type,
                   onChanged: (v) => setState(() {
@@ -457,8 +484,8 @@ class _AllocationDetailScreenState
               const SizedBox(height: 16),
             ],
 
-            // Cycle (all envelope types)
-            ...[
+            // Cycle (not for sinking funds: they keep their money)
+            if (_type != 'sinking') ...[
               _sectionContainer(children: [
                 _sectionHeader(l.allocCycleSection),
                 Padding(
@@ -545,7 +572,8 @@ class _AllocationDetailScreenState
               const SizedBox(height: 16),
             ],
 
-            // Budget / Target Amount
+            // Budget / Target Amount (a sinking fund's target is its schedule)
+            if (_type != 'sinking') ...[
             _sectionContainer(children: [
               _sectionHeader(
                 _type == 'spending' ? l.allocMonthlyBudget : l.allocTargetOptional),
@@ -581,6 +609,7 @@ class _AllocationDetailScreenState
                 ]),
               ]),
               const SizedBox(height: 16),
+            ],
 
             // Linked Categories
             _sectionContainer(children: [
@@ -655,8 +684,10 @@ class _AllocationDetailScreenState
             if (!_isNew) ...[
               const SizedBox(height: 16),
               _buildRecentTransactions(),
-              const SizedBox(height: 16),
-              _buildSpendingHistory(),
+              if (_storedType != 'sinking') ...[
+                const SizedBox(height: 16),
+                _buildSpendingHistory(),
+              ],
             ],
             const SizedBox(height: 80),
           ],
@@ -1989,10 +2020,11 @@ class _AllocationDetailScreenState
         categoryId = existing?.categoryId ?? allocId;
       }
 
+      final sinking = _type == 'sinking';
       final targetAmount =
-          _targetAmount > 0 ? _targetAmount : null;
+          _targetAmount > 0 && !sinking ? _targetAmount : null;
       final targetCurrency = _targetCurrencyController.text.trim();
-      final effectivePeriodicity = _periodicity;
+      final effectivePeriodicity = sinking ? 'permanent' : _periodicity;
 
       await dao.upsert(AllocationsCompanion.insert(
         id: allocId,
@@ -2014,6 +2046,23 @@ class _AllocationDetailScreenState
         for (final cat in _linkedCategories) {
           await dao.linkCategory(cat.id, allocId);
         }
+        // A sinking fund pays its schedule through a category: give it one
+        // of its own when none was linked.
+        if (sinking && _linkedCategories.isEmpty) {
+          final cats = ref.read(categoriesProvider).value ?? const <Category>[];
+          final color =
+              categoryPresetColors[cats.length % categoryPresetColors.length];
+          await db.into(db.categories).insert(CategoriesCompanion.insert(
+                id: const Uuid().v4(),
+                householdId: householdId,
+                name: name,
+                icon: Value(_icon ?? 'category'),
+                colorHex: Value(
+                    '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}'),
+                transactionType: const Value('expense'),
+                allocationId: Value(allocId),
+              ));
+        }
       }
       ref.invalidate(categoriesProvider);
       ref.invalidate(allocationsProvider);
@@ -2024,7 +2073,12 @@ class _AllocationDetailScreenState
             behavior: SnackBarBehavior.floating,
           ),
         );
-        context.pop();
+        // A new sinking fund opens on its own screen, to add the payments.
+        if (_isNew && sinking) {
+          context.pushReplacement('/allocations/$allocId');
+        } else {
+          context.pop();
+        }
       }
     } catch (e) {
       debugPrint('[AllocationDetail] Save failed: $e');

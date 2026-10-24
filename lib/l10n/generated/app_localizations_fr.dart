@@ -8666,4 +8666,286 @@ class SFr extends S {
     );
     return 'sur $_temp0';
   }
+
+  @override
+  String get sinkTypeTitle => 'Fonds d\'épargne planifié';
+
+  @override
+  String get sinkTypeShort => 'Planifié';
+
+  @override
+  String get sinkTypeDesc =>
+      'Mettez un peu de côté chaque mois pour des paiements à dates fixes : factures annuelles, frais de scolarité.';
+
+  @override
+  String get sinkSection => 'Fonds planifiés';
+
+  @override
+  String sinkThisMonth(String amount) {
+    return '$amount ce mois-ci';
+  }
+
+  @override
+  String sinkNext(String date) {
+    return 'Prochain : $date';
+  }
+
+  @override
+  String get sinkOnTrack => 'dans les temps';
+
+  @override
+  String get sinkOnTrackCap => 'Dans les temps';
+
+  @override
+  String get sinkCatchingUp => 'en rattrapage';
+
+  @override
+  String get sinkFundedThisMonth => 'Financé pour ce mois-ci';
+
+  @override
+  String sinkBehindBy(String amount) {
+    return 'En retard de $amount';
+  }
+
+  @override
+  String sinkBehindChoose(String amount) {
+    return 'En retard de $amount · choisissez comment rattraper';
+  }
+
+  @override
+  String get sinkNoPayments => 'Aucun paiement prévu';
+
+  @override
+  String get sinkNoPaymentsHelp =>
+      'Ajoutez les paiements que ce fonds prépare (dates et montants) : il calcule ce qu\'il faut mettre de côté chaque mois.';
+
+  @override
+  String sinkOf(String saved, String total) {
+    return '$saved sur $total';
+  }
+
+  @override
+  String sinkOfTotal(String total) {
+    return 'sur $total';
+  }
+
+  @override
+  String sinkSavingFor(String date, String title) {
+    return 'Pour le $date · $title';
+  }
+
+  @override
+  String get sinkThisMonthLabel => 'Ce mois-ci';
+
+  @override
+  String get sinkFundThisMonth => 'Financer ce mois-ci';
+
+  @override
+  String get sinkMonthlyPlan => 'Plan mensuel';
+
+  @override
+  String get sinkPlanNote =>
+      'Recalculé chaque mois selon ce qui est épargné et ce qui arrive.';
+
+  @override
+  String get sinkPayments => 'Paiements';
+
+  @override
+  String get sinkPaid => 'Payé';
+
+  @override
+  String sinkInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'dans $count jours',
+      one: 'demain',
+      zero: 'aujourd\'hui',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sinkRecurringBill => 'Facture récurrente';
+
+  @override
+  String get sinkAddPayment => 'Ajouter un paiement';
+
+  @override
+  String get sinkEditPayment => 'Modifier le paiement';
+
+  @override
+  String get sinkCopyLastYear => 'Copier l\'an dernier';
+
+  @override
+  String get sinkWhenBehind => 'En cas de retard';
+
+  @override
+  String get sinkWhenBehindHelp =>
+      'Si un mois est manqué : augmenter les mois suivants, ou rattraper d\'un coup.';
+
+  @override
+  String get sinkModeAsk => 'Me demander';
+
+  @override
+  String get sinkModeSpread => 'Étaler';
+
+  @override
+  String get sinkModeTopUp => 'Compléter maintenant';
+
+  @override
+  String get sinkNeedsCategory =>
+      'Liez une catégorie pour que les paiements sortent de ce fonds.';
+
+  @override
+  String get sinkCatchUpTitle => 'Rattraper';
+
+  @override
+  String sinkBehindExplain(String name, String amount) {
+    return 'Il manque $amount à $name par rapport à son plan.';
+  }
+
+  @override
+  String get sinkSpreadSub =>
+      'Par petites étapes : le montant mensuel augmente jusqu\'au paiement.';
+
+  @override
+  String sinkTopUpNow(String now, String steady) {
+    return '$now maintenant, puis $steady par mois';
+  }
+
+  @override
+  String get sinkTopUpSub =>
+      'De retour dans les temps aujourd\'hui ; le montant mensuel reste stable.';
+
+  @override
+  String get sinkAlways => 'Toujours faire ainsi pour ce fonds';
+
+  @override
+  String sinkFundAmount(String amount) {
+    return 'Financer $amount';
+  }
+
+  @override
+  String get sinkFromAccount => 'Payer depuis';
+
+  @override
+  String get sinkPaymentName => 'Nom';
+
+  @override
+  String get sinkPaymentNameHint => 'ex. 2e versement';
+
+  @override
+  String get sinkDueOn => 'Échéance';
+
+  @override
+  String get sinkPickDate => 'Choisissez une date';
+
+  @override
+  String get sinkAmountLabel => 'Montant';
+
+  @override
+  String get sinkAddAmount => 'Ajouter un montant';
+
+  @override
+  String get sinkAddCurrency => 'Ajouter une autre devise';
+
+  @override
+  String get sinkRemovePart => 'Retirer cette devise';
+
+  @override
+  String get sinkPartsNote =>
+      'Chaque part est épargnée et payée dans sa devise, jamais convertie.';
+
+  @override
+  String get sinkOnePartPerCurrency => 'Un seul montant par devise.';
+
+  @override
+  String get sinkSavePayment => 'Enregistrer le paiement';
+
+  @override
+  String get sinkPaymentSaved => 'Paiement enregistré';
+
+  @override
+  String get sinkPaymentDeleted => 'Paiement supprimé';
+
+  @override
+  String get sinkDeletePaymentTitle => 'Supprimer ce paiement ?';
+
+  @override
+  String get sinkDeletePaymentMsg =>
+      'Il quitte le calendrier ; rien n\'est payé ni remboursé.';
+
+  @override
+  String get sinkCopyHelp =>
+      'Les paiements de l\'an dernier, un an plus tard. Ajustez-les aux nouveaux montants après l\'ajout, ou augmentez-les ici.';
+
+  @override
+  String get sinkRaiseAll => 'Augmenter tous les montants';
+
+  @override
+  String get sinkAlreadyPlanned => 'déjà prévu';
+
+  @override
+  String sinkLastYear(String amount) {
+    return 'l\'an dernier $amount';
+  }
+
+  @override
+  String get sinkCopyNote =>
+      'À utiliser quand le nouveau calendrier est fixé ; rien n\'est copié tout seul. Chaque paiement reste modifiable jusqu\'à son règlement.';
+
+  @override
+  String sinkCopyAdd(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Ajouter $count paiements',
+      one: 'Ajouter 1 paiement',
+      zero: 'Ajouter les paiements',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sinkCopyNothing => 'Aucun paiement de l\'année passée à copier.';
+
+  @override
+  String sinkCopied(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count paiements ajoutés',
+      one: '1 paiement ajouté',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sinkBillOfferTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count factures annuelles ne sont pas encore préparées',
+      one: '1 facture annuelle n\'est pas encore préparée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sinkBillOfferBody(
+      String name, String amount, String date, String monthly) {
+    return '$name ($amount, $date) : environ $monthly par mois';
+  }
+
+  @override
+  String get sinkSaveMonthly => 'Épargner chaque mois';
+
+  @override
+  String get sinkFundCreated => 'Fonds planifié créé';
+
+  @override
+  String sinkSavingForDate(String date) {
+    return 'Pour le $date';
+  }
 }

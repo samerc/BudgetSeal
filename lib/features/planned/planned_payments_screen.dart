@@ -187,11 +187,17 @@ class _PlannedPaymentsScreenState
         final year = int.parse(parts[0]);
         final month = int.parse(parts[1]);
         final label = formatMonth(DateTime(year, month), year: true);
-        final total = items
-            .where((item) => item.lineCurrency == baseCurrency)
-            .fold(0.0, (sum, item) => sum + item.lineAmount);
-        final hasOtherCurrencies =
-            items.any((item) => item.lineCurrency != baseCurrency);
+        // Every part of a plan counts (a fund payment can have a USD and an
+        // LBP part); only base-currency ones are summed.
+        double baseOf(_PlannedItem item) => item.lines.length > 1
+            ? item.lines
+                .where((l) => l.currency == baseCurrency)
+                .fold(0.0, (sum, l) => sum + l.amount)
+            : (item.lineCurrency == baseCurrency ? item.lineAmount : 0);
+        final total = items.fold(0.0, (sum, item) => sum + baseOf(item));
+        final hasOtherCurrencies = items.any((item) => item.lines.length > 1
+            ? item.lines.any((l) => l.currency != baseCurrency)
+            : item.lineCurrency != baseCurrency);
         groups.add(_MonthGroup(
           key: key,
           label: label,
@@ -454,13 +460,18 @@ class _PlannedPaymentsScreenState
                                   group.items[itemIndex]),
                               onTap: () async {
                                 final item = group.items[itemIndex];
-                                final result = await context.push(
-                                  '/plan-payment',
-                                  extra: {
-                                    'transaction': item.tx,
-                                    'lines': item.lines,
-                                  },
-                                );
+                                // A plan in several currencies opens the
+                                // fund payment editor, which keeps its parts.
+                                final result = item.lines.length > 1
+                                    ? await context.push('/fund-payment',
+                                        extra: {'planId': item.tx.id})
+                                    : await context.push(
+                                        '/plan-payment',
+                                        extra: {
+                                          'transaction': item.tx,
+                                          'lines': item.lines,
+                                        },
+                                      );
                                 if (result == true) _load();
                               },
                             );
@@ -724,16 +735,37 @@ class _PlannedCard extends ConsumerWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      formatSignedAmount(
-                        item.lineAmount,
-                        currency: item.lineCurrency,
-                        type: tx.type,
-                      ),
-                      style: TextStyle(
-                        fontSize: TypographyTokens.amountRegularSize,
-                        fontWeight: TypographyTokens.amountRegularWeight,
-                        color: typeColor,
+                    ConstrainedBox(
+                      // Two currency parts stack, so they take less width.
+                      constraints: BoxConstraints(
+                          maxWidth: item.lines.length > 1 ? 110 : 150),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            for (final part in item.lines.length > 1
+                                ? [
+                                    for (final l in item.lines)
+                                      (l.amount, l.currency)
+                                  ]
+                                : [(item.lineAmount, item.lineCurrency)])
+                              Text(
+                                formatSignedAmount(
+                                  part.$1,
+                                  currency: part.$2,
+                                  type: tx.type,
+                                ),
+                                style: TextStyle(
+                                  fontSize: TypographyTokens.amountRegularSize,
+                                  fontWeight:
+                                      TypographyTokens.amountRegularWeight,
+                                  color: typeColor,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 2),

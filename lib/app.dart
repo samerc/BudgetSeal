@@ -37,6 +37,7 @@ import 'features/lock/lock_screen.dart';
 import 'features/accounts/account_detail_screen.dart';
 import 'features/accounts/accounts_screen.dart';
 import 'features/allocations/allocation_detail_screen.dart';
+import 'features/allocations/copy_year_screen.dart';
 import 'features/allocations/funding_screen.dart';
 import 'features/allocations/month_close_screen.dart';
 import 'features/reports/time/report_view.dart';
@@ -73,6 +74,7 @@ import 'features/settings/export_screen.dart';
 import 'features/settings/import_export_screen.dart';
 import 'features/settings/sync_screen.dart';
 import 'features/planned/planned_payments_screen.dart';
+import 'features/planned/fund_payment_screen.dart';
 import 'features/planned/plan_payment_screen.dart';
 import 'features/transactions/add_transaction_screen.dart';
 import 'features/transactions/assisted_transaction_screen.dart';
@@ -146,6 +148,13 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
               allocationId: state.pathParameters['id']!,
               openCover: (state.extra as Map?)?['cover'] == true,
             ),
+            state: state,
+          ),
+        ),
+        GoRoute(
+          path: '/allocations/:id/copy-year',
+          pageBuilder: (_, state) => slideUpPage(
+            child: CopyYearScreen(fundId: state.pathParameters['id']!),
             state: state,
           ),
         ),
@@ -310,6 +319,19 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
               child: PlanPaymentScreen(
                   editTx: state.extra as Map<String, dynamic>?),
               state: state),
+        ),
+        GoRoute(
+          path: '/fund-payment',
+          pageBuilder: (_, state) {
+            final extra = state.extra as Map<String, dynamic>? ?? const {};
+            return slideUpPage(
+              child: FundPaymentScreen(
+                planId: extra['planId'] as String?,
+                categoryId: extra['categoryId'] as String?,
+              ),
+              state: state,
+            );
+          },
         ),
         GoRoute(
           path: '/health-check',

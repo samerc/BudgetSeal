@@ -8,6 +8,10 @@ import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/engine_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../core/providers/sinking_fund_provider.dart';
+import '../../core/providers/date_format_provider.dart';
+import '../../shared/widgets/section_header.dart';
+import 'sinking_fund_widgets.dart' show fundStatusLine;
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/widgets/budget_progress.dart';
@@ -32,6 +36,8 @@ class FundingScreen extends ConsumerStatefulWidget {
 
 class _FundingScreenState extends ConsumerState<FundingScreen> {
   final Map<String, double> _amounts = {};
+  /// Sinking funds: one amount per currency (fund → currency → amount).
+  final Map<String, Map<String, double>> _fundAmounts = {};
   bool _isFunding = false;
   bool _instructionsExpanded = false;
 
@@ -77,6 +83,7 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
     setState(() {
       for (final a in allocations) {
         final alloc = a.data.allocation;
+        if (alloc.type == 'sinking') continue;
         final currency = alloc.targetCurrency ?? baseCurrency;
         final v = source[alloc.id]?[currency] ?? 0;
         if (v > 0) {
@@ -96,7 +103,13 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
   Map<String, double> _totalDistributedByCurrency(
       List<AllocationWithBalance> allocations, String baseCurrency) {
     final totals = <String, double>{};
+    for (final m in _fundAmounts.values) {
+      m.forEach((c, v) {
+        if (v > 0) totals[c] = (totals[c] ?? 0) + v;
+      });
+    }
     for (final a in allocations) {
+      if (a.data.allocation.type == 'sinking') continue;
       final amount = _parsedAmount(a.data.allocation.id);
       if (amount <= 0) continue;
       final currency = a.data.allocation.targetCurrency ?? baseCurrency;
@@ -106,9 +119,13 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
   }
 
   /// Auto-fill periodic allocations that have a target: fill up to (target - balance).
+  /// Then each sinking fund's share for this period, soonest due first, out
+  /// of what the spending envelopes leave (spending comes first when money
+  /// is short).
   void _quickFill(List<AllocationWithBalance> allocations, String baseCurrency) {
     for (final a in allocations) {
       final alloc = a.data.allocation;
+      if (alloc.type == 'sinking') continue;
       if (alloc.periodicity == 'periodic' && alloc.targetAmount != null) {
         final currency = alloc.targetCurrency ?? baseCurrency;
         final currentBalance = a.balanceByCurrency[currency] ?? 0.0;
@@ -117,6 +134,33 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
           _amounts[alloc.id] = gap;
         }
       }
+    }
+    final left = Map.of(ref.read(unallocatedProvider).value ?? {});
+    for (final a in allocations) {
+      final alloc = a.data.allocation;
+      if (alloc.type == 'sinking') continue;
+      final amount = _amounts[alloc.id] ?? 0;
+      if (amount <= 0) continue;
+      final c = alloc.targetCurrency ?? baseCurrency;
+      left[c] = (left[c] ?? 0) - amount;
+    }
+    final funds = (ref.read(sinkingFundsProvider).value ?? const {})
+        .values
+        .toList()
+      ..sort((a, b) => (a.plan.next?.date ?? DateTime(9999))
+          .compareTo(b.plan.next?.date ?? DateTime(9999)));
+    _fundAmounts.clear();
+    for (final f in funds) {
+      final fill = <String, double>{};
+      f.thisPeriod.forEach((c, v) {
+        final room = left[c] ?? 0;
+        final put = v < room ? v : room;
+        if (put > 0.005) {
+          fill[c] = put;
+          left[c] = room - put;
+        }
+      });
+      if (fill.isNotEmpty) _fundAmounts[f.allocation.id] = fill;
     }
     setState(() {});
   }
@@ -176,7 +220,20 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
       // All or nothing: a failure halfway must not leave some envelopes
       // funded and the rest not.
       await ref.read(databaseProvider).transaction(() async {
+        for (final f in _fundAmounts.entries) {
+          for (final e in f.value.entries) {
+            if (e.value <= 0) continue;
+            await engine.fundAllocation(
+              allocationId: f.key,
+              amount: e.value,
+              currency: e.key,
+              deviceId: 'local',
+              note: fundNote,
+            );
+          }
+        }
         for (final a in allocations) {
+          if (a.data.allocation.type == 'sinking') continue;
           final amount = _parsedAmount(a.data.allocation.id);
           if (amount <= 0) continue;
           final currency = a.data.allocation.targetCurrency ?? baseCurrency;
@@ -256,8 +313,13 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
           final available = unallocated[baseCurrency] ?? 0.0;
 
           // Count how many periodic envelopes have unfilled targets.
-          final fillableCount = allocations.where((a) {
+          final funds = ref.watch(sinkingFundsProvider).value ?? const {};
+          final fillableCount = funds.values
+                  .where((f) => f.thisPeriod.isNotEmpty)
+                  .length +
+              allocations.where((a) {
             final alloc = a.data.allocation;
+            if (alloc.type == 'sinking') return false;
             if (alloc.periodicity != 'periodic' ||
                 alloc.targetAmount == null) {
               return false;
@@ -266,6 +328,17 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
             final bal = a.balanceByCurrency[currency] ?? 0.0;
             return alloc.targetAmount! - bal > 0;
           }).length;
+
+          final envelopes = [
+            for (final a in allocations)
+              if (a.data.allocation.type != 'sinking' ||
+                  !funds.containsKey(a.data.allocation.id))
+                a,
+          ];
+          final fundList = [
+            for (final a in allocations)
+              if (funds[a.data.allocation.id] case final f?) f,
+          ];
 
           return Column(
             children: [
@@ -303,9 +376,39 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
                         child: ListView.builder(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 8),
-                        // +1 for the quick-fill tile at the top
-                        itemCount: allocations.length + 1,
+                        // +1 for the quick-fill tile at the top; sinking
+                        // funds after the envelopes, under their header.
+                        itemCount: envelopes.length +
+                            1 +
+                            (fundList.isEmpty ? 0 : fundList.length + 1),
                         itemBuilder: (context, i) {
+                          if (i > envelopes.length) {
+                            final j = i - envelopes.length - 1;
+                            if (j == 0) {
+                              return Padding(
+                                padding: const EdgeInsetsDirectional.only(
+                                    top: 10, bottom: 8, start: 4),
+                                child: SectionHeader(
+                                    S.of(context).sinkSection),
+                              );
+                            }
+                            final f = fundList[j - 1];
+                            return _SinkingFundingTile(
+                              fund: f,
+                              baseCurrency: baseCurrency,
+                              amounts: _fundAmounts[f.allocation.id] ??
+                                  const {},
+                              onChanged: (c, v) => setState(() {
+                                final m = _fundAmounts.putIfAbsent(
+                                    f.allocation.id, () => {});
+                                if (v > 0) {
+                                  m[c] = v;
+                                } else {
+                                  m.remove(c);
+                                }
+                              }),
+                            );
+                          }
                           // First item: Quick Fill tile
                           if (i == 0) {
                             return Column(
@@ -348,15 +451,18 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
                                               baseCurrency,
                                               _lastSpent),
                                         ),
-                                      if (_amounts.isNotEmpty)
+                                      if (_amounts.isNotEmpty ||
+                                          _fundAmounts.isNotEmpty)
                                         ActionChip(
                                           avatar: const Icon(
                                               AppIcons.x,
                                               size: 16),
                                           label: Text(
                                               S.of(context).fundPresetClear),
-                                          onPressed: () =>
-                                              setState(_amounts.clear),
+                                          onPressed: () => setState(() {
+                                            _amounts.clear();
+                                            _fundAmounts.clear();
+                                          }),
                                         ),
                                     ],
                                   ),
@@ -366,7 +472,7 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
                           }
 
                           final idx = i - 1;
-                          final a = allocations[idx];
+                          final a = envelopes[idx];
                           final alloc = a.data.allocation;
                           final currency =
                               alloc.targetCurrency ?? baseCurrency;
@@ -701,18 +807,26 @@ class _FundingBanner extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        S.of(context).fundAmountOfAvailable(
-                            entry.key,
-                            formatAmount(entry.value, currency: entry.key),
-                            formatAmount(unallocated[entry.key] ?? 0,
-                                currency: entry.key)),
-                        style: TextStyle(
-                          color: AppColors.ts(context),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                      Expanded(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: AlignmentDirectional.centerStart,
+                          child: Text(
+                            S.of(context).fundAmountOfAvailable(
+                                entry.key,
+                                formatAmount(entry.value, currency: entry.key),
+                                formatAmount(unallocated[entry.key] ?? 0,
+                                    currency: entry.key)),
+                            maxLines: 1,
+                            style: TextStyle(
+                              color: AppColors.ts(context),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 8),
                       if ((unallocated[entry.key] ?? 0) > 0)
                         Text(
                           '${formatNumber(((entry.value / (unallocated[entry.key] ?? 1)) * 100).clamp(0, 999).toDouble(), decimals: 0)}%',
@@ -1096,6 +1210,118 @@ class _BottomFundBar extends StatelessWidget {
                 ),
         ),
       ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Sinking fund tile: one amount per currency, with this month's share
+// ---------------------------------------------------------------------------
+
+class _SinkingFundingTile extends StatelessWidget {
+  final SinkingFund fund;
+  final String baseCurrency;
+  final Map<String, double> amounts;
+  final void Function(String currency, double amount) onChanged;
+
+  const _SinkingFundingTile({
+    required this.fund,
+    required this.baseCurrency,
+    required this.amounts,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tr = S.of(context);
+    final next = fund.plan.next;
+    final share = fund.thisPeriod;
+    final currencies = {...share.keys, ...amounts.keys, ...?next?.amounts.keys}
+        .toList()
+      ..sort((a, b) => a == baseCurrency
+          ? -1
+          : b == baseCurrency
+              ? 1
+              : a.compareTo(b));
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: AppColors.card(context),
+      padding: CardTokens.padding,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Expanded(
+            child: Text(fund.allocation.name,
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.tp(context))),
+          ),
+          if (next != null)
+            Text(formatDate(next.date),
+                style: TextStyle(fontSize: 12, color: AppColors.ts(context))),
+        ]),
+        const SizedBox(height: 2),
+        Text(fundStatusLine(tr, fund, baseCurrency),
+            style: TextStyle(
+                fontSize: 12,
+                color: fund.plan.isBehind
+                    ? AppColors.caution
+                    : AppColors.ts(context))),
+        for (final c in currencies) ...[
+          const SizedBox(height: 10),
+          Row(children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.sfv(context),
+                borderRadius: BorderRadius.circular(RadiusTokens.md),
+              ),
+              child: Text(c,
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.ts(context))),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.sfv(context),
+                  borderRadius: BorderRadius.circular(RadiusTokens.md),
+                ),
+                child: CalculatorAmountField(
+                  value: amounts[c] ?? 0,
+                  onChanged: (v) => onChanged(c, v),
+                  hintText: tr.commonAmount,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            if ((share[c] ?? 0) > 0) ...[
+              const SizedBox(width: 8),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 130),
+                child: FilledButton.tonal(
+                onPressed: () => onChanged(c, share[c]!),
+                style: FilledButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  minimumSize: const Size(0, 44),
+                ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 140),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(tr.fundFill(
+                        formatAmount(share[c]!, currency: c))),
+                  ),
+                ),
+              ),
+              ),
+            ],
+          ]),
+        ],
+      ]),
     );
   }
 }

@@ -367,6 +367,7 @@
   <a href="#accounts">Accounts</a>
   <a href="#transactions">Transactions</a>
   <a href="#envelopes">Envelopes (Budgeting)</a>
+  <a href="#sinking-funds">Sinking Funds</a>
   <a href="#categories">Categories</a>
   <a href="#funding">Funding Envelopes</a>
 
@@ -664,12 +665,13 @@
 
 <p>Think of it like putting cash into labeled envelopes: $500 for groceries, $1,200 for rent, $100 for entertainment. When you spend, the money comes out of the right envelope.</p>
 
-<h3>Two Types of Envelopes</h3>
+<h3>Types of Envelopes</h3>
 
 <table>
   <tr><th>Type</th><th>Use case</th><th>Behavior</th></tr>
   <tr><td><strong>Spending</strong></td><td>Groceries, fuel, dining</td><td>Set a monthly budget. Resets each period.</td></tr>
   <tr><td><strong>Rollover</strong></td><td>Anything else</td><td>Unspent money rolls over to the next period. Set an optional target or leave open.</td></tr>
+  <tr><td><strong>Sinking fund</strong></td><td>Yearly bills, school fees, insurance</td><td>Saves a little each month for payments on set dates. See <a href="#sinking-funds">Sinking Funds</a>.</td></tr>
 </table>
 
 <div class="tip">Envelopes plan how to use the money you already have — they don't move money between accounts. To save toward a specific goal (vacation, emergency fund) or track debts, use <a href="#goals">Goals &amp; Loans</a> instead. Goals create real transactions that move money.</div>
@@ -679,7 +681,7 @@
   <li>Go to the <strong>Budget</strong> tab</li>
   <li>Tap the <strong>+</strong> button</li>
   <li>Enter a name and optionally pick an emoji icon</li>
-  <li>Choose <strong>Spending</strong> or <strong>Rollover</strong></li>
+  <li>Choose <strong>Spending</strong>, <strong>Rollover</strong> or <strong>Sinking fund</strong></li>
   <li>Set a budget amount (spending) or optional target (rollover)</li>
   <li>Pick a currency</li>
   <li>Link categories — expenses in these categories will automatically debit this envelope</li>
@@ -725,6 +727,46 @@
 </ul>
 
 <div class="screenshot">Screenshot: Envelope detail showing balance hero card, fund button, and recent activity list</div>
+
+<!-- ══════════════════════════════════════════ -->
+<h2 id="sinking-funds">Sinking Funds</h2>
+
+<p>A sinking fund saves a little every month for payments you know are coming: a yearly subscription, car insurance, or school fees paid in installments. You give it the payments (dates and amounts) and it works out what to put aside each month so each payment is covered on its date.</p>
+
+<h3>Creating a Sinking Fund</h3>
+<ol>
+  <li>On the <strong>Budget</strong> tab, tap <strong>+</strong> and choose <strong>Sinking fund</strong></li>
+  <li>Name it (for example "School tuition"). If you don't link a category, BudgetSeal creates one with the same name; payments in that category come out of the fund</li>
+  <li>The fund opens: tap <strong>Add payment</strong> for each payment on the schedule</li>
+</ol>
+<p>A yearly (or every-3-months) subscription can start one too: on <strong>Subscriptions</strong>, a card lists the yearly bills nothing is saving for yet, with about what a month takes. <strong>Save monthly</strong> creates a fund for that bill. The bill keeps posting as usual, now from the fund.</p>
+
+<h3>Payments in Two Currencies</h3>
+<p>A payment can have a part in each currency: for example $1,500 from the bank and LBP 45,000,000 in cash. Tap <strong>Add another currency</strong> on the payment. Each part is saved, planned and paid in its own currency, never converted. The fund tells you what to put aside in each currency.</p>
+
+<h3>How the Monthly Amount Works</h3>
+<p>For each payment ahead, the fund looks at what is still missing up to that payment and spreads it over the months left before it (the month the payment falls in counts). The monthly amount is the smallest one that covers every payment on time. It is worked out again each month from what is saved, so it changes after a payment. The fund screen shows the <strong>Monthly plan</strong>, for example $500 from November to January, then $333.34 until April.</p>
+<p>Payments come from the fund's planned payments, plus any yearly or every-3-months recurring bill in its category. Monthly bills are left out: a normal spending envelope fits them better.</p>
+
+<h3>Funding</h3>
+<ul>
+  <li><strong>Fund this month</strong> on the fund screen puts this month's share in, in each currency</li>
+  <li><strong>Quick fill</strong> on the Fund screen adds each fund's share too, in its own <strong>Sinking funds</strong> group. When money is short, spending envelopes are filled first, then sinking funds, soonest payment first</li>
+  <li>The Budget tab lists sinking funds in their own section: what is saved toward the next payment in each currency, and what this month takes</li>
+</ul>
+
+<h3>When a Fund Falls Behind</h3>
+<p>If a month is missed, the fund is behind its plan. You can catch up two ways:</p>
+<ul>
+  <li><strong>Spread it out</strong>: smaller steps; the monthly amount goes up until the payment</li>
+  <li><strong>Top up now</strong>: put the shortfall in now; the monthly amount stays steady</li>
+</ul>
+<p>The fund asks each time, unless you tick <strong>Always do this for this fund</strong> or set <strong>When behind</strong> on the fund screen.</p>
+
+<h3>Copy from Last Year</h3>
+<p>Fees often change every year. When the new schedule is decided (the school announces its fees, the insurer sends the renewal), open the fund and tap <strong>Copy from last year</strong>: last year's payments come back one year later. Untick the ones you don't need, raise the amounts by a percentage per currency if everything went up, and add them. Each payment stays editable until it's paid, so you can set the exact new amounts. Nothing is copied on its own.</p>
+
+<div class="tip">Paid payments stay on the fund screen for a year, marked <strong>Paid</strong>. Tap a planned payment to change its date, amounts or name, or to delete it. Planned payments in two currencies also show both parts on the <a href="#planned">Planned Payments</a> screen.</div>
 
 <!-- ══════════════════════════════════════════ -->
 <h2 id="categories">Categories</h2>

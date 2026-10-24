@@ -36,6 +36,7 @@ v15→v16 added performance indexes: `idx_transactions_household_date`, `idx_tra
 v16→v17 added indexes: `idx_ledger_source_tx` on `allocation_ledger(source_transaction_id)`, `idx_categories_allocation` on `categories(allocation_id)`.
 v17→v18 added `deleted` to accounts/categories/allocations/objectives/recurring/templates and `lastModified` to recurring/templates.
 v19→v20 added `sortOrder` (nullable INT) to `allocations` for the manual Budget tab order (synced).
+v20→v21 added `behindMode` (nullable TEXT) to `allocations`: how a sinking fund catches up (`spread` / `topup`, null = ask; synced).
 v18→v19 added `anchorDay` (nullable INT) to `recurring_transactions`: the day of month a series was set up on. `advanceRecurringDate()` (recurring_engine.dart) clamps monthly/yearly dates to short months and returns to the anchor (Jan 31 → Feb 28 → Mar 31); legacy rows get the anchor filled from their due day the next time they post.
 
 ### Migrations

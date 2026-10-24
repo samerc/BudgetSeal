@@ -35,6 +35,8 @@ import 'reorder_envelopes_sheet.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/theme/app_icons.dart';
 import '../../core/providers/seal_provider.dart';
+import '../../core/providers/sinking_fund_provider.dart';
+import 'sinking_fund_widgets.dart';
 
 class AllocationsScreen extends ConsumerStatefulWidget {
   const AllocationsScreen({super.key});
@@ -45,7 +47,7 @@ class AllocationsScreen extends ConsumerStatefulWidget {
 
 class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
     with AutomaticKeepAliveClientMixin {
-  static const _typeOrder = ['spending', 'flexible'];
+  static const _typeOrder = ['sinking', 'spending', 'flexible'];
 
   String _searchQuery = '';
   final _searchController = TextEditingController();
@@ -179,6 +181,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
   String _sectionTitle(String type) => switch (type) {
         'spending' => S.of(context).allocSectionSpending,
         'flexible' => S.of(context).allocSectionFlexible,
+        'sinking' => S.of(context).sinkSection,
         _ => type[0].toUpperCase() + type.substring(1),
       };
 
@@ -591,6 +594,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
     final sealedIds =
         ref.watch(sealedEnvelopesProvider).value ?? const <String>{};
     final spending = ref.watch(periodSpendingProvider).value ?? const {};
+    final funds = ref.watch(sinkingFundsProvider).value ?? const {};
     // Envelope → its linked category (categories.allocationId; a top-level
     // one wins over a subcategory). The legacy allocations.categoryId join
     // is empty for envelopes created since categories link themselves.
@@ -614,6 +618,20 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
       final alloc = a.data.allocation;
       final cur = alloc.targetCurrency ?? baseCurrency;
       final cat = linkedCat[alloc.id] ?? a.data.category;
+      final fund = funds[alloc.id];
+      if (fund != null && !isOver(a)) {
+        return SinkingFundRow(
+          key: ValueKey(alloc.id),
+          fund: fund,
+          baseCurrency: baseCurrency,
+          icon: alloc.icon ?? cat?.icon,
+          color: cat != null ? AppColors.fromHex(cat.colorHex) : AppColors.accent,
+          onTap: () {
+            hapticLight();
+            context.push('/allocations/${alloc.id}');
+          },
+        );
+      }
       return EnvelopeRow(
         key: ValueKey(alloc.id),
         needsReview: pendingIds.contains(alloc.id),
@@ -668,7 +686,26 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
       );
     }
 
-    Widget header(String title, int count, double? total, {bool first = false}) {
+    Widget header(String title, int count, double? total,
+        {bool first = false, String? trailing}) {
+      if (trailing != null) {
+        // A line of its own under the title: amounts in two currencies
+        // don't fit beside it.
+        return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              header(title, count, null, first: first),
+              Padding(
+                padding: const EdgeInsetsDirectional.only(
+                    start: 4, end: 4, bottom: 8),
+                child: Text(trailing,
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.ts(context))),
+              ),
+            ]);
+      }
       return Padding(
         padding: EdgeInsetsDirectional.only(
             top: first ? 4 : 20, bottom: 8, start: 4, end: 4),
@@ -712,9 +749,21 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
       // Section total in base currency only (no mixing).
       final sectionTotal = entry.value.fold<double>(
           0.0, (sum, a) => sum + (a.balanceByCurrency[baseCurrency] ?? 0));
+      // Sinking funds: what they take this month, per currency.
+      String? trailing;
+      if (entry.key == 'sinking') {
+        final month = <String, double>{};
+        for (final a in entry.value) {
+          funds[a.data.allocation.id]?.thisPeriod.forEach(
+              (c, v) => month[c] = (month[c] ?? 0) + v);
+        }
+        trailing = month.isEmpty
+            ? null
+            : S.of(context).sinkThisMonth(fundAmounts(month, baseCurrency));
+      }
       widgets.add(header(_sectionTitle(entry.key), entry.value.length,
-          sectionTotal,
-          first: widgets.isEmpty));
+          entry.key == 'sinking' ? null : sectionTotal,
+          first: widgets.isEmpty, trailing: trailing));
       widgets.add(card(items));
     }
 
