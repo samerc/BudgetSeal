@@ -451,9 +451,30 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
         }
       }
       final l = currentS();
+      // Envelopes widget: spending envelopes in Budget-tab order, each in
+      // its own currency.
+      final envelopes = <WidgetEnvelope>[
+        for (final a in ref.read(allocationsProvider).value ??
+            const <AllocationWithBalance>[])
+          if (a.data.allocation.type == 'spending' &&
+              !a.data.allocation.archived)
+            () {
+              final cur = a.data.allocation.targetCurrency ?? base;
+              final v = a.balanceByCurrency[cur] ?? 0;
+              return (
+                name: a.data.allocation.name,
+                amount: formatAmount(v, currency: cur),
+                negative: v < -0.004,
+              );
+            }(),
+      ];
       HomeWidgetService.update(
         title: l.widgetReadyToAssign(formatAmount(rta, currency: base)),
         line: l.widgetSpentToday(formatAmount(spentToday, currency: base)),
+        envelopesTitle: l.widgetEnvelopesTitle,
+        envelopesEmpty: l.widgetEnvelopesEmpty,
+        envelopes: envelopes,
+        addLabel: l.widgetAddLabel,
       );
     } catch (e) {
       debugPrint('[HomeWidget] $e');

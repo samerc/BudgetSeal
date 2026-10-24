@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="widget_description">Shows today\'s spending summary</string>
+    <string name="envelopes_widget_description">Your envelopes and what\'s left in each</string>
+    <string name="quick_add_widget_description">Add a transaction in one tap</string>
 </resources>

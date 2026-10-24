@@ -9281,4 +9281,20 @@ class SEn extends S {
 
   @override
   String get changeLogFromBill => 'recurring bill';
+
+  @override
+  String get onboardRestoreBackupFile => 'Restore a backup file';
+
+  @override
+  String get onboardRestoreBackupHint =>
+      'A .db file saved from Settings › Backup & restore. The app closes to finish; open it again.';
+
+  @override
+  String get widgetEnvelopesTitle => 'Envelopes';
+
+  @override
+  String get widgetEnvelopesEmpty => 'No spending envelopes yet';
+
+  @override
+  String get widgetAddLabel => 'Add';
 }

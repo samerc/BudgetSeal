@@ -17,6 +17,7 @@ import 'core/providers/household_provider.dart';
 import 'core/providers/premium_provider.dart';
 import 'core/services/daily_reminder_service.dart';
 import 'core/services/app_shortcuts_service.dart';
+import 'core/services/home_widget_service.dart';
 import 'core/services/notification_service.dart';
 import 'shared/utils/app_info.dart';
 
@@ -92,6 +93,8 @@ Future<void> _startApp() async {
   }
 
   await AppShortcutsService.init();
+  // Home-screen widget taps (Android).
+  await HomeWidgetService.init();
 
   final container = ProviderContainer();
   await container.read(householdServiceProvider).loadSavedHousehold();

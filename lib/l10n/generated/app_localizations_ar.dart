@@ -9298,4 +9298,20 @@ class SAr extends S {
 
   @override
   String get changeLogFromBill => 'فاتورة متكررة';
+
+  @override
+  String get onboardRestoreBackupFile => 'استعادة ملف نسخة احتياطية';
+
+  @override
+  String get onboardRestoreBackupHint =>
+      'ملف ‎.db‎ محفوظ من الإعدادات › النسخ الاحتياطي والاستعادة. يُغلق التطبيق لإتمام العملية؛ افتحه مجدداً.';
+
+  @override
+  String get widgetEnvelopesTitle => 'الأظرف';
+
+  @override
+  String get widgetEnvelopesEmpty => 'لا أظرف إنفاق بعد';
+
+  @override
+  String get widgetAddLabel => 'إضافة';
 }

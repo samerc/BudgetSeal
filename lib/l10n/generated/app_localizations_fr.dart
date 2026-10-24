@@ -9381,4 +9381,20 @@ class SFr extends S {
 
   @override
   String get changeLogFromBill => 'facture récurrente';
+
+  @override
+  String get onboardRestoreBackupFile => 'Restaurer un fichier de sauvegarde';
+
+  @override
+  String get onboardRestoreBackupHint =>
+      'Un fichier .db enregistré depuis Réglages › Sauvegarde et restauration. L\'app se ferme pour terminer ; rouvrez-la.';
+
+  @override
+  String get widgetEnvelopesTitle => 'Enveloppes';
+
+  @override
+  String get widgetEnvelopesEmpty => 'Aucune enveloppe de dépenses';
+
+  @override
+  String get widgetAddLabel => 'Ajouter';
 }

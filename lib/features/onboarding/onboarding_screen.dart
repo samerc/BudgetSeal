@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart' show Value;
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show SystemNavigator;
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +15,7 @@ import '../../core/providers/database_provider.dart';
 import '../../core/providers/entry_mode_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/sync_provider.dart';
+import '../../core/services/auto_backup_service.dart';
 import '../../core/sync/cloud_provider.dart';
 import '../../core/sync/google_drive_provider.dart';
 import '../../core/sync/invite_code.dart';
@@ -1058,6 +1063,58 @@ class _RestoreSheetState extends ConsumerState<_RestoreSheet> {
     }
   }
 
+  /// A backup file made by Settings › Backup: checked, staged, and opened
+  /// on the next launch (the database can't be swapped while it's open).
+  Future<void> _restoreBackupFile() async {
+    final s = S.of(context);
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final file = await FilePicker.pickFile(type: FileType.any);
+      final path = file?.path;
+      if (path == null) {
+        if (mounted) setState(() => _loading = false);
+        return;
+      }
+      final householdId = await AutoBackupService.backupHouseholdId(path);
+      if (householdId == null) {
+        _fail(s.backupInvalid);
+        return;
+      }
+      await AutoBackupService.restoreForNewInstall(path, householdId);
+      if (!mounted) return;
+      setState(() => _loading = false);
+      final canClose = Platform.isAndroid;
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => AlertDialog(
+          title: Text(s.backupRestoreTitle),
+          content: Text(s.backupRestored),
+          actions: [
+            if (canClose)
+              FilledButton(
+                style: DialogButtons.filled,
+                onPressed: () => SystemNavigator.pop(),
+                child: Text(s.backupCloseApp),
+              )
+            else
+              FilledButton(
+                style: DialogButtons.filled,
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(s.commonOk),
+              ),
+          ],
+        ),
+      );
+    } catch (e) {
+      debugPrint('[Onboarding] Backup restore failed: $e');
+      _fail(s.backupRestoreFailed);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
@@ -1068,7 +1125,7 @@ class _RestoreSheetState extends ConsumerState<_RestoreSheet> {
       children: [
         if (_loading)
           const _SheetSpinner()
-        else
+        else ...[
           for (final provider in widget.providers) ...[
             OutlinedButton.icon(
               onPressed: () => _restore(provider),
@@ -1083,6 +1140,17 @@ class _RestoreSheetState extends ConsumerState<_RestoreSheet> {
             ),
             const SizedBox(height: 10),
           ],
+          // A backup file (.db from Settings › Backup) — no sync needed.
+          OutlinedButton.icon(
+            onPressed: _restoreBackupFile,
+            icon: const Icon(AppIcons.fileArrowDown, size: 20),
+            label: Text(s.onboardRestoreBackupFile),
+          ),
+          const SizedBox(height: 4),
+          Text(s.onboardRestoreBackupHint,
+              style: TextStyle(fontSize: 12.5, color: AppColors.ts(context))),
+          const SizedBox(height: 10),
+        ],
       ],
     );
   }

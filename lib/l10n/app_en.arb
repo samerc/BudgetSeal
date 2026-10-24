@@ -6928,5 +6928,15 @@
   "changeLogFromWeb": "from the Web Companion",
   "@changeLogFromWeb": {"description": "Change history"},
   "changeLogFromBill": "recurring bill",
-  "@changeLogFromBill": {"description": "Change history"}
+  "@changeLogFromBill": {"description": "Change history"},
+  "onboardRestoreBackupFile": "Restore a backup file",
+  "@onboardRestoreBackupFile": {"description": "Onboarding backup restore, home widgets"},
+  "onboardRestoreBackupHint": "A .db file saved from Settings › Backup & restore. The app closes to finish; open it again.",
+  "@onboardRestoreBackupHint": {"description": "Onboarding backup restore, home widgets"},
+  "widgetEnvelopesTitle": "Envelopes",
+  "@widgetEnvelopesTitle": {"description": "Onboarding backup restore, home widgets"},
+  "widgetEnvelopesEmpty": "No spending envelopes yet",
+  "@widgetEnvelopesEmpty": {"description": "Onboarding backup restore, home widgets"},
+  "widgetAddLabel": "Add",
+  "@widgetAddLabel": {"description": "Onboarding backup restore, home widgets"}
 }

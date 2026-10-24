@@ -34,7 +34,11 @@ Service declaration (inside `<application>`):
 ```
 
 ### Home Screen Widget
-`SpendingWidget.kt` shows Ready to assign and today's spending, written by `HomeWidgetService` (Dart) into shared_preferences and redrawn via the `budgetseal/widget` channel in `MainActivity.kt`.
+`SpendingWidget.kt` shows Ready to assign and today's spending, written by `HomeWidgetService` (Dart) into shared_preferences and redrawn via the `budgetseal/widget` channel in `MainActivity.kt` (`redrawAll` updates every widget type).
+- `EnvelopesWidget.kt` (Oct 24 2026, `envelopes_widget.xml`, 4 fixed rows): spending envelopes in Budget-tab order with their balance in their own currency (`widget_env_count`, `widget_env_name_i` / `_amount_i` / `_neg_i` — negative in red), title and empty text localized from Dart. Tap → `/funding`.
+- `QuickAddWidget.kt` (`quick_add_widget.xml`, gold `widget_accent_background`): one "+ Add" button (label `widget_add_label`) → `/add-transaction`.
+- Widget taps: `MainActivity.routeIntent(context, route, requestCode)` puts the route in the `budgetseal_route` extra. Cold start: Dart's `HomeWidgetService.init()` (main.dart) asks `launchRoute` once; while running (`singleTop`), `onNewIntent` calls Dart's `open`. Both set `NotificationService.openRoute`, so routing is shared with notifications and app shortcuts. Shared_preferences ints arrive in Kotlin as Long (`getLong`).
+- Widget picker descriptions are in `res/values/strings.xml` (English only).
 
 ### Debug vs Play Store build
 Debug builds are `com.budgetseal.app.debug`, labelled "BudgetSeal Dev" (`applicationIdSuffix` + the `appLabel` manifest placeholder in `build.gradle.kts`), so they install next to the Play Store app with their own data.

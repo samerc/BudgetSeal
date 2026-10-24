@@ -16007,6 +16007,36 @@ abstract class S {
   /// In en, this message translates to:
   /// **'recurring bill'**
   String get changeLogFromBill;
+
+  /// Onboarding backup restore, home widgets
+  ///
+  /// In en, this message translates to:
+  /// **'Restore a backup file'**
+  String get onboardRestoreBackupFile;
+
+  /// Onboarding backup restore, home widgets
+  ///
+  /// In en, this message translates to:
+  /// **'A .db file saved from Settings › Backup & restore. The app closes to finish; open it again.'**
+  String get onboardRestoreBackupHint;
+
+  /// Onboarding backup restore, home widgets
+  ///
+  /// In en, this message translates to:
+  /// **'Envelopes'**
+  String get widgetEnvelopesTitle;
+
+  /// Onboarding backup restore, home widgets
+  ///
+  /// In en, this message translates to:
+  /// **'No spending envelopes yet'**
+  String get widgetEnvelopesEmpty;
+
+  /// Onboarding backup restore, home widgets
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get widgetAddLabel;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

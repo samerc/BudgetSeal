@@ -5881,5 +5881,10 @@
   "changeLogDeleted": "Supprimée",
   "changeLogForDate": "pour le {date}",
   "changeLogFromWeb": "depuis le Compagnon Web",
-  "changeLogFromBill": "facture récurrente"
+  "changeLogFromBill": "facture récurrente",
+  "onboardRestoreBackupFile": "Restaurer un fichier de sauvegarde",
+  "onboardRestoreBackupHint": "Un fichier .db enregistré depuis Réglages › Sauvegarde et restauration. L'app se ferme pour terminer ; rouvrez-la.",
+  "widgetEnvelopesTitle": "Enveloppes",
+  "widgetEnvelopesEmpty": "Aucune enveloppe de dépenses",
+  "widgetAddLabel": "Ajouter"
 }

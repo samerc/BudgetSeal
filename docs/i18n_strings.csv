@@ -2990,3 +2990,8 @@ change_log_deleted,Change history,Deleted,حُذفت,Supprimée
 change_log_for_date,Change history,for {date},بتاريخ {date},pour le {date}
 change_log_from_web,Change history,from the Web Companion,من المرافق الإلكتروني,depuis le Compagnon Web
 change_log_from_bill,Change history,recurring bill,فاتورة متكررة,facture récurrente
+onboard_restore_backup_file,"Onboarding backup restore, home widgets",Restore a backup file,استعادة ملف نسخة احتياطية,Restaurer un fichier de sauvegarde
+onboard_restore_backup_hint,"Onboarding backup restore, home widgets",A .db file saved from Settings › Backup & restore. The app closes to finish; open it again.,ملف ‎.db‎ محفوظ من الإعدادات › النسخ الاحتياطي والاستعادة. يُغلق التطبيق لإتمام العملية؛ افتحه مجدداً.,Un fichier .db enregistré depuis Réglages › Sauvegarde et restauration. L'app se ferme pour terminer ; rouvrez-la.
+widget_envelopes_title,"Onboarding backup restore, home widgets",Envelopes,الأظرف,Enveloppes
+widget_envelopes_empty,"Onboarding backup restore, home widgets",No spending envelopes yet,لا أظرف إنفاق بعد,Aucune enveloppe de dépenses
+widget_add_label,"Onboarding backup restore, home widgets",Add,إضافة,Ajouter

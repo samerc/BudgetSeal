@@ -5881,5 +5881,10 @@
   "changeLogDeleted": "حُذفت",
   "changeLogForDate": "بتاريخ {date}",
   "changeLogFromWeb": "من المرافق الإلكتروني",
-  "changeLogFromBill": "فاتورة متكررة"
+  "changeLogFromBill": "فاتورة متكررة",
+  "onboardRestoreBackupFile": "استعادة ملف نسخة احتياطية",
+  "onboardRestoreBackupHint": "ملف ‎.db‎ محفوظ من الإعدادات › النسخ الاحتياطي والاستعادة. يُغلق التطبيق لإتمام العملية؛ افتحه مجدداً.",
+  "widgetEnvelopesTitle": "الأظرف",
+  "widgetEnvelopesEmpty": "لا أظرف إنفاق بعد",
+  "widgetAddLabel": "إضافة"
 }

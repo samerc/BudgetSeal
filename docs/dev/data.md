@@ -16,6 +16,7 @@ Single-file sync approach (`PocketPlan_Sync.json`):
 - Supports Google Drive (OAuth) and system file picker (Dropbox/OneDrive/local)
 - Auto-syncs on app resume and pause via `WidgetsBindingObserver`
 - Restore from sync file during onboarding
+- Restore from a backup file during onboarding (Oct 24 2026; Restore my budget sheet › "Restore a backup file"): `AutoBackupService.backupHouseholdId(path)` checks size, the SQLite header and reads `households.id` read-only (package `sqlite3`, already in the tree via drift, now a direct dependency); `restoreForNewInstall()` stages the file like Settings › Backup (swapped in on the next launch) and saves `current_household_id`, so the next launch opens the restored budget instead of onboarding. Android closes the app; iOS asks the user to.
 - Optional AES-256-CBC encryption with PBKDF2 key derivation (user-set password)
 
 ## Sync Encryption

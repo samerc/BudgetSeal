@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqlite3/sqlite3.dart' show OpenMode, sqlite3;
 
 /// Automatic local backup service.
 ///
@@ -199,6 +200,40 @@ class AutoBackupService {
     final tmp = await File(backupPath).copy('$staged.tmp');
     await tmp.rename(staged);
     restorePending = true;
+  }
+
+  /// Checks a picked file is a BudgetSeal backup: under 100 MB, an SQLite
+  /// file, with a household. Returns that household's id (the first one),
+  /// or null when the file isn't usable. Opens it read-only.
+  static Future<String?> backupHouseholdId(String path) async {
+    try {
+      final file = File(path);
+      if (await file.length() > 100 * 1024 * 1024) return null;
+      final header = await file.openRead(0, 16).first;
+      if (!String.fromCharCodes(header.take(15)).startsWith('SQLite format 3')) {
+        return null;
+      }
+      final db = sqlite3.open(path, mode: OpenMode.readOnly);
+      try {
+        final rows = db.select('SELECT id FROM households LIMIT 1');
+        return rows.isEmpty ? null : rows.first['id'] as String?;
+      } finally {
+        db.close();
+      }
+    } catch (e) {
+      debugPrint('[AutoBackup] Not a backup: $e');
+      return null;
+    }
+  }
+
+  /// Onboarding › Restore a backup file: stage [path] and remember its
+  /// household, so the next launch opens the restored budget instead of
+  /// onboarding.
+  static Future<void> restoreForNewInstall(
+      String path, String householdId) async {
+    await restoreFromBackup(path);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('current_household_id', householdId);
   }
 
   // ── Helpers ─────────────────────────────────────────────────────
