@@ -5867,5 +5867,19 @@
   "exportRangeLabel": "{from} – {to}",
   "exportCount": "{n, plural, =1{1 transaction sera exportée} other{{n} transactions seront exportées}}",
   "exportNone": "Rien à exporter avec ces filtres",
-  "exportFailed": "L'export a échoué. Réessayez."
+  "exportFailed": "L'export a échoué. Réessayez.",
+  "fundPresetAverage": "Dépenses moyennes",
+  "fundUsually": "Dépense d'habitude {amount} par mois",
+  "tileChangeLog": "Historique des modifications",
+  "tileChangeLogSub": "Ce qui a été ajouté, modifié ou supprimé, et quand",
+  "changeLogTitle": "Historique",
+  "changeLogIntro": "Les {n} dernières modifications de vos transactions, les plus récentes d'abord. Touchez-en une pour l'ouvrir.",
+  "changeLogEmpty": "Aucune modification",
+  "changeLogLoadFailed": "Impossible de charger l'historique",
+  "changeLogAdded": "Ajoutée",
+  "changeLogEdited": "Modifiée",
+  "changeLogDeleted": "Supprimée",
+  "changeLogForDate": "pour le {date}",
+  "changeLogFromWeb": "depuis le Compagnon Web",
+  "changeLogFromBill": "facture récurrente"
 }

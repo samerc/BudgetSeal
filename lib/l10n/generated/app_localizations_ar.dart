@@ -9250,4 +9250,52 @@ class SAr extends S {
 
   @override
   String get exportFailed => 'فشل التصدير. حاول مرة أخرى.';
+
+  @override
+  String get fundPresetAverage => 'متوسط الإنفاق';
+
+  @override
+  String fundUsually(String amount) {
+    return 'ينفق عادةً $amount شهرياً';
+  }
+
+  @override
+  String get tileChangeLog => 'سجل التغييرات';
+
+  @override
+  String get tileChangeLogSub => 'ما أُضيف أو عُدّل أو حُذف، ومتى';
+
+  @override
+  String get changeLogTitle => 'سجل التغييرات';
+
+  @override
+  String changeLogIntro(int n) {
+    return 'آخر $n تغيير على معاملاتك، الأحدث أولاً. اضغط على أي منها لفتحه.';
+  }
+
+  @override
+  String get changeLogEmpty => 'لا تغييرات بعد';
+
+  @override
+  String get changeLogLoadFailed => 'تعذّر تحميل سجل التغييرات';
+
+  @override
+  String get changeLogAdded => 'أُضيفت';
+
+  @override
+  String get changeLogEdited => 'عُدّلت';
+
+  @override
+  String get changeLogDeleted => 'حُذفت';
+
+  @override
+  String changeLogForDate(String date) {
+    return 'بتاريخ $date';
+  }
+
+  @override
+  String get changeLogFromWeb => 'من المرافق الإلكتروني';
+
+  @override
+  String get changeLogFromBill => 'فاتورة متكررة';
 }

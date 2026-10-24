@@ -2976,3 +2976,17 @@ export_range_label,"Search, settings search, export filters",{from} – {to},{fr
 export_count,"Search, settings search, export filters","{n, plural, =1{1 transaction will be exported} other{{n} transactions will be exported}}","{n, plural, =1{سيتم تصدير معاملة واحدة} =2{سيتم تصدير معاملتين} few{سيتم تصدير {n} معاملات} other{سيتم تصدير {n} معاملة}}","{n, plural, =1{1 transaction sera exportée} other{{n} transactions seront exportées}}"
 export_none,"Search, settings search, export filters",Nothing to export with these filters,لا شيء للتصدير بهذه الفلاتر,Rien à exporter avec ces filtres
 export_failed,"Search, settings search, export filters",Export failed. Try again.,فشل التصدير. حاول مرة أخرى.,L'export a échoué. Réessayez.
+fund_preset_average,Fund screen: average spending,Average spending,متوسط الإنفاق,Dépenses moyennes
+fund_usually,Fund screen: average spending,Usually spends {amount} a month,ينفق عادةً {amount} شهرياً,Dépense d'habitude {amount} par mois
+tile_change_log,Change history,Change history,سجل التغييرات,Historique des modifications
+tile_change_log_sub,Change history,"What was added, edited or deleted, and when",ما أُضيف أو عُدّل أو حُذف، ومتى,"Ce qui a été ajouté, modifié ou supprimé, et quand"
+change_log_title,Change history,Change history,سجل التغييرات,Historique
+change_log_intro,Change history,"The last {n} changes to your transactions, newest first. Tap one to open it.",آخر {n} تغيير على معاملاتك، الأحدث أولاً. اضغط على أي منها لفتحه.,"Les {n} dernières modifications de vos transactions, les plus récentes d'abord. Touchez-en une pour l'ouvrir."
+change_log_empty,Change history,No changes yet,لا تغييرات بعد,Aucune modification
+change_log_load_failed,Change history,Couldn't load the change history,تعذّر تحميل سجل التغييرات,Impossible de charger l'historique
+change_log_added,Change history,Added,أُضيفت,Ajoutée
+change_log_edited,Change history,Edited,عُدّلت,Modifiée
+change_log_deleted,Change history,Deleted,حُذفت,Supprimée
+change_log_for_date,Change history,for {date},بتاريخ {date},pour le {date}
+change_log_from_web,Change history,from the Web Companion,من المرافق الإلكتروني,depuis le Compagnon Web
+change_log_from_bill,Change history,recurring bill,فاتورة متكررة,facture récurrente

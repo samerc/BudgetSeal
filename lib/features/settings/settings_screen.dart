@@ -1239,6 +1239,13 @@ class _SettingsDetailScreenState extends ConsumerState<SettingsDetailScreen> {
                 subtitle: l.tileHealthCheckSub,
                 iconColor: SettingsRowStyle.hue(174),
                 onTap: () => context.push('/health-check'))),
+          _Find(keys: (t) => [t.tileChangeLog, t.tileChangeLogSub],
+              child: _SettingsTile(
+                icon: AppIcons.clockCounterClockwise,
+                title: l.tileChangeLog,
+                subtitle: l.tileChangeLogSub,
+                iconColor: SettingsRowStyle.hue(40),
+                onTap: () => context.push('/change-log'))),
           // ── Receipt Sync toggle ──
           _Find(keys: (t) => [t.tileSyncReceipts],
               child: Builder(builder: (context) {
@@ -1458,6 +1465,7 @@ final _settingsKeys = <_Keys>[
   (t) => [t.tileImportExport, t.tileImportExportSub],
   (t) => [t.tileNotifications, t.tileNotificationsSub],
   (t) => [t.tileHealthCheck, t.tileHealthCheckSub],
+  (t) => [t.tileChangeLog, t.tileChangeLogSub],
   (t) => [t.tileSyncReceipts],
   (t) => [t.householdNameTitle],
   (t) => [t.tileBaseCurrency],

@@ -9332,4 +9332,53 @@ class SFr extends S {
 
   @override
   String get exportFailed => 'L\'export a échoué. Réessayez.';
+
+  @override
+  String get fundPresetAverage => 'Dépenses moyennes';
+
+  @override
+  String fundUsually(String amount) {
+    return 'Dépense d\'habitude $amount par mois';
+  }
+
+  @override
+  String get tileChangeLog => 'Historique des modifications';
+
+  @override
+  String get tileChangeLogSub =>
+      'Ce qui a été ajouté, modifié ou supprimé, et quand';
+
+  @override
+  String get changeLogTitle => 'Historique';
+
+  @override
+  String changeLogIntro(int n) {
+    return 'Les $n dernières modifications de vos transactions, les plus récentes d\'abord. Touchez-en une pour l\'ouvrir.';
+  }
+
+  @override
+  String get changeLogEmpty => 'Aucune modification';
+
+  @override
+  String get changeLogLoadFailed => 'Impossible de charger l\'historique';
+
+  @override
+  String get changeLogAdded => 'Ajoutée';
+
+  @override
+  String get changeLogEdited => 'Modifiée';
+
+  @override
+  String get changeLogDeleted => 'Supprimée';
+
+  @override
+  String changeLogForDate(String date) {
+    return 'pour le $date';
+  }
+
+  @override
+  String get changeLogFromWeb => 'depuis le Compagnon Web';
+
+  @override
+  String get changeLogFromBill => 'facture récurrente';
 }

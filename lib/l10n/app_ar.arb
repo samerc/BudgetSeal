@@ -5867,5 +5867,19 @@
   "exportRangeLabel": "{from} – {to}",
   "exportCount": "{n, plural, =1{سيتم تصدير معاملة واحدة} =2{سيتم تصدير معاملتين} few{سيتم تصدير {n} معاملات} other{سيتم تصدير {n} معاملة}}",
   "exportNone": "لا شيء للتصدير بهذه الفلاتر",
-  "exportFailed": "فشل التصدير. حاول مرة أخرى."
+  "exportFailed": "فشل التصدير. حاول مرة أخرى.",
+  "fundPresetAverage": "متوسط الإنفاق",
+  "fundUsually": "ينفق عادةً {amount} شهرياً",
+  "tileChangeLog": "سجل التغييرات",
+  "tileChangeLogSub": "ما أُضيف أو عُدّل أو حُذف، ومتى",
+  "changeLogTitle": "سجل التغييرات",
+  "changeLogIntro": "آخر {n} تغيير على معاملاتك، الأحدث أولاً. اضغط على أي منها لفتحه.",
+  "changeLogEmpty": "لا تغييرات بعد",
+  "changeLogLoadFailed": "تعذّر تحميل سجل التغييرات",
+  "changeLogAdded": "أُضيفت",
+  "changeLogEdited": "عُدّلت",
+  "changeLogDeleted": "حُذفت",
+  "changeLogForDate": "بتاريخ {date}",
+  "changeLogFromWeb": "من المرافق الإلكتروني",
+  "changeLogFromBill": "فاتورة متكررة"
 }

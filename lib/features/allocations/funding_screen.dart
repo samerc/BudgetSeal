@@ -34,6 +34,30 @@ class FundingScreen extends ConsumerStatefulWidget {
   ConsumerState<FundingScreen> createState() => _FundingScreenState();
 }
 
+/// Average spending per envelope and currency over [history] (one map per
+/// budget period, oldest first), counted from the first period with any
+/// spending for that envelope — a new envelope isn't averaged down by
+/// months before it existed. Rounded up to whole units.
+Map<String, Map<String, double>> averageSpending(
+    List<Map<String, Map<String, double>>> history) {
+  final out = <String, Map<String, double>>{};
+  final ids = {for (final h in history) ...h.keys};
+  for (final id in ids) {
+    final first = history.indexWhere(
+        (h) => (h[id]?.values ?? const <double>[]).any((v) => v > 0));
+    if (first < 0) continue;
+    final n = history.length - first;
+    final sums = <String, double>{};
+    for (final h in history.skip(first)) {
+      h[id]?.forEach((c, v) {
+        if (v > 0) sums[c] = (sums[c] ?? 0) + v;
+      });
+    }
+    out[id] = {for (final e in sums.entries) e.key: (e.value / n).ceilToDouble()};
+  }
+  return out;
+}
+
 class _FundingScreenState extends ConsumerState<FundingScreen> {
   final Map<String, double> _amounts = {};
   /// Sinking funds: one amount per currency (fund → currency → amount).
@@ -44,6 +68,10 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
   /// Last budget period, per envelope and currency (for the presets).
   Map<String, Map<String, double>> _lastFunded = const {};
   Map<String, Map<String, double>> _lastSpent = const {};
+  /// Average spending per period over the last [_avgPeriods] (from the
+  /// first of them with any spending), rounded up to whole units.
+  Map<String, Map<String, double>> _avgSpent = const {};
+  static const _avgPeriods = 3;
 
   @override
   void initState() {
@@ -64,10 +92,26 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
       final spent = await dao
           .watchSpendingInPeriod(household.id, last.start, last.end)
           .first;
+      // Oldest first: [period -3, -2, -1].
+      final history = <Map<String, Map<String, double>>>[];
+      var p = last;
+      for (var k = 0; k < _avgPeriods; k++) {
+        history.insert(
+            0,
+            k == 0
+                ? spent
+                : await dao
+                    .watchSpendingInPeriod(household.id, p.start, p.end)
+                    .first);
+        p = budgetPeriodFor(household.periodStartDay,
+            p.start.subtract(const Duration(days: 1)));
+      }
+      final avg = averageSpending(history);
       if (mounted) {
         setState(() {
           _lastFunded = funded;
           _lastSpent = spent;
+          _avgSpent = avg;
         });
       }
     } catch (e) {
@@ -451,6 +495,18 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
                                               baseCurrency,
                                               _lastSpent),
                                         ),
+                                      if (_avgSpent.isNotEmpty)
+                                        ActionChip(
+                                          avatar: const Icon(
+                                              AppIcons.chartBar,
+                                              size: 16),
+                                          label: Text(
+                                              S.of(context).fundPresetAverage),
+                                          onPressed: () => _applyPreset(
+                                              allocations,
+                                              baseCurrency,
+                                              _avgSpent),
+                                        ),
                                       if (_amounts.isNotEmpty ||
                                           _fundAmounts.isNotEmpty)
                                         ActionChip(
@@ -497,6 +553,7 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
                             currency: currency,
                             targetAmount: alloc.targetAmount,
                             suggestedAmount: suggestedAmount,
+                            usualSpend: _avgSpent[alloc.id]?[currency],
                             isFunded: isFunded,
                             amount: _amounts[alloc.id] ?? 0.0,
                             onAmountChanged: (value) {
@@ -961,6 +1018,8 @@ class _FundingAllocationTile extends StatelessWidget {
   final String currency;
   final double? targetAmount;
   final double? suggestedAmount;
+  /// Average spending per period lately (null = none).
+  final double? usualSpend;
   final bool isFunded;
   final double amount;
   final ValueChanged<double> onAmountChanged;
@@ -971,6 +1030,7 @@ class _FundingAllocationTile extends StatelessWidget {
     required this.currency,
     required this.targetAmount,
     required this.suggestedAmount,
+    this.usualSpend,
     this.isFunded = false,
     required this.amount,
     required this.onAmountChanged,
@@ -1067,6 +1127,36 @@ class _FundingAllocationTile extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   color: AppColors.ts(context),
+                ),
+              ),
+            ],
+
+            if (usualSpend != null && usualSpend! > 0) ...[
+              const SizedBox(height: 6),
+              Tappable(
+                onTap: () => onAmountChanged(usualSpend!),
+                borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(AppIcons.chartBar,
+                          size: 14, color: AppColors.accentText(context)),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          S.of(context).fundUsually(
+                              formatAmount(usualSpend!, currency: currency)),
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.accentText(context),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

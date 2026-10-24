@@ -15923,6 +15923,90 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Export failed. Try again.'**
   String get exportFailed;
+
+  /// Fund screen: average spending
+  ///
+  /// In en, this message translates to:
+  /// **'Average spending'**
+  String get fundPresetAverage;
+
+  /// Fund screen: average spending
+  ///
+  /// In en, this message translates to:
+  /// **'Usually spends {amount} a month'**
+  String fundUsually(String amount);
+
+  /// Change history
+  ///
+  /// In en, this message translates to:
+  /// **'Change history'**
+  String get tileChangeLog;
+
+  /// Change history
+  ///
+  /// In en, this message translates to:
+  /// **'What was added, edited or deleted, and when'**
+  String get tileChangeLogSub;
+
+  /// Change history
+  ///
+  /// In en, this message translates to:
+  /// **'Change history'**
+  String get changeLogTitle;
+
+  /// Change history
+  ///
+  /// In en, this message translates to:
+  /// **'The last {n} changes to your transactions, newest first. Tap one to open it.'**
+  String changeLogIntro(int n);
+
+  /// Change history
+  ///
+  /// In en, this message translates to:
+  /// **'No changes yet'**
+  String get changeLogEmpty;
+
+  /// Change history
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the change history'**
+  String get changeLogLoadFailed;
+
+  /// Change history
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get changeLogAdded;
+
+  /// Change history
+  ///
+  /// In en, this message translates to:
+  /// **'Edited'**
+  String get changeLogEdited;
+
+  /// Change history
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted'**
+  String get changeLogDeleted;
+
+  /// Change history
+  ///
+  /// In en, this message translates to:
+  /// **'for {date}'**
+  String changeLogForDate(String date);
+
+  /// Change history
+  ///
+  /// In en, this message translates to:
+  /// **'from the Web Companion'**
+  String get changeLogFromWeb;
+
+  /// Change history
+  ///
+  /// In en, this message translates to:
+  /// **'recurring bill'**
+  String get changeLogFromBill;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

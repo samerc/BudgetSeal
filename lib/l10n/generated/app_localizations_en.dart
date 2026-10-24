@@ -9233,4 +9233,52 @@ class SEn extends S {
 
   @override
   String get exportFailed => 'Export failed. Try again.';
+
+  @override
+  String get fundPresetAverage => 'Average spending';
+
+  @override
+  String fundUsually(String amount) {
+    return 'Usually spends $amount a month';
+  }
+
+  @override
+  String get tileChangeLog => 'Change history';
+
+  @override
+  String get tileChangeLogSub => 'What was added, edited or deleted, and when';
+
+  @override
+  String get changeLogTitle => 'Change history';
+
+  @override
+  String changeLogIntro(int n) {
+    return 'The last $n changes to your transactions, newest first. Tap one to open it.';
+  }
+
+  @override
+  String get changeLogEmpty => 'No changes yet';
+
+  @override
+  String get changeLogLoadFailed => 'Couldn\'t load the change history';
+
+  @override
+  String get changeLogAdded => 'Added';
+
+  @override
+  String get changeLogEdited => 'Edited';
+
+  @override
+  String get changeLogDeleted => 'Deleted';
+
+  @override
+  String changeLogForDate(String date) {
+    return 'for $date';
+  }
+
+  @override
+  String get changeLogFromWeb => 'from the Web Companion';
+
+  @override
+  String get changeLogFromBill => 'recurring bill';
 }
