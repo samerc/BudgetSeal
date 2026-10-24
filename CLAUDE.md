@@ -75,5 +75,5 @@ Manual checklists: `test/manual_test_script.md`, `test/web_companion_test_script
 
 ## Workflow
 
-- Branch `app-redesign`; never commit to `main`. Commit only the paths you changed (the tree has untracked personal files). Commit messages end with the Co-Authored-By line.
+- Work on `main` (the `app-redesign` branch was merged into it and deleted on Oct 24 2026). Commit only the paths you changed (the tree has untracked personal files). Commit messages end with the Co-Authored-By line.
 - Debug builds install next to the Play Store app with their own data — never uninstall or wipe the Play Store app.
