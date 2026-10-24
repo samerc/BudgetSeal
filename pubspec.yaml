@@ -1,7 +1,7 @@
 name: budgetseal
 description: Allocation-first household finance manager.
 publish_to: 'none'
-version: 0.10.0+11
+version: 0.11.0+12
 
 environment:
   sdk: '>=3.5.0 <4.0.0'

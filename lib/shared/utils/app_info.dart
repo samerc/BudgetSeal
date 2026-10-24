@@ -3,7 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 /// App version string, populated at startup from the platform package info so
 /// it always matches `pubspec.yaml` and never goes stale. The default is only
 /// used before [initAppInfo] runs (e.g. in tests).
-String appVersion = '0.10.0';
+String appVersion = '0.11.0';
 
 /// Build number (the `+N` in the pubspec version), populated at startup.
 String appBuildNumber = '';
