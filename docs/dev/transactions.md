@@ -35,7 +35,7 @@ Cashew-style: long-press a transaction to enter selection mode (there is no cont
 
 ## Activity Tab FAB
 
-The + FAB on the Activity tab uses a custom `Material` + `InkWell` circle (not `FloatingActionButton`) so both `onTap` and `onLongPress` work reliably. Tap opens expense form directly (most common action). Long-press opens a type picker bottom sheet (expense/income/transfer). **Never wrap `FloatingActionButton` with `GestureDetector(onLongPress:)`** — the FAB's internal `InkWell` swallows the long-press gesture.
+The + FAB on the Activity tab uses a custom `Material` + `InkWell` circle (not `FloatingActionButton`) so both `onTap` and `onLongPress` work reliably. Tap opens expense form directly (most common action). Long-press opens a type picker bottom sheet (expense/income/transfer, and a full-width **Split a bill** row → `/bill-splitter`, premium-gated). There is no separate split button over the list (removed Oct 2026: it covered row amounts and clashed with the add screen's own Split); only scroll-to-top stacks above the +. **Never wrap `FloatingActionButton` with `GestureDetector(onLongPress:)`** — the FAB's internal `InkWell` swallows the long-press gesture.
 
 ## Finding & Fixing Transactions
 

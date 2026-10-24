@@ -2693,9 +2693,6 @@ class SFr extends S {
   String get txScrollTopTooltip => 'Retour en haut';
 
   @override
-  String get txSplitBillTooltip => 'Partager l\'addition';
-
-  @override
   String get txFromDate => 'Du';
 
   @override

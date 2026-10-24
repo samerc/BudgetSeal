@@ -704,20 +704,6 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               ),
               const SizedBox(height: 8),
             ],
-            FloatingActionButton.small(
-              heroTag: 'fab_split',
-              tooltip: S.of(context).txSplitBillTooltip,
-              backgroundColor: AppColors.pastel(context, kSplitColor,
-                  light: 0.75, dark: 0.55),
-              foregroundColor: AppColors.tp(context),
-              elevation: 2,
-              onPressed: () {
-                if (!checkPremiumAccess(context, ref, PremiumFeature.billSplitter)) return;
-                context.push('/bill-splitter');
-              },
-              child: const Icon(AppIcons.arrowsSplit, size: 18),
-            ),
-            const SizedBox(height: 8),
             // Cashew FAB: 60px rounded square in the accent color.
             SizedBox(
               width: 60,
@@ -829,6 +815,42 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                     },
                   ),
                 ],
+              ),
+            ),
+            // The bill splitter: here instead of a button over the list.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              child: Tappable(
+                borderRadius: BorderRadius.circular(CardTokens.radius),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  if (!checkPremiumAccess(
+                      context, ref, PremiumFeature.billSplitter)) {
+                    return;
+                  }
+                  context.push('/bill-splitter');
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: AppColors.pastel(context, kSplitColor,
+                        light: 0.88, dark: 0.8),
+                    borderRadius: BorderRadius.circular(CardTokens.radius),
+                  ),
+                  child: Row(children: [
+                    Icon(AppIcons.arrowsSplit,
+                        size: 20, color: AppColors.tp(context)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(tr.billScreenTitle,
+                          style: const TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w600)),
+                    ),
+                    Icon(AppIcons.caretRight,
+                        size: 16, color: AppColors.th(context)),
+                  ]),
+                ),
               ),
             ),
           ],

@@ -116,7 +116,6 @@ tx_list_settings_tooltip,Settings button tooltip,List settings,إعدادات ا
 tx_quick_add_hint,Quick-add bar placeholder,"Type name and amount, e.g. Coffee 4.50",اكتب الاسم والمبلغ، مثال: قهوة 4.50,"Tapez le nom et le montant, ex. Café 4.50"
 tx_send_tooltip,Quick-add send tooltip,Send,إرسال,Envoyer
 tx_scroll_top_tooltip,FAB tooltip,Scroll to top,التمرير للأعلى,Retour en haut
-tx_split_bill_tooltip,FAB tooltip,Split bill,تقسيم الفاتورة,Partager l'addition
 tx_from_date,Date range filter,From date,من تاريخ,Du
 tx_to_date,Date range filter,To date,إلى تاريخ,Au
 tx_min_amount,Amount range hint,Min,الحد الأدنى,Min

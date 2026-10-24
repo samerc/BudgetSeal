@@ -1127,10 +1127,6 @@
   "@txScrollTopTooltip": {
     "description": "FAB tooltip"
   },
-  "txSplitBillTooltip": "Partager l'addition",
-  "@txSplitBillTooltip": {
-    "description": "FAB tooltip"
-  },
   "txFromDate": "Du",
   "@txFromDate": {
     "description": "Date range filter"

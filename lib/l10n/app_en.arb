@@ -1266,10 +1266,6 @@
   "@txScrollTopTooltip": {
     "description": "FAB tooltip"
   },
-  "txSplitBillTooltip": "Split bill",
-  "@txSplitBillTooltip": {
-    "description": "FAB tooltip"
-  },
   "txFromDate": "From date",
   "@txFromDate": {
     "description": "Date range filter"

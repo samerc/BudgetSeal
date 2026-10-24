@@ -4708,12 +4708,6 @@ abstract class S {
   /// **'Scroll to top'**
   String get txScrollTopTooltip;
 
-  /// FAB tooltip
-  ///
-  /// In en, this message translates to:
-  /// **'Split bill'**
-  String get txSplitBillTooltip;
-
   /// Date range filter
   ///
   /// In en, this message translates to:

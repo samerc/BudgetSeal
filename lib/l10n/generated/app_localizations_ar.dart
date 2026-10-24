@@ -2686,9 +2686,6 @@ class SAr extends S {
   String get txScrollTopTooltip => 'التمرير للأعلى';
 
   @override
-  String get txSplitBillTooltip => 'تقسيم الفاتورة';
-
-  @override
   String get txFromDate => 'من تاريخ';
 
   @override

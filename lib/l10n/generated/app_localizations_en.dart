@@ -2672,9 +2672,6 @@ class SEn extends S {
   String get txScrollTopTooltip => 'Scroll to top';
 
   @override
-  String get txSplitBillTooltip => 'Split bill';
-
-  @override
   String get txFromDate => 'From date';
 
   @override
