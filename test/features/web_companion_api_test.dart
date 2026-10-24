@@ -630,6 +630,79 @@ void main() {
     expect(auth.connectedCount(), 0);
   });
 
+  test('sinking funds: schedule with two-currency parts, fund the month, '
+      'catch-up setting', () async {
+    final now = DateTime.now();
+    String day(DateTime d) =>
+        '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+    await db.into(db.allocations).insert(AllocationsCompanion.insert(
+        id: 'school',
+        householdId: hh,
+        name: 'School',
+        categoryId: 'edu',
+        type: const Value('sinking'),
+        periodicity: const Value('permanent'),
+        createdAt: Value(DateTime(now.year, now.month)),
+        deviceId: 't'));
+    await db.into(db.categories).insert(CategoriesCompanion.insert(
+        id: 'edu',
+        householdId: hh,
+        name: 'Education',
+        allocationId: const Value('school')));
+
+    // A payment in two currencies, two periods after this one.
+    final plan = await call(createPlannedHandler(ref), 'POST', body: {
+      'type': 'expense',
+      'accountId': 'usd',
+      'amount': 300,
+      'categoryId': 'edu',
+      'note': 'Fees',
+      'date': day(DateTime(now.year, now.month + 2, 5)),
+      'parts': [
+        {'accountId': 'usd', 'amount': 300},
+        {'accountId': 'lbp', 'amount': 9000000},
+      ],
+    });
+    expect(plan['status'], 201);
+    // One part per currency.
+    expect((await call(createPlannedHandler(ref), 'POST', body: {
+      'type': 'expense',
+      'accountId': 'usd',
+      'amount': 1,
+      'date': day(now),
+      'parts': [
+        {'accountId': 'usd', 'amount': 1},
+        {'accountId': 'usd2', 'amount': 2},
+      ],
+    }))['status'], 400);
+
+    final planned = await call(listPlannedHandler(ref), 'GET');
+    final parts = ((planned['items'] as List).single as Map)['parts'] as List;
+    expect(parts.map((p) => (p as Map)['currency']), ['USD', 'LBP']);
+
+    Future<Map<String, dynamic>> fund() async {
+      final env = await call(listEnvelopesHandler(ref), 'GET');
+      return ((env['items'] as List).cast<Map<String, dynamic>>())
+          .singleWhere((e) => e['id'] == 'school')['fund'] as Map<String, dynamic>;
+    }
+
+    var f = await fund();
+    expect(f['thisMonth'], {'USD': 100, 'LBP': 3000000});
+    expect(((f['payments'] as List).single as Map)['title'], 'Fees');
+
+    expect((await call(fundMonthHandler(ref), 'POST', id: 'school', body: {}))['status'], 200);
+    expect(await BalanceCalculator(db).allocationBalanceByCurrency('school'),
+        {'USD': 100, 'LBP': 3000000});
+    f = await fund();
+    expect(f['thisMonth'], isEmpty);
+
+    expect((await call(behindModeHandler(ref), 'PUT',
+        id: 'school', body: {'mode': 'topup'}))['status'], 200);
+    expect((await fund())['mode'], 'topup');
+    expect((await call(behindModeHandler(ref), 'PUT',
+        id: 'school', body: {'mode': 'later'}))['status'], 400);
+  });
+
   test('money moves between envelopes and Ready to assign', () async {
     await call(createTransactionHandler(ref), 'POST', body: {
       'type': 'income',

@@ -88,6 +88,8 @@ Handler buildRouter(Ref ref, WebCompanionAuth auth, ChangeFeed changes) {
   api.delete('/objectives/<id>', deleteObjectiveHandler(ref));
   api.post('/objectives/<id>/pay', payObjectiveHandler(ref));
   api.post('/envelopes/<id>/fund', fundEnvelopeHandler(ref));
+  api.post('/envelopes/<id>/fund-month', fundMonthHandler(ref));
+  api.put('/envelopes/<id>/behind-mode', behindModeHandler(ref));
 
   api.get('/recurring', listRecurringHandler(ref));
   api.post('/recurring', createRecurringHandler(ref));

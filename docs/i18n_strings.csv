@@ -2716,7 +2716,7 @@ rptGroupSpending,Reports library section,Spending,الصرف,Dépenses
 rptGroupMoney,Reports library section,Money,المال,Argent
 rptGroupCommitments,Reports library section,Commitments,الالتزامات,Engagements
 rptBudgetVsActual,Report title,Budget vs actual,الميزانية مقابل الفعلي,Budget et réel
-rptBudgetVsActualSub,Report description,"Planned vs spent each month, and every envelope's record","المخطط مقابل المصروف كل شهر، وسجل كل مغلف","Prévu et dépensé chaque mois, et le bilan de chaque enveloppe"
+rptBudgetVsActualSub,Report description,"Planned vs spent each month, and every envelope's record",المخطط مقابل المصروف كل شهر، وسجل كل مغلف,"Prévu et dépensé chaque mois, et le bilan de chaque enveloppe"
 rptInsights,Report title,Month insights,رؤى الشهر,Analyse du mois
 rptInsightsSub,Report description,"Pace, savings rate, age of money and tips",الوتيرة ومعدل الادخار وعمر المال ونصائح,"Rythme, taux d'épargne, âge de l'argent et conseils"
 rptOverview,Report title,Month overview,نظرة على الشهر,Aperçu du mois
@@ -2806,73 +2806,129 @@ rptBestMonth,Year in review,Best month,أفضل شهر,Meilleur mois
 rptShareImage,Year in review button,Share as image,شارك كصورة,Partager en image
 rptKeptValue,Year in review: best month's sub-line,kept {amount},بقي {amount},gardé {amount}
 rptOfDays,"Year in review: no-spend days sub-line, e.g. 269 / of 296 days","of {count, plural, =1{1 day} other{{count} days}}","من {count, plural, =1{يوم واحد} =2{يومين} few{{count} أيام} other{{count} يومًا}}","sur {count, plural, =1{1 jour} other{{count} jours}}"
-sinkTypeTitle,Envelope type: saves monthly for payments on set dates,Sinking fund,صندوق ادخار مجدول,Fonds d'épargne planifié
-sinkTypeShort,Short label of the sinking fund type in the type selector,Sinking,مجدول,Planifié
-sinkTypeDesc,Sinking fund type description,"Put a little aside each month for payments on set dates: yearly bills, school fees.",ادّخر قليلاً كل شهر لدفعات في مواعيد محددة: فواتير سنوية، أقساط مدرسية.,"Mettez un peu de côté chaque mois pour des paiements à dates fixes : factures annuelles, frais de scolarité."
-sinkSection,Budget tab section title for sinking funds,Sinking funds,صناديق الادخار المجدولة,Fonds planifiés
-sinkThisMonth,What a sinking fund takes this month,{amount} this month,{amount} هذا الشهر,{amount} ce mois-ci
-sinkNext,Next payment date of a sinking fund,Next: {date},التالي: {date},Prochain : {date}
-sinkOnTrack,"Sinking fund status, lowercase after a dot",on track,على المسار,dans les temps
-sinkOnTrackCap,Sinking fund status on its own line,On track,على المسار,Dans les temps
-sinkCatchingUp,Sinking fund status while spreading a shortfall,catching up,يلحق بالخطة,en rattrapage
-sinkFundedThisMonth,Sinking fund got its share this month,Funded for this month,مموَّل لهذا الشهر,Financé pour ce mois-ci
-sinkBehindBy,Sinking fund shortfall,Behind by {amount},متأخر بمبلغ {amount},En retard de {amount}
-sinkBehindChoose,Budget tab row of a fund that fell behind,Behind by {amount} · choose how to catch up,متأخر بمبلغ {amount} · اختر طريقة اللحاق,En retard de {amount} · choisissez comment rattraper
-sinkNoPayments,Sinking fund with no schedule,No payments planned yet,لا دفعات مخططة بعد,Aucun paiement prévu
-sinkNoPaymentsHelp,Fund screen hero when no payments,"Add the payments this fund saves for (dates and amounts), and it works out what to put aside each month.",أضف الدفعات التي يدّخر لها هذا الصندوق (التواريخ والمبالغ)، وسيحسب ما تضعه جانباً كل شهر.,Ajoutez les paiements que ce fonds prépare (dates et montants) : il calcule ce qu'il faut mettre de côté chaque mois.
-sinkOf,"Saved toward a payment, e.g. $0 of $1,500",{saved} of {total},{saved} من {total},{saved} sur {total}
-sinkOfTotal,After the saved amount in the fund hero,of {total},من {total},sur {total}
-sinkSavingFor,Fund hero: next payment,Saving for {date} · {title},ادخار لـ {date} · {title},Pour le {date} · {title}
-sinkThisMonthLabel,Fund hero label,This month,هذا الشهر,Ce mois-ci
-sinkFundThisMonth,Fund hero button,Fund this month,موّل هذا الشهر,Financer ce mois-ci
-sinkMonthlyPlan,Fund screen section,Monthly plan,الخطة الشهرية,Plan mensuel
-sinkPlanNote,Under the monthly plan,Recalculated every month from what's saved and what's due next.,يُعاد حسابها كل شهر بحسب المدَّخر والمستحق التالي.,Recalculé chaque mois selon ce qui est épargné et ce qui arrive.
-sinkPayments,Fund screen section,Payments,الدفعات,Paiements
-sinkPaid,A fund payment already paid,Paid,مدفوعة,Payé
-sinkInDays,When a fund payment is due,"{count, plural, =0{today} =1{tomorrow} other{in {count} days}}","{count, plural, =0{اليوم} =1{غداً} other{بعد {count} يوم}}","{count, plural, =0{aujourd'hui} =1{demain} other{dans {count} jours}}"
-sinkRecurringBill,Tag on a fund payment that comes from a recurring bill,Recurring bill,فاتورة متكررة,Facture récurrente
-sinkAddPayment,Fund screen button / payment screen title,Add payment,إضافة دفعة,Ajouter un paiement
-sinkEditPayment,Payment screen title when editing,Edit payment,تعديل الدفعة,Modifier le paiement
-sinkCopyLastYear,Fund screen button and screen title,Copy from last year,نسخ من العام الماضي,Copier l'an dernier
-sinkWhenBehind,Fund setting,When behind,عند التأخر,En cas de retard
-sinkWhenBehindHelp,Help under When behind,"If a month is missed: raise the next months, or catch up at once.",إذا فات شهر: ارفع الأشهر التالية، أو الحق بالخطة دفعة واحدة.,"Si un mois est manqué : augmenter les mois suivants, ou rattraper d'un coup."
-sinkModeAsk,When behind option,Ask me,اسألني,Me demander
-sinkModeSpread,When behind option,Spread it out,توزيعه على الأشهر,Étaler
-sinkModeTopUp,When behind option,Top up now,التعويض الآن,Compléter maintenant
-sinkNeedsCategory,Fund with no linked category,Link a category so payments come out of this fund.,اربط فئة لتُدفع المصاريف من هذا الصندوق.,Liez une catégorie pour que les paiements sortent de ce fonds.
-sinkCatchUpTitle,Catch-up sheet title and button,Catch up,اللحاق بالخطة,Rattraper
-sinkBehindExplain,Catch-up sheet explanation,{name} is {amount} short of its plan.,ينقص {name} مبلغ {amount} عن خطته.,Il manque {amount} à {name} par rapport à son plan.
-sinkSpreadSub,Spread option detail,Smaller steps: the monthly amount goes up until the payment.,خطوات أصغر: يرتفع المبلغ الشهري حتى موعد الدفعة.,Par petites étapes : le montant mensuel augmente jusqu'au paiement.
-sinkTopUpNow,Top up option detail,"{now} now, then {steady} a month",{now} الآن، ثم {steady} شهرياً,"{now} maintenant, puis {steady} par mois"
-sinkTopUpSub,Top up option detail,Back on track today; the monthly amount stays steady.,تعود إلى المسار اليوم؛ ويبقى المبلغ الشهري ثابتاً.,De retour dans les temps aujourd'hui ; le montant mensuel reste stable.
-sinkAlways,Catch-up sheet checkbox,Always do this for this fund,افعل هذا دائماً لهذا الصندوق,Toujours faire ainsi pour ce fonds
-sinkFundAmount,Catch-up sheet button,Fund {amount},موّل {amount},Financer {amount}
-sinkFromAccount,Account picker title for a payment part,Pay from,الدفع من,Payer depuis
-sinkPaymentName,Payment name label,Name,الاسم,Nom
-sinkPaymentNameHint,Payment name hint,e.g. 2nd installment,مثال: القسط الثاني,ex. 2e versement
-sinkDueOn,Payment due date label,Due on,تاريخ الاستحقاق,Échéance
-sinkPickDate,Due date placeholder / error,Pick a date,اختر تاريخاً,Choisissez une date
-sinkAmountLabel,Payment amount label,Amount,المبلغ,Montant
-sinkAddAmount,Add the first currency part,Add an amount,إضافة مبلغ,Ajouter un montant
-sinkAddCurrency,Add a currency part,Add another currency,إضافة عملة أخرى,Ajouter une autre devise
-sinkRemovePart,Tooltip on a part's remove button,Remove this currency,إزالة هذه العملة,Retirer cette devise
-sinkPartsNote,Under the payment parts,"Each part is saved and paid in its own currency, never converted.",يُدَّخر كل جزء ويُدفع بعملته، دون تحويل.,"Chaque part est épargnée et payée dans sa devise, jamais convertie."
-sinkOnePartPerCurrency,Validation: two parts in one currency,Use one amount per currency.,استخدم مبلغاً واحداً لكل عملة.,Un seul montant par devise.
-sinkSavePayment,Payment screen button,Save payment,حفظ الدفعة,Enregistrer le paiement
-sinkPaymentSaved,Snackbar,Payment saved,تم حفظ الدفعة,Paiement enregistré
-sinkPaymentDeleted,Snackbar,Payment deleted,تم حذف الدفعة,Paiement supprimé
-sinkDeletePaymentTitle,Confirm title,Delete this payment?,حذف هذه الدفعة؟,Supprimer ce paiement ?
-sinkDeletePaymentMsg,Confirm message,It leaves the schedule; nothing is paid or refunded.,ستُزال من الجدول؛ لا يُدفع أو يُسترد شيء.,Il quitte le calendrier ; rien n'est payé ni remboursé.
-sinkCopyHelp,Copy screen help,"Last year's payments, one year later. Change them to the new amounts after adding, or raise them here.",دفعات العام الماضي بعد سنة. عدّلها للمبالغ الجديدة بعد الإضافة، أو ارفعها هنا.,"Les paiements de l'an dernier, un an plus tard. Ajustez-les aux nouveaux montants après l'ajout, ou augmentez-les ici."
-sinkRaiseAll,Copy screen: percent per currency,Raise all amounts,رفع كل المبالغ,Augmenter tous les montants
-sinkAlreadyPlanned,Copy row that matches an existing plan,already planned,مخطط مسبقاً,déjà prévu
-sinkLastYear,Copy row: the original amount,last year {amount},العام الماضي {amount},l'an dernier {amount}
-sinkCopyNote,Copy screen footnote,Use this when the new schedule is decided; nothing is copied on its own. Each payment stays editable until it's paid.,استخدم هذا عند تحديد الجدول الجديد؛ لا يُنسخ شيء تلقائياً. تبقى كل دفعة قابلة للتعديل حتى تُدفع.,À utiliser quand le nouveau calendrier est fixé ; rien n'est copié tout seul. Chaque paiement reste modifiable jusqu'à son règlement.
-sinkCopyAdd,Copy screen button,"{count, plural, =0{Add payments} =1{Add 1 payment} other{Add {count} payments}}","{count, plural, =0{إضافة الدفعات} =1{إضافة دفعة واحدة} other{إضافة {count} دفعات}}","{count, plural, =0{Ajouter les paiements} =1{Ajouter 1 paiement} other{Ajouter {count} paiements}}"
-sinkCopyNothing,Copy screen empty,No payments from the past year to copy.,لا دفعات من العام الماضي لنسخها.,Aucun paiement de l'année passée à copier.
-sinkCopied,Copy snackbar,"{count, plural, =1{1 payment added} other{{count} payments added}}","{count, plural, =1{أضيفت دفعة واحدة} other{أضيفت {count} دفعات}}","{count, plural, =1{1 paiement ajouté} other{{count} paiements ajoutés}}"
-sinkBillOfferTitle,Subscriptions offer card title,"{count, plural, =1{1 yearly bill isn't saved for yet} other{{count} yearly bills aren't saved for yet}}","{count, plural, =1{فاتورة سنوية واحدة بلا ادخار بعد} other{{count} فواتير سنوية بلا ادخار بعد}}","{count, plural, =1{1 facture annuelle n'est pas encore préparée} other{{count} factures annuelles ne sont pas encore préparées}}"
-sinkBillOfferBody,Subscriptions offer line,"{name} ({amount}, {date}): about {monthly} a month",{name} ({amount}، {date}): نحو {monthly} شهرياً,"{name} ({amount}, {date}) : environ {monthly} par mois"
-sinkSaveMonthly,Subscriptions offer button,Save monthly,ادّخر شهرياً,Épargner chaque mois
-sinkFundCreated,Snackbar after Save monthly,Sinking fund created,تم إنشاء صندوق الادخار,Fonds planifié créé
-sinkSavingForDate,Fund hero when the payment is named like the fund,Saving for {date},ادخار لـ {date},Pour le {date}
+sink_type_title,Envelope type: saves monthly for payments on set dates,Sinking fund,صندوق ادخار مجدول,Fonds d'épargne planifié
+sink_type_short,Short label of the sinking fund type in the type selector,Sinking,مجدول,Planifié
+sink_type_desc,Sinking fund type description,"Put a little aside each month for payments on set dates: yearly bills, school fees.",ادّخر قليلاً كل شهر لدفعات في مواعيد محددة: فواتير سنوية، أقساط مدرسية.,"Mettez un peu de côté chaque mois pour des paiements à dates fixes : factures annuelles, frais de scolarité."
+sink_section,Budget tab section title for sinking funds,Sinking funds,صناديق الادخار المجدولة,Fonds planifiés
+sink_this_month,What a sinking fund takes this month,{amount} this month,{amount} هذا الشهر,{amount} ce mois-ci
+sink_next,Next payment date of a sinking fund,Next: {date},التالي: {date},Prochain : {date}
+sink_on_track,"Sinking fund status, lowercase after a dot",on track,على المسار,dans les temps
+sink_on_track_cap,Sinking fund status on its own line,On track,على المسار,Dans les temps
+sink_catching_up,Sinking fund status while spreading a shortfall,catching up,يلحق بالخطة,en rattrapage
+sink_funded_this_month,Sinking fund got its share this month,Funded for this month,مموَّل لهذا الشهر,Financé pour ce mois-ci
+sink_behind_by,Sinking fund shortfall,Behind by {amount},متأخر بمبلغ {amount},En retard de {amount}
+sink_behind_choose,Budget tab row of a fund that fell behind,Behind by {amount} · choose how to catch up,متأخر بمبلغ {amount} · اختر طريقة اللحاق,En retard de {amount} · choisissez comment rattraper
+sink_no_payments,Sinking fund with no schedule,No payments planned yet,لا دفعات مخططة بعد,Aucun paiement prévu
+sink_no_payments_help,Fund screen hero when no payments,"Add the payments this fund saves for (dates and amounts), and it works out what to put aside each month.",أضف الدفعات التي يدّخر لها هذا الصندوق (التواريخ والمبالغ)، وسيحسب ما تضعه جانباً كل شهر.,Ajoutez les paiements que ce fonds prépare (dates et montants) : il calcule ce qu'il faut mettre de côté chaque mois.
+sink_of,"Saved toward a payment, e.g. $0 of $1,500",{saved} of {total},{saved} من {total},{saved} sur {total}
+sink_of_total,After the saved amount in the fund hero,of {total},من {total},sur {total}
+sink_saving_for,Fund hero: next payment,Saving for {date} · {title},ادخار لـ {date} · {title},Pour le {date} · {title}
+sink_this_month_label,Fund hero label,This month,هذا الشهر,Ce mois-ci
+sink_fund_this_month,Fund hero button,Fund this month,موّل هذا الشهر,Financer ce mois-ci
+sink_monthly_plan,Fund screen section,Monthly plan,الخطة الشهرية,Plan mensuel
+sink_plan_note,Under the monthly plan,Recalculated every month from what's saved and what's due next.,يُعاد حسابها كل شهر بحسب المدَّخر والمستحق التالي.,Recalculé chaque mois selon ce qui est épargné et ce qui arrive.
+sink_payments,Fund screen section,Payments,الدفعات,Paiements
+sink_paid,A fund payment already paid,Paid,مدفوعة,Payé
+sink_in_days,When a fund payment is due,"{count, plural, =0{today} =1{tomorrow} other{in {count} days}}","{count, plural, =0{اليوم} =1{غداً} other{بعد {count} يوم}}","{count, plural, =0{aujourd'hui} =1{demain} other{dans {count} jours}}"
+sink_recurring_bill,Tag on a fund payment that comes from a recurring bill,Recurring bill,فاتورة متكررة,Facture récurrente
+sink_add_payment,Fund screen button / payment screen title,Add payment,إضافة دفعة,Ajouter un paiement
+sink_edit_payment,Payment screen title when editing,Edit payment,تعديل الدفعة,Modifier le paiement
+sink_copy_last_year,Fund screen button and screen title,Copy from last year,نسخ من العام الماضي,Copier l'an dernier
+sink_when_behind,Fund setting,When behind,عند التأخر,En cas de retard
+sink_when_behind_help,Help under When behind,"If a month is missed: raise the next months, or catch up at once.",إذا فات شهر: ارفع الأشهر التالية، أو الحق بالخطة دفعة واحدة.,"Si un mois est manqué : augmenter les mois suivants, ou rattraper d'un coup."
+sink_mode_ask,When behind option,Ask me,اسألني,Me demander
+sink_mode_spread,When behind option,Spread it out,توزيعه على الأشهر,Étaler
+sink_mode_top_up,When behind option,Top up now,التعويض الآن,Compléter maintenant
+sink_needs_category,Fund with no linked category,Link a category so payments come out of this fund.,اربط فئة لتُدفع المصاريف من هذا الصندوق.,Liez une catégorie pour que les paiements sortent de ce fonds.
+sink_catch_up_title,Catch-up sheet title and button,Catch up,اللحاق بالخطة,Rattraper
+sink_behind_explain,Catch-up sheet explanation,{name} is {amount} short of its plan.,ينقص {name} مبلغ {amount} عن خطته.,Il manque {amount} à {name} par rapport à son plan.
+sink_spread_sub,Spread option detail,Smaller steps: the monthly amount goes up until the payment.,خطوات أصغر: يرتفع المبلغ الشهري حتى موعد الدفعة.,Par petites étapes : le montant mensuel augmente jusqu'au paiement.
+sink_top_up_now,Top up option detail,"{now} now, then {steady} a month",{now} الآن، ثم {steady} شهرياً,"{now} maintenant, puis {steady} par mois"
+sink_top_up_sub,Top up option detail,Back on track today; the monthly amount stays steady.,تعود إلى المسار اليوم؛ ويبقى المبلغ الشهري ثابتاً.,De retour dans les temps aujourd'hui ; le montant mensuel reste stable.
+sink_always,Catch-up sheet checkbox,Always do this for this fund,افعل هذا دائماً لهذا الصندوق,Toujours faire ainsi pour ce fonds
+sink_fund_amount,Catch-up sheet button,Fund {amount},موّل {amount},Financer {amount}
+sink_from_account,Account picker title for a payment part,Pay from,الدفع من,Payer depuis
+sink_payment_name,Payment name label,Name,الاسم,Nom
+sink_payment_name_hint,Payment name hint,e.g. 2nd installment,مثال: القسط الثاني,ex. 2e versement
+sink_due_on,Payment due date label,Due on,تاريخ الاستحقاق,Échéance
+sink_pick_date,Due date placeholder / error,Pick a date,اختر تاريخاً,Choisissez une date
+sink_amount_label,Payment amount label,Amount,المبلغ,Montant
+sink_add_amount,Add the first currency part,Add an amount,إضافة مبلغ,Ajouter un montant
+sink_add_currency,Add a currency part,Add another currency,إضافة عملة أخرى,Ajouter une autre devise
+sink_remove_part,Tooltip on a part's remove button,Remove this currency,إزالة هذه العملة,Retirer cette devise
+sink_parts_note,Under the payment parts,"Each part is saved and paid in its own currency, never converted.",يُدَّخر كل جزء ويُدفع بعملته، دون تحويل.,"Chaque part est épargnée et payée dans sa devise, jamais convertie."
+sink_one_part_per_currency,Validation: two parts in one currency,Use one amount per currency.,استخدم مبلغاً واحداً لكل عملة.,Un seul montant par devise.
+sink_save_payment,Payment screen button,Save payment,حفظ الدفعة,Enregistrer le paiement
+sink_payment_saved,Snackbar,Payment saved,تم حفظ الدفعة,Paiement enregistré
+sink_payment_deleted,Snackbar,Payment deleted,تم حذف الدفعة,Paiement supprimé
+sink_delete_payment_title,Confirm title,Delete this payment?,حذف هذه الدفعة؟,Supprimer ce paiement ?
+sink_delete_payment_msg,Confirm message,It leaves the schedule; nothing is paid or refunded.,ستُزال من الجدول؛ لا يُدفع أو يُسترد شيء.,Il quitte le calendrier ; rien n'est payé ni remboursé.
+sink_copy_help,Copy screen help,"Last year's payments, one year later. Change them to the new amounts after adding, or raise them here.",دفعات العام الماضي بعد سنة. عدّلها للمبالغ الجديدة بعد الإضافة، أو ارفعها هنا.,"Les paiements de l'an dernier, un an plus tard. Ajustez-les aux nouveaux montants après l'ajout, ou augmentez-les ici."
+sink_raise_all,Copy screen: percent per currency,Raise all amounts,رفع كل المبالغ,Augmenter tous les montants
+sink_already_planned,Copy row that matches an existing plan,already planned,مخطط مسبقاً,déjà prévu
+sink_last_year,Copy row: the original amount,last year {amount},العام الماضي {amount},l'an dernier {amount}
+sink_copy_note,Copy screen footnote,Use this when the new schedule is decided; nothing is copied on its own. Each payment stays editable until it's paid.,استخدم هذا عند تحديد الجدول الجديد؛ لا يُنسخ شيء تلقائياً. تبقى كل دفعة قابلة للتعديل حتى تُدفع.,À utiliser quand le nouveau calendrier est fixé ; rien n'est copié tout seul. Chaque paiement reste modifiable jusqu'à son règlement.
+sink_copy_add,Copy screen button,"{count, plural, =0{Add payments} =1{Add 1 payment} other{Add {count} payments}}","{count, plural, =0{إضافة الدفعات} =1{إضافة دفعة واحدة} other{إضافة {count} دفعات}}","{count, plural, =0{Ajouter les paiements} =1{Ajouter 1 paiement} other{Ajouter {count} paiements}}"
+sink_copy_nothing,Copy screen empty,No payments from the past year to copy.,لا دفعات من العام الماضي لنسخها.,Aucun paiement de l'année passée à copier.
+sink_copied,Copy snackbar,"{count, plural, =1{1 payment added} other{{count} payments added}}","{count, plural, =1{أضيفت دفعة واحدة} other{أضيفت {count} دفعات}}","{count, plural, =1{1 paiement ajouté} other{{count} paiements ajoutés}}"
+sink_bill_offer_title,Subscriptions offer card title,"{count, plural, =1{1 yearly bill isn't saved for yet} other{{count} yearly bills aren't saved for yet}}","{count, plural, =1{فاتورة سنوية واحدة بلا ادخار بعد} other{{count} فواتير سنوية بلا ادخار بعد}}","{count, plural, =1{1 facture annuelle n'est pas encore préparée} other{{count} factures annuelles ne sont pas encore préparées}}"
+sink_bill_offer_body,Subscriptions offer line,"{name} ({amount}, {date}): about {monthly} a month",{name} ({amount}، {date}): نحو {monthly} شهرياً,"{name} ({amount}, {date}) : environ {monthly} par mois"
+sink_save_monthly,Subscriptions offer button,Save monthly,ادّخر شهرياً,Épargner chaque mois
+sink_fund_created,Snackbar after Save monthly,Sinking fund created,تم إنشاء صندوق الادخار,Fonds planifié créé
+sink_saving_for_date,Fund hero when the payment is named like the fund,Saving for {date},ادخار لـ {date},Pour le {date}
+web_fund_section,Web Companion: sinking funds,Sinking funds,صناديق الادخار المجدولة,Fonds planifiés
+web_fund_kind,Web Companion: sinking funds,Sinking fund,صندوق ادخار مجدول,Fonds planifié
+web_fund_next,Web Companion: sinking funds,Next: {date},التالي: {date},Prochain : {date}
+web_fund_this_month,Web Companion: sinking funds,{amount} this month,{amount} هذا الشهر,{amount} ce mois-ci
+web_fund_on_track,Web Companion: sinking funds,on track,على المسار,dans les temps
+web_fund_on_track_cap,Web Companion: sinking funds,On track,على المسار,Dans les temps
+web_fund_catching_up,Web Companion: sinking funds,catching up,يلحق بالخطة,en rattrapage
+web_fund_funded_month,Web Companion: sinking funds,Funded for this month,مموَّل لهذا الشهر,Financé pour ce mois-ci
+web_fund_behind,Web Companion: sinking funds,Behind by {amount},متأخر بمبلغ {amount},En retard de {amount}
+web_fund_behind_choose,Web Companion: sinking funds,Behind by {amount} · choose how to catch up,متأخر بمبلغ {amount} · اختر طريقة اللحاق,En retard de {amount} · choisissez comment rattraper
+web_fund_no_payments,Web Companion: sinking funds,No payments planned yet,لا دفعات مخططة بعد,Aucun paiement prévu
+web_fund_of,Web Companion: sinking funds,{saved} of {total},{saved} من {total},{saved} sur {total}
+web_fund_saving_for,Web Companion: sinking funds,Saving for {date},ادخار لـ {date},Pour le {date}
+web_fund_schedule,Web Companion: sinking funds,Schedule,الجدول,Calendrier
+web_fund_fund_month,Web Companion: sinking funds,Fund this month,موّل هذا الشهر,Financer ce mois-ci
+web_fund_catch_up,Web Companion: sinking funds,Catch up,اللحاق بالخطة,Rattraper
+web_fund_plan,Web Companion: sinking funds,Monthly plan,الخطة الشهرية,Plan mensuel
+web_fund_plan_note,Web Companion: sinking funds,Recalculated every month from what's saved and what's due next.,يُعاد حسابها كل شهر بحسب المدَّخر والمستحق التالي.,Recalculé chaque mois selon ce qui est épargné et ce qui arrive.
+web_fund_payments,Web Companion: sinking funds,Payments,الدفعات,Paiements
+web_fund_paid,Web Companion: sinking funds,Paid,مدفوعة,Payé
+web_fund_bill,Web Companion: sinking funds,Recurring bill,فاتورة متكررة,Facture récurrente
+web_fund_add_payment,Web Companion: sinking funds,Add payment,إضافة دفعة,Ajouter un paiement
+web_fund_edit_payment,Web Companion: sinking funds,Edit payment,تعديل الدفعة,Modifier le paiement
+web_fund_copy,Web Companion: sinking funds,Copy from last year,نسخ من العام الماضي,Copier l'an dernier
+web_fund_when_behind,Web Companion: sinking funds,When behind,عند التأخر,En cas de retard
+web_fund_mode_ask,Web Companion: sinking funds,Ask me,اسألني,Me demander
+web_fund_mode_spread,Web Companion: sinking funds,Spread it out,توزيعه على الأشهر,Étaler
+web_fund_mode_topup,Web Companion: sinking funds,Top up now,التعويض الآن,Compléter maintenant
+web_fund_spread_sub,Web Companion: sinking funds,Smaller steps: the monthly amount goes up until the payment.,خطوات أصغر: يرتفع المبلغ الشهري حتى موعد الدفعة.,Par petites étapes : le montant mensuel augmente jusqu'au paiement.
+web_fund_topup_now,Web Companion: sinking funds,"{now} now, then {steady} a month",{now} الآن، ثم {steady} شهرياً,"{now} maintenant, puis {steady} par mois"
+web_fund_topup_sub,Web Companion: sinking funds,Back on track today; the monthly amount stays steady.,تعود إلى المسار اليوم؛ ويبقى المبلغ الشهري ثابتاً.,De retour dans les temps aujourd'hui ; le montant mensuel reste stable.
+web_fund_always,Web Companion: sinking funds,Always do this for this fund,افعل هذا دائماً لهذا الصندوق,Toujours faire ainsi pour ce fonds
+web_fund_behind_explain,Web Companion: sinking funds,{name} is {amount} short of its plan.,ينقص {name} مبلغ {amount} عن خطته.,Il manque {amount} à {name} par rapport à son plan.
+web_fund_name,Web Companion: sinking funds,Name,الاسم,Nom
+web_fund_name_hint,Web Companion: sinking funds,e.g. 2nd installment,مثال: القسط الثاني,ex. 2e versement
+web_fund_due,Web Companion: sinking funds,Due on,تاريخ الاستحقاق,Échéance
+web_fund_parts_note,Web Companion: sinking funds,"Each part is saved and paid in its own currency, never converted.",يُدَّخر كل جزء ويُدفع بعملته، دون تحويل.,"Chaque part est épargnée et payée dans sa devise, jamais convertie."
+web_fund_add_currency,Web Companion: sinking funds,Add another currency,إضافة عملة أخرى,Ajouter une autre devise
+web_fund_remove_part,Web Companion: sinking funds,Remove this currency,إزالة هذه العملة,Retirer cette devise
+web_fund_one_per_currency,Web Companion: sinking funds,Use one amount per currency.,استخدم مبلغاً واحداً لكل عملة.,Un seul montant par devise.
+web_fund_saved,Web Companion: sinking funds,Payment saved,تم حفظ الدفعة,Paiement enregistré
+web_fund_deleted,Web Companion: sinking funds,Payment deleted,تم حذف الدفعة,Paiement supprimé
+web_fund_delete_title,Web Companion: sinking funds,Delete this payment?,حذف هذه الدفعة؟,Supprimer ce paiement ?
+web_fund_delete_msg,Web Companion: sinking funds,It leaves the schedule; nothing is paid or refunded.,ستُزال من الجدول؛ لا يُدفع أو يُسترد شيء.,Il quitte le calendrier ; rien n'est payé ni remboursé.
+web_fund_copy_help,Web Companion: sinking funds,"Last year's payments, one year later. Change them to the new amounts after adding, or raise them here.",دفعات العام الماضي بعد سنة. عدّلها للمبالغ الجديدة بعد الإضافة، أو ارفعها هنا.,"Les paiements de l'an dernier, un an plus tard. Ajustez-les aux nouveaux montants après l'ajout, ou augmentez-les ici."
+web_fund_raise,Web Companion: sinking funds,Raise all amounts (%),رفع كل المبالغ (%),Augmenter tous les montants (%)
+web_fund_already,Web Companion: sinking funds,already planned,مخطط مسبقاً,déjà prévu
+web_fund_last_year,Web Companion: sinking funds,last year {amount},العام الماضي {amount},l'an dernier {amount}
+web_fund_copy_note,Web Companion: sinking funds,Use this when the new schedule is decided; nothing is copied on its own. Each payment stays editable until it's paid.,استخدم هذا عند تحديد الجدول الجديد؛ لا يُنسخ شيء تلقائياً. تبقى كل دفعة قابلة للتعديل حتى تُدفع.,À utiliser quand le nouveau calendrier est fixé ; rien n'est copié tout seul. Chaque paiement reste modifiable jusqu'à son règlement.
+web_fund_copy_add,Web Companion: sinking funds,Add payments,إضافة الدفعات,Ajouter les paiements
+web_fund_copy_none,Web Companion: sinking funds,No payments from the past year to copy.,لا دفعات من العام الماضي لنسخها.,Aucun paiement de l'année passée à copier.
+web_fund_copied,Web Companion: sinking funds,Payments added: {n},الدفعات المضافة: {n},Paiements ajoutés : {n}
+web_fund_need_category,Web Companion: sinking funds,Link a category to this fund (in the app) so payments come out of it.,اربط فئة بهذا الصندوق (في التطبيق) لتُدفع المصاريف منه.,Liez une catégorie à ce fonds (dans l'app) pour que les paiements en sortent.
+web_fund_in_days,Web Companion: sinking funds,in {n} days,بعد {n} يوم,dans {n} jours
+web_fund_saving_chip,Web Companion: sinking funds,Saving · {saved} of {total},ادخار · {saved} من {total},Épargne · {saved} sur {total}
+sink_saving_chip,Subscription row: a sinking fund saves for this bill,Saving · {saved} of {total},ادخار · {saved} من {total},Épargne · {saved} sur {total}

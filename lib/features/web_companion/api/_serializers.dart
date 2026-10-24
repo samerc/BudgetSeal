@@ -24,6 +24,7 @@ Map<String, dynamic> txToJson(
   Map<String, Account> acctMap, {
   TransactionLine? firstLine,
   int lineCount = 0,
+  List<TransactionLine>? parts,
 }) {
   // Split and single-line transactions keep the category on the line.
   final catId = t.categoryId ?? firstLine?.categoryId;
@@ -53,6 +54,17 @@ Map<String, dynamic> txToJson(
       'lineAmount': firstLine.amount,
       'lineExchangeRate': firstLine.exchangeRateToBase,
     },
+    // A planned payment in several currencies (sinking funds): each part.
+    if (parts != null && parts.length > 1)
+      'parts': [
+        for (final l in parts)
+          {
+            'amount': l.amount,
+            'currency': l.currency,
+            'accountId': l.accountId ?? t.accountId,
+            'accountName': acctMap[l.accountId ?? t.accountId]?.name,
+          },
+      ],
   };
 }
 

@@ -8850,4 +8850,206 @@ class SEn extends S {
   String sinkSavingForDate(String date) {
     return 'Saving for $date';
   }
+
+  @override
+  String get webFundSection => 'Sinking funds';
+
+  @override
+  String get webFundKind => 'Sinking fund';
+
+  @override
+  String webFundNext(String date) {
+    return 'Next: $date';
+  }
+
+  @override
+  String webFundThisMonth(String amount) {
+    return '$amount this month';
+  }
+
+  @override
+  String get webFundOnTrack => 'on track';
+
+  @override
+  String get webFundOnTrackCap => 'On track';
+
+  @override
+  String get webFundCatchingUp => 'catching up';
+
+  @override
+  String get webFundFundedMonth => 'Funded for this month';
+
+  @override
+  String webFundBehind(String amount) {
+    return 'Behind by $amount';
+  }
+
+  @override
+  String webFundBehindChoose(String amount) {
+    return 'Behind by $amount · choose how to catch up';
+  }
+
+  @override
+  String get webFundNoPayments => 'No payments planned yet';
+
+  @override
+  String webFundOf(String saved, String total) {
+    return '$saved of $total';
+  }
+
+  @override
+  String webFundSavingFor(String date) {
+    return 'Saving for $date';
+  }
+
+  @override
+  String get webFundSchedule => 'Schedule';
+
+  @override
+  String get webFundFundMonth => 'Fund this month';
+
+  @override
+  String get webFundCatchUp => 'Catch up';
+
+  @override
+  String get webFundPlan => 'Monthly plan';
+
+  @override
+  String get webFundPlanNote =>
+      'Recalculated every month from what\'s saved and what\'s due next.';
+
+  @override
+  String get webFundPayments => 'Payments';
+
+  @override
+  String get webFundPaid => 'Paid';
+
+  @override
+  String get webFundBill => 'Recurring bill';
+
+  @override
+  String get webFundAddPayment => 'Add payment';
+
+  @override
+  String get webFundEditPayment => 'Edit payment';
+
+  @override
+  String get webFundCopy => 'Copy from last year';
+
+  @override
+  String get webFundWhenBehind => 'When behind';
+
+  @override
+  String get webFundModeAsk => 'Ask me';
+
+  @override
+  String get webFundModeSpread => 'Spread it out';
+
+  @override
+  String get webFundModeTopup => 'Top up now';
+
+  @override
+  String get webFundSpreadSub =>
+      'Smaller steps: the monthly amount goes up until the payment.';
+
+  @override
+  String webFundTopupNow(String now, String steady) {
+    return '$now now, then $steady a month';
+  }
+
+  @override
+  String get webFundTopupSub =>
+      'Back on track today; the monthly amount stays steady.';
+
+  @override
+  String get webFundAlways => 'Always do this for this fund';
+
+  @override
+  String webFundBehindExplain(String name, String amount) {
+    return '$name is $amount short of its plan.';
+  }
+
+  @override
+  String get webFundName => 'Name';
+
+  @override
+  String get webFundNameHint => 'e.g. 2nd installment';
+
+  @override
+  String get webFundDue => 'Due on';
+
+  @override
+  String get webFundPartsNote =>
+      'Each part is saved and paid in its own currency, never converted.';
+
+  @override
+  String get webFundAddCurrency => 'Add another currency';
+
+  @override
+  String get webFundRemovePart => 'Remove this currency';
+
+  @override
+  String get webFundOnePerCurrency => 'Use one amount per currency.';
+
+  @override
+  String get webFundSaved => 'Payment saved';
+
+  @override
+  String get webFundDeleted => 'Payment deleted';
+
+  @override
+  String get webFundDeleteTitle => 'Delete this payment?';
+
+  @override
+  String get webFundDeleteMsg =>
+      'It leaves the schedule; nothing is paid or refunded.';
+
+  @override
+  String get webFundCopyHelp =>
+      'Last year\'s payments, one year later. Change them to the new amounts after adding, or raise them here.';
+
+  @override
+  String get webFundRaise => 'Raise all amounts (%)';
+
+  @override
+  String get webFundAlready => 'already planned';
+
+  @override
+  String webFundLastYear(String amount) {
+    return 'last year $amount';
+  }
+
+  @override
+  String get webFundCopyNote =>
+      'Use this when the new schedule is decided; nothing is copied on its own. Each payment stays editable until it\'s paid.';
+
+  @override
+  String get webFundCopyAdd => 'Add payments';
+
+  @override
+  String get webFundCopyNone => 'No payments from the past year to copy.';
+
+  @override
+  String webFundCopied(String n) {
+    return 'Payments added: $n';
+  }
+
+  @override
+  String get webFundNeedCategory =>
+      'Link a category to this fund (in the app) so payments come out of it.';
+
+  @override
+  String webFundInDays(String n) {
+    return 'in $n days';
+  }
+
+  @override
+  String webFundSavingChip(String saved, String total) {
+    return 'Saving · $saved of $total';
+  }
+
+  @override
+  String sinkSavingChip(String saved, String total) {
+    return 'Saving · $saved of $total';
+  }
 }

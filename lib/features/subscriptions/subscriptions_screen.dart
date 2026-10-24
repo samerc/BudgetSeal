@@ -557,6 +557,40 @@ class _SubscriptionTile extends ConsumerWidget {
     final catColor = categoryColor != null
         ? AppColors.fromHex(categoryColor!)
         : AppColors.accent;
+
+    // A sinking fund saving for this bill: what it holds toward the next one.
+    Widget? saving;
+    final id = sub['id']?.toString();
+    for (final f in (ref.watch(sinkingFundsProvider).value ?? const {}).values) {
+      final next = f.plan.upcoming.where((p) => p.recurringId == id).firstOrNull;
+      if (next == null) continue;
+      final saved = savedToward(next, f.balances)[currency] ?? 0;
+      final behind = f.plan.isBehind;
+      final color = behind ? AppColors.caution : AppColors.healthy;
+      saving = Tappable(
+        onTap: () => context.push('/allocations/${f.allocation.id}'),
+        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+        color: AppColors.pastel(context, color, light: 0.85, dark: 0.78),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          child: Text(
+              [
+                tr.sinkSavingChip(formatAmount(saved, currency: currency),
+                    formatAmount(next.amounts[currency] ?? amount,
+                        currency: currency)),
+                if (behind) tr.sinkCatchingUp,
+              ].join(' · '),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.pastel(context, color,
+                      light: 0.35, dark: 0.35, inverse: true))),
+        ),
+      );
+      break;
+    }
     final amountColor = billing
         ? ref.watch(txColorsProvider).forType(type)
         : AppColors.th(context);
@@ -599,6 +633,9 @@ class _SubscriptionTile extends ConsumerWidget {
               color: subscriptionStatusColor(context, status),
               label: subscriptionStatusLabel(tr, status),
             ),
+      extra: saving == null
+          ? null
+          : Align(alignment: AlignmentDirectional.centerStart, child: saving),
       toggle: SizedBox(
         width: 32,
         height: 32,

@@ -8864,4 +8864,204 @@ class SAr extends S {
   String sinkSavingForDate(String date) {
     return 'ادخار لـ $date';
   }
+
+  @override
+  String get webFundSection => 'صناديق الادخار المجدولة';
+
+  @override
+  String get webFundKind => 'صندوق ادخار مجدول';
+
+  @override
+  String webFundNext(String date) {
+    return 'التالي: $date';
+  }
+
+  @override
+  String webFundThisMonth(String amount) {
+    return '$amount هذا الشهر';
+  }
+
+  @override
+  String get webFundOnTrack => 'على المسار';
+
+  @override
+  String get webFundOnTrackCap => 'على المسار';
+
+  @override
+  String get webFundCatchingUp => 'يلحق بالخطة';
+
+  @override
+  String get webFundFundedMonth => 'مموَّل لهذا الشهر';
+
+  @override
+  String webFundBehind(String amount) {
+    return 'متأخر بمبلغ $amount';
+  }
+
+  @override
+  String webFundBehindChoose(String amount) {
+    return 'متأخر بمبلغ $amount · اختر طريقة اللحاق';
+  }
+
+  @override
+  String get webFundNoPayments => 'لا دفعات مخططة بعد';
+
+  @override
+  String webFundOf(String saved, String total) {
+    return '$saved من $total';
+  }
+
+  @override
+  String webFundSavingFor(String date) {
+    return 'ادخار لـ $date';
+  }
+
+  @override
+  String get webFundSchedule => 'الجدول';
+
+  @override
+  String get webFundFundMonth => 'موّل هذا الشهر';
+
+  @override
+  String get webFundCatchUp => 'اللحاق بالخطة';
+
+  @override
+  String get webFundPlan => 'الخطة الشهرية';
+
+  @override
+  String get webFundPlanNote =>
+      'يُعاد حسابها كل شهر بحسب المدَّخر والمستحق التالي.';
+
+  @override
+  String get webFundPayments => 'الدفعات';
+
+  @override
+  String get webFundPaid => 'مدفوعة';
+
+  @override
+  String get webFundBill => 'فاتورة متكررة';
+
+  @override
+  String get webFundAddPayment => 'إضافة دفعة';
+
+  @override
+  String get webFundEditPayment => 'تعديل الدفعة';
+
+  @override
+  String get webFundCopy => 'نسخ من العام الماضي';
+
+  @override
+  String get webFundWhenBehind => 'عند التأخر';
+
+  @override
+  String get webFundModeAsk => 'اسألني';
+
+  @override
+  String get webFundModeSpread => 'توزيعه على الأشهر';
+
+  @override
+  String get webFundModeTopup => 'التعويض الآن';
+
+  @override
+  String get webFundSpreadSub =>
+      'خطوات أصغر: يرتفع المبلغ الشهري حتى موعد الدفعة.';
+
+  @override
+  String webFundTopupNow(String now, String steady) {
+    return '$now الآن، ثم $steady شهرياً';
+  }
+
+  @override
+  String get webFundTopupSub =>
+      'تعود إلى المسار اليوم؛ ويبقى المبلغ الشهري ثابتاً.';
+
+  @override
+  String get webFundAlways => 'افعل هذا دائماً لهذا الصندوق';
+
+  @override
+  String webFundBehindExplain(String name, String amount) {
+    return 'ينقص $name مبلغ $amount عن خطته.';
+  }
+
+  @override
+  String get webFundName => 'الاسم';
+
+  @override
+  String get webFundNameHint => 'مثال: القسط الثاني';
+
+  @override
+  String get webFundDue => 'تاريخ الاستحقاق';
+
+  @override
+  String get webFundPartsNote => 'يُدَّخر كل جزء ويُدفع بعملته، دون تحويل.';
+
+  @override
+  String get webFundAddCurrency => 'إضافة عملة أخرى';
+
+  @override
+  String get webFundRemovePart => 'إزالة هذه العملة';
+
+  @override
+  String get webFundOnePerCurrency => 'استخدم مبلغاً واحداً لكل عملة.';
+
+  @override
+  String get webFundSaved => 'تم حفظ الدفعة';
+
+  @override
+  String get webFundDeleted => 'تم حذف الدفعة';
+
+  @override
+  String get webFundDeleteTitle => 'حذف هذه الدفعة؟';
+
+  @override
+  String get webFundDeleteMsg => 'ستُزال من الجدول؛ لا يُدفع أو يُسترد شيء.';
+
+  @override
+  String get webFundCopyHelp =>
+      'دفعات العام الماضي بعد سنة. عدّلها للمبالغ الجديدة بعد الإضافة، أو ارفعها هنا.';
+
+  @override
+  String get webFundRaise => 'رفع كل المبالغ (%)';
+
+  @override
+  String get webFundAlready => 'مخطط مسبقاً';
+
+  @override
+  String webFundLastYear(String amount) {
+    return 'العام الماضي $amount';
+  }
+
+  @override
+  String get webFundCopyNote =>
+      'استخدم هذا عند تحديد الجدول الجديد؛ لا يُنسخ شيء تلقائياً. تبقى كل دفعة قابلة للتعديل حتى تُدفع.';
+
+  @override
+  String get webFundCopyAdd => 'إضافة الدفعات';
+
+  @override
+  String get webFundCopyNone => 'لا دفعات من العام الماضي لنسخها.';
+
+  @override
+  String webFundCopied(String n) {
+    return 'الدفعات المضافة: $n';
+  }
+
+  @override
+  String get webFundNeedCategory =>
+      'اربط فئة بهذا الصندوق (في التطبيق) لتُدفع المصاريف منه.';
+
+  @override
+  String webFundInDays(String n) {
+    return 'بعد $n يوم';
+  }
+
+  @override
+  String webFundSavingChip(String saved, String total) {
+    return 'ادخار · $saved من $total';
+  }
+
+  @override
+  String sinkSavingChip(String saved, String total) {
+    return 'ادخار · $saved من $total';
+  }
 }

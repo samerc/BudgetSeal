@@ -4,7 +4,9 @@ import '../../../core/database/app_database.dart';
 import '../../../core/database/daos/ledger_dao.dart';
 import '../../../core/engine/balance_calculator.dart';
 import '../../../core/engine/period_engine.dart';
+import '../../../core/engine/sinking_fund.dart';
 import '../../../core/providers/seal_provider.dart' show isEnvelopeSealed;
+import '../../../core/providers/sinking_fund_provider.dart';
 import '_serializers.dart';
 
 /// Envelopes (in the Budget tab's order), Ready to assign per currency and
@@ -74,6 +76,17 @@ Future<Map<String, dynamic>> budgetSnapshot(
     }
   }
 
+  // Sinking funds: schedule and plan, as on the phone's fund screen.
+  final sinking = allocs.where((a) => a.type == 'sinking').toList();
+  final funds = sinking.isEmpty
+      ? const <String, SinkingFund>{}
+      : await loadSinkingFunds(db,
+          householdId: householdId,
+          funds: {for (final a in sinking) a: allocBalances[a.id] ?? const {}},
+          liveAllocations: allocs,
+          categories: cats,
+          startDay: household?.periodStartDay ?? 1);
+
   return {
     'household': {
       'id': household?.id,
@@ -100,8 +113,62 @@ Future<Map<String, dynamic>> budgetSnapshot(
               // Fully funded: the app's wax seal.
               'sealed': isEnvelopeSealed(
                   a, allocBalances[a.id] ?? const {}, funded[a.id], base),
+              if (funds[a.id] case final f?)
+                'fund': fundToJson(f,
+                    cats.where((c) => c.allocationId == a.id).firstOrNull?.id),
             })
         .toList(),
     'unallocated': unallocated,
+  };
+}
+
+Map<String, dynamic> _payment(FundPayment p) => {
+      'title': p.title,
+      'date': p.date.toIso8601String(),
+      'amounts': p.amounts,
+      'paid': p.paid,
+      'planId': p.planId,
+      'recurringId': p.recurringId,
+    };
+
+/// A sinking fund for the Web Companion: what this month takes (by its
+/// catch-up setting), how far behind, the monthly plan, the payments (paid
+/// in the past year, then ahead) and the "Copy from last year" candidates.
+Map<String, dynamic> fundToJson(SinkingFund f, String? categoryId) {
+  final plan = f.plan;
+  final next = plan.next;
+  final topUpSteps = plan.steps(BehindMode.topUp);
+  return {
+    'categoryId': categoryId,
+    'mode': f.allocation.behindMode ?? 'ask',
+    'mustChoose': f.mustChoose,
+    'behind': plan.behind,
+    'thisMonth': f.thisPeriod,
+    'spreadNow': plan.remaining(BehindMode.spread),
+    'topUpNow': plan.remaining(BehindMode.topUp),
+    'steady': topUpSteps.length > 1 ? topUpSteps[1].amounts : const {},
+    if (next != null)
+      'next': {
+        ..._payment(next),
+        'saved': savedToward(next, f.balances),
+      },
+    'steps': [
+      for (final s in plan.steps(
+          f.mode == BehindMode.topUp ? BehindMode.topUp : BehindMode.spread))
+        {
+          'from': s.from.toIso8601String(),
+          'to': s.to.toIso8601String(),
+          'amounts': s.amounts,
+        },
+    ],
+    'payments': [
+      for (final p in f.paid.reversed) _payment(p),
+      for (final p in plan.upcoming) _payment(p),
+    ],
+    'copy': [
+      for (final c in copyFromLastYear(f.history))
+        {..._payment(c.payment), 'alreadyPlanned': c.alreadyPlanned,
+          'accountIds': c.payment.accountIds},
+    ],
   };
 }

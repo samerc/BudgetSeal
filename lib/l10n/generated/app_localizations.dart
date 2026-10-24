@@ -15323,6 +15323,342 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Saving for {date}'**
   String sinkSavingForDate(String date);
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Sinking funds'**
+  String get webFundSection;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Sinking fund'**
+  String get webFundKind;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {date}'**
+  String webFundNext(String date);
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} this month'**
+  String webFundThisMonth(String amount);
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'on track'**
+  String get webFundOnTrack;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'On track'**
+  String get webFundOnTrackCap;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'catching up'**
+  String get webFundCatchingUp;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Funded for this month'**
+  String get webFundFundedMonth;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Behind by {amount}'**
+  String webFundBehind(String amount);
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Behind by {amount} · choose how to catch up'**
+  String webFundBehindChoose(String amount);
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'No payments planned yet'**
+  String get webFundNoPayments;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'{saved} of {total}'**
+  String webFundOf(String saved, String total);
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Saving for {date}'**
+  String webFundSavingFor(String date);
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get webFundSchedule;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Fund this month'**
+  String get webFundFundMonth;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Catch up'**
+  String get webFundCatchUp;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly plan'**
+  String get webFundPlan;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Recalculated every month from what\'s saved and what\'s due next.'**
+  String get webFundPlanNote;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Payments'**
+  String get webFundPayments;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get webFundPaid;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring bill'**
+  String get webFundBill;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Add payment'**
+  String get webFundAddPayment;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Edit payment'**
+  String get webFundEditPayment;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Copy from last year'**
+  String get webFundCopy;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'When behind'**
+  String get webFundWhenBehind;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Ask me'**
+  String get webFundModeAsk;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Spread it out'**
+  String get webFundModeSpread;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Top up now'**
+  String get webFundModeTopup;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Smaller steps: the monthly amount goes up until the payment.'**
+  String get webFundSpreadSub;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'{now} now, then {steady} a month'**
+  String webFundTopupNow(String now, String steady);
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Back on track today; the monthly amount stays steady.'**
+  String get webFundTopupSub;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Always do this for this fund'**
+  String get webFundAlways;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is {amount} short of its plan.'**
+  String webFundBehindExplain(String name, String amount);
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get webFundName;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 2nd installment'**
+  String get webFundNameHint;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Due on'**
+  String get webFundDue;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Each part is saved and paid in its own currency, never converted.'**
+  String get webFundPartsNote;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Add another currency'**
+  String get webFundAddCurrency;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this currency'**
+  String get webFundRemovePart;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Use one amount per currency.'**
+  String get webFundOnePerCurrency;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Payment saved'**
+  String get webFundSaved;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Payment deleted'**
+  String get webFundDeleted;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this payment?'**
+  String get webFundDeleteTitle;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'It leaves the schedule; nothing is paid or refunded.'**
+  String get webFundDeleteMsg;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Last year\'s payments, one year later. Change them to the new amounts after adding, or raise them here.'**
+  String get webFundCopyHelp;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Raise all amounts (%)'**
+  String get webFundRaise;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'already planned'**
+  String get webFundAlready;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'last year {amount}'**
+  String webFundLastYear(String amount);
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Use this when the new schedule is decided; nothing is copied on its own. Each payment stays editable until it\'s paid.'**
+  String get webFundCopyNote;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Add payments'**
+  String get webFundCopyAdd;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'No payments from the past year to copy.'**
+  String get webFundCopyNone;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Payments added: {n}'**
+  String webFundCopied(String n);
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Link a category to this fund (in the app) so payments come out of it.'**
+  String get webFundNeedCategory;
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'in {n} days'**
+  String webFundInDays(String n);
+
+  /// Web Companion: sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'Saving · {saved} of {total}'**
+  String webFundSavingChip(String saved, String total);
+
+  /// Subscription row: a sinking fund saves for this bill
+  ///
+  /// In en, this message translates to:
+  /// **'Saving · {saved} of {total}'**
+  String sinkSavingChip(String saved, String total);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

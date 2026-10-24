@@ -171,6 +171,9 @@ class RecurringRow extends StatelessWidget {
   final Widget amount;
   final String subtitle;
   final Widget? status;
+
+  /// Under the status: e.g. the sinking fund saving for a yearly bill.
+  final Widget? extra;
   final Widget toggle;
   final VoidCallback onTap;
 
@@ -181,6 +184,7 @@ class RecurringRow extends StatelessWidget {
     required this.amount,
     required this.subtitle,
     this.status,
+    this.extra,
     required this.toggle,
     required this.onTap,
   });
@@ -227,6 +231,10 @@ class RecurringRow extends StatelessWidget {
                     if (status != null) ...[
                       const SizedBox(height: 4),
                       status!,
+                    ],
+                    if (extra != null) ...[
+                      const SizedBox(height: 6),
+                      extra!,
                     ],
                   ],
                 ),

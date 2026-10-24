@@ -699,7 +699,9 @@ select.input { appearance: none; cursor: pointer; background-image: url("data:im
 
 .modal-overlay {
   position: fixed; inset: 0; z-index: 100;
-  display: grid; place-items: center;
+  /* Auto margins center the dialog, and a tall one scrolls from its top
+     (place-items: center would push its top out of reach). */
+  display: grid; place-items: start center;
   padding: 20px 16px;
   background: var(--scrim);
   animation: fadeIn 150ms;
@@ -714,6 +716,7 @@ select.input { appearance: none; cursor: pointer; background-image: url("data:im
   padding: 26px 26px 20px;
   animation: pop 220ms var(--ease);
 }
+.modal-overlay > .modal { margin-block: auto; }
 .modal.narrow { max-width: 400px; }
 .modal-title { font-size: 18px; font-weight: 700; line-height: 1.3; margin-bottom: 16px; }
 .modal.confirm .modal-title { margin-bottom: 8px; }
@@ -971,3 +974,25 @@ kbd {
   .day-card-head, .day-card:has(.row-actions) .day-card-head { padding-inline: 10px; }
   .tx-after { max-width: 50%; }
 }
+
+/* Sinking funds */
+.fund-bar { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.fund-bar .bar { flex: 1; }
+.fund-cur { font-size: 11px; font-weight: 800; color: var(--text-2); min-width: 32px; }
+.fund-of { font-size: 12px; color: var(--text-2); white-space: nowrap; }
+.fund-warn { color: var(--caution); font-weight: 700; }
+.fund-hero { background: var(--container); border-radius: 18px; padding: 14px 16px; margin-bottom: 12px; }
+.fund-month { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; font-weight: 700; }
+.fund-options { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.fund-option { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 16px; background: var(--container); cursor: pointer; box-shadow: inset 0 0 0 1.5px transparent; }
+.fund-option.active { background: var(--chip-fill); box-shadow: inset 0 0 0 1.5px var(--chip); }
+.fund-option strong { display: block; }
+.fund-option .help { display: block; margin-top: 2px; }
+.fund-part { align-items: center; }
+.fund-part .field { margin-bottom: 8px; }
+.help.warn { color: var(--caution); }
+.fund-list .row { padding: 8px 0; }
+.fund-list .row-end { text-align: end; }
+.fund-list .row-title, .fund-list .row-sub { white-space: normal; }
+.fund-hero:focus { outline: none; }
+.fund-hero .bar { background: var(--card); }

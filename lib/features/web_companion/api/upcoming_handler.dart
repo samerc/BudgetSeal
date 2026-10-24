@@ -152,7 +152,8 @@ Handler listPlannedHandler(Ref ref) {
           for (final t in txs)
             txToJson(t, cats, accts,
                 firstLine: byTx[t.id]?.first,
-                lineCount: byTx[t.id]?.length ?? 0),
+                lineCount: byTx[t.id]?.length ?? 0,
+                parts: byTx[t.id]),
         ],
         'baseCurrency': await _base(db, householdId),
       });
@@ -163,8 +164,10 @@ Handler listPlannedHandler(Ref ref) {
 }
 
 // ── POST /api/planned · PUT /api/planned/:id ──────────────────────────────────
-// { type, accountId, destinationAccountId?, amount, categoryId?, note?, date }
-// in the (source) account's currency, rate 1.0 until it's posted.
+// { type, accountId, destinationAccountId?, amount, categoryId?, note?, date,
+//   parts?: [{ accountId, amount }] }
+// in the (source) account's currency, rate 1.0 until it's posted. `parts`
+// (expenses only) gives one line per currency, each from its own account.
 
 Future<Response> _savePlanned(Ref ref, Request request, String? id) async {
   final body = await parseBody(request);
@@ -185,9 +188,37 @@ Future<Response> _savePlanned(Ref ref, Request request, String? id) async {
   final destId = type == 'transfer' ? optString(body, 'destinationAccountId') : null;
   final categoryId = type == 'transfer' ? null : optString(body, 'categoryId');
   final note = truncate((optString(body, 'note') ?? '').trim(), kMaxNoteLength);
+  final rawParts = body['parts'];
+  if (rawParts != null &&
+      (type != 'expense' ||
+          rawParts is! List ||
+          rawParts.isEmpty ||
+          rawParts.length > 10 ||
+          rawParts.any((p) => p is! Map<String, dynamic>))) {
+    return badRequest('parts must be a list of { accountId, amount } (expenses only)');
+  }
 
   final db = ref.read(databaseProvider);
   try {
+    final parts = <PlanPart>[];
+    for (final p in (rawParts as List?)?.cast<Map<String, dynamic>>() ??
+        const <Map<String, dynamic>>[]) {
+      final partAmount = requireAmount(p, 'amount');
+      final partAccount = requireString(p, 'accountId');
+      if (partAmount == null || partAccount == null) {
+        return badRequest('each part needs an accountId and a positive amount');
+      }
+      final acc = await (db.select(db.accounts)
+            ..where((a) =>
+                a.id.equals(partAccount) & a.householdId.equals(householdId)))
+          .getSingleOrNull();
+      if (acc == null) return badRequest('part accountId does not exist');
+      if (parts.any((x) => x.currency == acc.currency)) {
+        return badRequest('one part per currency');
+      }
+      parts.add(PlanPart(
+          amount: partAmount, currency: acc.currency, accountId: acc.id));
+    }
     final account = await (db.select(db.accounts)
           ..where((a) => a.id.equals(accountId) & a.householdId.equals(householdId)))
         .getSingleOrNull();
@@ -230,6 +261,7 @@ Future<Response> _savePlanned(Ref ref, Request request, String? id) async {
       date: date,
       createdBy: 'web',
       deviceId: 'web',
+      parts: parts,
     );
     return id == null ? created({'id': newId}) : ok({'id': newId});
   } catch (e) {

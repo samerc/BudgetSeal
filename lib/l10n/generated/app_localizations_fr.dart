@@ -8948,4 +8948,206 @@ class SFr extends S {
   String sinkSavingForDate(String date) {
     return 'Pour le $date';
   }
+
+  @override
+  String get webFundSection => 'Fonds planifiés';
+
+  @override
+  String get webFundKind => 'Fonds planifié';
+
+  @override
+  String webFundNext(String date) {
+    return 'Prochain : $date';
+  }
+
+  @override
+  String webFundThisMonth(String amount) {
+    return '$amount ce mois-ci';
+  }
+
+  @override
+  String get webFundOnTrack => 'dans les temps';
+
+  @override
+  String get webFundOnTrackCap => 'Dans les temps';
+
+  @override
+  String get webFundCatchingUp => 'en rattrapage';
+
+  @override
+  String get webFundFundedMonth => 'Financé pour ce mois-ci';
+
+  @override
+  String webFundBehind(String amount) {
+    return 'En retard de $amount';
+  }
+
+  @override
+  String webFundBehindChoose(String amount) {
+    return 'En retard de $amount · choisissez comment rattraper';
+  }
+
+  @override
+  String get webFundNoPayments => 'Aucun paiement prévu';
+
+  @override
+  String webFundOf(String saved, String total) {
+    return '$saved sur $total';
+  }
+
+  @override
+  String webFundSavingFor(String date) {
+    return 'Pour le $date';
+  }
+
+  @override
+  String get webFundSchedule => 'Calendrier';
+
+  @override
+  String get webFundFundMonth => 'Financer ce mois-ci';
+
+  @override
+  String get webFundCatchUp => 'Rattraper';
+
+  @override
+  String get webFundPlan => 'Plan mensuel';
+
+  @override
+  String get webFundPlanNote =>
+      'Recalculé chaque mois selon ce qui est épargné et ce qui arrive.';
+
+  @override
+  String get webFundPayments => 'Paiements';
+
+  @override
+  String get webFundPaid => 'Payé';
+
+  @override
+  String get webFundBill => 'Facture récurrente';
+
+  @override
+  String get webFundAddPayment => 'Ajouter un paiement';
+
+  @override
+  String get webFundEditPayment => 'Modifier le paiement';
+
+  @override
+  String get webFundCopy => 'Copier l\'an dernier';
+
+  @override
+  String get webFundWhenBehind => 'En cas de retard';
+
+  @override
+  String get webFundModeAsk => 'Me demander';
+
+  @override
+  String get webFundModeSpread => 'Étaler';
+
+  @override
+  String get webFundModeTopup => 'Compléter maintenant';
+
+  @override
+  String get webFundSpreadSub =>
+      'Par petites étapes : le montant mensuel augmente jusqu\'au paiement.';
+
+  @override
+  String webFundTopupNow(String now, String steady) {
+    return '$now maintenant, puis $steady par mois';
+  }
+
+  @override
+  String get webFundTopupSub =>
+      'De retour dans les temps aujourd\'hui ; le montant mensuel reste stable.';
+
+  @override
+  String get webFundAlways => 'Toujours faire ainsi pour ce fonds';
+
+  @override
+  String webFundBehindExplain(String name, String amount) {
+    return 'Il manque $amount à $name par rapport à son plan.';
+  }
+
+  @override
+  String get webFundName => 'Nom';
+
+  @override
+  String get webFundNameHint => 'ex. 2e versement';
+
+  @override
+  String get webFundDue => 'Échéance';
+
+  @override
+  String get webFundPartsNote =>
+      'Chaque part est épargnée et payée dans sa devise, jamais convertie.';
+
+  @override
+  String get webFundAddCurrency => 'Ajouter une autre devise';
+
+  @override
+  String get webFundRemovePart => 'Retirer cette devise';
+
+  @override
+  String get webFundOnePerCurrency => 'Un seul montant par devise.';
+
+  @override
+  String get webFundSaved => 'Paiement enregistré';
+
+  @override
+  String get webFundDeleted => 'Paiement supprimé';
+
+  @override
+  String get webFundDeleteTitle => 'Supprimer ce paiement ?';
+
+  @override
+  String get webFundDeleteMsg =>
+      'Il quitte le calendrier ; rien n\'est payé ni remboursé.';
+
+  @override
+  String get webFundCopyHelp =>
+      'Les paiements de l\'an dernier, un an plus tard. Ajustez-les aux nouveaux montants après l\'ajout, ou augmentez-les ici.';
+
+  @override
+  String get webFundRaise => 'Augmenter tous les montants (%)';
+
+  @override
+  String get webFundAlready => 'déjà prévu';
+
+  @override
+  String webFundLastYear(String amount) {
+    return 'l\'an dernier $amount';
+  }
+
+  @override
+  String get webFundCopyNote =>
+      'À utiliser quand le nouveau calendrier est fixé ; rien n\'est copié tout seul. Chaque paiement reste modifiable jusqu\'à son règlement.';
+
+  @override
+  String get webFundCopyAdd => 'Ajouter les paiements';
+
+  @override
+  String get webFundCopyNone => 'Aucun paiement de l\'année passée à copier.';
+
+  @override
+  String webFundCopied(String n) {
+    return 'Paiements ajoutés : $n';
+  }
+
+  @override
+  String get webFundNeedCategory =>
+      'Liez une catégorie à ce fonds (dans l\'app) pour que les paiements en sortent.';
+
+  @override
+  String webFundInDays(String n) {
+    return 'dans $n jours';
+  }
+
+  @override
+  String webFundSavingChip(String saved, String total) {
+    return 'Épargne · $saved sur $total';
+  }
+
+  @override
+  String sinkSavingChip(String saved, String total) {
+    return 'Épargne · $saved sur $total';
+  }
 }

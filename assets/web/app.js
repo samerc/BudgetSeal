@@ -949,7 +949,8 @@ async function renderBudget(quiet) {
   cache.unallocated = d.unallocated || {};
   const period = d.period ? `${fmtDate(d.period.start)} – ${fmtDate(new Date(new Date(d.period.end) - 1))}` : '';
 
-  const cards = cache.envelopes.map(e => {
+  const funds = cache.envelopes.filter(e => e.fund);
+  const cards = cache.envelopes.filter(e => !e.fund).map(e => {
     const f = envFigures(e);
     const kind = f.flexible ? t('web_env_flexible') : t('web_env_spending');
     return `<div class="card env-card${f.over ? ' over' : ''}">
@@ -978,8 +979,316 @@ async function renderBudget(quiet) {
   setContent(`
     ${pageHead(t('web_nav_budget'), esc(period))}
     ${rtaBanner(d.unallocated, base, false, cache.envelopes)}
-    <div class="section-head"><span class="section-title">${esc(t('nav_envelopes'))}</span></div>
-    ${cache.envelopes.length ? `<div class="grid-auto">${cards}</div>` : `<div class="card">${emptyState(IC.envelope, t('web_env_empty_title'), t('web_env_empty_sub'))}</div>`}`);
+    ${funds.length ? `<div class="section-head"><span class="section-title">${esc(t('web_fund_section'))}</span></div>
+      <div class="grid-auto">${funds.map(fundCard).join('')}</div>` : ''}
+    ${cards || !funds.length ? `<div class="section-head"><span class="section-title">${esc(t('nav_envelopes'))}</span></div>` : ''}
+    ${cards ? `<div class="grid-auto">${cards}</div>` : funds.length ? '' : `<div class="card">${emptyState(IC.envelope, t('web_env_empty_title'), t('web_env_empty_sub'))}</div>`}`);
+}
+
+// ── Sinking funds ─────────────────────────────────────────────────────────────
+// The fund data (`e.fund`) comes from the phone's plan (GET /api/envelopes):
+// what this month takes, how far behind, the monthly plan and the payments,
+// in each currency on its own.
+
+function fundCurrencies(m) {
+  const base = state.baseCurrency;
+  return Object.keys(m || {}).sort((a, b) => (a === base ? -1 : b === base ? 1 : a.localeCompare(b)));
+}
+
+/** "$500.00 + LBP 15,000,000": one amount per currency, the base first. */
+function fundAmounts(m) {
+  return fundCurrencies(m).map(c => fmt(m[c], c)).join(' + ');
+}
+
+function fundBehind(f) { return Object.keys(f.behind || {}).length > 0; }
+
+/** What this month takes and how it's going (as on the phone's Budget tab). */
+function fundStatus(f) {
+  if (!f.next) return t('web_fund_no_payments');
+  if (f.mustChoose) return t('web_fund_behind_choose', { amount: fundAmounts(f.behind) });
+  const left = f.thisMonth || {};
+  if (!Object.keys(left).length) return t('web_fund_funded_month') + (fundBehind(f) ? ` · ${t('web_fund_catching_up')}` : '');
+  return `${t('web_fund_this_month', { amount: fundAmounts(left) })} · ${t(fundBehind(f) ? 'web_fund_catching_up' : 'web_fund_on_track')}`;
+}
+
+/** A thin bar per currency: saved toward the next payment. */
+function fundBars(f) {
+  if (!f.next) return '';
+  const cs = fundCurrencies(f.next.amounts);
+  return cs.map(c => {
+    const saved = (f.next.saved || {})[c] || 0, total = f.next.amounts[c] || 0;
+    const pct = total > 0 ? Math.min(100, (saved / total) * 100) : 0;
+    return `<div class="fund-bar">${cs.length > 1 ? `<span class="fund-cur">${esc(c)}</span>` : ''}
+      <div class="bar thin"><span style="width:${pct.toFixed(1)}%;background:var(--healthy)"></span></div>
+      <span class="fund-of num">${esc(t('web_fund_of', { saved: fmt(saved, c), total: fmt(total, c) }))}</span></div>`;
+  }).join('');
+}
+
+/** Fund this month, or Catch up when it's behind and set to ask. */
+function fundAction(e, cls = 'btn-sm btn-tonal') {
+  const f = e.fund;
+  if (!Object.keys(f.thisMonth || {}).length) return '';
+  return f.mustChoose
+    ? `<button class="btn ${cls}" data-action="fund-catchup" data-id="${esc(e.id)}">${esc(t('web_fund_catch_up'))}</button>`
+    : `<button class="btn ${cls}" data-action="fund-month" data-id="${esc(e.id)}">${IC.plus}${esc(t('web_fund_fund_month'))}</button>`;
+}
+
+function fundCard(e) {
+  const f = e.fund;
+  return `<div class="card env-card">
+    <div class="env-top">
+      ${envIcon(e)}
+      <div class="row-main"><div class="env-name">${esc(e.name)}</div>
+        <div class="env-kind">${esc(t('web_fund_kind'))}${f.next ? ` · ${esc(t('web_fund_next', { date: fmtDate(f.next.date, true) }))}` : ''}</div></div>
+    </div>
+    ${fundBars(f)}
+    <div class="env-meta"><span class="${f.mustChoose ? 'fund-warn' : ''}">${esc(fundStatus(f))}</span></div>
+    <div class="env-foot">
+      <span></span>
+      <span class="env-actions">
+        <button class="btn btn-sm btn-ghost" data-action="fund-detail" data-id="${esc(e.id)}">${IC.calendar}${esc(t('web_fund_schedule'))}</button>
+        ${fundAction(e)}
+      </span>
+    </div>
+  </div>`;
+}
+
+async function fundMonth(id, mode = null, always = false) {
+  const r = await api(`/api/envelopes/${encodeURIComponent(id)}/fund-month`, { method: 'POST', body: { mode, always } });
+  if (!r) return false;
+  toast(t('web_toast_env_funded'));
+  invalidate();
+  closeModal();
+  refresh(true);
+  return true;
+}
+
+/** Behind: spread the shortfall over the months left, or top up now. */
+function openCatchUp(id) {
+  const e = (cache.envelopes || []).find(x => x.id === id);
+  if (!e?.fund) return;
+  const f = e.fund;
+  const opt = (mode, title, line, sub, on) => `<label class="fund-option${on ? ' active' : ''}">
+      <input type="radio" name="cu-mode" value="${mode}"${on ? ' checked' : ''}>
+      <span><strong>${esc(title)}</strong><span class="help">${esc(line)}</span><span class="help">${esc(sub)}</span></span></label>`;
+  openModal({
+    title: t('web_fund_catch_up'), narrow: true,
+    submit: t('web_fund_fund_month'),
+    body: `<p class="help">${esc(t('web_fund_behind_explain', { name: e.name, amount: fundAmounts(f.behind) }))}</p>
+      <div class="fund-options">
+        ${opt('spread', t('web_fund_mode_spread'), t('web_fund_this_month', { amount: fundAmounts(f.spreadNow) || '0' }), t('web_fund_spread_sub'), true)}
+        ${opt('topup', t('web_fund_mode_topup'), t('web_fund_topup_now', { now: fundAmounts(f.topUpNow) || '0', steady: fundAmounts(f.steady) || '—' }), t('web_fund_topup_sub'), false)}
+      </div>
+      <label class="check" style="margin-top:12px"><input type="checkbox" id="cu-always"> ${esc(t('web_fund_always'))}</label>`,
+    onOpen: form => form.querySelectorAll('input[name="cu-mode"]').forEach(r => r.addEventListener('change', () =>
+      form.querySelectorAll('.fund-option').forEach(o => o.classList.toggle('active', o.querySelector('input').checked)))),
+    onSubmit: form => fundMonth(id, form.querySelector('input[name="cu-mode"]:checked').value, form.querySelector('#cu-always').checked),
+  });
+}
+
+/** The fund's schedule: next payment, monthly plan, payments, settings. */
+function openFundDetail(id) {
+  const e = (cache.envelopes || []).find(x => x.id === id);
+  if (!e?.fund) return;
+  const f = e.fund;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const range = s => {
+    const a = toDate(s.from), b = toDate(s.to);
+    const ma = monthLabel(a.getFullYear(), a.getMonth()), mb = monthLabel(b.getFullYear(), b.getMonth());
+    return ma === mb ? ma : `${ma} – ${mb}`;
+  };
+  const payRow = p => {
+    const d = toDate(p.date);
+    const days = Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - today) / 86400000);
+    const tag = p.paid ? `<span class="tag">${esc(t('web_fund_paid'))}</span>`
+      : days < 0 ? `<span class="due-label overdue">${esc(dueLabel(days))}</span>`
+      : `<span class="help">${esc(dueLabel(days))}</span>`;
+    const click = p.planId ? ` clickable" data-action="fund-payment" data-id="${esc(id)}" data-plan="${esc(p.planId)}" tabindex="0` : '';
+    return `<div class="row${p.paid ? ' dim' : ''}${click}">
+      <div class="row-main"><div class="row-title">${esc(p.title || fmtDate(p.date, true))}</div>
+        <div class="row-sub">${esc(fmtDate(p.date, true))}${p.recurringId ? ` · ${esc(t('web_fund_bill'))}` : ''}</div></div>
+      <div class="row-end"><div class="row-amount num">${esc(fundAmounts(p.amounts))}</div>${tag}</div>
+    </div>`;
+  };
+  const noCat = !f.categoryId;
+  openModal({
+    title: e.name,
+    body: `
+      <div class="fund-hero" tabindex="-1" autofocus>
+        <div class="help">${f.next ? esc(t('web_fund_saving_for', { date: fmtDate(f.next.date, true) }) + (f.next.title && f.next.title !== e.name ? ` · ${f.next.title}` : '')) : esc(t('web_fund_no_payments'))}</div>
+        ${fundBars(f)}
+        <div class="fund-month"><span class="${f.mustChoose ? 'fund-warn' : ''}">${esc(fundStatus(f))}</span>
+          ${fundBehind(f) ? `<span class="tag warn">${esc(t('web_fund_behind', { amount: fundAmounts(f.behind) }))}</span>` : ''}</div>
+        <div class="chips">${fundAction(e, 'btn-sm btn-primary')}</div>
+      </div>
+      ${noCat ? `<p class="help warn">${esc(t('web_fund_need_category'))}</p>` : ''}
+      ${f.steps?.length ? `<div class="section-head"><span class="section-title">${esc(t('web_fund_plan'))}</span></div>
+        <div class="list fund-list">${f.steps.map(s => `<div class="row"><div class="row-main"><div class="row-title">${esc(range(s))}</div></div>
+          <div class="row-end"><div class="row-amount num">${esc(fundAmounts(s.amounts))}</div></div></div>`).join('')}</div>
+        <p class="help">${esc(t('web_fund_plan_note'))}</p>` : ''}
+      <div class="section-head"><span class="section-title">${esc(t('web_fund_payments'))}</span>
+        <span class="chips" style="margin:0">
+          <button type="button" class="btn btn-sm btn-ghost" data-action="fund-payment" data-id="${esc(id)}"${noCat ? ' disabled' : ''}>${IC.plus}${esc(t('web_fund_add_payment'))}</button>
+          <button type="button" class="btn btn-sm btn-ghost" data-action="fund-copy" data-id="${esc(id)}"${noCat ? ' disabled' : ''}>${IC.copy}${esc(t('web_fund_copy'))}</button>
+        </span></div>
+      ${f.payments?.length ? `<div class="list fund-list">${f.payments.map(payRow).join('')}</div>` : `<p class="help">${esc(t('web_fund_no_payments'))}</p>`}
+      <div class="field" style="margin-top:14px"><label class="label" for="fd-mode">${esc(t('web_fund_when_behind'))}</label>
+        <select id="fd-mode" class="input">${['ask', 'spread', 'topup'].map(m => `<option value="${m}"${f.mode === m ? ' selected' : ''}>${esc(t(`web_fund_mode_${m}`))}</option>`).join('')}</select></div>`,
+    onOpen: form => form.querySelector('#fd-mode').addEventListener('change', async ev => {
+      if (await api(`/api/envelopes/${encodeURIComponent(id)}/behind-mode`, { method: 'PUT', body: { mode: ev.target.value } })) {
+        invalidate();
+        refresh(true);
+      }
+    }),
+  });
+}
+
+/** Add or edit a fund payment: name, due date, one part per currency. */
+async function openFundPayment(fundId, planId = null) {
+  const e = (cache.envelopes || []).find(x => x.id === fundId);
+  const { accounts } = await refs();
+  if (!accounts.length) { toast(t('web_need_account'), true); return; }
+  let plan = null;
+  if (planId) {
+    const d = await api('/api/planned');
+    plan = (d?.items || []).find(p => p.id === planId);
+    if (!plan) return;
+  }
+  const categoryId = plan?.categoryId || e?.fund?.categoryId || null;
+  const parts = plan
+    ? (plan.parts || [{ accountId: plan.accountId, amount: plan.lineAmount ?? plan.amount }])
+    : [{ accountId: accounts[0].id, amount: '' }];
+  const partRow = p => `<div class="field-row keep fund-part">
+      <div class="field"><select class="input fp-acct">${accountOptions(accounts, p.accountId)}</select></div>
+      <div class="field"><input class="input amount num fp-amount" inputmode="decimal" autocomplete="off" placeholder="0"
+        value="${p.amount === '' ? '' : esc(amountInputValue(p.amount, accounts.find(a => a.id === p.accountId)?.currency))}"></div>
+      <button type="button" class="icon-btn fp-del" title="${esc(t('web_fund_remove_part'))}" aria-label="${esc(t('web_fund_remove_part'))}">${IC.trash}</button>
+    </div>`;
+  openModal({
+    title: plan ? t('web_fund_edit_payment') : t('web_fund_add_payment'),
+    submit: t('common_save'),
+    extra: plan ? { label: t('common_delete'), danger: true, run: async () => {
+      if (!(await confirmDialog(t('web_fund_delete_title'), t('web_fund_delete_msg')))) return;
+      if (await api(`/api/planned/${encodeURIComponent(plan.id)}`, { method: 'DELETE' })) {
+        toast(t('web_fund_deleted')); invalidate(); closeModal(); refresh(true);
+      }
+    } } : null,
+    body: `
+      <div class="field-row">
+        <div class="field"><label class="label" for="fp-name">${esc(t('web_fund_name'))}</label><input id="fp-name" class="input" maxlength="500" value="${esc(plan?.note || '')}" placeholder="${esc(t('web_fund_name_hint'))}"></div>
+        <div class="field"><label class="label" for="fp-date">${esc(t('web_fund_due'))}</label><input id="fp-date" type="date" class="input" value="${esc(plan ? dayKey(plan.date) : '')}"></div>
+      </div>
+      <label class="label">${esc(t('web_form_amount'))}</label>
+      <div id="fp-parts">${parts.map(partRow).join('')}</div>
+      <button type="button" class="btn btn-sm btn-ghost" id="fp-add">${IC.plus}${esc(t('web_fund_add_currency'))}</button>
+      <p class="help">${esc(t('web_fund_parts_note'))}</p>`,
+    onOpen: form => {
+      const wrap = form.querySelector('#fp-parts');
+      const sync = () => wrap.querySelectorAll('.fp-del').forEach(b => { b.disabled = wrap.children.length < 2; });
+      wrap.addEventListener('click', ev => { const b = ev.target.closest('.fp-del'); if (b && wrap.children.length > 1) { b.closest('.fund-part').remove(); sync(); } });
+      form.querySelector('#fp-add').addEventListener('click', () => {
+        const used = [...wrap.querySelectorAll('.fp-acct')].map(s => accounts.find(a => a.id === s.value)?.currency);
+        const next = accounts.find(a => !used.includes(a.currency)) || accounts[0];
+        wrap.insertAdjacentHTML('beforeend', partRow({ accountId: next.id, amount: '' }));
+        sync();
+      });
+      sync();
+    },
+    onSubmit: async form => {
+      const rows = [...form.querySelectorAll('.fund-part')].map(r => ({
+        accountId: r.querySelector('.fp-acct').value,
+        amount: parseAmount(r.querySelector('.fp-amount').value),
+      })).filter(p => p.amount > 0);
+      const date = form.querySelector('#fp-date').value;
+      if (!date) { toast(t('web_plan_need_date'), true); return false; }
+      if (!rows.length) { toast(t('web_val_valid_amount'), true); return false; }
+      const curs = rows.map(p => accounts.find(a => a.id === p.accountId)?.currency);
+      if (new Set(curs).size < curs.length) { toast(t('web_fund_one_per_currency'), true); return false; }
+      const body = { type: 'expense', accountId: rows[0].accountId, amount: rows[0].amount, date,
+        note: form.querySelector('#fp-name').value.trim(), categoryId, parts: rows };
+      const r = plan
+        ? await api(`/api/planned/${encodeURIComponent(plan.id)}`, { method: 'PUT', body })
+        : await api('/api/planned', { method: 'POST', body });
+      if (!r) return false;
+      toast(t('web_fund_saved'));
+      invalidate();
+      closeModal();
+      refresh(true);
+      return true;
+    },
+  });
+}
+
+/** Copy from last year: the past year's payments a year later, raised by a
+ *  percentage per currency, saved as plans (still editable). */
+async function openCopyYear(fundId) {
+  const e = (cache.envelopes || []).find(x => x.id === fundId);
+  if (!e?.fund) return;
+  const { accounts } = await refs();
+  const rows = e.fund.copy || [];
+  const curs = fundCurrencies(Object.fromEntries(rows.flatMap(r => Object.keys(r.amounts)).map(c => [c, 1])));
+  const raised = (v, c, pct) => {
+    const d = ZERO_DEC.has(c) ? 0 : 2, f = 10 ** d;
+    return Math.round(v * (1 + (pct || 0) / 100) * f) / f;
+  };
+  openModal({
+    title: t('web_fund_copy'),
+    submit: rows.length ? t('web_fund_copy_add') : null,
+    body: rows.length ? `
+      <p class="help">${esc(t('web_fund_copy_help'))}</p>
+      <div class="field"><label class="label">${esc(t('web_fund_raise'))}</label>
+        <div class="field-row keep">${curs.map(c => `<div class="field"><div class="input-cur"><input class="input num cy-raise" data-cur="${esc(c)}" inputmode="decimal" placeholder="0"><span class="cur">${esc(c)} %</span></div></div>`).join('')}</div></div>
+      <div class="list fund-list" id="cy-rows"></div>
+      <p class="help">${esc(t('web_fund_copy_note'))}</p>` : `<p class="help">${esc(t('web_fund_copy_none'))}</p>`,
+    onOpen: form => {
+      if (!rows.length) return;
+      const off = new Set(rows.map((r, i) => (r.alreadyPlanned ? i : -1)).filter(i => i >= 0));
+      const pct = () => Object.fromEntries([...form.querySelectorAll('.cy-raise')].map(i => [i.dataset.cur, parseAmount(i.value) || 0]));
+      const draw = () => {
+        const p = pct();
+        form.querySelector('#cy-rows').innerHTML = rows.map((r, i) => {
+          const now = Object.fromEntries(Object.entries(r.amounts).map(([c, v]) => [c, raised(v, c, p[c])]));
+          const changed = Object.keys(now).some(c => now[c] !== r.amounts[c]);
+          return `<label class="row">
+            <input type="checkbox" data-i="${i}"${off.has(i) ? '' : ' checked'}>
+            <div class="row-main"><div class="row-title">${esc(fmtDate(r.date, true))}</div>
+              <div class="row-sub">${esc([r.title, r.alreadyPlanned ? t('web_fund_already') : ''].filter(Boolean).join(' · '))}</div>
+              ${changed ? `<div class="row-sub">${esc(t('web_fund_last_year', { amount: fundAmounts(r.amounts) }))}</div>` : ''}</div>
+            <div class="row-end"><div class="row-amount num">${esc(fundAmounts(now))}</div></div></label>`;
+        }).join('');
+      };
+      form.querySelector('#cy-rows').addEventListener('change', ev => {
+        const i = Number(ev.target.dataset.i);
+        if (ev.target.checked) off.delete(i); else off.add(i);
+      });
+      form.querySelectorAll('.cy-raise').forEach(i => i.addEventListener('input', draw));
+      form._copy = { off, pct };
+      draw();
+    },
+    onSubmit: async form => {
+      const { off, pct } = form._copy;
+      const p = pct();
+      let added = 0;
+      for (const [i, r] of rows.entries()) {
+        if (off.has(i)) continue;
+        const parts = Object.entries(r.amounts).map(([c, v]) => {
+          const acct = (r.accountIds || []).map(id => accounts.find(a => a.id === id)).find(a => a?.currency === c)
+            || accounts.find(a => a.currency === c);
+          return acct ? { accountId: acct.id, amount: raised(v, c, p[c]) } : null;
+        }).filter(Boolean);
+        if (!parts.length) continue;
+        const ok = await api('/api/planned', { method: 'POST', body: {
+          type: 'expense', accountId: parts[0].accountId, amount: parts[0].amount,
+          date: dayKey(toDate(r.date)), note: r.title || '', categoryId: e.fund.categoryId, parts } });
+        if (ok) added++;
+      }
+      toast(t('web_fund_copied', { n: added }));
+      invalidate();
+      closeModal();
+      refresh(true);
+      return true;
+    },
+  });
 }
 
 function openFund(id) {
@@ -2728,7 +3037,9 @@ async function renderUpcoming(quiet) {
     return `<div class="row clickable" data-action="plan" data-id="${esc(p.id)}" tabindex="0">
       ${isT ? transferChip() : catChip(p)}
       <div class="row-main"><div class="row-title">${esc(p.note || p.categoryName || t(`type_${p.type}`))}</div><div class="row-sub">${esc(sub)}</div></div>
-      <div class="row-end"><div class="row-amount ${cls}">${esc(fmtSigned(p.lineAmount ?? p.amount, p.lineCurrency || p.currency, p.type))}</div></div>
+      <div class="row-end">${p.parts
+        ? p.parts.map(x => `<div class="row-amount ${cls}">${esc(fmtSigned(x.amount, x.currency, p.type))}</div>`).join('')
+        : `<div class="row-amount ${cls}">${esc(fmtSigned(p.lineAmount ?? p.amount, p.lineCurrency || p.currency, p.type))}</div>`}</div>
     </div>`;
   };
   const months = [];
@@ -2786,9 +3097,9 @@ function openPlan(id) {
   openModal({
     title: p.note || p.categoryName || t(`type_${p.type}`), narrow: true,
     submit: t('web_plan_post'),
-    extra: { label: t('web_goal_edit'), run: () => openPlanForm(p) },
+    extra: { label: t('web_goal_edit'), run: () => (p.parts ? openFundPayment(null, p.id) : openPlanForm(p)) },
     body: `<div class="goal-hero">${p.type === 'transfer' ? transferChip('lg') : catChip(p, 'lg')}
-        <div><div class="env-amount num ${typeCls(p.type)}">${esc(fmtSigned(p.lineAmount ?? p.amount, p.lineCurrency || p.currency, p.type))}</div><div class="env-kind">${esc(fmtDate(p.date, true))} · ${esc(p.accountName || '')}</div></div></div>
+        <div><div class="env-amount num ${typeCls(p.type)}">${esc(p.parts ? p.parts.map(x => fmtSigned(x.amount, x.currency, p.type)).join(' + ') : fmtSigned(p.lineAmount ?? p.amount, p.lineCurrency || p.currency, p.type))}</div><div class="env-kind">${esc(fmtDate(p.date, true))} · ${esc(p.accountName || '')}</div></div></div>
       <p class="help" style="margin-top:14px">${esc(t('web_plan_post_help'))}</p>`,
     onSubmit: () => postPlans([id]),
   });
@@ -3350,6 +3661,11 @@ const actions = {
   'more-tx': el => { el.disabled = true; txView.page++; loadTx(false); },
   'export-tx': exportTx,
   'fund': el => openFund(el.dataset.id),
+  'fund-detail': el => openFundDetail(el.dataset.id),
+  'fund-month': el => fundMonth(el.dataset.id),
+  'fund-catchup': el => openCatchUp(el.dataset.id),
+  'fund-payment': el => openFundPayment(el.dataset.id, el.dataset.plan || null),
+  'fund-copy': el => openCopyYear(el.dataset.id),
   'import-run': () => runImport(),
   'reconcile': el => openReconcile(el.dataset.id),
   'edit-account': el => openEditAccount(el.dataset.id),
