@@ -9436,4 +9436,41 @@ class SFr extends S {
   String webFundUsually(String amount) {
     return 'Dépense d\'habitude $amount';
   }
+
+  @override
+  String get memberAskTitle => 'Qui utilise ce téléphone ?';
+
+  @override
+  String get memberAskBody =>
+      'D\'autres utilisent aussi ce budget. Votre nom apparaît à côté de ce que vous ajoutez, dans l\'historique et sur chaque transaction.';
+
+  @override
+  String get memberYourName => 'Votre nom';
+
+  @override
+  String get memberJustMe => 'Juste moi';
+
+  @override
+  String memberSaved(String name) {
+    return 'Enregistré sous $name';
+  }
+
+  @override
+  String memberSavedBy(String name) {
+    return 'Enregistrée par $name';
+  }
+
+  @override
+  String get memberTileSub =>
+      'Affiché à côté de ce que vous ajoutez dans un budget partagé';
+
+  @override
+  String changeLogBy(String name) {
+    return 'par $name';
+  }
+
+  @override
+  String webHistoryBy(String name) {
+    return 'par $name';
+  }
 }

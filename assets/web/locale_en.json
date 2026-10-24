@@ -535,5 +535,6 @@
   "web_history_for_date": "for {date}",
   "web_history_from_web": "from the Web Companion",
   "web_history_from_bill": "recurring bill",
-  "web_fund_usually": "Usually spends {amount}"
+  "web_fund_usually": "Usually spends {amount}",
+  "web_history_by": "by {name}"
 }

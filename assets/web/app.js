@@ -2353,6 +2353,7 @@ async function renderHistory(quiet) {
     const time = toDate(e.at).toLocaleTimeString(intlLocale(), { hour: 'numeric', minute: '2-digit' });
     const sub = [
       `${t(verb)} ${time}`,
+      e.by ? t('web_history_by', { name: e.by }) : '',
       dayKey(e.date) !== dayKey(e.at) ? t('web_history_for_date', { date: fmtDate(e.date) }) : '',
       e.source === 'bill' ? t('web_history_from_bill') : e.source === 'web' ? t('web_history_from_web') : '',
     ].filter(Boolean).join(' · ');

@@ -13,6 +13,7 @@ import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
+import '../../core/providers/member_names_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
@@ -91,6 +92,11 @@ class _DetailBody extends ConsumerWidget {
     final overBy = envelope != null && envelope.balance < -0.005
         ? -envelope.balance
         : null;
+    // Shared budgets: who saved it (the last edit's device, after an edit).
+    final savedBy = tx.id.startsWith('rec:')
+        ? null
+        : memberNameFor(
+            ref.watch(memberNamesProvider).value ?? const {}, tx.deviceId);
 
     return Scaffold(
       appBar: AppBar(
@@ -145,6 +151,23 @@ class _DetailBody extends ConsumerWidget {
             categoryMap: categoryMap,
             baseCurrency: baseCurrency,
           ),
+          if (savedBy != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(AppIcons.user, size: 15, color: AppColors.ts(context)),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(tr.memberSavedBy(savedBy),
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontSize: 13, color: AppColors.ts(context))),
+                  ),
+                ],
+              ),
+            ),
           const SizedBox(height: 16),
           _ReceiptSection(
             receiptPath: tx.receiptPath,

@@ -535,5 +535,6 @@
   "web_history_for_date": "pour le {date}",
   "web_history_from_web": "depuis le Compagnon Web",
   "web_history_from_bill": "facture récurrente",
-  "web_fund_usually": "Dépense d'habitude {amount}"
+  "web_fund_usually": "Dépense d'habitude {amount}",
+  "web_history_by": "par {name}"
 }

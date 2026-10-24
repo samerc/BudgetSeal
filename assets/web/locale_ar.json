@@ -535,5 +535,6 @@
   "web_history_for_date": "بتاريخ {date}",
   "web_history_from_web": "من المرافق الإلكتروني",
   "web_history_from_bill": "فاتورة متكررة",
-  "web_fund_usually": "ينفق عادةً {amount}"
+  "web_fund_usually": "ينفق عادةً {amount}",
+  "web_history_by": "بواسطة {name}"
 }

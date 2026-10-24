@@ -8,6 +8,7 @@ import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/household_provider.dart';
+import '../../core/providers/member_names_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/app_icons.dart';
@@ -160,6 +161,7 @@ class _DayGroup extends ConsumerWidget {
       for (final c in ref.watch(categoriesProvider).value ?? const <Category>[])
         c.id: c
     };
+    final names = ref.watch(memberNamesProvider).value ?? const {};
     return Padding(
       padding: const EdgeInsets.only(top: 10),
       child: Container(
@@ -179,7 +181,11 @@ class _DayGroup extends ConsumerWidget {
                   )),
             ),
             for (final e in events)
-              _EventRow(event: e, lines: lines[e.tx.id] ?? const [], cats: cats),
+              _EventRow(
+                  event: e,
+                  lines: lines[e.tx.id] ?? const [],
+                  cats: cats,
+                  names: names),
           ],
         ),
       ),
@@ -191,8 +197,12 @@ class _EventRow extends StatelessWidget {
   final ChangeEvent event;
   final List<TransactionLine> lines;
   final Map<String, Category> cats;
+  final Map<String, String> names;
   const _EventRow(
-      {required this.event, required this.lines, required this.cats});
+      {required this.event,
+      required this.lines,
+      required this.cats,
+      required this.names});
 
   @override
   Widget build(BuildContext context) {
@@ -236,8 +246,15 @@ class _EventRow extends StatelessWidget {
     final txDay = tx.createdAt.toLocal();
     final atDay = event.at.toLocal();
     final otherDay = calendarDaysBetween(atDay, txDay) != 0;
+    // Shared budgets: whose device saved it (a delete is the old row's,
+    // so it names who saved it, not who deleted it — left out).
+    // A bill posted by itself names no one.
+    final by = event.kind == ChangeKind.deleted || tx.id.startsWith('rec:')
+        ? null
+        : memberNameFor(names, tx.deviceId);
     final sub = [
       '$verb $time',
+      if (by != null) tr.changeLogBy(by),
       if (otherDay) tr.changeLogForDate(formatDate(txDay)),
       if (source != null) source,
     ].join(' · ');

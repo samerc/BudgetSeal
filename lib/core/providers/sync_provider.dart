@@ -25,6 +25,7 @@ import 'objectives_provider.dart';
 import 'period_reset_provider.dart';
 import 'receipt_sync_provider.dart';
 import '../../l10n/s_lookup.dart';
+import '../services/household_members.dart';
 
 const _prefActiveProvider = 'sync_active_provider';
 const _prefLastSync = 'sync_last_sync';
@@ -347,6 +348,10 @@ class SyncNotifier extends Notifier<SyncState> {
             .read(householdServiceProvider)
             .setCurrentHousehold(households.first.id);
       }
+
+      // A budget taken from the cloud is most likely shared: ask this
+      // device's name (HouseholdMembers.shouldAsk).
+      await HouseholdMembers.markJoined();
 
       final key = provider is GoogleDriveProvider ? 'google_drive' : 'file';
       final prefs = await SharedPreferences.getInstance();

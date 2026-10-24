@@ -29,6 +29,8 @@ import '../../core/providers/backup_reminder_provider.dart';
 import '../../core/providers/premium_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
 import '../../core/sync/google_drive_provider.dart';
+import '../../core/providers/member_names_provider.dart';
+import '../../core/services/household_members.dart' show DeviceIdentity;
 import '../../features/transactions/widgets/currency_sheet.dart';
 import '../../shared/utils/search_match.dart';
 import '../../shared/theme/app_colors.dart';
@@ -45,6 +47,7 @@ import '../../shared/widgets/app_chip.dart';
 import '../../shared/widgets/confirm_dialog.dart';
 import '../../shared/widgets/settings_row.dart';
 import '../../shared/widgets/sheet_title.dart';
+import 'member_name_dialog.dart';
 import 'share_household_sheet.dart';
 import '../../shared/utils/biometric_errors.dart';
 import '../../shared/theme/app_icons.dart';
@@ -1217,6 +1220,23 @@ class _SettingsDetailScreenState extends ConsumerState<SettingsDetailScreen> {
                 },
               );
             })),
+          // Who's on this device in a shared budget (shown next to what it
+          // saves). Hidden until the budget syncs or someone has a name.
+          _Find(keys: (t) => [t.memberYourName, t.memberTileSub],
+              child: Builder(builder: (context) {
+              final names = ref.watch(memberNamesProvider).value ?? const {};
+              final synced = ref.watch(syncProvider).activeProvider != null;
+              if (names.isEmpty && !synced) return const SizedBox.shrink();
+              final mine = names[DeviceIdentity.id];
+              return _SettingsTile(
+                icon: AppIcons.user,
+                title: l.memberYourName,
+                subtitle: mine ?? l.memberTileSub,
+                iconColor: SettingsRowStyle.hue(262),
+                onTap: () => showMemberNameDialog(context, ref,
+                    initial: mine ?? ''),
+              );
+            })),
           _Find(keys: (t) => [t.tileBackupRestore, t.tileBackupRestoreSub],
               child: _SettingsTile(icon: AppIcons.cloudArrowUp, title: l.tileBackupRestore,
                 subtitle: l.tileBackupRestoreSub, iconColor: SettingsRowStyle.hue(207),
@@ -1461,6 +1481,7 @@ final _settingsKeys = <_Keys>[
   (t) => [t.tileTxList, t.tileTxListSub],
   (t) => [t.tileCloudSync],
   (t) => [t.tileShareHousehold],
+  (t) => [t.memberYourName, t.memberTileSub],
   (t) => [t.tileBackupRestore, t.tileBackupRestoreSub],
   (t) => [t.tileImportExport, t.tileImportExportSub],
   (t) => [t.tileNotifications, t.tileNotificationsSub],

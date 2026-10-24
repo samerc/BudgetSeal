@@ -5897,5 +5897,14 @@
   "webHistoryForDate": "pour le {date}",
   "webHistoryFromWeb": "depuis le Compagnon Web",
   "webHistoryFromBill": "facture récurrente",
-  "webFundUsually": "Dépense d'habitude {amount}"
+  "webFundUsually": "Dépense d'habitude {amount}",
+  "memberAskTitle": "Qui utilise ce téléphone ?",
+  "memberAskBody": "D'autres utilisent aussi ce budget. Votre nom apparaît à côté de ce que vous ajoutez, dans l'historique et sur chaque transaction.",
+  "memberYourName": "Votre nom",
+  "memberJustMe": "Juste moi",
+  "memberSaved": "Enregistré sous {name}",
+  "memberSavedBy": "Enregistrée par {name}",
+  "memberTileSub": "Affiché à côté de ce que vous ajoutez dans un budget partagé",
+  "changeLogBy": "par {name}",
+  "webHistoryBy": "par {name}"
 }

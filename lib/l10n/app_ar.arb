@@ -5897,5 +5897,14 @@
   "webHistoryForDate": "بتاريخ {date}",
   "webHistoryFromWeb": "من المرافق الإلكتروني",
   "webHistoryFromBill": "فاتورة متكررة",
-  "webFundUsually": "ينفق عادةً {amount}"
+  "webFundUsually": "ينفق عادةً {amount}",
+  "memberAskTitle": "من يستخدم هذا الهاتف؟",
+  "memberAskBody": "يستخدم آخرون هذه الميزانية أيضاً. يظهر اسمك بجانب ما تضيفه، في سجل التغييرات وعلى كل معاملة.",
+  "memberYourName": "اسمك",
+  "memberJustMe": "أنا فقط",
+  "memberSaved": "تم الحفظ باسم {name}",
+  "memberSavedBy": "حفظها {name}",
+  "memberTileSub": "يظهر بجانب ما تضيفه في ميزانية مشتركة",
+  "changeLogBy": "بواسطة {name}",
+  "webHistoryBy": "بواسطة {name}"
 }

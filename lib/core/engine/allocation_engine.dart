@@ -8,6 +8,7 @@ import '../../shared/utils/format_number.dart'
     show currencyDecimals, formatAmount, isRealRate;
 import '../database/app_database.dart';
 import '../database/daos/ledger_dao.dart';
+import '../services/household_members.dart' show DeviceIdentity;
 import '../fx/fx_service.dart' show latestCachedRate;
 import 'balance_calculator.dart';
 
@@ -92,7 +93,7 @@ class AllocationEngine {
           currency: currency,
           exchangeRateToBase: Value(exchangeRateToBase),
           createdBy: createdBy,
-          deviceId: deviceId,
+          deviceId: DeviceIdentity.stamp(deviceId),
           note: Value(note),
         ));
     return txId;
@@ -212,7 +213,7 @@ class AllocationEngine {
             currency: currency,
             exchangeRateToBase: Value(exchangeRateToBase),
             createdBy: createdBy,
-            deviceId: deviceId,
+            deviceId: DeviceIdentity.stamp(deviceId),
             categoryId: Value(categoryId),
             note: Value(note),
           ));
@@ -259,7 +260,7 @@ class AllocationEngine {
           currency: currency,
           exchangeRateToBase: Value(exchangeRateToBase),
           createdBy: createdBy,
-          deviceId: deviceId,
+          deviceId: DeviceIdentity.stamp(deviceId),
           note: Value(note),
           createdAt: Value(date ?? DateTime.now()),
         ));
@@ -391,7 +392,7 @@ class AllocationEngine {
           categoryId: Value(singleCategoryId),
           note: Value(note),
           createdBy: 'user',
-          deviceId: deviceId,
+          deviceId: DeviceIdentity.stamp(deviceId),
           createdAt: Value(effectiveDate),
         ));
 

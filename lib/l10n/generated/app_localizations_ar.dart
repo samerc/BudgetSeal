@@ -9353,4 +9353,40 @@ class SAr extends S {
   String webFundUsually(String amount) {
     return 'ينفق عادةً $amount';
   }
+
+  @override
+  String get memberAskTitle => 'من يستخدم هذا الهاتف؟';
+
+  @override
+  String get memberAskBody =>
+      'يستخدم آخرون هذه الميزانية أيضاً. يظهر اسمك بجانب ما تضيفه، في سجل التغييرات وعلى كل معاملة.';
+
+  @override
+  String get memberYourName => 'اسمك';
+
+  @override
+  String get memberJustMe => 'أنا فقط';
+
+  @override
+  String memberSaved(String name) {
+    return 'تم الحفظ باسم $name';
+  }
+
+  @override
+  String memberSavedBy(String name) {
+    return 'حفظها $name';
+  }
+
+  @override
+  String get memberTileSub => 'يظهر بجانب ما تضيفه في ميزانية مشتركة';
+
+  @override
+  String changeLogBy(String name) {
+    return 'بواسطة $name';
+  }
+
+  @override
+  String webHistoryBy(String name) {
+    return 'بواسطة $name';
+  }
 }

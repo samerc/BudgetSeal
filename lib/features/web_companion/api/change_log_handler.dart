@@ -4,6 +4,8 @@ import 'package:shelf/shelf.dart';
 import '../../../core/engine/change_log.dart';
 import '../../../core/providers/database_provider.dart';
 import '../../../core/providers/household_provider.dart';
+import '../../../core/providers/member_names_provider.dart';
+import '../../../core/services/household_members.dart';
 import '../../../shared/utils/note_text.dart';
 import '_validation.dart';
 
@@ -25,6 +27,7 @@ Handler changeLogHandler(Ref ref) {
             ..where((c) => c.householdId.equals(householdId)))
           .get();
       final catNames = {for (final c in categories) c.id: c.name};
+      final members = await HouseholdMembers.names(db, householdId);
       return ok({
         'limit': limit,
         'items': [
@@ -53,6 +56,10 @@ Handler changeLogHandler(Ref ref) {
                   for (final a in amounts.entries)
                     {'currency': a.key, 'amount': a.value}
                 ],
+                // Shared budgets: whose device saved it (not for deletes).
+                'by': e.kind == ChangeKind.deleted || tx.id.startsWith('rec:')
+                    ? null
+                    : memberNameFor(members, tx.deviceId),
                 'source': tx.id.startsWith('rec:')
                     ? 'bill'
                     : tx.deviceId == 'web'

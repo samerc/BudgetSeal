@@ -19,6 +19,7 @@ import 'core/services/daily_reminder_service.dart';
 import 'core/services/app_shortcuts_service.dart';
 import 'core/services/home_widget_service.dart';
 import 'core/services/notification_service.dart';
+import 'core/services/household_members.dart';
 import 'shared/utils/app_info.dart';
 
 void main() {
@@ -75,6 +76,9 @@ Future<void> _startApp() async {
 
   // Set locale early so engine/notification code uses the right language.
   final prefs = await SharedPreferences.getInstance();
+  // This install's id, stamped on the transactions it saves (who added what
+  // in a shared budget).
+  await DeviceIdentity.init(prefs);
   Intl.defaultLocale = prefs.getString('app_locale') ??
       WidgetsBinding.instance.platformDispatcher.locale.languageCode;
   // Dates use Western digits like every amount does ("21 أكتوبر 2026", not

@@ -9336,4 +9336,40 @@ class SEn extends S {
   String webFundUsually(String amount) {
     return 'Usually spends $amount';
   }
+
+  @override
+  String get memberAskTitle => 'Who\'s using this phone?';
+
+  @override
+  String get memberAskBody =>
+      'Others use this budget too. Your name shows next to what you add, in Change history and on each transaction.';
+
+  @override
+  String get memberYourName => 'Your name';
+
+  @override
+  String get memberJustMe => 'Just me';
+
+  @override
+  String memberSaved(String name) {
+    return 'Saved as $name';
+  }
+
+  @override
+  String memberSavedBy(String name) {
+    return 'Saved by $name';
+  }
+
+  @override
+  String get memberTileSub => 'Shown next to what you add in a shared budget';
+
+  @override
+  String changeLogBy(String name) {
+    return 'by $name';
+  }
+
+  @override
+  String webHistoryBy(String name) {
+    return 'by $name';
+  }
 }

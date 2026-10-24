@@ -6,12 +6,14 @@ import 'package:go_router/go_router.dart';
 import '../../core/engine/recurring_engine.dart';
 import '../../core/providers/home_tab_provider.dart';
 import '../../core/providers/activity_filter_provider.dart';
+import '../../core/providers/sync_provider.dart';
 import '../../core/services/notification_service.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../allocations/allocations_screen.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../reports/reports_hub_screen.dart';
+import '../settings/member_name_dialog.dart';
 import '../settings/settings_screen.dart';
 import '../transactions/transactions_screen.dart';
 import '../../shared/widgets/hint_banner.dart';
@@ -67,8 +69,21 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       // never covers a tip.
       afterHints(() =>
           NotificationService.requestPermissionOnce().catchError((_) {}));
+      // A shared budget asks this device's name once (who added what).
+      _askName();
     });
     RecurringEngine.postedNotice.addListener(_showPostedNotice);
+  }
+
+  bool _askingName = false;
+
+  /// After the tips; again after a sync, which may bring someone else in.
+  void _askName() {
+    if (_askingName) return;
+    _askingName = true;
+    afterHints(() async {
+      if (mounted) await askMemberNameIfNeeded(context, ref);
+    }).whenComplete(() => _askingName = false);
   }
 
   /// "N recurring items posted" after launch/resume processing.
@@ -114,6 +129,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // A finished sync may have brought another member's name or entries.
+    ref.listen(syncProvider.select((s) => s.status), (prev, next) {
+      if (prev != SyncStatus.success && next == SyncStatus.success) _askName();
+    });
     // Read the preferred home tab and jump to it once on first build.
     final homeTab = ref.watch(homeTabProvider);
     if (!_initialized && homeTab > 0 && homeTab < _tabs.length) {

@@ -16103,6 +16103,60 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Usually spends {amount}'**
   String webFundUsually(String amount);
+
+  /// Shared budget: member names
+  ///
+  /// In en, this message translates to:
+  /// **'Who\'s using this phone?'**
+  String get memberAskTitle;
+
+  /// Shared budget: member names
+  ///
+  /// In en, this message translates to:
+  /// **'Others use this budget too. Your name shows next to what you add, in Change history and on each transaction.'**
+  String get memberAskBody;
+
+  /// Shared budget: member names
+  ///
+  /// In en, this message translates to:
+  /// **'Your name'**
+  String get memberYourName;
+
+  /// Shared budget: member names
+  ///
+  /// In en, this message translates to:
+  /// **'Just me'**
+  String get memberJustMe;
+
+  /// Shared budget: member names
+  ///
+  /// In en, this message translates to:
+  /// **'Saved as {name}'**
+  String memberSaved(String name);
+
+  /// Shared budget: member names
+  ///
+  /// In en, this message translates to:
+  /// **'Saved by {name}'**
+  String memberSavedBy(String name);
+
+  /// Shared budget: member names
+  ///
+  /// In en, this message translates to:
+  /// **'Shown next to what you add in a shared budget'**
+  String get memberTileSub;
+
+  /// Shared budget: member names
+  ///
+  /// In en, this message translates to:
+  /// **'by {name}'**
+  String changeLogBy(String name);
+
+  /// Shared budget: member names
+  ///
+  /// In en, this message translates to:
+  /// **'by {name}'**
+  String webHistoryBy(String name);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

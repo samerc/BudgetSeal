@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../../shared/utils/format_number.dart' show isRealRate;
 import '../database/app_database.dart';
 import 'allocation_engine.dart';
+import '../services/household_members.dart' show DeviceIdentity;
 
 /// Looks up a `from → to` exchange rate; null when none is known.
 typedef RateLookup = Future<double?> Function(String from, String to);
@@ -87,7 +88,7 @@ class PlannedEngine {
             exchangeRateToBase: const Value(1.0),
             categoryId: Value(isTransfer ? null : categoryId),
             createdBy: createdBy,
-            deviceId: deviceId,
+            deviceId: DeviceIdentity.stamp(deviceId),
             note: Value(note),
             createdAt: Value(date),
             status: const Value('planned'),

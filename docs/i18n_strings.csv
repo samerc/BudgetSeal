@@ -3006,3 +3006,12 @@ web_history_for_date,"Web Companion: change history, usual spending",for {date},
 web_history_from_web,"Web Companion: change history, usual spending",from the Web Companion,من المرافق الإلكتروني,depuis le Compagnon Web
 web_history_from_bill,"Web Companion: change history, usual spending",recurring bill,فاتورة متكررة,facture récurrente
 web_fund_usually,"Web Companion: change history, usual spending",Usually spends {amount},ينفق عادةً {amount},Dépense d'habitude {amount}
+member_ask_title,Shared budget: member names,Who's using this phone?,من يستخدم هذا الهاتف؟,Qui utilise ce téléphone ?
+member_ask_body,Shared budget: member names,"Others use this budget too. Your name shows next to what you add, in Change history and on each transaction.",يستخدم آخرون هذه الميزانية أيضاً. يظهر اسمك بجانب ما تضيفه، في سجل التغييرات وعلى كل معاملة.,"D'autres utilisent aussi ce budget. Votre nom apparaît à côté de ce que vous ajoutez, dans l'historique et sur chaque transaction."
+member_your_name,Shared budget: member names,Your name,اسمك,Votre nom
+member_just_me,Shared budget: member names,Just me,أنا فقط,Juste moi
+member_saved,Shared budget: member names,Saved as {name},تم الحفظ باسم {name},Enregistré sous {name}
+member_saved_by,Shared budget: member names,Saved by {name},حفظها {name},Enregistrée par {name}
+member_tile_sub,Shared budget: member names,Shown next to what you add in a shared budget,يظهر بجانب ما تضيفه في ميزانية مشتركة,Affiché à côté de ce que vous ajoutez dans un budget partagé
+change_log_by,Shared budget: member names,by {name},بواسطة {name},par {name}
+web_history_by,Shared budget: member names,by {name},بواسطة {name},par {name}

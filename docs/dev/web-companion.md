@@ -101,7 +101,7 @@ POST /api/accounts/:id/reconcile       → { balance } → { adjusted, reconcile
 
 GET  /api/envelopes                    → { items, unallocated, period, baseCurrency }
 GET  /api/envelopes/average-spending  → { items: { envelopeId: { currency: amount } } } (last 3 budget periods)
-GET  /api/change-log                   → { limit, items: [{ kind added|edited|deleted, at, txId, type, date, note, categoryName, amounts: [{currency, amount}], source bill|web|null }] }
+GET  /api/change-log                   → { limit, items: [{ kind added|edited|deleted, at, txId, type, date, note, categoryName, amounts: [{currency, amount}], by (member name or null), source bill|web|null }] }
 POST /api/envelopes/:id/fund           → add funding
 POST /api/envelopes/move               → { fromId?, toId?, amount, currency } (null side = Ready to assign; AllocationEngine.moveMoney; 400 if the source envelope lacks it)
 
