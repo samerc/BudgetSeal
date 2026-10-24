@@ -481,15 +481,16 @@ class OcrService {
 
   static final _nonLetter = RegExp(r'[^\p{L}]', unicode: true);
 
-  /// A row that ends in a zero price ("0.00", "0").
-  static final _zeroPrice = RegExp(r'(^|\s)[$€£¥]?0+(?:[.,]0+)?$');
+  /// A row that ends in a zero price ("0.00", "0", "0T").
+  static final _zeroPrice =
+      RegExp(r'(^|\s)[$€£¥]?0+(?:[.,]0+)?[A-Za-z]{0,3}$');
 
   /// "1 Regular Fries": a row that starts with a count and a word.
   static final _leadingQty = RegExp(r'^\d{1,2}\s+\p{L}', unicode: true);
 
   /// A row that is only a price: "4.50", "$12.00", "450,000 LBP".
   static final _lonePrice = RegExp(
-      r'^[$€£¥]?\s*(\d{1,3}(?:[,. ]\d{3})*(?:[.,]\d{1,3})?|\d{4,}(?:[.,]\d{1,3})?)\s*[A-Za-z]{0,3}$');
+      r'^(?!0\d)[$€£¥]?\s*(\d{1,3}(?:[,. ]\d{3})*(?:[.,]\d{1,3})?|\d{4,}(?:[.,]\d{1,3})?)\s*[A-Za-z]{0,3}$');
 
   /// A priceless row's text as an item name.
   static String? _cleanName(String text) =>
@@ -554,6 +555,9 @@ class OcrService {
       // Must contain at least one separator or be 4+ digits to look like a price
       final text = _stripPriceSuffix(m.group(1)!);
       final cleaned = text.replaceAll(RegExp(r'^[,.]'), ''); // strip leading sep
+      // "01600000", "03000000": a leading zero is a phone number or a code,
+      // never a price ("0.50" has a separator).
+      if (RegExp(r'^0\d+$').hasMatch(cleaned)) return false;
       return cleaned.contains(RegExp(r'[.,]')) || cleaned.replaceAll(RegExp(r'[,. ]'), '').length >= 4;
     }).toList();
 
@@ -562,7 +566,11 @@ class OcrService {
       final lastMatch = validMatches.last;
       final priceStr = lastMatch.group(1)!;
       final namepart = trimmed.substring(0, lastMatch.start).trim();
-      final item = _buildItem(namepart, priceStr, decimals);
+      // A bare run of digits ("20035", no separator, currency or suffix)
+      // may be an order or check number: weak, so it only counts in the
+      // price column below the header (step 6).
+      final bare = RegExp(r'^\s*\d+\s*$').hasMatch(lastMatch.group(0)!);
+      final item = _buildItem(namepart, priceStr, decimals, bare);
       if (item != null) return item;
     }
 
@@ -771,6 +779,11 @@ class OcrService {
   static final _taxId = RegExp(
       r'(^|[^a-z])(vat|tax|tva|gst|trn)\s*(no|n°|nr|number|#|id|reg\w*|invoice|facture)([^a-z]|$)');
 
+  /// "Order Nb 20035", "CHECK # 1600000", "Ref: 8000000", "Table 12":
+  /// a reference number, not an item with a price.
+  static final _reference = RegExp(
+      r'^(order|check|chk|cheque|ticket|table|ref|reference|bill|commande|trans\w*|txn|cashier|caissier|server)[\s.:#,n°obr]*\d+$');
+
   static bool _has(String lower, List<String> words) {
     for (final w in words) {
       if (_latinWord.hasMatch(w)) {
@@ -790,6 +803,7 @@ class OcrService {
     if (_dateOrTime.hasMatch(lower)) return OcrLineKind.other;
     if (_has(lower, _subtotalWords)) return OcrLineKind.other;
     if (_taxId.hasMatch(lower)) return OcrLineKind.other;
+    if (_reference.hasMatch(lower.trim())) return OcrLineKind.other;
     if (_taxIncluded.hasMatch(lower)) {
       return _has(lower, _totalWords) ? OcrLineKind.total : OcrLineKind.other;
     }
@@ -847,6 +861,12 @@ class OcrService {
     _currencySymbols.forEach((sym, code) {
       if (mine.contains(code) && lower.contains(sym)) printed.add(code);
     });
+    // "TOTAL LL: 2,240,000": Lebanese receipts write the lira as LL (a
+    // whole word, so "all" or "mall" don't count).
+    if (mine.contains('LBP') &&
+        RegExp(r'(^|[^a-z])ll([^a-z]|$)').hasMatch(lower)) {
+      printed.add('LBP');
+    }
     for (final c in mine) {
       if (RegExp('(^|[^A-Za-z])$c([^A-Za-z]|\$)').hasMatch(text)) {
         printed.add(c);

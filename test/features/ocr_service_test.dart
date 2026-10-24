@@ -334,6 +334,89 @@ void main() {
           isEmpty);
     });
 
+    test('a real Why Cook delivery receipt (ML Kit output, Oct 2026)', () {
+      // A delivery slip: the header has phone numbers ("01600000",
+      // "mc 03000000"), a check number and an order number — none are
+      // items. (Name, address and numbers replaced; layout kept.) Prices carry a "T" suffix; the total is in LBP and USD.
+      OcrRawLine l(String text, double l, double t, double r, double b,
+              double angle, double h) =>
+          OcrRawLine(
+              text: text,
+              rect: ui.Rect.fromLTRB(l, t, r, b),
+              angle: angle,
+              height: h);
+      final lines = [
+      l('Name: JOHN', 171, 189, 314, 219, 0.0779, 19.1),
+      l('Fam.: SMITH', 180, 222, 312, 255, 0.0691, 24.1),
+      l('>', 180, 357, 186, 374, 0.0000, 17.1),
+      l('Why Cook sarl', 330, 16, 495, 52, 0.0984, 20.2),
+      l('Baabda, Highway', 334, 45, 493, 84, 0.1149, 21.2),
+      l('Tel: 01000000- *03000000', 170, 254, 437, 295, 0.0641, 24.1),
+      l('1st left', 211, 359, 302, 383, 0.0785, 17.1),
+      l('Tel: 03111111-81222222', 179, 287, 422, 326, 0.0622, 24.1),
+      l('FIr : ar', 171, 390, 235, 412, 0.0644, 18.1),
+      l('Str : main street after the bakery', 170, 323, 554, 366, 0.0523, 23.1),
+      l('01600000', 369, 112, 461, 139, 0.0997, 18.1),
+      l('Baabda', 379, 82, 450, 107, 0.1316, 16.3),
+      l('DELIVERY-J', 339, 168, 490, 201, 0.0804, 21.1),
+      l('me 03000000', 172, 632, 304, 656, -0.0227, 21.0),
+      l('Near: the church then north about 200 m second building', 179, 426, 658, 458, 0.0230, 21.0),
+      l('Zone : TOWN -AREA', 170, 459, 380, 485, 0.0239, 21.0),
+      l('City : TOWN -AREA', 171, 493, 370, 520, 0.0152, 24.0),
+      l('Address Label : HOME', 170, 529, 396, 551, 0.0089, 20.0),
+      l('Rem : ring the bell twice', 172, 562, 408, 587, 0.0128, 22.0),
+      l('OLD QUARTER', 171, 598, 321, 618, 0.0067, 19.0),
+      l('24-10-2026 13:26', 333, 664, 508, 686, -0.0171, 19.0),
+      l('1 Zone 1:', 246, 906, 332, 930, -0.0233, 22.0),
+      l('Firstrder Tine: 24-0ct-26 13:22:45', 250, 696, 600, 725, -0.0143, 24.0),
+      l('Prowsed Tinte: 14:13:32', 302, 730, 541, 757, -0.0251, 21.0),
+      l('CHECK, 1600000', 341, 765, 513, 791, -0.0233, 22.0),
+      l('Order Nb 20035', 330, 796, 515, 824, -0.0324, 22.0),
+      l('1 TAWOUK L', 237, 940, 375, 963, -0.0217, 20.0),
+      l('1 WITH CORN', 246, 974, 386, 1002, -0.0214, 25.0),
+      l('1 WITH TOMATO', 246, 1009, 420, 1038, -0.0230, 25.0),
+      l('1 CHICKEN AVOCADO SALI', 246, 1041, 528, 1075, -0.0354, 24.0),
+      l('1 WITH CUTLERY', 246, 1080, 427, 1110, -0.0331, 24.0),
+      l('1 TAWOUK BREADED LARC', 238, 1115, 530, 1146, -0.0274, 23.0),
+      l('1 ICE TEA PEACH', 246, 1154, 431, 1184, -0.0270, 25.0),
+      l('TOTAL LL: 2,240,000', 296, 1222, 567, 1262, -0.0295, 32.0),
+      l('TOTAL \$: 25.17', 331, 1263, 535, 1296, -0.0343, 26.0),
+      l('Thank you.', 379, 1383, 488, 1406, 0.0000, 23.0),
+      l('Dollar Rate: 89000', 342, 1410, 530, 1446, -0.0694, 23.0),
+      l('120000T', 595, 896, 668, 920, -0.0547, 20.0),
+      l('630000T', 590, 934, 673, 954, 0.0000, 20.0),
+      l('Call Center Reference: 8000000', 271, 1334, 594, 1375, -0.0496, 25.0),
+      l('40000T', 602, 968, 670, 989, 0.0000, 21.0),
+      l('0T', 652, 1004, 672, 1022, 0.0000, 18.0),
+      l('870000T', 593, 1036, 674, 1063, -0.0749, 21.0),
+      l('0T', 654, 1074, 675, 1093, 0.0000, 19.0),
+      l('450000T', 594, 1107, 678, 1134, -0.0841, 20.0),
+      l('130000T', 598, 1143, 680, 1170, -0.0739, 21.0),
+      ];
+      final res = OcrService.parseLines(lines,
+          imageWidth: 1084, imageHeight: 1441, currency: 'LBP');
+      expect(_items(res), [
+        ('Zone 1', 120000.0, 1),
+        ('TAWOUK L', 630000.0, 1),
+        ('WITH CORN', 40000.0, 1),
+        ('CHICKEN AVOCADO SALI', 870000.0, 1),
+        ('TAWOUK BREADED LARC', 450000.0, 1),
+        ('ICE TEA PEACH', 130000.0, 1),
+      ]);
+      expect(res.receiptTotal, 2240000);
+      // "TOTAL LL:" names the lira.
+      expect(
+          OcrService.receiptCurrency(res,
+              billCurrency: 'USD', userCurrencies: {'USD', 'LBP'}),
+          (code: 'LBP', printed: true));
+      // The delivery address and contact lines aren't items either.
+      expect(
+          res.lines
+              .where((l) => l.kind == OcrLineKind.item && !l.hasPrice)
+              .map((l) => l.text),
+          isEmpty);
+    });
+
     test('a real Roadster Diner receipt (ML Kit output, Oct 2026)', () {
       // Ungrouped LBP prices with ".00", the total on the row under
       // "TOTAL DUE" (read "6300O00.0O0"), a free "W/Regular 0.00", the USD
