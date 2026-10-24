@@ -9172,4 +9172,11 @@ class SEn extends S {
 
   @override
   String get webBillToConfirm => 'confirm the amount';
+
+  @override
+  String get tmplPickerEmpty =>
+      'No templates yet. Save one from a transaction\'s ⋮ menu, or add it in Templates.';
+
+  @override
+  String get tmplPickerManage => 'Manage templates';
 }

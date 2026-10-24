@@ -21,6 +21,8 @@ import '../../core/providers/tx_colors_provider.dart';
 import '../../core/services/autofill_service.dart';
 import '../../core/services/last_used_service.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../shared/widgets/date_swipe.dart';
+import '../templates/template_picker.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/app_icons.dart';
 import '../../shared/theme/design_tokens.dart';
@@ -1248,7 +1250,16 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 40),
+          if (_editing)
+            const SizedBox(width: 48)
+          else
+            IconButton(
+              tooltip: tr.txFormUseTemplate,
+              icon: const Icon(AppIcons.lightning),
+              onPressed: () => pickTemplateIntoForm(context, ref,
+                  date: DateTime(_date.year, _date.month, _date.day,
+                      _time.hour, _time.minute)),
+            ),
         ],
       ),
     );
@@ -1513,10 +1524,15 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
         : days == -1
             ? tr.commonYesterday
             : formatDate(_date);
-    final datePill = _pill(
-      leading: Icon(AppIcons.calendarBlank, size: 16, color: AppColors.tp(context)),
-      label: dateLabel,
-      onTap: _pickWhen,
+    final datePill = DateSwipe(
+      date: _date,
+      lastDate: now,
+      onChanged: (d) => setState(() => _date = d),
+      child: _pill(
+        leading: Icon(AppIcons.calendarBlank, size: 16, color: AppColors.tp(context)),
+        label: dateLabel,
+        onTap: _pickWhen,
+      ),
     );
     if (_type == 'transfer') {
       return Padding(

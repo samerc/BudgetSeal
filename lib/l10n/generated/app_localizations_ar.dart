@@ -9185,4 +9185,11 @@ class SAr extends S {
 
   @override
   String get webBillToConfirm => 'أكّد المبلغ';
+
+  @override
+  String get tmplPickerEmpty =>
+      'لا قوالب بعد. احفظ واحداً من قائمة ⋮ في أي معاملة، أو أضفه من القوالب.';
+
+  @override
+  String get tmplPickerManage => 'إدارة القوالب';
 }

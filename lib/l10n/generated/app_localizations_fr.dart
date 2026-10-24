@@ -9271,4 +9271,11 @@ class SFr extends S {
 
   @override
   String get webBillToConfirm => 'confirmez le montant';
+
+  @override
+  String get tmplPickerEmpty =>
+      'Aucun modèle pour l\'instant. Enregistrez-en un depuis le menu ⋮ d\'une transaction, ou ajoutez-le dans Modèles.';
+
+  @override
+  String get tmplPickerManage => 'Gérer les modèles';
 }

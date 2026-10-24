@@ -6872,5 +6872,9 @@
   "webBillConfirmDesc": "Amount this time",
   "@webBillConfirmDesc": {"description": "Web Companion: bill options"},
   "webBillToConfirm": "confirm the amount",
-  "@webBillToConfirm": {"description": "Web Companion: bill options"}
+  "@webBillToConfirm": {"description": "Web Companion: bill options"},
+  "tmplPickerEmpty": "No templates yet. Save one from a transaction's ⋮ menu, or add it in Templates.",
+  "@tmplPickerEmpty": {"description": "Add form: template picker"},
+  "tmplPickerManage": "Manage templates",
+  "@tmplPickerManage": {"description": "Add form: template picker"}
 }

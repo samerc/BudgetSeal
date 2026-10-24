@@ -15839,6 +15839,18 @@ abstract class S {
   /// In en, this message translates to:
   /// **'confirm the amount'**
   String get webBillToConfirm;
+
+  /// Add form: template picker
+  ///
+  /// In en, this message translates to:
+  /// **'No templates yet. Save one from a transaction\'s ⋮ menu, or add it in Templates.'**
+  String get tmplPickerEmpty;
+
+  /// Add form: template picker
+  ///
+  /// In en, this message translates to:
+  /// **'Manage templates'**
+  String get tmplPickerManage;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

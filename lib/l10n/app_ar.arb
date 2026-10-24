@@ -5853,5 +5853,7 @@
   "webBillRemindN": "قبل {n} يوم",
   "webBillConfirmPost": "أكّد وسجّل",
   "webBillConfirmDesc": "المبلغ هذه المرة",
-  "webBillToConfirm": "أكّد المبلغ"
+  "webBillToConfirm": "أكّد المبلغ",
+  "tmplPickerEmpty": "لا قوالب بعد. احفظ واحداً من قائمة ⋮ في أي معاملة، أو أضفه من القوالب.",
+  "tmplPickerManage": "إدارة القوالب"
 }

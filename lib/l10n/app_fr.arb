@@ -5853,5 +5853,7 @@
   "webBillRemindN": "{n} jours avant",
   "webBillConfirmPost": "Confirmer et enregistrer",
   "webBillConfirmDesc": "Montant cette fois",
-  "webBillToConfirm": "confirmez le montant"
+  "webBillToConfirm": "confirmez le montant",
+  "tmplPickerEmpty": "Aucun modèle pour l'instant. Enregistrez-en un depuis le menu ⋮ d'une transaction, ou ajoutez-le dans Modèles.",
+  "tmplPickerManage": "Gérer les modèles"
 }

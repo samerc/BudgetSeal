@@ -28,6 +28,7 @@ import '../../shared/widgets/large_title_header.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/sheet_title.dart';
 import '../../shared/widgets/tappable.dart';
+import 'template_picker.dart';
 
 enum _SortMode { mostUsed, alphabetical, newest, amount }
 enum _GroupMode { none, type, category }
@@ -135,36 +136,8 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
   Future<void> _useTemplate(TransactionTemplate t) async {
     try {
       hapticLight();
-      final db = ref.read(databaseProvider);
-      await (db.update(db.transactionTemplates)
-            ..where((r) => r.id.equals(t.id)))
-          .write(TransactionTemplatesCompanion(
-        useCount: Value(t.useCount + 1),
-        lastUsedAt: Value(DateTime.now()),
-        lastModified: Value(DateTime.now()),
-      ));
-
-      final cats = ref.read(categoriesProvider).value ?? [];
-      final cat = t.categoryId != null
-          ? cats.where((c) => c.id == t.categoryId).firstOrNull
-          : null;
-
-      if (mounted) {
-        context.push('/add-transaction', extra: {
-          'editType': t.type,
-          'editNote': t.title,
-          'editLines': [
-            {
-              'amount': t.amount,
-              'currency': t.currency,
-              'accountId': t.accountId,
-              'categoryId': t.categoryId,
-              'categoryName': cat?.name,
-              'note': '',
-            }
-          ],
-        });
-      }
+      final extra = await useTemplate(ref, t);
+      if (mounted) context.push('/add-transaction', extra: extra);
     } catch (e) {
       debugPrint('[Templates] Error using template: $e');
       if (mounted) {

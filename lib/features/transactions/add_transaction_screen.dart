@@ -22,6 +22,8 @@ import '../../core/providers/engine_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/transactions_provider.dart';
+import '../../shared/widgets/date_swipe.dart';
+import '../templates/template_picker.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
@@ -1055,7 +1057,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           if (widget.editTransactionId == null)
             IconButton(
               tooltip: S.of(context).txFormUseTemplate,
-              onPressed: () => context.push('/templates'),
+              onPressed: () => pickTemplateIntoForm(context, ref,
+                  date: DateTime(
+                      _selectedDate.year,
+                      _selectedDate.month,
+                      _selectedDate.day,
+                      _selectedTime.hour,
+                      _selectedTime.minute)),
               icon: const Icon(AppIcons.lightning),
             ),
           const SizedBox(width: 4),
@@ -1499,7 +1507,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       child: Row(
         children: [
           Expanded(
-            child: Tappable(
+            child: DateSwipe(
+              date: _selectedDate,
+              lastDate: DateTime.now().add(const Duration(days: 1)),
+              onChanged: (d) => setState(() => _selectedDate = d),
+              child: Tappable(
               onTap: _pickDate,
               borderRadius: BorderRadius.circular(RadiusTokens.sm),
               child: Padding(
@@ -1517,6 +1529,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   ],
                 ),
               ),
+            ),
             ),
           ),
           DateQuickChip(
