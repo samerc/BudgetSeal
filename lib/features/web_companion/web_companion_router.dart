@@ -8,6 +8,7 @@ import 'package:shelf_router/shelf_router.dart';
 
 import 'api/accounts_handler.dart';
 import 'api/categories_handler.dart';
+import 'api/change_log_handler.dart';
 import 'api/changes_handler.dart';
 import 'api/dashboard_handler.dart';
 import 'api/envelopes_handler.dart';
@@ -70,8 +71,10 @@ Handler buildRouter(Ref ref, WebCompanionAuth auth, ChangeFeed changes) {
   api.post('/accounts/<id>/reconcile', reconcileAccountHandler(ref));
 
   api.get('/envelopes', listEnvelopesHandler(ref));
+  api.get('/envelopes/average-spending', averageSpendingHandler(ref));
   api.post('/envelopes/move', moveEnvelopeMoneyHandler(ref));
   api.get('/changes', changesHandler(changes));
+  api.get('/change-log', changeLogHandler(ref));
   api.post('/import', importCsvHandler(ref));
   api.get('/upcoming', upcomingBillsHandler(ref));
   api.post('/recurring/<id>/post-now', recurringActionHandler(ref, post: true));

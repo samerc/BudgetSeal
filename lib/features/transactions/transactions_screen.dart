@@ -1338,6 +1338,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 color: ref.watch(txColorsProvider).transfer,
                 onTap: () { setState(() => _typeFilter = 'transfer'); _saveFilters(); },
               ),
+              const SizedBox(width: 8),
+              AppChip(
+                label: S.of(context).txSortLargest,
+                icon: AppIcons.sortDescending,
+                selected: _sortLargest,
+                onTap: () => setState(() => _sortLargest = !_sortLargest),
+              ),
             ],
           ),
         ),
@@ -1510,6 +1517,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       _dateTo = null;
       _amountMin = null;
       _amountMax = null;
+      _sortLargest = false;
     });
     _saveFilters();
   }
@@ -1604,6 +1612,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               })
         ),
     ];
+    if (_sortLargest) {
+      chips.add(
+          (tr.txSortLargest, () => setState(() => _sortLargest = false)));
+    }
     if (_allMonthsRequested) {
       chips.insert(0, (
         tr.txAllMonths,
@@ -1816,7 +1828,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
 
     final baseCurrency =
         ref.read(householdProvider).value?.baseCurrency ?? 'USD';
-    final sortLargest = _sortLargest && hasSearch;
+    final sortLargest = _sortLargest;
     final groups = sortLargest
         ? const <({DateTime date, double dayTotal, String baseCurrency, List<TransactionEntry> entries})>[]
         : _buildGroups(filtered);
@@ -1898,7 +1910,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               ),
               // Planned payments section (dimmed, above real transactions);
               // not while searching or filtering — it isn't filtered.
-              if (_plannedTxs.isNotEmpty && !hasAnyFilter)
+              if (_plannedTxs.isNotEmpty && !hasAnyFilter && !sortLargest)
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),

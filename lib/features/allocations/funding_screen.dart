@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/database/daos/ledger_dao.dart';
 import '../../core/engine/period_engine.dart' show budgetPeriodFor;
+import '../../core/engine/spending_average.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/engine_provider.dart';
@@ -32,30 +33,6 @@ class FundingScreen extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<FundingScreen> createState() => _FundingScreenState();
-}
-
-/// Average spending per envelope and currency over [history] (one map per
-/// budget period, oldest first), counted from the first period with any
-/// spending for that envelope — a new envelope isn't averaged down by
-/// months before it existed. Rounded up to whole units.
-Map<String, Map<String, double>> averageSpending(
-    List<Map<String, Map<String, double>>> history) {
-  final out = <String, Map<String, double>>{};
-  final ids = {for (final h in history) ...h.keys};
-  for (final id in ids) {
-    final first = history.indexWhere(
-        (h) => (h[id]?.values ?? const <double>[]).any((v) => v > 0));
-    if (first < 0) continue;
-    final n = history.length - first;
-    final sums = <String, double>{};
-    for (final h in history.skip(first)) {
-      h[id]?.forEach((c, v) {
-        if (v > 0) sums[c] = (sums[c] ?? 0) + v;
-      });
-    }
-    out[id] = {for (final e in sums.entries) e.key: (e.value / n).ceilToDouble()};
-  }
-  return out;
 }
 
 class _FundingScreenState extends ConsumerState<FundingScreen> {
@@ -92,21 +69,9 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
       final spent = await dao
           .watchSpendingInPeriod(household.id, last.start, last.end)
           .first;
-      // Oldest first: [period -3, -2, -1].
-      final history = <Map<String, Map<String, double>>>[];
-      var p = last;
-      for (var k = 0; k < _avgPeriods; k++) {
-        history.insert(
-            0,
-            k == 0
-                ? spent
-                : await dao
-                    .watchSpendingInPeriod(household.id, p.start, p.end)
-                    .first);
-        p = budgetPeriodFor(household.periodStartDay,
-            p.start.subtract(const Duration(days: 1)));
-      }
-      final avg = averageSpending(history);
+      final avg = await recentAverageSpending(
+          dao, household.id, household.periodStartDay,
+          periods: _avgPeriods);
       if (mounted) {
         setState(() {
           _lastFunded = funded;

@@ -2,4 +2,9 @@
 <resources>
     <!-- Dark app background (night, AppColors.darkBackground) -->
     <color name="splash_background">#121318</color>
+    <!-- Home widgets at night (AppColors.darkSurface / darkTextPrimary / darkTextSecondary) -->
+    <color name="widget_surface">#FF1C1D24</color>
+    <color name="widget_text">#FFF2EEE6</color>
+    <color name="widget_text_secondary">#FFA8A49B</color>
+    <color name="widget_negative">#FFF87171</color>
 </resources>

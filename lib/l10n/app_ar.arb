@@ -5886,5 +5886,16 @@
   "onboardRestoreBackupHint": "ملف ‎.db‎ محفوظ من الإعدادات › النسخ الاحتياطي والاستعادة. يُغلق التطبيق لإتمام العملية؛ افتحه مجدداً.",
   "widgetEnvelopesTitle": "الأظرف",
   "widgetEnvelopesEmpty": "لا أظرف إنفاق بعد",
-  "widgetAddLabel": "إضافة"
+  "widgetAddLabel": "إضافة",
+  "webHistoryBtn": "السجل",
+  "webHistoryTitle": "سجل التغييرات",
+  "webHistoryIntro": "آخر {n} تغيير على معاملاتك، الأحدث أولاً.",
+  "webHistoryEmpty": "لا تغييرات بعد",
+  "webHistoryAdded": "أُضيفت",
+  "webHistoryEdited": "عُدّلت",
+  "webHistoryDeleted": "حُذفت",
+  "webHistoryForDate": "بتاريخ {date}",
+  "webHistoryFromWeb": "من المرافق الإلكتروني",
+  "webHistoryFromBill": "فاتورة متكررة",
+  "webFundUsually": "ينفق عادةً {amount}"
 }

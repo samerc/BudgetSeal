@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:budgetseal/core/database/app_database.dart';
-import 'package:budgetseal/features/settings/change_log_screen.dart';
+import 'package:budgetseal/core/engine/change_log.dart';
 
 Transaction _tx(String id, DateTime at, {bool deleted = false, String type = 'expense'}) =>
     Transaction(

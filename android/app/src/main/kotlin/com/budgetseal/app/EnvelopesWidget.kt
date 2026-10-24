@@ -53,7 +53,8 @@ class EnvelopesWidget : AppWidgetProvider() {
                         prefs.getString("flutter.widget_env_amount_$i", ""))
                     val negative = prefs.getBoolean("flutter.widget_env_neg_$i", false)
                     views.setTextColor(amount,
-                        if (negative) 0xFFC62828.toInt() else 0xFF1B1B1F.toInt())
+                        context.getColor(
+                            if (negative) R.color.widget_negative else R.color.widget_text))
                 } else {
                     views.setViewVisibility(row, View.GONE)
                 }

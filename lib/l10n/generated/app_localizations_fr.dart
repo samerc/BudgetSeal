@@ -9397,4 +9397,43 @@ class SFr extends S {
 
   @override
   String get widgetAddLabel => 'Ajouter';
+
+  @override
+  String get webHistoryBtn => 'Historique';
+
+  @override
+  String get webHistoryTitle => 'Historique';
+
+  @override
+  String webHistoryIntro(int n) {
+    return 'Les $n dernières modifications de vos transactions, les plus récentes d\'abord.';
+  }
+
+  @override
+  String get webHistoryEmpty => 'Aucune modification';
+
+  @override
+  String get webHistoryAdded => 'Ajoutée';
+
+  @override
+  String get webHistoryEdited => 'Modifiée';
+
+  @override
+  String get webHistoryDeleted => 'Supprimée';
+
+  @override
+  String webHistoryForDate(String date) {
+    return 'pour le $date';
+  }
+
+  @override
+  String get webHistoryFromWeb => 'depuis le Compagnon Web';
+
+  @override
+  String get webHistoryFromBill => 'facture récurrente';
+
+  @override
+  String webFundUsually(String amount) {
+    return 'Dépense d\'habitude $amount';
+  }
 }

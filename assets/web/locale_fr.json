@@ -524,5 +524,16 @@
   "web_bill_remind_n": "{n} jours avant",
   "web_bill_confirm_post": "Confirmer et enregistrer",
   "web_bill_confirm_desc": "Montant cette fois",
-  "web_bill_to_confirm": "confirmez le montant"
+  "web_bill_to_confirm": "confirmez le montant",
+  "web_history_btn": "Historique",
+  "web_history_title": "Historique",
+  "web_history_intro": "Les {n} dernières modifications de vos transactions, les plus récentes d'abord.",
+  "web_history_empty": "Aucune modification",
+  "web_history_added": "Ajoutée",
+  "web_history_edited": "Modifiée",
+  "web_history_deleted": "Supprimée",
+  "web_history_for_date": "pour le {date}",
+  "web_history_from_web": "depuis le Compagnon Web",
+  "web_history_from_bill": "facture récurrente",
+  "web_fund_usually": "Dépense d'habitude {amount}"
 }

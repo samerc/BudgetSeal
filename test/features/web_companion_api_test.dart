@@ -6,6 +6,7 @@ import 'package:budgetseal/core/providers/database_provider.dart';
 import 'package:budgetseal/core/providers/household_provider.dart';
 import 'package:budgetseal/features/web_companion/api/accounts_handler.dart';
 import 'package:budgetseal/features/web_companion/api/categories_handler.dart';
+import 'package:budgetseal/features/web_companion/api/change_log_handler.dart';
 import 'package:budgetseal/features/web_companion/api/changes_handler.dart';
 import 'package:budgetseal/features/web_companion/api/dashboard_handler.dart';
 import 'package:budgetseal/features/web_companion/api/envelopes_handler.dart';
@@ -773,5 +774,82 @@ void main() {
     expect(byId['a']['USD'], 70);
     expect(byId['b']['USD'], 20);
     expect((list['unallocated'] as Map)['USD'], 410);
+  });
+
+  test('search folds accents and Arabic letters, matches categories and '
+      'amount terms, and pages after matching', () async {
+    Future<void> add(String note, double amount, {String? cat}) async {
+      final r = await call(createTransactionHandler(ref), 'POST', body: {
+        'type': 'expense',
+        'accountId': 'usd',
+        'amount': amount,
+        'currency': 'USD',
+        if (cat != null) 'categoryId': cat,
+        'note': note,
+        'date': '2026-09-03',
+      });
+      expect(r['status'], 201);
+    }
+
+    await add('Café Nero', 12);
+    await add('قهوة', 4);
+    await add('Weekly shop', 80, cat: 'food');
+    Future<List<String>> notes(String q, [String page = '']) async {
+      final r = await call(listTransactionsHandler(ref), 'GET',
+          query: '?search=${Uri.encodeQueryComponent(q)}$page');
+      return [for (final i in r['items'] as List) i['note'] as String];
+    }
+
+    expect(await notes('cafe'), ['Café Nero']);
+    expect(await notes('قهوه'), ['قهوة']);
+    expect(await notes('food'), ['Weekly shop']);
+    expect(await notes('>50'), ['Weekly shop']);
+    expect((await notes('<50')).length, 2);
+    final second = await call(listTransactionsHandler(ref), 'GET',
+        query: '?search=${Uri.encodeQueryComponent('<50')}&limit=1&page=2');
+    expect((second['items'] as List).length, 1);
+    expect(second['hasMore'], isFalse);
+  });
+
+  test('change log: added, edited (one entry) and deleted', () async {
+    final a = await call(createTransactionHandler(ref), 'POST', body: {
+      'type': 'expense',
+      'accountId': 'usd',
+      'amount': 10,
+      'currency': 'USD',
+      'note': 'Lunch',
+      'date': '2026-09-03',
+    });
+    final b = await call(createTransactionHandler(ref), 'POST', body: {
+      'type': 'income',
+      'accountId': 'lbp',
+      'amount': 500000,
+      'currency': 'LBP',
+      'categoryId': 'pay',
+      'date': '2026-09-03',
+    });
+    await call(updateTransactionHandler(ref), 'PUT',
+        id: a['id'] as String, body: {'amount': 12});
+    await call(deleteTransactionHandler(ref), 'DELETE', id: b['id'] as String);
+
+    final log = await call(changeLogHandler(ref), 'GET');
+    expect(log['status'], 200);
+    final items = (log['items'] as List).cast<Map<String, dynamic>>();
+    final kinds = items.map((i) => i['kind']).toList()..sort();
+    expect(kinds, ['deleted', 'edited']);
+    final deleted = items.firstWhere((i) => i['kind'] == 'deleted');
+    expect(deleted['categoryName'], 'Salary');
+    expect(deleted['amounts'], [
+      {'currency': 'LBP', 'amount': 500000}
+    ]);
+    final edited = items.firstWhere((i) => i['kind'] == 'edited');
+    expect(edited['note'], 'Lunch');
+    expect(edited['source'], 'web');
+  });
+
+  test('average spending answers with a map per envelope', () async {
+    final r = await call(averageSpendingHandler(ref), 'GET');
+    expect(r['status'], 200);
+    expect(r['items'], isA<Map>());
   });
 }

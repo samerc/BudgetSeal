@@ -1,9 +1,9 @@
-import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/database/app_database.dart';
+import '../../core/engine/change_log.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/date_format_provider.dart';
@@ -20,54 +20,6 @@ import '../../shared/widgets/error_retry.dart';
 import '../../shared/widgets/large_title_header.dart';
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/widgets/tappable.dart';
-
-enum ChangeKind { added, edited, deleted }
-
-/// One entry of the change history.
-class ChangeEvent {
-  final ChangeKind kind;
-  final Transaction tx; // the live row (added/edited) or the deleted one
-  final DateTime at;
-  const ChangeEvent(this.kind, this.tx, this.at);
-}
-
-/// The change history from transaction rows alone (no log table): a row's
-/// `lastModified` is when it was saved, or when it was deleted. An edit
-/// saves a new row and deletes the old one within moments, so a deleted
-/// row and a live row of the same type within [pairWindow] read as one
-/// "edited". Newest first.
-List<ChangeEvent> buildChangeLog(List<Transaction> rows,
-    {Duration pairWindow = const Duration(seconds: 10)}) {
-  final live = rows.where((t) => !t.deleted).toList();
-  final deleted = rows.where((t) => t.deleted).toList();
-  final edited = <String>{};
-  final pairedDeleted = <String>{};
-  for (final d in deleted) {
-    Transaction? best;
-    var bestGap = pairWindow;
-    for (final a in live) {
-      if (edited.contains(a.id) || a.type != d.type) continue;
-      final gap = a.lastModified.difference(d.lastModified).abs();
-      if (gap <= bestGap) {
-        best = a;
-        bestGap = gap;
-      }
-    }
-    if (best != null) {
-      edited.add(best.id);
-      pairedDeleted.add(d.id);
-    }
-  }
-  final out = <ChangeEvent>[
-    for (final a in live)
-      ChangeEvent(edited.contains(a.id) ? ChangeKind.edited : ChangeKind.added,
-          a, a.lastModified),
-    for (final d in deleted)
-      if (!pairedDeleted.contains(d.id))
-        ChangeEvent(ChangeKind.deleted, d, d.lastModified),
-  ]..sort((a, b) => b.at.compareTo(a.at));
-  return out;
-}
 
 /// Settings › Change history: what was added, edited or deleted, and when.
 class ChangeLogScreen extends ConsumerStatefulWidget {
@@ -98,28 +50,11 @@ class _ChangeLogScreenState extends ConsumerState<ChangeLogScreen> {
         if (mounted) setState(() => _loading = false);
         return;
       }
-      // Posted rows and deleted ones (planned payments aren't history yet).
-      final rows = await (db.select(db.transactions)
-            ..where((t) =>
-                t.householdId.equals(householdId) &
-                (t.status.isNull() | t.deleted.equals(true)))
-            ..orderBy([(t) => OrderingTerm.desc(t.lastModified)])
-            ..limit(_limit))
-          .get();
-      final ids = rows.map((t) => t.id).toList();
-      final lines = ids.isEmpty
-          ? const <TransactionLine>[]
-          : await (db.select(db.transactionLines)
-                ..where((l) => l.transactionId.isIn(ids)))
-              .get();
-      final byTx = <String, List<TransactionLine>>{};
-      for (final l in lines) {
-        byTx.putIfAbsent(l.transactionId, () => []).add(l);
-      }
+      final log = await loadChangeLog(db, householdId, limit: _limit);
       if (mounted) {
         setState(() {
-          _events = buildChangeLog(rows);
-          _lines = byTx;
+          _events = log.events;
+          _lines = log.lines;
           _loading = false;
           _error = null;
         });

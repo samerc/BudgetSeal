@@ -167,12 +167,16 @@ String formatCalcExpression(String expr) {
 }
 
 /// Returns the confirmed amount, or null if dismissed.
-Future<double?> showCalculatorSheet(BuildContext context, double initialValue) {
+/// [title] and [subtitle] label what the amount is for (e.g. a bill whose
+/// amount is confirmed each time); without them the sheet is just the pad.
+Future<double?> showCalculatorSheet(BuildContext context, double initialValue,
+    {String? title, String? subtitle}) {
   return showModalBottomSheet<double>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (ctx) => _CalculatorSheet(initialValue: initialValue),
+    builder: (ctx) => _CalculatorSheet(
+        initialValue: initialValue, title: title, subtitle: subtitle),
   );
 }
 
@@ -182,7 +186,10 @@ Future<double?> showCalculatorSheet(BuildContext context, double initialValue) {
 
 class _CalculatorSheet extends StatefulWidget {
   final double initialValue;
-  const _CalculatorSheet({required this.initialValue});
+  final String? title;
+  final String? subtitle;
+  const _CalculatorSheet(
+      {required this.initialValue, this.title, this.subtitle});
 
   @override
   State<_CalculatorSheet> createState() => _CalculatorSheetState();
@@ -353,14 +360,46 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
         borderRadius: const BorderRadius.vertical(
             top: Radius.circular(RadiusTokens.sheet)),
       ),
-      // Numbers and operators are laid out left-to-right in every locale.
-      child: Directionality(
+      // Numbers and operators are laid out left-to-right in every locale;
+      // the title keeps the reading direction.
+      child: Builder(builder: (context) {
+        final textDirection = Directionality.of(context);
+        return Directionality(
         textDirection: TextDirection.ltr,
         child: SafeArea(
           top: false,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (widget.title != null)
+                Directionality(
+                  textDirection: textDirection,
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(24, 18, 24, 0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(widget.title!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontFamily: TypographyTokens.displayFamily,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.tp(context),
+                              )),
+                          if (widget.subtitle != null)
+                            Text(widget.subtitle!,
+                                style: TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.ts(context))),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               // Amount display — scales down instead of truncating.
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
@@ -457,7 +496,8 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
             ],
           ),
         ),
-      ),
+        );
+      }),
     );
   }
 

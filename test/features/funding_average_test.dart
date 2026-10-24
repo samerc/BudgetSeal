@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:budgetseal/features/allocations/funding_screen.dart';
+import 'package:budgetseal/core/engine/spending_average.dart';
 
 void main() {
   test('averages from the first period with spending, rounded up', () {

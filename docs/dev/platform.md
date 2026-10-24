@@ -39,6 +39,7 @@ Service declaration (inside `<application>`):
 - `QuickAddWidget.kt` (`quick_add_widget.xml`, gold `widget_accent_background`): one "+ Add" button (label `widget_add_label`) → `/add-transaction`.
 - Widget taps: `MainActivity.routeIntent(context, route, requestCode)` puts the route in the `budgetseal_route` extra. Cold start: Dart's `HomeWidgetService.init()` (main.dart) asks `launchRoute` once; while running (`singleTop`), `onNewIntent` calls Dart's `open`. Both set `NotificationService.openRoute`, so routing is shared with notifications and app shortcuts. Shared_preferences ints arrive in Kotlin as Long (`getLong`).
 - Widget picker descriptions are in `res/values/strings.xml` (English only).
+- Colors: `widget_surface` / `widget_text` / `widget_text_secondary` / `widget_negative` in `values/colors.xml` (AppColors light surface/text/overspent) and `values-night/colors.xml` (dark surface/text, lighter red) — the widgets follow the phone's dark mode, not the in-app theme choice. `EnvelopesWidget.kt` picks the amount color with `context.getColor(R.color.…)`. No hex colors in the widget layouts.
 
 ### Debug vs Play Store build
 Debug builds are `com.budgetseal.app.debug`, labelled "BudgetSeal Dev" (`applicationIdSuffix` + the `appLabel` manifest placeholder in `build.gradle.kts`), so they install next to the Play Store app with their own data.

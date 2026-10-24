@@ -524,5 +524,16 @@
   "web_bill_remind_n": "{n} days before",
   "web_bill_confirm_post": "Confirm and post",
   "web_bill_confirm_desc": "Amount this time",
-  "web_bill_to_confirm": "confirm the amount"
+  "web_bill_to_confirm": "confirm the amount",
+  "web_history_btn": "History",
+  "web_history_title": "Change history",
+  "web_history_intro": "The last {n} changes to your transactions, newest first.",
+  "web_history_empty": "No changes yet",
+  "web_history_added": "Added",
+  "web_history_edited": "Edited",
+  "web_history_deleted": "Deleted",
+  "web_history_for_date": "for {date}",
+  "web_history_from_web": "from the Web Companion",
+  "web_history_from_bill": "recurring bill",
+  "web_fund_usually": "Usually spends {amount}"
 }

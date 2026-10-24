@@ -3,4 +3,9 @@
     <color name="ic_launcher_background">#1C1D24</color>
     <!-- App background (paper, AppColors.background) so launch → app is seamless -->
     <color name="splash_background">#F7F5F1</color>
+    <!-- Home widgets (AppColors.surface / textPrimary / textSecondary / overspent) -->
+    <color name="widget_surface">#FFFFFFFF</color>
+    <color name="widget_text">#FF1C1A16</color>
+    <color name="widget_text_secondary">#FF6B655B</color>
+    <color name="widget_negative">#FFDC2626</color>
 </resources>

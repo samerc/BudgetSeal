@@ -5886,5 +5886,16 @@
   "onboardRestoreBackupHint": "Un fichier .db enregistré depuis Réglages › Sauvegarde et restauration. L'app se ferme pour terminer ; rouvrez-la.",
   "widgetEnvelopesTitle": "Enveloppes",
   "widgetEnvelopesEmpty": "Aucune enveloppe de dépenses",
-  "widgetAddLabel": "Ajouter"
+  "widgetAddLabel": "Ajouter",
+  "webHistoryBtn": "Historique",
+  "webHistoryTitle": "Historique",
+  "webHistoryIntro": "Les {n} dernières modifications de vos transactions, les plus récentes d'abord.",
+  "webHistoryEmpty": "Aucune modification",
+  "webHistoryAdded": "Ajoutée",
+  "webHistoryEdited": "Modifiée",
+  "webHistoryDeleted": "Supprimée",
+  "webHistoryForDate": "pour le {date}",
+  "webHistoryFromWeb": "depuis le Compagnon Web",
+  "webHistoryFromBill": "facture récurrente",
+  "webFundUsually": "Dépense d'habitude {amount}"
 }

@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="BudgetSeal"
-        android:textColor="#FF1B1B1F"
+        android:textColor="@color/widget_text"
         android:textSize="14sp"
         android:textStyle="bold" />
 
@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
         android:text=""
-        android:textColor="#FF49454F"
+        android:textColor="@color/widget_text_secondary"
         android:textSize="20sp" />
 
 </LinearLayout>

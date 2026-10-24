@@ -524,5 +524,16 @@
   "web_bill_remind_n": "قبل {n} يوم",
   "web_bill_confirm_post": "أكّد وسجّل",
   "web_bill_confirm_desc": "المبلغ هذه المرة",
-  "web_bill_to_confirm": "أكّد المبلغ"
+  "web_bill_to_confirm": "أكّد المبلغ",
+  "web_history_btn": "السجل",
+  "web_history_title": "سجل التغييرات",
+  "web_history_intro": "آخر {n} تغيير على معاملاتك، الأحدث أولاً.",
+  "web_history_empty": "لا تغييرات بعد",
+  "web_history_added": "أُضيفت",
+  "web_history_edited": "عُدّلت",
+  "web_history_deleted": "حُذفت",
+  "web_history_for_date": "بتاريخ {date}",
+  "web_history_from_web": "من المرافق الإلكتروني",
+  "web_history_from_bill": "فاتورة متكررة",
+  "web_fund_usually": "ينفق عادةً {amount}"
 }

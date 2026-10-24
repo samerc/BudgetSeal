@@ -9314,4 +9314,43 @@ class SAr extends S {
 
   @override
   String get widgetAddLabel => 'إضافة';
+
+  @override
+  String get webHistoryBtn => 'السجل';
+
+  @override
+  String get webHistoryTitle => 'سجل التغييرات';
+
+  @override
+  String webHistoryIntro(int n) {
+    return 'آخر $n تغيير على معاملاتك، الأحدث أولاً.';
+  }
+
+  @override
+  String get webHistoryEmpty => 'لا تغييرات بعد';
+
+  @override
+  String get webHistoryAdded => 'أُضيفت';
+
+  @override
+  String get webHistoryEdited => 'عُدّلت';
+
+  @override
+  String get webHistoryDeleted => 'حُذفت';
+
+  @override
+  String webHistoryForDate(String date) {
+    return 'بتاريخ $date';
+  }
+
+  @override
+  String get webHistoryFromWeb => 'من المرافق الإلكتروني';
+
+  @override
+  String get webHistoryFromBill => 'فاتورة متكررة';
+
+  @override
+  String webFundUsually(String amount) {
+    return 'ينفق عادةً $amount';
+  }
 }

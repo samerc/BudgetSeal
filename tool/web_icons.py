@@ -58,6 +58,8 @@ ICONS = {
     'keyboard': ('keyboard', 'Regular'),
     'signOut': ('signOut', 'Regular'),
     'wifiSlash': ('wifiSlash', 'Regular'),
+    'history': ('clockCounterClockwise', 'Regular'),
+    'plusCircle': ('plusCircle', 'Regular'),
     'sun': ('sun', 'Regular'),
 }
 

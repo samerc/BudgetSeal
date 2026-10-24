@@ -169,7 +169,9 @@ class _UpcomingBillsScreenState
     double? amount;
     if (bill.askFirst && action != 'skip') {
       amount = await showCalculatorSheet(
-          context, recurringAmountOn(bill, bill.nextDueDate));
+          context, recurringAmountOn(bill, bill.nextDueDate),
+          title: bill.title.isNotEmpty ? bill.title : tr.subUntitled,
+          subtitle: tr.billToConfirm);
       if (amount == null || amount <= 0 || !mounted) return;
     }
     try {

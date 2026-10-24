@@ -11,6 +11,7 @@ import '../../../core/providers/engine_provider.dart';
 import '../../../core/providers/household_provider.dart';
 import '../../../shared/utils/format_number.dart' show isRealRate;
 import '../../../shared/utils/note_text.dart';
+import '../../../shared/utils/search_match.dart';
 import '_running.dart';
 import '_serializers.dart';
 import '_validation.dart';
@@ -18,6 +19,46 @@ import '_validation.dart';
 const _types = ['income', 'expense', 'transfer'];
 
 // ── GET /api/transactions ─────────────────────────────────────────────────────
+
+/// Lines per transaction, read in chunks (SQLite caps bound variables).
+Future<Map<String, List<TransactionLine>>> _linesByTx(
+    AppDatabase db, List<String> ids) async {
+  final out = <String, List<TransactionLine>>{};
+  for (var i = 0; i < ids.length; i += 500) {
+    final chunk = ids.sublist(i, i + 500 > ids.length ? ids.length : i + 500);
+    final lines = await (db.select(db.transactionLines)
+          ..where((l) => l.transactionId.isIn(chunk)))
+        .get();
+    for (final l in lines) {
+      out.putIfAbsent(l.transactionId, () => []).add(l);
+    }
+  }
+  return out;
+}
+
+/// The Activity screen's match: the same text and own-currency amount.
+bool _matchesSearch(SearchQuery q, Transaction t, List<TransactionLine> lines,
+    Map<String, Category> cats, Map<String, Account> accounts) {
+  final text = StringBuffer()
+    ..write(t.note)
+    ..write(' ')
+    ..write(accounts[t.accountId]?.name ?? '')
+    ..write(' ')
+    ..write(t.amount.toStringAsFixed(2));
+  final cat = cats[t.categoryId];
+  if (cat != null) text.write(' ${cat.name}');
+  for (final l in lines) {
+    text.write(' ${l.note} ${l.amount.toStringAsFixed(2)}');
+    final lineCat = cats[l.categoryId];
+    if (lineCat != null) text.write(' ${lineCat.name}');
+  }
+  final amount = lines.isEmpty
+      ? t.amount
+      : t.type == 'transfer'
+          ? lines.first.amount.abs()
+          : lines.fold<double>(0, (a, l) => a + l.amount);
+  return q.matches(foldForSearch(text.toString()), amount);
+}
 
 Handler listTransactionsHandler(Ref ref) {
   return (Request request) async {
@@ -42,7 +83,14 @@ Handler listTransactionsHandler(Ref ref) {
           params['from'] != null ? DateTime.tryParse(params['from']!) : null;
       final toDate =
           params['to'] != null ? DateTime.tryParse(params['to']!) : null;
-      final search = params['search']?.trim();
+      // The app's Activity search: accent- and Arabic-insensitive words over
+      // the note, account, category and line text, plus amount terms (>50)
+      // on the row's own-currency amount. Folding isn't SQL, so a search
+      // reads every candidate row and pages after matching.
+      final rawSearch = params['search']?.trim() ?? '';
+      final search = SearchQuery.parse(rawSearch.length > 200
+          ? rawSearch.substring(0, 200)
+          : rawSearch);
 
       final query = db.select(db.transactions)
         ..where((t) {
@@ -66,22 +114,14 @@ Handler listTransactionsHandler(Ref ref) {
           if (toDate != null) {
             expr = expr & t.createdAt.isSmallerThanValue(toDate);
           }
-          if (search != null && search.isNotEmpty) {
-            final s = search.length > 200 ? search.substring(0, 200) : search;
-            expr = expr & t.note.lower().contains(s.toLowerCase());
-          }
           return expr;
         })
         ..orderBy([
           (t) => OrderingTerm.desc(t.createdAt),
           (t) => OrderingTerm.desc(t.id),
-        ])
-        // One extra row tells the browser whether a next page exists.
-        ..limit(limit + 1, offset: offset);
-
-      final rows = await query.get();
-      final hasMore = rows.length > limit;
-      final txs = hasMore ? rows.sublist(0, limit) : rows;
+        ]);
+      // One extra row tells the browser whether a next page exists.
+      if (search.isEmpty) query.limit(limit + 1, offset: offset);
 
       final accounts = await (db.select(db.accounts)
             ..where((a) => a.householdId.equals(householdId)))
@@ -92,19 +132,31 @@ Handler listTransactionsHandler(Ref ref) {
       final catMap = {for (final c in categories) c.id: c};
       final acctMap = {for (final a in accounts) a.id: a};
 
+      var rows = await query.get();
+      var linesByTx = <String, List<TransactionLine>>{};
+      if (!search.isEmpty) {
+        linesByTx = await _linesByTx(db, rows.map((t) => t.id).toList());
+        rows = rows
+            .where((t) => _matchesSearch(
+                search, t, linesByTx[t.id] ?? const [], catMap, acctMap))
+            .skip(offset)
+            .take(limit + 1)
+            .toList();
+      }
+      final hasMore = rows.length > limit;
+      final txs = hasMore ? rows.sublist(0, limit) : rows;
+      if (search.isEmpty) {
+        linesByTx = await _linesByTx(db, txs.map((t) => t.id).toList());
+      }
+
       // First line per transaction: native currency/amount and category
       // (tx.amount/currency is always the base currency).
-      final txIds = txs.map((t) => t.id).toList();
-      final allLines = txIds.isEmpty
-          ? <TransactionLine>[]
-          : await (db.select(db.transactionLines)
-                ..where((l) => l.transactionId.isIn(txIds)))
-              .get();
       final firstLine = <String, TransactionLine>{};
       final lineCount = <String, int>{};
-      for (final l in allLines) {
-        firstLine.putIfAbsent(l.transactionId, () => l);
-        lineCount[l.transactionId] = (lineCount[l.transactionId] ?? 0) + 1;
+      for (final t in txs) {
+        final lines = linesByTx[t.id] ?? const <TransactionLine>[];
+        if (lines.isNotEmpty) firstLine[t.id] = lines.first;
+        lineCount[t.id] = lines.length;
       }
 
       final household = await (db.select(db.households)

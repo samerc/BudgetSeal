@@ -4,6 +4,8 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/database/daos/ledger_dao.dart';
+import '../../../core/engine/spending_average.dart';
 import '../../../core/providers/database_provider.dart';
 import '../../../core/providers/engine_provider.dart';
 import '../../../core/providers/household_provider.dart';
@@ -27,6 +29,30 @@ Handler listEnvelopesHandler(Ref ref) {
         'baseCurrency':
             (snapshot['household'] as Map<String, dynamic>)['baseCurrency'],
       });
+    } catch (e) {
+      return serverError(e);
+    }
+  };
+}
+
+// ── GET /api/envelopes/average-spending ───────────────────────────────────────
+
+/// Each envelope's average spending per currency over the last 3 budget
+/// periods (the app's "Usually spends" on the Fund screen): {items: {id:
+/// {currency: amount}}}.
+Handler averageSpendingHandler(Ref ref) {
+  return (Request request) async {
+    final db = ref.read(databaseProvider);
+    final householdId = ref.read(currentHouseholdIdProvider);
+    if (householdId == null) return forbidden();
+
+    try {
+      final household = await (db.select(db.households)
+            ..where((h) => h.id.equals(householdId)))
+          .getSingleOrNull();
+      final avg = await recentAverageSpending(
+          LedgerDao(db), householdId, household?.periodStartDay ?? 1);
+      return ok({'items': avg});
     } catch (e) {
       return serverError(e);
     }

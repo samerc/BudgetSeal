@@ -2092,7 +2092,7 @@ class SEn extends S {
 
   @override
   String get syncErrNeedsPassword =>
-      'The sync file is encrypted. Enter your sync password in Cloud Sync to read it.';
+      'The sync file is encrypted. Enter your sync password in Cloud sync to read it.';
 
   @override
   String travelExchangeNote(String currency) {
@@ -3587,7 +3587,7 @@ class SEn extends S {
 
   @override
   String get fundStep2 =>
-      'Enter how much to put in each envelope, or use \"Quick Fill\" to auto-fill periodic envelopes up to their target.';
+      'Enter how much to put in each envelope, or use \"Quick fill\" to auto-fill periodic envelopes up to their target.';
 
   @override
   String get fundStep3 =>
@@ -4901,7 +4901,7 @@ class SEn extends S {
 
   @override
   String get tileShareHouseholdSnackbar =>
-      'Set up Cloud Sync with Google Drive first to share your household.';
+      'Set up cloud sync with Google Drive first to share your household.';
 
   @override
   String get tileBackupRestore => 'Backup & restore';
@@ -5139,14 +5139,14 @@ class SEn extends S {
 
   @override
   String get privacyDataStorageBody =>
-      'All your financial data (transactions, accounts, envelopes, categories, goals, and settings) is stored locally on your device in an SQLite database. No data leaves your device unless you explicitly enable Cloud Sync.';
+      'All your financial data (transactions, accounts, envelopes, categories, goals, and settings) is stored locally on your device in an SQLite database. No data leaves your device unless you explicitly enable cloud sync.';
 
   @override
   String get privacyCloudSyncTitle => '2. Cloud sync (optional)';
 
   @override
   String get privacyCloudSyncBody =>
-      'If you choose to enable Cloud Sync, your data is uploaded to your personal Google Drive account or a file storage provider you select. BudgetSeal does not have access to your Google account credentials — authentication is handled by Google\'s OAuth system.\n\nYou may optionally encrypt your sync file with AES-256 encryption using a password you set. The password is stored only on your device in secure storage (Android Keystore / iOS Keychain).';
+      'If you choose to enable cloud sync, your data is uploaded to your personal Google Drive account or a file storage provider you select. BudgetSeal does not have access to your Google account credentials — authentication is handled by Google\'s OAuth system.\n\nYou may optionally encrypt your sync file with AES-256 encryption using a password you set. The password is stored only on your device in secure storage (Android Keystore / iOS Keychain).';
 
   @override
   String get privacyWebCompanionTitle => '3. Web Companion';
@@ -5167,7 +5167,7 @@ class SEn extends S {
 
   @override
   String get privacyPermissionsBody =>
-      '• Camera — used only for receipt scanning (offline OCR)\n• Notifications — daily reminders and bill alerts\n• Biometrics — optional app lock\n• Network — only for Cloud Sync and exchange rate fetching\n• Local Network — Web Companion server\n\nAll permissions are optional and can be denied without affecting core functionality.';
+      '• Camera — used only for receipt scanning (offline OCR)\n• Notifications — daily reminders and bill alerts\n• Biometrics — optional app lock\n• Network — only for cloud sync and exchange rate fetching\n• Local Network — Web Companion server\n\nAll permissions are optional and can be denied without affecting core functionality.';
 
   @override
   String get privacyReceiptsTitle => '6. Receipt images';
@@ -5455,7 +5455,7 @@ class SEn extends S {
 
   @override
   String get reportsAgeExplanation =>
-      'Age of Money measures how many days your money sits before you spend it. It traces each expense back to the income that funded it (oldest income first).';
+      'Age of money measures how many days your money sits before you spend it. It traces each expense back to the income that funded it (oldest income first).';
 
   @override
   String get reportsTipsSection => 'Tips';
@@ -6972,7 +6972,7 @@ class SEn extends S {
 
   @override
   String travelExchangeSuccess(String fromAmount, String toAmount) {
-    return 'Exchanged $fromAmount → $toAmount. Open the travel wallet and use \"Convert Back & Close\" to return leftover money.';
+    return 'Exchanged $fromAmount → $toAmount. Open the travel wallet and use \"Convert back & close\" to return leftover money.';
   }
 
   @override
@@ -9297,4 +9297,43 @@ class SEn extends S {
 
   @override
   String get widgetAddLabel => 'Add';
+
+  @override
+  String get webHistoryBtn => 'History';
+
+  @override
+  String get webHistoryTitle => 'Change history';
+
+  @override
+  String webHistoryIntro(int n) {
+    return 'The last $n changes to your transactions, newest first.';
+  }
+
+  @override
+  String get webHistoryEmpty => 'No changes yet';
+
+  @override
+  String get webHistoryAdded => 'Added';
+
+  @override
+  String get webHistoryEdited => 'Edited';
+
+  @override
+  String get webHistoryDeleted => 'Deleted';
+
+  @override
+  String webHistoryForDate(String date) {
+    return 'for $date';
+  }
+
+  @override
+  String get webHistoryFromWeb => 'from the Web Companion';
+
+  @override
+  String get webHistoryFromBill => 'recurring bill';
+
+  @override
+  String webFundUsually(String amount) {
+    return 'Usually spends $amount';
+  }
 }

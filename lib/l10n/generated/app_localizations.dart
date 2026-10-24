@@ -3745,7 +3745,7 @@ abstract class S {
   /// No description provided for @syncErrNeedsPassword.
   ///
   /// In en, this message translates to:
-  /// **'The sync file is encrypted. Enter your sync password in Cloud Sync to read it.'**
+  /// **'The sync file is encrypted. Enter your sync password in Cloud sync to read it.'**
   String get syncErrNeedsPassword;
 
   /// No description provided for @travelExchangeNote.
@@ -6283,7 +6283,7 @@ abstract class S {
   /// No description provided for @fundStep2.
   ///
   /// In en, this message translates to:
-  /// **'Enter how much to put in each envelope, or use \"Quick Fill\" to auto-fill periodic envelopes up to their target.'**
+  /// **'Enter how much to put in each envelope, or use \"Quick fill\" to auto-fill periodic envelopes up to their target.'**
   String get fundStep2;
 
   /// No description provided for @fundStep3.
@@ -8677,7 +8677,7 @@ abstract class S {
   /// Snackbar message
   ///
   /// In en, this message translates to:
-  /// **'Set up Cloud Sync with Google Drive first to share your household.'**
+  /// **'Set up cloud sync with Google Drive first to share your household.'**
   String get tileShareHouseholdSnackbar;
 
   /// Tile title
@@ -9109,7 +9109,7 @@ abstract class S {
   /// Body
   ///
   /// In en, this message translates to:
-  /// **'All your financial data (transactions, accounts, envelopes, categories, goals, and settings) is stored locally on your device in an SQLite database. No data leaves your device unless you explicitly enable Cloud Sync.'**
+  /// **'All your financial data (transactions, accounts, envelopes, categories, goals, and settings) is stored locally on your device in an SQLite database. No data leaves your device unless you explicitly enable cloud sync.'**
   String get privacyDataStorageBody;
 
   /// Heading
@@ -9121,7 +9121,7 @@ abstract class S {
   /// Body
   ///
   /// In en, this message translates to:
-  /// **'If you choose to enable Cloud Sync, your data is uploaded to your personal Google Drive account or a file storage provider you select. BudgetSeal does not have access to your Google account credentials — authentication is handled by Google\'s OAuth system.\n\nYou may optionally encrypt your sync file with AES-256 encryption using a password you set. The password is stored only on your device in secure storage (Android Keystore / iOS Keychain).'**
+  /// **'If you choose to enable cloud sync, your data is uploaded to your personal Google Drive account or a file storage provider you select. BudgetSeal does not have access to your Google account credentials — authentication is handled by Google\'s OAuth system.\n\nYou may optionally encrypt your sync file with AES-256 encryption using a password you set. The password is stored only on your device in secure storage (Android Keystore / iOS Keychain).'**
   String get privacyCloudSyncBody;
 
   /// Heading
@@ -9157,7 +9157,7 @@ abstract class S {
   /// Body
   ///
   /// In en, this message translates to:
-  /// **'• Camera — used only for receipt scanning (offline OCR)\n• Notifications — daily reminders and bill alerts\n• Biometrics — optional app lock\n• Network — only for Cloud Sync and exchange rate fetching\n• Local Network — Web Companion server\n\nAll permissions are optional and can be denied without affecting core functionality.'**
+  /// **'• Camera — used only for receipt scanning (offline OCR)\n• Notifications — daily reminders and bill alerts\n• Biometrics — optional app lock\n• Network — only for cloud sync and exchange rate fetching\n• Local Network — Web Companion server\n\nAll permissions are optional and can be denied without affecting core functionality.'**
   String get privacyPermissionsBody;
 
   /// Heading
@@ -9691,7 +9691,7 @@ abstract class S {
   /// Explanation
   ///
   /// In en, this message translates to:
-  /// **'Age of Money measures how many days your money sits before you spend it. It traces each expense back to the income that funded it (oldest income first).'**
+  /// **'Age of money measures how many days your money sits before you spend it. It traces each expense back to the income that funded it (oldest income first).'**
   String get reportsAgeExplanation;
 
   /// Section header
@@ -12391,7 +12391,7 @@ abstract class S {
   /// SnackBar after successful travel exchange
   ///
   /// In en, this message translates to:
-  /// **'Exchanged {fromAmount} → {toAmount}. Open the travel wallet and use \"Convert Back & Close\" to return leftover money.'**
+  /// **'Exchanged {fromAmount} → {toAmount}. Open the travel wallet and use \"Convert back & close\" to return leftover money.'**
   String travelExchangeSuccess(String fromAmount, String toAmount);
 
   /// Restore backup confirmation dialog body
@@ -16037,6 +16037,72 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Add'**
   String get widgetAddLabel;
+
+  /// Web Companion: change history, usual spending
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get webHistoryBtn;
+
+  /// Web Companion: change history, usual spending
+  ///
+  /// In en, this message translates to:
+  /// **'Change history'**
+  String get webHistoryTitle;
+
+  /// Web Companion: change history, usual spending
+  ///
+  /// In en, this message translates to:
+  /// **'The last {n} changes to your transactions, newest first.'**
+  String webHistoryIntro(int n);
+
+  /// Web Companion: change history, usual spending
+  ///
+  /// In en, this message translates to:
+  /// **'No changes yet'**
+  String get webHistoryEmpty;
+
+  /// Web Companion: change history, usual spending
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get webHistoryAdded;
+
+  /// Web Companion: change history, usual spending
+  ///
+  /// In en, this message translates to:
+  /// **'Edited'**
+  String get webHistoryEdited;
+
+  /// Web Companion: change history, usual spending
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted'**
+  String get webHistoryDeleted;
+
+  /// Web Companion: change history, usual spending
+  ///
+  /// In en, this message translates to:
+  /// **'for {date}'**
+  String webHistoryForDate(String date);
+
+  /// Web Companion: change history, usual spending
+  ///
+  /// In en, this message translates to:
+  /// **'from the Web Companion'**
+  String get webHistoryFromWeb;
+
+  /// Web Companion: change history, usual spending
+  ///
+  /// In en, this message translates to:
+  /// **'recurring bill'**
+  String get webHistoryFromBill;
+
+  /// Web Companion: change history, usual spending
+  ///
+  /// In en, this message translates to:
+  /// **'Usually spends {amount}'**
+  String webFundUsually(String amount);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

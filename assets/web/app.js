@@ -291,6 +291,8 @@ const IC = {
   x: ph('x'),
   checkCircle: ph('checkCircle'),
   circle: ph('circle'),
+  history: ph('history'),
+  plusCircle: ph('plusCircle'),
 };
 const TYPE_ICON = { bank: IC.bank, cash: IC.cash, credit: IC.card, wallet: IC.wallet };
 
@@ -741,6 +743,7 @@ const routes = {
   '#/import': renderImport,
   '#/goals': renderGoals,
   '#/upcoming': renderUpcoming,
+  '#/history': renderHistory,
 };
 
 function navigate(hash, quiet = false) {
@@ -749,7 +752,7 @@ function navigate(hash, quiet = false) {
   state.route = route;
   const acct = route.match(/^#\/accounts\/([\w-]+)$/);
   const base = acct ? '#/accounts' : route;
-  const navBase = base === '#/bulk' || base === '#/import' ? '#/transactions' : base;
+  const navBase = base === '#/bulk' || base === '#/import' || base === '#/history' ? '#/transactions' : base;
   document.querySelectorAll('.nav-link').forEach(a => a.classList.toggle('active', a.dataset.route === navBase));
   toggleSidebar(false);
   if (changed && !quiet) window.scrollTo(0, 0);
@@ -1310,6 +1313,7 @@ function openFund(id) {
         <div class="chips">
           ${toTarget > 0 ? `<button type="button" class="pill" data-fill="${toTarget}">${esc(t('web_fund_to_target'))}</button>` : ''}
           <button type="button" class="pill" data-fill="all">${esc(t('web_fund_all'))}</button>
+          <button type="button" class="pill" id="fund-usual" hidden></button>
         </div>
         <div class="help" id="fund-help"></div>
       </div>
@@ -1328,7 +1332,24 @@ function openFund(id) {
         help.classList.toggle('warn', left < -0.004);
         if (left < -0.004) help.textContent = t('web_fund_over', { amount: fmt(left, cur()) });
         form.querySelector('#fund-cur-badge').textContent = cur();
+        // "Usually spends": the average of the last 3 periods, as in the app.
+        const avg = usual?.[cur()];
+        usualBtn.hidden = !(avg > 0);
+        if (avg > 0) {
+          usualBtn.textContent = t('web_fund_usually', { amount: fmt(avg, cur()) });
+          usualBtn.dataset.value = avg;
+        }
       };
+      const usualBtn = form.querySelector('#fund-usual');
+      let usual = null;
+      usualBtn.addEventListener('click', () => {
+        amount.value = amountInputValue(Number(usualBtn.dataset.value), cur());
+        update();
+      });
+      api('/api/envelopes/average-spending', { quiet: true }).then(d => {
+        usual = d?.items?.[id] || null;
+        if (form.isConnected) update();
+      });
       form.querySelectorAll('[data-fill]').forEach(b => b.addEventListener('click', () => {
         const v = b.dataset.fill === 'all' ? Math.max(0, available(cur())) : Number(b.dataset.fill);
         amount.value = amountInputValue(v, cur());
@@ -1503,6 +1524,7 @@ async function renderTransactions(opts = {}) {
           <button class="btn btn-primary" data-action="add-tx">${IC.plus}${esc(t('web_tx_add'))}</button>`}`)}`
     : pageHead(t('nav_transactions'), '',
         `<button class="btn btn-ghost" data-action="export-tx">${IC.download}${esc(t('web_csv'))}</button>
+         <a class="btn btn-ghost" href="#/history">${IC.history}${esc(t('web_history_btn'))}</a>
          <a class="btn btn-ghost" href="#/import">${IC.upload}${esc(t('web_import_btn'))}</a>
          <a class="btn btn-tonal" href="#/bulk">${IC.grid}${esc(t('web_bulk_add'))}</a>
          <button class="btn btn-primary" data-action="add-tx">${IC.plus}${esc(t('web_tx_add'))}</button>`);
@@ -2305,6 +2327,52 @@ function importRows() {
     else if (cdb >= 0 || ccr >= 0) amount = Math.abs(num(r[ccr]) || 0) - Math.abs(num(r[cdb]) || 0);
     return { date: cd >= 0 ? day(r[cd]) : dayKey(), description: cs >= 0 ? r[cs] : '', amount, category: cc >= 0 ? r[cc] : '' };
   });
+}
+
+// ── Change history ────────────────────────────────────────────────────────────
+// The app's Settings › Change history (GET /api/change-log): what was added,
+// edited or deleted and when, grouped by the day of the change.
+
+async function renderHistory(quiet) {
+  const head = `<a class="back-link" href="#/transactions">${IC.back}${esc(t('nav_transactions'))}</a>${pageHead(t('web_history_title'), '')}`;
+  if (!quiet) setContent(head + skeleton(6));
+  const d = await api('/api/change-log');
+  if (state.route !== '#/history') return;
+  if (!d) { if (!quiet) loadFailed(t('web_history_title')); return; }
+  const items = d.items || [];
+  if (!items.length) { setContent(head + `<div class="card">${emptyState(IC.history, t('web_history_empty'), '')}</div>`); return; }
+
+  const KIND = {
+    added: [IC.plusCircle, 'var(--healthy)', 'web_history_added'],
+    edited: [IC.edit, 'var(--accent)', 'web_history_edited'],
+    deleted: [IC.trash, 'var(--overspent)', 'web_history_deleted'],
+  };
+  const row = e => {
+    const [icon, color, verb] = KIND[e.kind] || KIND.added;
+    const gone = e.kind === 'deleted';
+    const time = toDate(e.at).toLocaleTimeString(intlLocale(), { hour: 'numeric', minute: '2-digit' });
+    const sub = [
+      `${t(verb)} ${time}`,
+      dayKey(e.date) !== dayKey(e.at) ? t('web_history_for_date', { date: fmtDate(e.date) }) : '',
+      e.source === 'bill' ? t('web_history_from_bill') : e.source === 'web' ? t('web_history_from_web') : '',
+    ].filter(Boolean).join(' · ');
+    // Amounts per line currency, never summed across them.
+    const amount = (e.amounts || []).map(a => fmtSigned(a.amount, a.currency, e.type)).join(' + ');
+    return `<div class="row${gone ? ' dim' : ' clickable'}"${gone ? '' : ` data-action="edit-tx" data-id="${esc(e.txId)}" tabindex="0"`}>
+      <span class="chip-icon" style="background:color-mix(in srgb, ${color} 16%, transparent);color:${color}">${icon}</span>
+      <div class="row-main"><div class="row-title"${gone ? ' style="text-decoration:line-through"' : ''}>${esc(e.note || e.categoryName || t(`type_${e.type}`))}</div>
+        <div class="row-sub">${esc(sub)}</div></div>
+      <div class="row-end"><div class="row-amount num">${esc(amount)}</div></div>
+    </div>`;
+  };
+  const groups = [];
+  for (const e of items) {
+    const k = dayKey(e.at);
+    if (!groups.length || groups[groups.length - 1].k !== k) groups.push({ k, at: e.at, items: [] });
+    groups[groups.length - 1].items.push(e);
+  }
+  setContent(head + `<p class="help" style="margin:0 0 12px">${esc(t('web_history_intro', { n: d.limit || items.length }))}</p>
+    <div class="card card-flush list">${groups.map(g => `<div class="day-head"><span>${esc(fmtDay(g.at))}</span></div>${g.items.map(row).join('')}`).join('')}</div>`);
 }
 
 async function renderImport() {
