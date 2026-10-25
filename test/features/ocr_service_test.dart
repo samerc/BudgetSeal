@@ -417,6 +417,92 @@ void main() {
           isEmpty);
     });
 
+    test('a real Beit Bhamdoun restaurant receipt (ML Kit output, Oct 2026)',
+        () {
+      // Wines listed by vintage ("1 2014  2700000" — all digits, still an
+      // item), two references on one line ("CHECK # 105165 TABLE #1"), a
+      // phone number, ungrouped LBP prices and the USD equivalent total.
+      // (Phone and waiter's name replaced; layout kept.)
+      OcrRawLine l(String text, double left, double top, double right,
+              double bottom, double angle, double h) =>
+          OcrRawLine(
+              text: text,
+              rect: ui.Rect.fromLTRB(left, top, right, bottom),
+              angle: angle,
+              height: h);
+      final res = OcrService.parseLines([
+        l('Beit Bhamdoun', 211, 88, 507, 127, -0.0270, 31.0),
+        l('1 2014', 138, 447, 215, 480, -0.0389, 30.0),
+        l('Bhamdoun El Dayaa', 236, 143, 482, 176, -0.0203, 28.0),
+        l('1 2016', 143, 494, 219, 525, 0.0000, 31.0),
+        l('03000000', 295, 186, 419, 213, -0.0242, 24.0),
+        l('25-10-2026 16:13', 243, 274, 472, 305, -0.0218, 26.0),
+        l('CHECK # 105165 TABLE #1', 175, 366, 544, 399, 0.0000, 33.0),
+        l('TABLE', 315, 232, 399, 257, -0.0119, 24.0),
+        l('DUPLICATA #2', 263, 320, 466, 353, 0.0000, 33.0),
+        l('1 DUCK MAGRET', 144, 535, 356, 565, -0.0141, 27.0),
+        l('1 PASTA RED', 147, 579, 312, 606, 0.0000, 27.0),
+        l('3 ARGENTINIAN FILET', 139, 621, 423, 642, 0.0000, 21.0),
+        l('1 FRIES', 154, 655, 243, 681, -0.0225, 24.0),
+        l('2 PASTA MUSHROOM', 146, 693, 416, 714, 0.0000, 21.0),
+        l('1 AUSTRALIAN WAGYU', 158, 731, 435, 756, 0.0000, 25.0),
+        l('5 LARGE STILL WATER', 145, 773, 433, 793, 0.0000, 20.0),
+        l('4 ESPRESSO COFFEE', 144, 811, 422, 832, 0.0000, 21.0),
+        l('6 CREME BRULE', 144, 851, 357, 872, 0.0000, 21.0),
+        l('1 ALL GREEN SALAD', 154, 890, 407, 915, 0.0000, 25.0),
+        l('1 AUBERGINE KEBBE', 156, 930, 414, 955, 0.0000, 25.0),
+        l('2 SAMOSAS', 143, 972, 296, 994, 0.0000, 22.0),
+        l('1 DUCK SHAWARMA', 155, 1009, 405, 1038, 0.0120, 26.0),
+        l('1 BEETROOT SALAD', 154, 1051, 404, 1077, 0.0000, 26.0),
+        l('You Have been served by', 217, 1292, 503, 1316, 0.0000, 24.0),
+        l('SAM', 322, 1325, 401, 1348, -0.0506, 19.0),
+        l('2700000', 559, 453, 668, 476, 0.0000, 23.0),
+        l('Thank you.', 306, 1369, 419, 1395, -0.0535, 20.0),
+        l('2250000', 558, 498, 665, 519, 0.0000, 21.0),
+        l('2700000', 556, 540, 662, 562, 0.0000, 22.0),
+        l('1440000', 556, 579, 657, 603, 0.0200, 22.0),
+        l('8100000', 551, 616, 649, 641, -0.0306, 22.0),
+        l('540000', 563, 657, 648, 675, 0.0000, 18.0),
+        l('3600000', 547, 693, 645, 713, 0.0000, 20.0),
+        l('7020000', 547, 733, 645, 753, 0.0000, 20.0),
+        l('1800000', 550, 773, 645, 792, 0.0000, 19.0),
+        l('1080000', 550, 809, 644, 832, -0.0213, 21.0),
+        l('4050000', 549, 852, 646, 872, 0.0000, 20.0),
+        l('1080000', 551, 887, 645, 914, -0.0319, 24.0),
+        l('1080000', 552, 932, 648, 952, 0.0000, 20.0),
+        l('2160000', 550, 969, 647, 992, -0.0206, 21.0),
+        l('TOTAL LL: 42660000', 165, 1119, 560, 1150, 0.0000, 31.0),
+        l('TOTAL \$: 474.00', 206, 1162, 520, 1197, 0.0000, 35.0),
+        l('1980000', 553, 1012, 650, 1033, 0.0000, 21.0),
+        l('1080000', 554, 1050, 649, 1074, -0.0210, 22.0),
+      ], imageWidth: 798, imageHeight: 1446, currency: 'LBP');
+      expect(_items(res), [
+        ('2014', 2700000.0, 1),
+        ('2016', 2250000.0, 1),
+        ('DUCK MAGRET', 2700000.0, 1),
+        ('PASTA RED', 1440000.0, 1),
+        ('ARGENTINIAN FILET', 8100000.0, 3),
+        ('FRIES', 540000.0, 1),
+        ('PASTA MUSHROOM', 3600000.0, 2),
+        ('AUSTRALIAN WAGYU', 7020000.0, 1),
+        ('LARGE STILL WATER', 1800000.0, 5),
+        ('ESPRESSO COFFEE', 1080000.0, 4),
+        ('CREME BRULE', 4050000.0, 6),
+        ('ALL GREEN SALAD', 1080000.0, 1),
+        ('AUBERGINE KEBBE', 1080000.0, 1),
+        ('SAMOSAS', 2160000.0, 2),
+        ('DUCK SHAWARMA', 1980000.0, 1),
+        ('BEETROOT SALAD', 1080000.0, 1),
+      ]);
+      expect(res.receiptTotal, 42660000);
+      // The items add up to the receipt.
+      expect(_items(res).fold<double>(0, (s, i) => s + i.$2), 42660000);
+      expect(
+          OcrService.receiptCurrency(res,
+              billCurrency: 'USD', userCurrencies: {'USD', 'LBP'}),
+          (code: 'LBP', printed: true));
+    });
+
     test('a real Roadster Diner receipt (ML Kit output, Oct 2026)', () {
       // Ungrouped LBP prices with ".00", the total on the row under
       // "TOTAL DUE" (read "6300O00.0O0"), a free "W/Regular 0.00", the USD

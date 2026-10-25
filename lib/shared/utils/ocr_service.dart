@@ -686,6 +686,16 @@ class OcrService {
     var name = rawName.trim();
     int quantity = 1;
 
+    // "1 2014": a count and a vintage (see [_yearItem]) — the year is the name.
+    final vintage = RegExp(r'^(\d{1,2})\s+((?:19|20)\d{2})$').firstMatch(name);
+    if (vintage != null) {
+      return ExtractedItem(
+          name: vintage.group(2)!,
+          amount: amount,
+          quantity: int.parse(vintage.group(1)!),
+          weakPrice: weak);
+    }
+
     // Inline unit price: "Coffee 2 @ 4.50" (the line's price is the total).
     final inlineQty =
         RegExp(r'^(.+?)\s+(\d{1,2})\s*[xX×@]\s*[$€£¥]?\s*[\d.,]+$')
@@ -779,10 +789,16 @@ class OcrService {
   static final _taxId = RegExp(
       r'(^|[^a-z])(vat|tax|tva|gst|trn)\s*(no|n°|nr|number|#|id|reg\w*|invoice|facture)([^a-z]|$)');
 
-  /// "Order Nb 20035", "CHECK # 1600000", "Ref: 8000000", "Table 12":
-  /// a reference number, not an item with a price.
+  /// "Order Nb 20035", "CHECK # 1600000", "Ref: 8000000", "Table 12" —
+  /// or several on one line ("CHECK # 105165 TABLE # 1"): reference
+  /// numbers, not an item with a price.
   static final _reference = RegExp(
-      r'^(order|check|chk|cheque|ticket|table|ref|reference|bill|commande|trans\w*|txn|cashier|caissier|server)[\s.:#,n°obr]*\d+$');
+      r'^(?:(?:order|check|chk|cheque|ticket|table|ref|reference|bill|commande|trans\w*|txn|cashier|caissier|server)\b[\s.:#,n°obr]*\d+\s*)+$');
+
+  /// "1 2014  2700000": a count, a year and a price — a wine listed by its
+  /// vintage. All digits, but an item, not noise.
+  static final _yearItem =
+      RegExp(r'^\d{1,2}\s+(?:19|20)\d{2}\s+[\d.,]{4,}\s*[a-z]{0,3}$');
 
   static bool _has(String lower, List<String> words) {
     for (final w in words) {
@@ -817,6 +833,7 @@ class OcrService {
   /// Lines that are only numbers, dates or codes, or have almost no letters
   /// (in any script, so Arabic item names count).
   static bool _isNoise(String lower) {
+    if (_yearItem.hasMatch(lower.trim())) return false;
     if (RegExp(r'^[\d/\-.:, ]+$').hasMatch(lower)) return true;
     if (lower.replaceAll(_nonLetter, '').length < 2) {
       return true;
