@@ -16217,6 +16217,30 @@ abstract class S {
   /// In en, this message translates to:
   /// **'{amount} + tip {tip}'**
   String billBeforeTipLine(String amount, String tip);
+
+  /// Bill splitter: item quantity
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get billQuantity;
+
+  /// Bill splitter: item quantity
+  ///
+  /// In en, this message translates to:
+  /// **'One less'**
+  String get billQuantityLess;
+
+  /// Bill splitter: item quantity
+  ///
+  /// In en, this message translates to:
+  /// **'One more'**
+  String get billQuantityMore;
+
+  /// Bill splitter: item quantity
+  ///
+  /// In en, this message translates to:
+  /// **'The amount is for all {qty}'**
+  String billQuantityHint(int qty);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

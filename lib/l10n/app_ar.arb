@@ -5916,5 +5916,9 @@
   "billShareShort": "مشاركة",
   "billBeforeTipLabel": "قبل الإكرامية",
   "billTaxLabel": "الضريبة أو الخدمة",
-  "billBeforeTipLine": "{amount} + إكرامية {tip}"
+  "billBeforeTipLine": "{amount} + إكرامية {tip}",
+  "billQuantity": "الكمية",
+  "billQuantityLess": "واحد أقل",
+  "billQuantityMore": "واحد أكثر",
+  "billQuantityHint": "المبلغ لجميع الـ{qty}"
 }

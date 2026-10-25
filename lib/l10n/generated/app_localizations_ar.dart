@@ -9425,4 +9425,18 @@ class SAr extends S {
   String billBeforeTipLine(String amount, String tip) {
     return '$amount + إكرامية $tip';
   }
+
+  @override
+  String get billQuantity => 'الكمية';
+
+  @override
+  String get billQuantityLess => 'واحد أقل';
+
+  @override
+  String get billQuantityMore => 'واحد أكثر';
+
+  @override
+  String billQuantityHint(int qty) {
+    return 'المبلغ لجميع الـ$qty';
+  }
 }

@@ -6998,5 +6998,13 @@
   "billTaxLabel": "Tax or service",
   "@billTaxLabel": {"description": "Bill splitter: totals page"},
   "billBeforeTipLine": "{amount} + tip {tip}",
-  "@billBeforeTipLine": {"description": "Bill splitter: totals page", "placeholders": {"amount": {"type": "String"}, "tip": {"type": "String"}}}
+  "@billBeforeTipLine": {"description": "Bill splitter: totals page", "placeholders": {"amount": {"type": "String"}, "tip": {"type": "String"}}},
+  "billQuantity": "Quantity",
+  "@billQuantity": {"description": "Bill splitter: item quantity"},
+  "billQuantityLess": "One less",
+  "@billQuantityLess": {"description": "Bill splitter: item quantity"},
+  "billQuantityMore": "One more",
+  "@billQuantityMore": {"description": "Bill splitter: item quantity"},
+  "billQuantityHint": "The amount is for all {qty}",
+  "@billQuantityHint": {"description": "Bill splitter: item quantity", "placeholders": {"qty": {"type": "int"}}}
 }

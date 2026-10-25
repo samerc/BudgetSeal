@@ -9509,4 +9509,18 @@ class SFr extends S {
   String billBeforeTipLine(String amount, String tip) {
     return '$amount + pourboire $tip';
   }
+
+  @override
+  String get billQuantity => 'Quantité';
+
+  @override
+  String get billQuantityLess => 'Un de moins';
+
+  @override
+  String get billQuantityMore => 'Un de plus';
+
+  @override
+  String billQuantityHint(int qty) {
+    return 'Le montant est pour les $qty';
+  }
 }

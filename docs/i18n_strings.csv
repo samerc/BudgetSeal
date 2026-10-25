@@ -3025,3 +3025,7 @@ bill_share_short,Bill splitter: totals page,Share,مشاركة,Partager
 bill_before_tip_label,Bill splitter: totals page,Before tip,قبل الإكرامية,Avant pourboire
 bill_tax_label,Bill splitter: totals page,Tax or service,الضريبة أو الخدمة,Taxe ou service
 bill_before_tip_line,Bill splitter: totals page,{amount} + tip {tip},{amount} + إكرامية {tip},{amount} + pourboire {tip}
+bill_quantity,Bill splitter: item quantity,Quantity,الكمية,Quantité
+bill_quantity_less,Bill splitter: item quantity,One less,واحد أقل,Un de moins
+bill_quantity_more,Bill splitter: item quantity,One more,واحد أكثر,Un de plus
+bill_quantity_hint,Bill splitter: item quantity,The amount is for all {qty},المبلغ لجميع الـ{qty},Le montant est pour les {qty}

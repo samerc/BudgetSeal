@@ -5916,5 +5916,9 @@
   "billShareShort": "Partager",
   "billBeforeTipLabel": "Avant pourboire",
   "billTaxLabel": "Taxe ou service",
-  "billBeforeTipLine": "{amount} + pourboire {tip}"
+  "billBeforeTipLine": "{amount} + pourboire {tip}",
+  "billQuantity": "Quantité",
+  "billQuantityLess": "Un de moins",
+  "billQuantityMore": "Un de plus",
+  "billQuantityHint": "Le montant est pour les {qty}"
 }

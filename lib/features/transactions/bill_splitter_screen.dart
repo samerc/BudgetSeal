@@ -673,8 +673,11 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   /// Add (item null) or edit an item: name, amount, split a quantity, delete.
   Future<void> _editItem([_BillItem? item]) async {
     final tr = S.of(context);
-    final nameCtrl = TextEditingController(text: item?.name ?? '');
+    // The name without its "×3" (the quantity has its own control).
+    final nameCtrl = TextEditingController(
+        text: (item?.name ?? '').replaceAll(RegExp(r'\s*×\d+$'), ''));
     var amount = item?.amount ?? 0;
+    var qty = item?.qty ?? 1;
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -722,13 +725,41 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                   ),
                 ),
               ),
-              if (item != null && item.qty > 1 && item.amount > 0)
+              // How many (a count, not an amount — a stepper, no keyboard).
+              const SizedBox(height: 8),
+              Row(children: [
+                Expanded(
+                  child: Text(tr.billQuantity,
+                      style: TextStyle(color: AppColors.ts(ctx))),
+                ),
+                IconButton(
+                  tooltip: tr.billQuantityLess,
+                  onPressed: qty > 1 ? () => setLocal(() => qty--) : null,
+                  icon: const Icon(AppIcons.minus, size: 18),
+                ),
+                SizedBox(
+                  width: 32,
+                  child: Text('$qty',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          fontSize: 17, fontWeight: FontWeight.w700)),
+                ),
+                IconButton(
+                  tooltip: tr.billQuantityMore,
+                  onPressed: qty < 99 ? () => setLocal(() => qty++) : null,
+                  icon: const Icon(AppIcons.plus, size: 18),
+                ),
+              ]),
+              if (qty > 1)
+                Text(tr.billQuantityHint(qty),
+                    style: TextStyle(fontSize: 12, color: AppColors.ts(ctx))),
+              if (qty > 1 && amount > 0)
                 Align(
                   alignment: AlignmentDirectional.centerStart,
                   child: TextButton.icon(
                     onPressed: () => Navigator.pop(ctx, 'split'),
                     icon: const Icon(AppIcons.arrowsSplit, size: 18),
-                    label: Text(tr.billSplitInto(item.qty)),
+                    label: Text(tr.billSplitInto(qty)),
                   ),
                 ),
             ],
@@ -762,18 +793,17 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           if (item?.ocrLineIndex != null) {
             _addedLines.remove(item!.ocrLineIndex);
           }
-        case 'split':
-          _splitItem(item!);
-        case 'save':
+        case 'split' || 'save':
           if (amount == 0) return;
-          final label = name.isEmpty ? tr.billItemN(_items.length + 1) : name;
-          if (item == null) {
-            _items.add(_BillItem(name: label, amount: amount));
-          } else {
-            item
-              ..name = label
-              ..amount = amount;
-          }
+          final base = name.isEmpty ? tr.billItemN(_items.length + 1) : name;
+          final label = qty > 1 ? '$base ×$qty' : base;
+          final target = item ?? _BillItem(name: label, amount: amount);
+          target
+            ..name = label
+            ..amount = amount
+            ..qty = qty;
+          if (item == null) _items.add(target);
+          if (result == 'split') _splitItem(target);
       }
     });
   }

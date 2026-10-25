@@ -9408,4 +9408,18 @@ class SEn extends S {
   String billBeforeTipLine(String amount, String tip) {
     return '$amount + tip $tip';
   }
+
+  @override
+  String get billQuantity => 'Quantity';
+
+  @override
+  String get billQuantityLess => 'One less';
+
+  @override
+  String get billQuantityMore => 'One more';
+
+  @override
+  String billQuantityHint(int qty) {
+    return 'The amount is for all $qty';
+  }
 }
