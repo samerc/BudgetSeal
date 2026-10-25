@@ -763,20 +763,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             _addedLines.remove(item!.ocrLineIndex);
           }
         case 'split':
-          final i = _items.indexOf(item!);
-          final unit = item.amount / item.qty;
-          final base = item.name.replaceAll(RegExp(r'\s*×\d+$'), '');
-          _items
-            ..removeAt(i)
-            ..insertAll(i, [
-              for (var n = 0; n < item.qty; n++)
-                _BillItem(
-                  name: '$base (${n + 1}/${item.qty})',
-                  amount: unit,
-                  people: Set.of(item.people),
-                  ocrLineIndex: item.ocrLineIndex,
-                ),
-            ]);
+          _splitItem(item!);
         case 'save':
           if (amount == 0) return;
           final label = name.isEmpty ? tr.billItemN(_items.length + 1) : name;
@@ -789,6 +776,26 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           }
       }
     });
+  }
+
+  /// "Lemonade ×3" → three items of one each, so each can go to whoever
+  /// had it (from the item's row or its edit dialog). Call inside setState.
+  void _splitItem(_BillItem item) {
+    final i = _items.indexOf(item);
+    if (i < 0 || item.qty < 2) return;
+    final unit = item.amount / item.qty;
+    final base = item.name.replaceAll(RegExp(r'\s*×\d+$'), '');
+    _items
+      ..removeAt(i)
+      ..insertAll(i, [
+        for (var n = 0; n < item.qty; n++)
+          _BillItem(
+            name: '$base (${n + 1}/${item.qty})',
+            amount: unit,
+            people: Set.of(item.people),
+            ocrLineIndex: item.ocrLineIndex,
+          ),
+      ]);
   }
 
   // ─── OCR ───────────────────────────────────────────────────────────────────
@@ -1950,7 +1957,10 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
         onLongPress: () => _editItem(item),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Row(children: [
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+          Row(children: [
             if (painting != null) ...[
               Container(
                 width: 24,
@@ -2017,6 +2027,18 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               ),
             ),
           ]),
+          // Several of the same ("×3"): split them so each can go to
+          // whoever had it — on the row, full width, so it's found.
+          if (painting == null && item.qty > 1 && item.amount > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: _Pill(
+                onTap: () => setState(() => _splitItem(item)),
+                icon: AppIcons.arrowsSplit,
+                label: tr.billSplitInto(item.qty),
+              ),
+            ),
+              ]),
         ),
       ),
     );
