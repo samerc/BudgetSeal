@@ -6978,5 +6978,19 @@
   "changeLogBy": "by {name}",
   "@changeLogBy": {"description": "Shared budget: member names", "placeholders": {"name": {"type": "String"}}},
   "webHistoryBy": "by {name}",
-  "@webHistoryBy": {"description": "Shared budget: member names", "placeholders": {"name": {"type": "String"}}}
+  "@webHistoryBy": {"description": "Shared budget: member names", "placeholders": {"name": {"type": "String"}}},
+  "billSplitInBase": "Split in {currency}",
+  "@billSplitInBase": {"description": "Bill splitter: split in base currency", "placeholders": {"currency": {"type": "String"}}},
+  "billSeeTotals": "See totals",
+  "@billSeeTotals": {"description": "Bill splitter: totals page"},
+  "billTotalsTitle": "Totals",
+  "@billTotalsTitle": {"description": "Bill splitter: totals page"},
+  "billTotalsEach": "Each person pays",
+  "@billTotalsEach": {"description": "Bill splitter: totals page"},
+  "billEditSplit": "Edit split",
+  "@billEditSplit": {"description": "Bill splitter: totals page"},
+  "billSaveAmount": "Save · {amount}",
+  "@billSaveAmount": {"description": "Bill splitter: totals page", "placeholders": {"amount": {"type": "String"}}},
+  "billShareShort": "Share",
+  "@billShareShort": {"description": "Bill splitter: totals page"}
 }

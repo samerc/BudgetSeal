@@ -9473,4 +9473,29 @@ class SFr extends S {
   String webHistoryBy(String name) {
     return 'par $name';
   }
+
+  @override
+  String billSplitInBase(String currency) {
+    return 'Partager en $currency';
+  }
+
+  @override
+  String get billSeeTotals => 'Voir les totaux';
+
+  @override
+  String get billTotalsTitle => 'Totaux';
+
+  @override
+  String get billTotalsEach => 'Chacun paie';
+
+  @override
+  String get billEditSplit => 'Modifier le partage';
+
+  @override
+  String billSaveAmount(String amount) {
+    return 'Enregistrer · $amount';
+  }
+
+  @override
+  String get billShareShort => 'Partager';
 }

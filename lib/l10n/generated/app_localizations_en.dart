@@ -9372,4 +9372,29 @@ class SEn extends S {
   String webHistoryBy(String name) {
     return 'by $name';
   }
+
+  @override
+  String billSplitInBase(String currency) {
+    return 'Split in $currency';
+  }
+
+  @override
+  String get billSeeTotals => 'See totals';
+
+  @override
+  String get billTotalsTitle => 'Totals';
+
+  @override
+  String get billTotalsEach => 'Each person pays';
+
+  @override
+  String get billEditSplit => 'Edit split';
+
+  @override
+  String billSaveAmount(String amount) {
+    return 'Save · $amount';
+  }
+
+  @override
+  String get billShareShort => 'Share';
 }

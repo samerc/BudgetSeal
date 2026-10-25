@@ -5906,5 +5906,12 @@
   "memberSavedBy": "Enregistrée par {name}",
   "memberTileSub": "Affiché à côté de ce que vous ajoutez dans un budget partagé",
   "changeLogBy": "par {name}",
-  "webHistoryBy": "par {name}"
+  "webHistoryBy": "par {name}",
+  "billSplitInBase": "Partager en {currency}",
+  "billSeeTotals": "Voir les totaux",
+  "billTotalsTitle": "Totaux",
+  "billTotalsEach": "Chacun paie",
+  "billEditSplit": "Modifier le partage",
+  "billSaveAmount": "Enregistrer · {amount}",
+  "billShareShort": "Partager"
 }

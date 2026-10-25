@@ -5906,5 +5906,12 @@
   "memberSavedBy": "حفظها {name}",
   "memberTileSub": "يظهر بجانب ما تضيفه في ميزانية مشتركة",
   "changeLogBy": "بواسطة {name}",
-  "webHistoryBy": "بواسطة {name}"
+  "webHistoryBy": "بواسطة {name}",
+  "billSplitInBase": "قسّم بـ{currency}",
+  "billSeeTotals": "عرض المجاميع",
+  "billTotalsTitle": "المجاميع",
+  "billTotalsEach": "يدفع كل شخص",
+  "billEditSplit": "تعديل التقسيم",
+  "billSaveAmount": "حفظ · {amount}",
+  "billShareShort": "مشاركة"
 }

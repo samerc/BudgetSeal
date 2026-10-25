@@ -16157,6 +16157,48 @@ abstract class S {
   /// In en, this message translates to:
   /// **'by {name}'**
   String webHistoryBy(String name);
+
+  /// Bill splitter: split in base currency
+  ///
+  /// In en, this message translates to:
+  /// **'Split in {currency}'**
+  String billSplitInBase(String currency);
+
+  /// Bill splitter: totals page
+  ///
+  /// In en, this message translates to:
+  /// **'See totals'**
+  String get billSeeTotals;
+
+  /// Bill splitter: totals page
+  ///
+  /// In en, this message translates to:
+  /// **'Totals'**
+  String get billTotalsTitle;
+
+  /// Bill splitter: totals page
+  ///
+  /// In en, this message translates to:
+  /// **'Each person pays'**
+  String get billTotalsEach;
+
+  /// Bill splitter: totals page
+  ///
+  /// In en, this message translates to:
+  /// **'Edit split'**
+  String get billEditSplit;
+
+  /// Bill splitter: totals page
+  ///
+  /// In en, this message translates to:
+  /// **'Save · {amount}'**
+  String billSaveAmount(String amount);
+
+  /// Bill splitter: totals page
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get billShareShort;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

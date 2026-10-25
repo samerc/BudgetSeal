@@ -3015,3 +3015,10 @@ member_saved_by,Shared budget: member names,Saved by {name},حفظها {name},En
 member_tile_sub,Shared budget: member names,Shown next to what you add in a shared budget,يظهر بجانب ما تضيفه في ميزانية مشتركة,Affiché à côté de ce que vous ajoutez dans un budget partagé
 change_log_by,Shared budget: member names,by {name},بواسطة {name},par {name}
 web_history_by,Shared budget: member names,by {name},بواسطة {name},par {name}
+bill_split_in_base,Bill splitter: split in base currency,Split in {currency},قسّم بـ{currency},Partager en {currency}
+bill_see_totals,Bill splitter: totals page,See totals,عرض المجاميع,Voir les totaux
+bill_totals_title,Bill splitter: totals page,Totals,المجاميع,Totaux
+bill_totals_each,Bill splitter: totals page,Each person pays,يدفع كل شخص,Chacun paie
+bill_edit_split,Bill splitter: totals page,Edit split,تعديل التقسيم,Modifier le partage
+bill_save_amount,Bill splitter: totals page,Save · {amount},حفظ · {amount},Enregistrer · {amount}
+bill_share_short,Bill splitter: totals page,Share,مشاركة,Partager

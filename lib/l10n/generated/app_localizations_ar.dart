@@ -9389,4 +9389,29 @@ class SAr extends S {
   String webHistoryBy(String name) {
     return 'بواسطة $name';
   }
+
+  @override
+  String billSplitInBase(String currency) {
+    return 'قسّم بـ$currency';
+  }
+
+  @override
+  String get billSeeTotals => 'عرض المجاميع';
+
+  @override
+  String get billTotalsTitle => 'المجاميع';
+
+  @override
+  String get billTotalsEach => 'يدفع كل شخص';
+
+  @override
+  String get billEditSplit => 'تعديل التقسيم';
+
+  @override
+  String billSaveAmount(String amount) {
+    return 'حفظ · $amount';
+  }
+
+  @override
+  String get billShareShort => 'مشاركة';
 }

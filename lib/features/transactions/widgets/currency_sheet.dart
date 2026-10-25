@@ -640,7 +640,9 @@ class _CurrencySheetState extends State<CurrencySheet>
             Expanded(
               child: ListView(
                 controller: scrollCtrl,
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                // Clear of the system navigation bar.
+                padding: EdgeInsets.only(
+                    top: 8, bottom: 8 + MediaQuery.viewPaddingOf(context).bottom),
                 children: [
                   // Account currencies (pinned at top)
                   if (_query.isEmpty && accountCodes.isNotEmpty) ...[
