@@ -9414,4 +9414,15 @@ class SAr extends S {
 
   @override
   String get billShareShort => 'مشاركة';
+
+  @override
+  String get billBeforeTipLabel => 'قبل الإكرامية';
+
+  @override
+  String get billTaxLabel => 'الضريبة أو الخدمة';
+
+  @override
+  String billBeforeTipLine(String amount, String tip) {
+    return '$amount + إكرامية $tip';
+  }
 }

@@ -9397,4 +9397,15 @@ class SEn extends S {
 
   @override
   String get billShareShort => 'Share';
+
+  @override
+  String get billBeforeTipLabel => 'Before tip';
+
+  @override
+  String get billTaxLabel => 'Tax or service';
+
+  @override
+  String billBeforeTipLine(String amount, String tip) {
+    return '$amount + tip $tip';
+  }
 }

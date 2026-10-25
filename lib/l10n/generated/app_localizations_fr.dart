@@ -9498,4 +9498,15 @@ class SFr extends S {
 
   @override
   String get billShareShort => 'Partager';
+
+  @override
+  String get billBeforeTipLabel => 'Avant pourboire';
+
+  @override
+  String get billTaxLabel => 'Taxe ou service';
+
+  @override
+  String billBeforeTipLine(String amount, String tip) {
+    return '$amount + pourboire $tip';
+  }
 }

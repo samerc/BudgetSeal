@@ -5913,5 +5913,8 @@
   "billTotalsEach": "Chacun paie",
   "billEditSplit": "Modifier le partage",
   "billSaveAmount": "Enregistrer · {amount}",
-  "billShareShort": "Partager"
+  "billShareShort": "Partager",
+  "billBeforeTipLabel": "Avant pourboire",
+  "billTaxLabel": "Taxe ou service",
+  "billBeforeTipLine": "{amount} + pourboire {tip}"
 }

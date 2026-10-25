@@ -3022,3 +3022,6 @@ bill_totals_each,Bill splitter: totals page,Each person pays,يدفع كل شخ�
 bill_edit_split,Bill splitter: totals page,Edit split,تعديل التقسيم,Modifier le partage
 bill_save_amount,Bill splitter: totals page,Save · {amount},حفظ · {amount},Enregistrer · {amount}
 bill_share_short,Bill splitter: totals page,Share,مشاركة,Partager
+bill_before_tip_label,Bill splitter: totals page,Before tip,قبل الإكرامية,Avant pourboire
+bill_tax_label,Bill splitter: totals page,Tax or service,الضريبة أو الخدمة,Taxe ou service
+bill_before_tip_line,Bill splitter: totals page,{amount} + tip {tip},{amount} + إكرامية {tip},{amount} + pourboire {tip}

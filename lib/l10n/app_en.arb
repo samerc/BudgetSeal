@@ -6992,5 +6992,11 @@
   "billSaveAmount": "Save · {amount}",
   "@billSaveAmount": {"description": "Bill splitter: totals page", "placeholders": {"amount": {"type": "String"}}},
   "billShareShort": "Share",
-  "@billShareShort": {"description": "Bill splitter: totals page"}
+  "@billShareShort": {"description": "Bill splitter: totals page"},
+  "billBeforeTipLabel": "Before tip",
+  "@billBeforeTipLabel": {"description": "Bill splitter: totals page"},
+  "billTaxLabel": "Tax or service",
+  "@billTaxLabel": {"description": "Bill splitter: totals page"},
+  "billBeforeTipLine": "{amount} + tip {tip}",
+  "@billBeforeTipLine": {"description": "Bill splitter: totals page", "placeholders": {"amount": {"type": "String"}, "tip": {"type": "String"}}}
 }

@@ -256,6 +256,34 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     return _rounded(raw, exact);
   }
 
+  /// Each person's part of the tip in [shares] (bill currency), rounded so
+  /// the parts add up to the tip: in proportion to each share (Evenly), the
+  /// tip percentage of what they had (By item), or evenly (custom tip).
+  Map<String, double> _tipParts(Map<String, double> shares) {
+    final tip = _tipTotal;
+    if (tip == 0 || _grand == 0) return {for (final p in _people) p: 0.0};
+    final raw = <String, double>{};
+    if (_mode == _SplitMode.evenly) {
+      for (final p in _people) {
+        raw[p] = tip * (shares[p] ?? 0) / _grand;
+      }
+    } else if (_tipIsAmount) {
+      for (final p in _people) {
+        raw[p] = tip / _people.length;
+      }
+    } else {
+      for (final p in _people) {
+        var sub = 0.0;
+        for (final item in _items) {
+          final owners = _owners(item);
+          if (owners.contains(p)) sub += item.amount / owners.length;
+        }
+        raw[p] = sub * _tipPercent / 100;
+      }
+    }
+    return _rounded(raw, const {});
+  }
+
   /// Largest remainder rounding; [exact] (shares set by hand) are kept.
   Map<String, double> _rounded(Map<String, double> raw, Set<String> exact,
       {double? factor}) {
@@ -2151,6 +2179,8 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   /// Review before saving — a flat ListView like the editing view.
   Widget _totalsPage(S tr, Map<String, double> billShares) {
     final shares = _payShares(billShares);
+    // With and without the tip, in the currency people pay in.
+    final tips = _payShares(_tipParts(billShares));
     final mode = _effectiveMode;
     final mine = shares[_me] ?? 0;
     final owedTotal = _others.fold(0.0, (s, p) => s + (shares[p] ?? 0));
@@ -2239,6 +2269,14 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                         '≈ ${formatAmount(_toBase(_grand), currency: _baseCurrency)} · $rateText',
                         style: TextStyle(
                             fontSize: 13, color: AppColors.ts(context))),
+                  if (_tipTotal != 0 || _taxTotal != 0) ...[
+                    const SizedBox(height: 8),
+                    _BreakdownRow(tr.billBeforeTipLabel, _fmt(_subtotal)),
+                    if (_taxTotal != 0)
+                      _BreakdownRow(tr.billTaxLabel, _fmt(_taxTotal)),
+                    if (_tipTotal != 0)
+                      _BreakdownRow(tr.billTip, _fmt(_tipTotal)),
+                  ],
                   if (_canSplitInBase)
                     Row(children: [
                       Expanded(
@@ -2269,36 +2307,54 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                     Divider(height: 1, indent: 64, color: AppColors.bd(context)),
                   Padding(
                     padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 12),
+                    // Name and amount on top; the tip split, then the bill-
+                    // currency amount, each on a full-width line under them.
                     child: Row(children: [
                       _Avatar(label: _initials(p), color: _colorOf(p)),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: Text(p == _me ? tr.billYou : p,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w700)),
-                      ),
-                      const SizedBox(width: 8),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(_fmtPay(shares[p] ?? 0),
-                              style: TextStyle(
-                                fontFamily: TypographyTokens.displayFamily,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 20,
-                                fontFeatures: const [
-                                  FontFeature.tabularFigures()
-                                ],
-                                color: AppColors.tp(context),
-                              )),
-                          if (_inBase)
-                            Text(_fmt(billShares[p] ?? 0),
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.ts(context))),
-                        ],
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(children: [
+                              Expanded(
+                                child: Text(p == _me ? tr.billYou : p,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700)),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(_fmtPay(shares[p] ?? 0),
+                                  style: TextStyle(
+                                    fontFamily: TypographyTokens.displayFamily,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 20,
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures()
+                                    ],
+                                    color: AppColors.tp(context),
+                                  )),
+                            ]),
+                            // Without and with the tip.
+                            if (_tipTotal != 0)
+                              Text(
+                                  tr.billBeforeTipLine(
+                                      _fmtPay((shares[p] ?? 0) -
+                                          (tips[p] ?? 0)),
+                                      _fmtPay(tips[p] ?? 0)),
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.ts(context))),
+                            if (_inBase)
+                              Text(_fmt(billShares[p] ?? 0),
+                                  textAlign: TextAlign.end,
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.ts(context))),
+                          ],
+                        ),
                       ),
                     ]),
                   ),
@@ -2406,8 +2462,9 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2))
-                        : Text(saveLabel,
-                            maxLines: 1, overflow: TextOverflow.ellipsis),
+                        : FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(saveLabel, maxLines: 1)),
                   ),
                   const SizedBox(height: 8),
                   Row(children: [
@@ -2442,6 +2499,25 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
 }
 
 // ─── Small widgets ───────────────────────────────────────────────────────────
+
+/// "Tip ........ LBP 485,000" under the bill on the totals page.
+class _BreakdownRow extends StatelessWidget {
+  final String label;
+  final String amount;
+  const _BreakdownRow(this.label, this.amount);
+
+  @override
+  Widget build(BuildContext context) {
+    final style = TextStyle(fontSize: 13, color: AppColors.ts(context));
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(end: 8, top: 2),
+      child: Row(children: [
+        Expanded(child: Text(label, style: style)),
+        Text(amount, style: style),
+      ]),
+    );
+  }
+}
 
 /// A person's initials on their pastel.
 class _Avatar extends StatelessWidget {

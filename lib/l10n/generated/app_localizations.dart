@@ -16199,6 +16199,24 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Share'**
   String get billShareShort;
+
+  /// Bill splitter: totals page
+  ///
+  /// In en, this message translates to:
+  /// **'Before tip'**
+  String get billBeforeTipLabel;
+
+  /// Bill splitter: totals page
+  ///
+  /// In en, this message translates to:
+  /// **'Tax or service'**
+  String get billTaxLabel;
+
+  /// Bill splitter: totals page
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} + tip {tip}'**
+  String billBeforeTipLine(String amount, String tip);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

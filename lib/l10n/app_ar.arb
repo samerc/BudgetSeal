@@ -5913,5 +5913,8 @@
   "billTotalsEach": "يدفع كل شخص",
   "billEditSplit": "تعديل التقسيم",
   "billSaveAmount": "حفظ · {amount}",
-  "billShareShort": "مشاركة"
+  "billShareShort": "مشاركة",
+  "billBeforeTipLabel": "قبل الإكرامية",
+  "billTaxLabel": "الضريبة أو الخدمة",
+  "billBeforeTipLine": "{amount} + إكرامية {tip}"
 }
