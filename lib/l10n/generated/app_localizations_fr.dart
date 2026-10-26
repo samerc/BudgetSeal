@@ -3883,7 +3883,7 @@ class SFr extends S {
 
   @override
   String get acctArchiveMsg =>
-      'Ce compte sera masqué de toutes les listes et menus déroulants. Vos transactions seront préservées.\n\nVous pouvez le désarchiver plus tard depuis les Paramètres.';
+      'Ce compte sera masqué de toutes les listes et menus déroulants. Vos transactions seront préservées.\n\nPour le récupérer, ouvrez Comptes → ⋮ → Afficher les archivés.';
 
   @override
   String get acctDeleteTitle => 'Supprimer le compte définitivement';

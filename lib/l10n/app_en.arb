@@ -2406,7 +2406,7 @@
   "@acctConvertedBack": { "placeholders": { "amount": { "type": "String" } } },
   "acctSomethingWrong": "Something went wrong. Please try again.",
   "acctArchiveTitle": "Archive account",
-  "acctArchiveMsg": "This account will be hidden from all lists and dropdowns. Your transactions will be preserved.\n\nYou can unarchive it later from Settings.",
+  "acctArchiveMsg": "This account will be hidden from all lists and dropdowns. Your transactions will be preserved.\n\nTo bring it back, open Accounts → ⋮ → Show archived.",
   "acctDeleteTitle": "Delete account permanently",
   "acctDeleteMsg": "This account has no transactions. Are you sure you want to permanently delete it? This cannot be undone.",
   "acctArchiveInstead": "Archive instead",

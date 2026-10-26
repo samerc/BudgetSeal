@@ -6727,7 +6727,7 @@ abstract class S {
   /// No description provided for @acctArchiveMsg.
   ///
   /// In en, this message translates to:
-  /// **'This account will be hidden from all lists and dropdowns. Your transactions will be preserved.\n\nYou can unarchive it later from Settings.'**
+  /// **'This account will be hidden from all lists and dropdowns. Your transactions will be preserved.\n\nTo bring it back, open Accounts → ⋮ → Show archived.'**
   String get acctArchiveMsg;
 
   /// No description provided for @acctDeleteTitle.
