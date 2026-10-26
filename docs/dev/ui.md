@@ -188,7 +188,7 @@ Default font: **Nunito Sans** (closest to Cashew's Avenir). Available: Plus Jaka
 
 ## Help Guide
 
-`assets/web/help.html` — comprehensive user guide bundled in the app. 29 sections covering every feature (headings in sentence case; checked against the app in full on Oct 26 2026) with step-by-step instructions. Responsive (desktop sidebar + mobile hamburger), dark mode support, screenshot placeholders.
+`assets/web/help.html` — comprehensive user guide bundled in the app. 29 sections covering every feature (headings in sentence case; checked against the app in full on Oct 26 2026) with step-by-step instructions. Responsive (desktop sidebar + mobile hamburger), dark mode support. Screenshots: `assets/web/help/*.webp` (480 px wide, A02 at font scale 1.0 with a demo budget, status/nav bars cropped), shown as `<figure class="shot">` (or `.shots` for a row); `HelpScreen` loads the page as a string, so `_inlineImages()` swaps each `src="help/…"` for a data URI. A new image needs no code change.
 
 **In-app delivery:** `lib/features/settings/help_screen.dart` — `WebView` loads the HTML from `rootBundle`. Injects dark mode CSS variables based on current app theme. Supports deep-linking to sections via `?section=` query parameter (e.g., `context.push('/help?section=envelopes')`).
 

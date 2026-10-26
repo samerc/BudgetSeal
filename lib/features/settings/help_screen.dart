@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:webview_flutter/webview_flutter.dart';
@@ -65,7 +67,8 @@ class _HelpScreenState extends State<HelpScreen> {
         '--border:${hex(Color.alphaBlend(AppColors.bd(context), surface))};'
         '}';
     try {
-      final html = await rootBundle.loadString('assets/web/help.html');
+      final html = await _inlineImages(
+          await rootBundle.loadString('assets/web/help.html'));
       if (!mounted) return;
       final themed = html.replaceFirst('</style>', '$vars</style>');
       await _controller.loadHtmlString(themed);
@@ -78,6 +81,26 @@ class _HelpScreenState extends State<HelpScreen> {
         });
       }
     }
+  }
+
+  /// The page is loaded as a string, so its relative image paths
+  /// (`help/home.webp`) can't resolve: swap each for a data URI from the
+  /// bundled asset. A missing image just stays broken.
+  static Future<String> _inlineImages(String html) async {
+    final paths = RegExp(r'src="(help/[\w-]+\.webp)"')
+        .allMatches(html)
+        .map((m) => m.group(1)!)
+        .toSet();
+    for (final path in paths) {
+      try {
+        final bytes = await rootBundle.load('assets/web/$path');
+        html = html.replaceAll('src="$path"',
+            'src="data:image/webp;base64,${base64Encode(bytes.buffer.asUint8List())}"');
+      } catch (e) {
+        debugPrint('[HelpScreen] Missing image $path: $e');
+      }
+    }
+    return html;
   }
 
   @override

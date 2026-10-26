@@ -106,6 +106,7 @@ flutter:
     - assets/icon/
     - assets/categories/
     - assets/web/
+    - assets/web/help/
 
   # Brand display face for amounts and screen titles (SIL OFL 1.1, see
   # assets/fonts/OFL-BricolageGrotesque.txt). Bundled so it works offline.

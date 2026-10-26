@@ -349,11 +349,11 @@ class _CategorySheetState extends ConsumerState<CategorySheet>
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
             sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
                 mainAxisSpacing: 6,
                 crossAxisSpacing: 4,
-                childAspectRatio: 0.74,
+                mainAxisExtent: _tileExtent(context),
               ),
               delegate: SliverChildBuilderDelegate(
                 (context, i) => _gridTile(recent[i], 0),
@@ -395,11 +395,11 @@ class _CategorySheetState extends ConsumerState<CategorySheet>
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(14, 4, 14, 28),
           sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 4,
               mainAxisSpacing: 6,
               crossAxisSpacing: 4,
-              childAspectRatio: 0.74,
+              mainAxisExtent: _tileExtent(context),
             ),
             delegate: SliverChildBuilderDelegate(
               (context, i) {
@@ -417,6 +417,11 @@ class _CategorySheetState extends ConsumerState<CategorySheet>
       ],
     );
   }
+
+  /// A tile's height: the ringed icon (54 + 2×6) and one label line at the
+  /// user's text size. A fixed aspect ratio overflowed on narrow phones.
+  double _tileExtent(BuildContext context) =>
+      12 + 66 + 4 + MediaQuery.textScalerOf(context).scale(12.5) * 1.45 + 2;
 
   Widget _gridTile(Category c, int subCount) {
     final color = AppColors.fromHex(c.colorHex);
