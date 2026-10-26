@@ -4546,7 +4546,7 @@ class SAr extends S {
 
   @override
   String get syncProviderInfo =>
-      'OneDrive وDropbox يفتحان منتقي الملفات الذي يصل لتلك الخدمات عند تثبيت تطبيقاتها. Google Drive يتطلب مشروع Google Cloud مع OAuth.';
+      'الملف المحلي يستخدم منتقي الملفات في هاتفك: احفظ ملف المزامنة حيث تشاء. صور الإيصالات تُزامن مع Google Drive فقط.';
 
   @override
   String get syncConnectionFailed => 'فشل الاتصال';
@@ -9439,4 +9439,32 @@ class SAr extends S {
   String billQuantityHint(int qty) {
     return 'المبلغ لجميع الـ$qty';
   }
+
+  @override
+  String baseChangeTitle(String code) {
+    return 'تغيير العملة الأساسية إلى $code؟';
+  }
+
+  @override
+  String baseChangeBody(String code) {
+    return 'تبقى المبالغ التي سجّلتها كما هي. تُحتسب في المجاميع والتقارير بـ$code على هذا السعر:';
+  }
+
+  @override
+  String get baseChangeNoRate => 'لا يوجد سعر بعد. أدخل سعرًا للمتابعة.';
+
+  @override
+  String get baseChangeEditRate => 'تغيير السعر';
+
+  @override
+  String baseChangeRateSheet(String from, String to) {
+    return '1 $from بـ$to';
+  }
+
+  @override
+  String get baseChangeSharedTitle => 'ليس في ميزانية مشتركة';
+
+  @override
+  String get baseChangeSharedBody =>
+      'على كل هاتف في الميزانية المشتركة أن يحوّل سجلّه في الوقت نفسه، لذا لا يمكن تغيير العملة الأساسية في ميزانية مشتركة حاليًا.';
 }

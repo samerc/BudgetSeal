@@ -573,7 +573,7 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
       trailing: TextButton(
         onPressed: _hasPassword ? _removePassword : _setPassword,
         child: Text(_hasPassword
-            ? S.of(context).commonChange
+            ? S.of(context).commonRemove
             : S.of(context).commonEnable),
       ),
       children: [

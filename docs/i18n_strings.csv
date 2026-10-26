@@ -635,7 +635,7 @@ sync_share_household,Button / sheet title,Share household,مشاركة الأس�
 sync_disconnect,Button / dialog title,Disconnect,قطع الاتصال,Déconnecter
 sync_connect_section,Section header,Connect a provider,ربط مزود,Connecter un fournisseur
 sync_receipt_coming_soon,Note,Receipt sync coming soon for this provider,مزامنة الإيصالات قريباً لهذا المزود,Synchronisation des reçus bientôt disponible
-sync_provider_info,Info text,"OneDrive and Dropbox open the system file picker, which can access those services when their apps are installed on your device. Google Drive requires a Google Cloud project with OAuth configured.",OneDrive وDropbox يفتحان منتقي الملفات الذي يصل لتلك الخدمات عند تثبيت تطبيقاتها. Google Drive يتطلب مشروع Google Cloud مع OAuth.,OneDrive et Dropbox ouvrent le sélecteur de fichiers système qui accède à ces services quand leurs apps sont installées. Google Drive nécessite un projet Google Cloud avec OAuth.
+sync_provider_info,Info text,Local file uses your phone's file picker: keep the sync file wherever you like. Receipt photos sync only with Google Drive.,الملف المحلي يستخدم منتقي الملفات في هاتفك: احفظ ملف المزامنة حيث تشاء. صور الإيصالات تُزامن مع Google Drive فقط.,Fichier local utilise le sélecteur de fichiers du téléphone : gardez le fichier de synchronisation où vous voulez. Les photos de reçus ne se synchronisent qu'avec Google Drive.
 sync_connection_failed,Dialog title,Connection failed,فشل الاتصال,Échec de la connexion
 sync_failed_to_connect,Default error,Failed to connect,فشل الاتصال,Échec de la connexion
 sync_disconnect_msg,Dialog content,"Your data will remain on your device, but automatic sync will stop. You can reconnect at any time.",ستبقى بياناتك على جهازك، لكن المزامنة التلقائية ستتوقف. يمكنك إعادة الاتصال في أي وقت.,"Vos données resteront sur votre appareil, mais la synchronisation automatique s'arrêtera. Vous pourrez vous reconnecter à tout moment."
@@ -3029,3 +3029,10 @@ bill_quantity,Bill splitter: item quantity,Quantity,الكمية,Quantité
 bill_quantity_less,Bill splitter: item quantity,One less,واحد أقل,Un de moins
 bill_quantity_more,Bill splitter: item quantity,One more,واحد أكثر,Un de plus
 bill_quantity_hint,Bill splitter: item quantity,The amount is for all {qty},المبلغ لجميع الـ{qty},Le montant est pour les {qty}
+base_change_title,Settings: change base currency,Change base currency to {code}?,تغيير العملة الأساسية إلى {code}؟,Passer la devise de base en {code} ?
+base_change_body,Settings: change base currency,Amounts you've recorded stay as they are. Totals and reports in {code} count them at this rate:,تبقى المبالغ التي سجّلتها كما هي. تُحتسب في المجاميع والتقارير بـ{code} على هذا السعر:,Les montants déjà saisis ne changent pas. Les totaux et rapports en {code} les comptent à ce taux :
+base_change_no_rate,Settings: change base currency,No rate known yet. Enter one to continue.,لا يوجد سعر بعد. أدخل سعرًا للمتابعة.,Aucun taux connu pour l’instant. Saisissez-en un pour continuer.
+base_change_edit_rate,Settings: change base currency,Change rate,تغيير السعر,Changer le taux
+base_change_rate_sheet,Settings: change base currency,1 {from} in {to},1 {from} بـ{to},1 {from} en {to}
+base_change_shared_title,Settings: change base currency,Not on a shared budget,ليس في ميزانية مشتركة,Pas sur un budget partagé
+base_change_shared_body,Settings: change base currency,"Every phone on a shared budget would have to convert its history at the same time, so the base currency can't be changed on a shared budget for now.",على كل هاتف في الميزانية المشتركة أن يحوّل سجلّه في الوقت نفسه، لذا لا يمكن تغيير العملة الأساسية في ميزانية مشتركة حاليًا.,Chaque téléphone d’un budget partagé devrait convertir son historique au même moment : la devise de base ne peut donc pas encore être changée sur un budget partagé.

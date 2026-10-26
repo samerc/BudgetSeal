@@ -97,9 +97,8 @@ class SyncNotifier extends Notifier<SyncState> {
   final googleDrive = GoogleDriveProvider();
   final filePicker = FilePickerProvider();
 
-  /// All provider options shown in the UI. OneDrive, Dropbox, and Local File
-  /// all use the same [FilePickerProvider] under the hood — the system file
-  /// picker navigates to those apps when they are installed.
+  /// All provider options shown in the UI. Local file uses the system file
+  /// picker, which also reaches OneDrive/Dropbox when their apps are installed.
   List<({String label, String subtitle, String iconKey, CloudProvider provider})>
       get providerOptions => [
             (
@@ -108,18 +107,9 @@ class SyncNotifier extends Notifier<SyncState> {
               iconKey: 'google_drive',
               provider: googleDrive,
             ),
-            (
-              label: 'OneDrive',
-              subtitle: currentS().syncOneDriveSub,
-              iconKey: 'onedrive',
-              provider: filePicker,
-            ),
-            (
-              label: 'Dropbox',
-              subtitle: currentS().syncDropboxSub,
-              iconKey: 'dropbox',
-              provider: filePicker,
-            ),
+            // OneDrive and Dropbox rows ('onedrive' / 'dropbox', subtitles
+            // syncOneDriveSub / syncDropboxSub) are hidden until they get
+            // their own providers; Local file reaches them through the picker.
             (
               label: currentS().syncLocalFile,
               subtitle: currentS().syncLocalFileSub,

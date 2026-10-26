@@ -3137,7 +3137,7 @@
   "@syncReceiptComingSoon": {
     "description": "Note"
   },
-  "syncProviderInfo": "OneDrive and Dropbox open the system file picker, which can access those services when their apps are installed on your device. Google Drive requires a Google Cloud project with OAuth configured.",
+  "syncProviderInfo": "Local file uses your phone's file picker: keep the sync file wherever you like. Receipt photos sync only with Google Drive.",
   "@syncProviderInfo": {
     "description": "Info text"
   },
@@ -7006,5 +7006,19 @@
   "billQuantityMore": "One more",
   "@billQuantityMore": {"description": "Bill splitter: item quantity"},
   "billQuantityHint": "The amount is for all {qty}",
-  "@billQuantityHint": {"description": "Bill splitter: item quantity", "placeholders": {"qty": {"type": "int"}}}
+  "@billQuantityHint": {"description": "Bill splitter: item quantity", "placeholders": {"qty": {"type": "int"}}},
+  "baseChangeTitle": "Change base currency to {code}?",
+  "@baseChangeTitle": {"description": "Settings: change base currency", "placeholders": {"code": {"type": "String"}}},
+  "baseChangeBody": "Amounts you've recorded stay as they are. Totals and reports in {code} count them at this rate:",
+  "@baseChangeBody": {"description": "Settings: change base currency", "placeholders": {"code": {"type": "String"}}},
+  "baseChangeNoRate": "No rate known yet. Enter one to continue.",
+  "@baseChangeNoRate": {"description": "Settings: change base currency"},
+  "baseChangeEditRate": "Change rate",
+  "@baseChangeEditRate": {"description": "Settings: change base currency"},
+  "baseChangeRateSheet": "1 {from} in {to}",
+  "@baseChangeRateSheet": {"description": "Settings: change base currency", "placeholders": {"from": {"type": "String"}, "to": {"type": "String"}}},
+  "baseChangeSharedTitle": "Not on a shared budget",
+  "@baseChangeSharedTitle": {"description": "Settings: change base currency"},
+  "baseChangeSharedBody": "Every phone on a shared budget would have to convert its history at the same time, so the base currency can't be changed on a shared budget for now.",
+  "@baseChangeSharedBody": {"description": "Settings: change base currency"}
 }

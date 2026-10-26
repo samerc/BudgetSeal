@@ -47,6 +47,7 @@ import '../../shared/widgets/app_chip.dart';
 import '../../shared/widgets/confirm_dialog.dart';
 import '../../shared/widgets/settings_row.dart';
 import '../../shared/widgets/sheet_title.dart';
+import 'base_currency_flow.dart';
 import 'member_name_dialog.dart';
 import 'share_household_sheet.dart';
 import '../../shared/utils/biometric_errors.dart';
@@ -1350,23 +1351,10 @@ class _SettingsDetailScreenState extends ConsumerState<SettingsDetailScreen> {
                 );
                 if (result != null &&
                     household != null &&
-                    result != household.baseCurrency) {
-                  final db = ref.read(databaseProvider);
-                  try {
-                    await (db.update(db.households)
-                          ..where((h) => h.id.equals(household.id)))
-                        .write(HouseholdsCompanion(
-                            baseCurrency: Value(result),
-                            lastModified: Value(DateTime.now())));
-                    if (context.mounted) {
-                      _snack(context, l.baseCurrencySaved(result));
-                    }
-                  } catch (e) {
-                    debugPrint('[Settings] Change base currency failed: $e');
-                    if (context.mounted) {
-                      _snack(context, l.commonSomethingWentWrong);
-                    }
-                  }
+                    result != household.baseCurrency &&
+                    context.mounted) {
+                  await changeBaseCurrencyFlow(
+                      context, ref, household, result);
                 }
               },
             )),

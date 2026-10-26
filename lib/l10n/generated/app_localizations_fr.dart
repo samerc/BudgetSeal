@@ -4570,7 +4570,7 @@ class SFr extends S {
 
   @override
   String get syncProviderInfo =>
-      'OneDrive et Dropbox ouvrent le sélecteur de fichiers système qui accède à ces services quand leurs apps sont installées. Google Drive nécessite un projet Google Cloud avec OAuth.';
+      'Fichier local utilise le sélecteur de fichiers du téléphone : gardez le fichier de synchronisation où vous voulez. Les photos de reçus ne se synchronisent qu\'avec Google Drive.';
 
   @override
   String get syncConnectionFailed => 'Échec de la connexion';
@@ -9523,4 +9523,33 @@ class SFr extends S {
   String billQuantityHint(int qty) {
     return 'Le montant est pour les $qty';
   }
+
+  @override
+  String baseChangeTitle(String code) {
+    return 'Passer la devise de base en $code ?';
+  }
+
+  @override
+  String baseChangeBody(String code) {
+    return 'Les montants déjà saisis ne changent pas. Les totaux et rapports en $code les comptent à ce taux :';
+  }
+
+  @override
+  String get baseChangeNoRate =>
+      'Aucun taux connu pour l’instant. Saisissez-en un pour continuer.';
+
+  @override
+  String get baseChangeEditRate => 'Changer le taux';
+
+  @override
+  String baseChangeRateSheet(String from, String to) {
+    return '1 $from en $to';
+  }
+
+  @override
+  String get baseChangeSharedTitle => 'Pas sur un budget partagé';
+
+  @override
+  String get baseChangeSharedBody =>
+      'Chaque téléphone d’un budget partagé devrait convertir son historique au même moment : la devise de base ne peut donc pas encore être changée sur un budget partagé.';
 }

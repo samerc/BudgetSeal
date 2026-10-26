@@ -2887,7 +2887,7 @@
   "@syncReceiptComingSoon": {
     "description": "Note"
   },
-  "syncProviderInfo": "OneDrive et Dropbox ouvrent le sélecteur de fichiers système qui accède à ces services quand leurs apps sont installées. Google Drive nécessite un projet Google Cloud avec OAuth.",
+  "syncProviderInfo": "Fichier local utilise le sélecteur de fichiers du téléphone : gardez le fichier de synchronisation où vous voulez. Les photos de reçus ne se synchronisent qu'avec Google Drive.",
   "@syncProviderInfo": {
     "description": "Info text"
   },
@@ -5920,5 +5920,12 @@
   "billQuantity": "Quantité",
   "billQuantityLess": "Un de moins",
   "billQuantityMore": "Un de plus",
-  "billQuantityHint": "Le montant est pour les {qty}"
+  "billQuantityHint": "Le montant est pour les {qty}",
+  "baseChangeTitle": "Passer la devise de base en {code} ?",
+  "baseChangeBody": "Les montants déjà saisis ne changent pas. Les totaux et rapports en {code} les comptent à ce taux :",
+  "baseChangeNoRate": "Aucun taux connu pour l’instant. Saisissez-en un pour continuer.",
+  "baseChangeEditRate": "Changer le taux",
+  "baseChangeRateSheet": "1 {from} en {to}",
+  "baseChangeSharedTitle": "Pas sur un budget partagé",
+  "baseChangeSharedBody": "Chaque téléphone d’un budget partagé devrait convertir son historique au même moment : la devise de base ne peut donc pas encore être changée sur un budget partagé."
 }

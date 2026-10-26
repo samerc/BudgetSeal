@@ -7969,7 +7969,7 @@ abstract class S {
   /// Info text
   ///
   /// In en, this message translates to:
-  /// **'OneDrive and Dropbox open the system file picker, which can access those services when their apps are installed on your device. Google Drive requires a Google Cloud project with OAuth configured.'**
+  /// **'Local file uses your phone\'s file picker: keep the sync file wherever you like. Receipt photos sync only with Google Drive.'**
   String get syncProviderInfo;
 
   /// Dialog title
@@ -16241,6 +16241,48 @@ abstract class S {
   /// In en, this message translates to:
   /// **'The amount is for all {qty}'**
   String billQuantityHint(int qty);
+
+  /// Settings: change base currency
+  ///
+  /// In en, this message translates to:
+  /// **'Change base currency to {code}?'**
+  String baseChangeTitle(String code);
+
+  /// Settings: change base currency
+  ///
+  /// In en, this message translates to:
+  /// **'Amounts you\'ve recorded stay as they are. Totals and reports in {code} count them at this rate:'**
+  String baseChangeBody(String code);
+
+  /// Settings: change base currency
+  ///
+  /// In en, this message translates to:
+  /// **'No rate known yet. Enter one to continue.'**
+  String get baseChangeNoRate;
+
+  /// Settings: change base currency
+  ///
+  /// In en, this message translates to:
+  /// **'Change rate'**
+  String get baseChangeEditRate;
+
+  /// Settings: change base currency
+  ///
+  /// In en, this message translates to:
+  /// **'1 {from} in {to}'**
+  String baseChangeRateSheet(String from, String to);
+
+  /// Settings: change base currency
+  ///
+  /// In en, this message translates to:
+  /// **'Not on a shared budget'**
+  String get baseChangeSharedTitle;
+
+  /// Settings: change base currency
+  ///
+  /// In en, this message translates to:
+  /// **'Every phone on a shared budget would have to convert its history at the same time, so the base currency can\'t be changed on a shared budget for now.'**
+  String get baseChangeSharedBody;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

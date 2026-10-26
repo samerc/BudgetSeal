@@ -413,7 +413,7 @@
 
 <p>BudgetSeal is an envelope budgeting app. The idea is simple: every dollar you earn gets a job. You divide your money into virtual envelopes — groceries, rent, entertainment — and spend from them. When an envelope is empty, you've reached your limit for that category.</p>
 
-<p>The app works entirely offline. Your data lives on your device, not on a server. You can optionally sync through Google Drive, or through a file you pick on your phone or in another app (OneDrive, Dropbox…), to keep a backup or share with a partner.</p>
+<p>The app works entirely offline. Your data lives on your device, not on a server. You can optionally sync through Google Drive, or through a file you pick with your phone's file picker, to keep a backup or share with a partner.</p>
 
 <div class="card">
   <strong>The basic flow:</strong>
@@ -434,7 +434,7 @@
 <p>You'll see a quick overview of how envelope budgeting works. From here you can:</p>
 <ul>
   <li><strong>Get started</strong> — set up a new household</li>
-  <li><strong>Restore my budget</strong> — bring back a budget from its sync file, on Google Drive or saved on your phone or in another app (Dropbox, OneDrive…), or from a <strong>backup file</strong> (the .db file from Settings › Backup &amp; restore). After a backup file the app closes; open it again and your budget is back</li>
+  <li><strong>Restore my budget</strong> — bring back a budget from its sync file, on Google Drive or saved on your phone or in another app, or from a <strong>backup file</strong> (the .db file from Settings › Backup &amp; restore). After a backup file the app closes; open it again and your budget is back</li>
   <li><strong>Join a household</strong> — enter an invite code to join someone else's BudgetSeal</li>
 </ul>
 
@@ -1183,7 +1183,7 @@
   <li>Choose a provider:
     <ul>
       <li><strong>Google Drive</strong> — sign in with your Google account</li>
-      <li><strong>OneDrive</strong>, <strong>Dropbox</strong> or <strong>Local file</strong> — the system file picker opens: choose or create the sync file on your phone, or in OneDrive or Dropbox if their app is installed</li>
+      <li><strong>Local file</strong> — your phone's file picker opens: choose or create the sync file wherever you like (on your phone, or in another app that shows up in the picker)</li>
     </ul>
   </li>
   <li>Tap to connect — the app syncs right away: it creates the sync file, or merges with the one already there. If that file holds a budget made on another device, the app asks whether to use it on this device (your current data is backed up first) or disconnect. The Cloud sync row in Settings then shows when you last synced (or that the last sync failed)</li>
@@ -1202,7 +1202,7 @@
   <li>Enter a strong password and confirm it</li>
   <li>The next sync will encrypt the file with AES-256</li>
 </ol>
-<p>To turn encryption off, tap the button on the same card and confirm <strong>Remove encryption?</strong> Your other devices need to remove their password too.</p>
+<p>To turn encryption off, tap <strong>Remove</strong> on the same card and confirm <strong>Remove encryption?</strong> Your other devices need to remove their password too.</p>
 
 <div class="tip">If you share a household with someone, both devices must use the same sync password.</div>
 
@@ -1336,7 +1336,7 @@
 <table>
   <tr><th>Setting</th><th>What it controls</th></tr>
   <tr><td><strong>Household name</strong></td><td>Rename your budget household</td></tr>
-  <tr><td><strong>Base currency</strong></td><td>Your primary currency for all totals and summaries</td></tr>
+  <tr><td><strong>Base currency</strong></td><td>Your primary currency for all totals and summaries. Changing it later asks for the rate to count past amounts at (see the <a href="#faq">FAQ</a>)</td></tr>
   <tr><td><strong>Exchange rates</strong></td><td>Rates for every currency your accounts and recurring items use. Tap refresh for the latest live rates, or tap a currency to set your own rate — it is used instead of the live one (for new transactions, balance adjustments, imports and bills) until you choose <em>Use live rate</em></td></tr>
   <tr><td><strong>Period start day</strong></td><td>When your monthly budget cycle starts</td></tr>
   <tr><td><strong>Currency symbols</strong></td><td>Override the default symbol for any currency (e.g., show "L.L." instead of "LBP"). By default, currencies whose symbol is written in Arabic (Lebanese pound, UAE dirham, Saudi riyal) show their code — "LBP 1,200,000" — unless the app is in Arabic, where they show ل.ل, د.إ and ﷼</td></tr>
@@ -1394,7 +1394,7 @@
 <p><strong>Recurring bills and planned payments</strong> in another currency use the latest rate when they're posted (recurring bills use the last rate saved on your device, so the app never waits for the internet at start-up). A recurring transfer between two currencies waits until a rate is known.</p>
 
 <h3>Is my data sent anywhere?</h3>
-<p>No. Everything stays on your device. Cloud sync is optional: it uses your own Google Drive, or a file you pick (on your phone, or in OneDrive or Dropbox through the file picker) — BudgetSeal never sees your data. The only thing the app downloads is exchange rates. There are no BudgetSeal servers, no accounts, and no tracking.</p>
+<p>No. Everything stays on your device. Cloud sync is optional: it uses your own Google Drive, or a file you pick with your phone's file picker — BudgetSeal never sees your data. The only thing the app downloads is exchange rates. There are no BudgetSeal servers, no accounts, and no tracking.</p>
 
 <h3>What happens if I delete a transaction?</h3>
 <p>Deleted transactions are soft-deleted — they're hidden but not permanently removed. Any envelope deductions are reversed. You can permanently purge them from Health Check.</p>
@@ -1406,7 +1406,7 @@
 <p>The envelope goes negative and shows a red indicator. Your transaction still saves — BudgetSeal never blocks spending. It's a signal to either fund the envelope more or spend less.</p>
 
 <h3>How do I change my base currency?</h3>
-<p>Go to <strong>More</strong> → <strong>Settings</strong> → <strong>Base currency</strong>. It's best set once, when you start: amounts you've already recorded aren't converted, so totals from before the change still use the old currency's numbers.</p>
+<p>Go to <strong>More</strong> → <strong>Settings</strong> → <strong>Base currency</strong>. If you've already recorded transactions, BudgetSeal shows the exchange rate it will use (the latest one it knows — tap <strong>Change rate</strong> to type your own) and counts your past amounts at that rate, so totals and reports carry on in the new currency. What you recorded and your account balances don't change. On a shared budget the base currency can't be changed for now: every phone would have to convert at the same time.</p>
 
 <h3>My notifications aren't working</h3>
 <p>Make sure notifications are enabled in your device settings for BudgetSeal. On Android 13+, you need to grant notification permission explicitly. Go to <strong>Settings</strong> → <strong>Notifications</strong> to configure daily reminders and bill alerts. BudgetSeal asks for the permission the first time you open your budget. Bill reminders are scheduled for each bill (see <a href="#recurring">Upcoming bills</a>); envelope alerts are checked when the app opens or comes back, at most once a day each; the daily reminder skips days you've already logged something.</p>

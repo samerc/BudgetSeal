@@ -88,6 +88,11 @@ class HouseholdMembers {
     await prefs.setInt(_skippedKey, others);
   }
 
+  /// Another device has named itself here: the budget is shared with
+  /// someone (not just entries from your own old phone).
+  static Future<bool> hasOthers(AppDatabase db, String householdId) async =>
+      (await names(db, householdId)).keys.any((d) => d != DeviceIdentity.id);
+
   /// Another person's device has added entries or named itself.
   static Future<bool> isShared(AppDatabase db, String householdId) async {
     final others = (await names(db, householdId))

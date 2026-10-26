@@ -4526,7 +4526,7 @@ class SEn extends S {
 
   @override
   String get syncProviderInfo =>
-      'OneDrive and Dropbox open the system file picker, which can access those services when their apps are installed on your device. Google Drive requires a Google Cloud project with OAuth configured.';
+      'Local file uses your phone\'s file picker: keep the sync file wherever you like. Receipt photos sync only with Google Drive.';
 
   @override
   String get syncConnectionFailed => 'Connection failed';
@@ -9422,4 +9422,32 @@ class SEn extends S {
   String billQuantityHint(int qty) {
     return 'The amount is for all $qty';
   }
+
+  @override
+  String baseChangeTitle(String code) {
+    return 'Change base currency to $code?';
+  }
+
+  @override
+  String baseChangeBody(String code) {
+    return 'Amounts you\'ve recorded stay as they are. Totals and reports in $code count them at this rate:';
+  }
+
+  @override
+  String get baseChangeNoRate => 'No rate known yet. Enter one to continue.';
+
+  @override
+  String get baseChangeEditRate => 'Change rate';
+
+  @override
+  String baseChangeRateSheet(String from, String to) {
+    return '1 $from in $to';
+  }
+
+  @override
+  String get baseChangeSharedTitle => 'Not on a shared budget';
+
+  @override
+  String get baseChangeSharedBody =>
+      'Every phone on a shared budget would have to convert its history at the same time, so the base currency can\'t be changed on a shared budget for now.';
 }

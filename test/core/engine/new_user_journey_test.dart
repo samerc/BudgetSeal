@@ -582,7 +582,9 @@ void main() {
         accountId: checking,
         categoryId: groceriesCat,
         frequency: 'daily',
-        startDate: today.subtract(const Duration(days: 3)),
+        // Calendar days, not 72 hours: across a clock change the start
+        // would land at 01:00 and today's occurrence would look ahead.
+        startDate: DateTime(today.year, today.month, today.day - 3),
         endDate: today,
       );
 

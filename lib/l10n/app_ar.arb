@@ -2887,7 +2887,7 @@
   "@syncReceiptComingSoon": {
     "description": "Note"
   },
-  "syncProviderInfo": "OneDrive وDropbox يفتحان منتقي الملفات الذي يصل لتلك الخدمات عند تثبيت تطبيقاتها. Google Drive يتطلب مشروع Google Cloud مع OAuth.",
+  "syncProviderInfo": "الملف المحلي يستخدم منتقي الملفات في هاتفك: احفظ ملف المزامنة حيث تشاء. صور الإيصالات تُزامن مع Google Drive فقط.",
   "@syncProviderInfo": {
     "description": "Info text"
   },
@@ -5920,5 +5920,12 @@
   "billQuantity": "الكمية",
   "billQuantityLess": "واحد أقل",
   "billQuantityMore": "واحد أكثر",
-  "billQuantityHint": "المبلغ لجميع الـ{qty}"
+  "billQuantityHint": "المبلغ لجميع الـ{qty}",
+  "baseChangeTitle": "تغيير العملة الأساسية إلى {code}؟",
+  "baseChangeBody": "تبقى المبالغ التي سجّلتها كما هي. تُحتسب في المجاميع والتقارير بـ{code} على هذا السعر:",
+  "baseChangeNoRate": "لا يوجد سعر بعد. أدخل سعرًا للمتابعة.",
+  "baseChangeEditRate": "تغيير السعر",
+  "baseChangeRateSheet": "1 {from} بـ{to}",
+  "baseChangeSharedTitle": "ليس في ميزانية مشتركة",
+  "baseChangeSharedBody": "على كل هاتف في الميزانية المشتركة أن يحوّل سجلّه في الوقت نفسه، لذا لا يمكن تغيير العملة الأساسية في ميزانية مشتركة حاليًا."
 }
