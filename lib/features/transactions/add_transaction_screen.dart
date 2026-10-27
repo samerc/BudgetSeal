@@ -8,7 +8,8 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart' show Value;
 
-import '../../core/capture/capture_rules.dart';
+import '../../core/capture/bank_alerts.dart';
+import '../../core/capture/share_intake.dart';
 import '../../core/database/app_database.dart';
 import '../../core/engine/allocation_engine.dart';
 import '../../core/providers/accounts_provider.dart';
@@ -61,8 +62,8 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
   /// Receipt filenames already attached (a shared photo).
   final List<String>? initialReceipts;
 
-  /// A captured payment's shop: saved with a category, it becomes a rule.
-  final String? captureShop;
+  /// A captured payment (shared, or a bank alert): see `captureSaved`.
+  final Map<String, dynamic>? capture;
 
   const AddTransactionScreen({
     super.key,
@@ -74,7 +75,7 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
     this.editFromAccountId,
     this.editDestAccountId,
     this.initialReceipts,
-    this.captureShop,
+    this.capture,
   });
 
   @override
@@ -973,16 +974,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         LastUsedService.rememberAccount(_lines.first.accountId!);
       }
 
-      // A captured payment saved with a category: remember its shop.
-      if (widget.captureShop != null && _type != _TxType.transfer) {
+      // A captured payment: learn its shop, clear its alert.
+      if (widget.capture != null && _type != _TxType.transfer) {
         try {
-          await learnCaptureRule(ref.read(databaseProvider),
+          await captureSaved(ref.read(databaseProvider),
               householdId: householdId,
-              shop: widget.captureShop!,
+              capture: widget.capture!,
+              amount: _lines.first.amount,
               categoryId: _lines.first.categoryId,
               accountId: _lines.first.accountId);
+          ref.invalidate(alertInboxProvider);
         } catch (e) {
-          debugPrint('[AddTransaction] Learning the rule failed: $e');
+          debugPrint('[AddTransaction] Capture follow-up failed: $e');
         }
       }
 

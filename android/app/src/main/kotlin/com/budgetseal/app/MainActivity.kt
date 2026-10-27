@@ -7,6 +7,10 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.provider.Settings
+import androidx.core.app.NotificationManagerCompat
+import org.json.JSONArray
+import org.json.JSONObject
 import android.util.Log
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -45,6 +49,39 @@ class MainActivity : FlutterFragmentActivity() {
                 else -> result.notImplemented()
             }
         }
+        // Bank alerts (BankAlerts in Dart): what AlertListener kept.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "budgetseal/alerts")
+            .setMethodCallHandler { call, result ->
+                val prefs = getSharedPreferences(AlertListener.PREFS, Context.MODE_PRIVATE)
+                when (call.method) {
+                    "status" -> {
+                        val seen = JSONObject(prefs.getString(AlertListener.KEY_SEEN, "{}") ?: "{}")
+                        val apps = JSONArray(prefs.getString(AlertListener.KEY_APPS, "[]") ?: "[]")
+                        result.success(mapOf(
+                            "enabled" to NotificationManagerCompat
+                                .getEnabledListenerPackages(this).contains(packageName),
+                            "seen" to seen.keys().asSequence().associateWith { seen.optString(it) },
+                            "apps" to (0 until apps.length()).map { apps.optString(it) },
+                        ))
+                    }
+                    "setApps" -> {
+                        val apps = (call.arguments as? List<*>)?.map { it.toString() } ?: emptyList()
+                        prefs.edit().putString(AlertListener.KEY_APPS, JSONArray(apps).toString()).apply()
+                        result.success(null)
+                    }
+                    // The kept alerts, once (a JSON list).
+                    "take" -> {
+                        val queue = prefs.getString(AlertListener.KEY_QUEUE, "[]") ?: "[]"
+                        prefs.edit().putString(AlertListener.KEY_QUEUE, "[]").apply()
+                        result.success(queue)
+                    }
+                    "openSettings" -> {
+                        startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                        result.success(null)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
         // Share into BudgetSeal (ShareIntake in Dart takes it when ready).
         pendingShare = readShare(intent)
         shareChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "budgetseal/share")

@@ -111,14 +111,13 @@ String _westernDigits(String s) {
   return b.toString();
 }
 
-/// Reads [text] — a bank SMS or notification, a payment app's share, a
-/// receipt's text — in any bank's wording (English, French, Arabic): the
-/// amount next to a currency, whether it went out or came in, the shop,
-/// the card's last digits and a date. [fallbackCurrency] is used when an
-/// amount has no currency beside it. Returns what it could find.
-CaptureDraft readCapturedText(String text, {String? fallbackCurrency}) {
-  final s = _westernDigits(text).replaceAll('\u00a0', ' ');
+/// A number as banks write it: 1,350,000 · 1 234,56 · 45.20 · 450000.
+const _number = r'(\d{1,3}(?:[ ,.\u202f]\d{3})+(?:[.,]\d{1,3})?|\d+(?:[.,]\d{1,3})?)';
 
+/// Every amount beside a currency in [text], in the order they appear
+/// (a bank message: the payment, then often the balance).
+List<({double amount, String currency})> capturedAmounts(String text) {
+  final s = _westernDigits(text).replaceAll('\u00a0', ' ');
   // Amounts beside a currency (a code, or a symbol / local spelling).
   final codes = {...defaultCurrencySymbols.keys};
   final tokens = <String, String>{
@@ -128,12 +127,9 @@ CaptureDraft readCapturedText(String text, {String? fallbackCurrency}) {
   final tokenAlt = (tokens.keys.toList()..sort((a, b) => b.length - a.length))
       .map(RegExp.escape)
       .join('|');
-  const number = r'(\d{1,3}(?:[ ,.\u202f]\d{3})+(?:[.,]\d{1,3})?|\d+(?:[.,]\d{1,3})?)';
-  final before = RegExp('(?<![A-Za-z])($tokenAlt)\\s?$number');
-  final after = RegExp('$number\\s?($tokenAlt)(?![A-Za-z])');
+  final before = RegExp('(?<![A-Za-z])($tokenAlt)\\s?$_number');
+  final after = RegExp('$_number\\s?($tokenAlt)(?![A-Za-z])');
 
-  double? amount;
-  String? currency;
   final found = <(int, double, String)>[];
   for (final m in before.allMatches(s)) {
     final v = parseLooseAmount(m.group(2)!.replaceAll(RegExp(r'[ \u202f]'), ''));
@@ -144,14 +140,33 @@ CaptureDraft readCapturedText(String text, {String? fallbackCurrency}) {
     if (v != null && v > 0) found.add((m.start, v, tokens[m.group(2)!]!));
   }
   found.sort((a, b) => a.$1.compareTo(b.$1));
-  // The first one is the payment; later ones are usually the balance.
+  return [for (final f in found) (amount: f.$2, currency: f.$3)];
+}
+
+/// Reads [text] — a bank SMS or notification, a payment app's share, a
+/// receipt's text — in any bank's wording (English, French, Arabic): the
+/// amount next to a currency, whether it went out or came in, the shop,
+/// the card's last digits and a date. [fallbackCurrency] is used when an
+/// amount has no currency beside it; [amountIndex] which of several
+/// amounts is the payment. Returns what it could find.
+CaptureDraft readCapturedText(String text,
+    {String? fallbackCurrency, int amountIndex = 0}) {
+  final s = _westernDigits(text).replaceAll('\u00a0', ' ');
+
+  double? amount;
+  String? currency;
+  final found = capturedAmounts(text);
+
+  // The first one is the payment, later ones usually the balance — unless
+  // this bank's wording was learned otherwise ([amountIndex]).
   if (found.isNotEmpty) {
-    amount = found.first.$2;
-    currency = found.first.$3;
+    final pick = found[amountIndex < found.length ? amountIndex : 0];
+    amount = pick.amount;
+    currency = pick.currency;
   } else {
     // A bare amount: the first number with decimals, or after "amount".
     final bare = RegExp(
-            r'(?:amount|montant|المبلغ|total)\s*[:=]?\s*' + number,
+            r'(?:amount|montant|المبلغ|total)\s*[:=]?\s*' + _number,
             caseSensitive: false)
         .firstMatch(s) ??
         RegExp(r'\b(\d{1,3}(?:,\d{3})*\.\d{2}|\d+\.\d{2})\b').firstMatch(s);

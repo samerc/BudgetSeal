@@ -2179,6 +2179,73 @@ class SEn extends S {
   String get rulesDeleted => 'Rule deleted';
 
   @override
+  String get tileBankAlerts => 'Bank alerts';
+
+  @override
+  String get tileBankAlertsSub =>
+      'Suggest transactions from your bank’s notifications';
+
+  @override
+  String get alertsDisclosure =>
+      'BudgetSeal can read the notifications your bank and wallet apps post, to suggest the transactions they mention. It reads only the apps you pick below, keeps their text on this phone, and never sends it anywhere. Nothing is recorded until you add it from To review.';
+
+  @override
+  String get alertsAccessOn => 'Notification access is on';
+
+  @override
+  String get alertsAccessOff => 'Notification access is off';
+
+  @override
+  String get alertsAllow => 'Allow in settings';
+
+  @override
+  String get alertsChange => 'Change in settings';
+
+  @override
+  String get alertsApps => 'Apps to read';
+
+  @override
+  String get alertsAppsEmpty =>
+      'Apps show up here once they post a notification after access is on. Then pick your bank’s.';
+
+  @override
+  String get alertsNotAndroid =>
+      'Reading bank notifications works on Android phones only.';
+
+  @override
+  String get reviewTitle => 'To review';
+
+  @override
+  String get reviewEmpty => 'Nothing to review';
+
+  @override
+  String get reviewIntro =>
+      'Payments read from your bank’s notifications. Add the ones you want; nothing is recorded until you do.';
+
+  @override
+  String get reviewAdd => 'Add';
+
+  @override
+  String get reviewDismiss => 'Dismiss';
+
+  @override
+  String get reviewDismissed => 'Dismissed';
+
+  @override
+  String get reviewNoAmount => 'No amount found';
+
+  @override
+  String reviewCard(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n payments to review',
+      one: '1 payment to review',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get allocArchivedTitle => 'Archived envelopes';
 
   @override

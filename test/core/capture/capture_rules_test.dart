@@ -112,7 +112,7 @@ void main() {
         householdId: 'h',
         baseCurrency: 'USD');
     expect(extra!['editNote'], 'Spinneys');
-    expect(extra['captureShop'], 'SPINNEYS ACHRAFIEH');
+    expect((extra['capture'] as Map)['shop'], 'SPINNEYS ACHRAFIEH');
     final line = (extra['editLines'] as List).single as Map;
     expect((line['categoryId'], line['accountId']), ('food', 'visa'));
   });

@@ -2182,6 +2182,72 @@ class SAr extends S {
   String get rulesDeleted => 'حُذفت القاعدة';
 
   @override
+  String get tileBankAlerts => 'تنبيهات البنك';
+
+  @override
+  String get tileBankAlertsSub => 'اقتراح معاملات من إشعارات البنك';
+
+  @override
+  String get alertsDisclosure =>
+      'يمكن لـBudgetSeal قراءة الإشعارات التي تنشرها تطبيقات البنك والمحفظة، ليقترح المعاملات المذكورة فيها. لا يقرأ إلا التطبيقات التي تختارها أدناه، ويحفظ نصها على هذا الهاتف، ولا يرسله إلى أي مكان. لا يُسجَّل شيء حتى تضيفه من «للمراجعة».';
+
+  @override
+  String get alertsAccessOn => 'الوصول إلى الإشعارات مفعّل';
+
+  @override
+  String get alertsAccessOff => 'الوصول إلى الإشعارات متوقف';
+
+  @override
+  String get alertsAllow => 'السماح من الإعدادات';
+
+  @override
+  String get alertsChange => 'التغيير من الإعدادات';
+
+  @override
+  String get alertsApps => 'التطبيقات المقروءة';
+
+  @override
+  String get alertsAppsEmpty =>
+      'تظهر التطبيقات هنا بعد أن تنشر إشعارًا وبعد تفعيل الوصول. ثم اختر تطبيق البنك.';
+
+  @override
+  String get alertsNotAndroid =>
+      'قراءة إشعارات البنك متاحة على هواتف أندرويد فقط.';
+
+  @override
+  String get reviewTitle => 'للمراجعة';
+
+  @override
+  String get reviewEmpty => 'لا شيء للمراجعة';
+
+  @override
+  String get reviewIntro =>
+      'دفعات مقروءة من إشعارات البنك. أضف ما تريد؛ لا يُسجَّل شيء قبل ذلك.';
+
+  @override
+  String get reviewAdd => 'إضافة';
+
+  @override
+  String get reviewDismiss => 'تجاهل';
+
+  @override
+  String get reviewDismissed => 'تم التجاهل';
+
+  @override
+  String get reviewNoAmount => 'لم يُعثر على مبلغ';
+
+  @override
+  String reviewCard(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n دفعات للمراجعة',
+      one: 'دفعة واحدة للمراجعة',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get allocArchivedTitle => 'الأظرف المؤرشفة';
 
   @override

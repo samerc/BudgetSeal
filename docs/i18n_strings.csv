@@ -1813,6 +1813,24 @@ rules_keep,Rules for captured payments (Settings › Rules),Leave as is,اترك
 rules_need_match,Rules for captured payments (Settings › Rules),Enter the text to look for,أدخل النص المطلوب البحث عنه,Saisissez le texte à rechercher
 rules_saved,Rules for captured payments (Settings › Rules),Rule saved,حُفظت القاعدة,Règle enregistrée
 rules_deleted,Rules for captured payments (Settings › Rules),Rule deleted,حُذفت القاعدة,Règle supprimée
+tile_bank_alerts,Bank alerts (notifications from bank apps) and To review,Bank alerts,تنبيهات البنك,Alertes bancaires
+tile_bank_alerts_sub,Bank alerts (notifications from bank apps) and To review,Suggest transactions from your bank’s notifications,اقتراح معاملات من إشعارات البنك,Proposer des transactions à partir des notifications de votre banque
+alerts_disclosure,Bank alerts (notifications from bank apps) and To review,"BudgetSeal can read the notifications your bank and wallet apps post, to suggest the transactions they mention. It reads only the apps you pick below, keeps their text on this phone, and never sends it anywhere. Nothing is recorded until you add it from To review.",يمكن لـBudgetSeal قراءة الإشعارات التي تنشرها تطبيقات البنك والمحفظة، ليقترح المعاملات المذكورة فيها. لا يقرأ إلا التطبيقات التي تختارها أدناه، ويحفظ نصها على هذا الهاتف، ولا يرسله إلى أي مكان. لا يُسجَّل شيء حتى تضيفه من «للمراجعة».,"BudgetSeal peut lire les notifications de vos applications bancaires et de portefeuille pour proposer les transactions qu’elles mentionnent. Il ne lit que les applications choisies ci-dessous, garde leur texte sur ce téléphone et ne l’envoie nulle part. Rien n’est enregistré avant que vous l’ajoutiez depuis À vérifier."
+alerts_access_on,Bank alerts (notifications from bank apps) and To review,Notification access is on,الوصول إلى الإشعارات مفعّل,L’accès aux notifications est activé
+alerts_access_off,Bank alerts (notifications from bank apps) and To review,Notification access is off,الوصول إلى الإشعارات متوقف,L’accès aux notifications est désactivé
+alerts_allow,Bank alerts (notifications from bank apps) and To review,Allow in settings,السماح من الإعدادات,Autoriser dans les réglages
+alerts_change,Bank alerts (notifications from bank apps) and To review,Change in settings,التغيير من الإعدادات,Modifier dans les réglages
+alerts_apps,Bank alerts (notifications from bank apps) and To review,Apps to read,التطبيقات المقروءة,Applications à lire
+alerts_apps_empty,Bank alerts (notifications from bank apps) and To review,Apps show up here once they post a notification after access is on. Then pick your bank’s.,تظهر التطبيقات هنا بعد أن تنشر إشعارًا وبعد تفعيل الوصول. ثم اختر تطبيق البنك.,"Les applications apparaissent ici dès qu’elles publient une notification, une fois l’accès activé. Choisissez alors celle de votre banque."
+alerts_not_android,Bank alerts (notifications from bank apps) and To review,Reading bank notifications works on Android phones only.,قراءة إشعارات البنك متاحة على هواتف أندرويد فقط.,La lecture des notifications bancaires ne fonctionne que sur Android.
+review_title,Bank alerts (notifications from bank apps) and To review,To review,للمراجعة,À vérifier
+review_empty,Bank alerts (notifications from bank apps) and To review,Nothing to review,لا شيء للمراجعة,Rien à vérifier
+review_intro,Bank alerts (notifications from bank apps) and To review,Payments read from your bank’s notifications. Add the ones you want; nothing is recorded until you do.,دفعات مقروءة من إشعارات البنك. أضف ما تريد؛ لا يُسجَّل شيء قبل ذلك.,Paiements lus dans les notifications de votre banque. Ajoutez ceux que vous voulez ; rien n’est enregistré avant.
+review_add,Bank alerts (notifications from bank apps) and To review,Add,إضافة,Ajouter
+review_dismiss,Bank alerts (notifications from bank apps) and To review,Dismiss,تجاهل,Ignorer
+review_dismissed,Bank alerts (notifications from bank apps) and To review,Dismissed,تم التجاهل,Ignorée
+review_no_amount,Bank alerts (notifications from bank apps) and To review,No amount found,لم يُعثر على مبلغ,Aucun montant trouvé
+review_card,Bank alerts (notifications from bank apps) and To review,"{n, plural, =1{1 payment to review} other{{n} payments to review}}","{n, plural, =1{دفعة واحدة للمراجعة} other{{n} دفعات للمراجعة}}","{n, plural, =1{1 paiement à vérifier} other{{n} paiements à vérifier}}"
 alloc_archived_title,,Archived envelopes,الأظرف المؤرشفة,Enveloppes archivées
 alloc_no_archived,,No archived envelopes,لا توجد أظرف مؤرشفة,Aucune enveloppe archivée
 alloc_unarchived,,{name} unarchived,تم إلغاء أرشفة {name},{name} désarchivée

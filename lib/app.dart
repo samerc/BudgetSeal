@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'core/capture/bank_alerts.dart';
 import 'core/capture/share_intake.dart';
 import 'core/providers/accent_color_provider.dart';
 import 'core/providers/arabic_digits_provider.dart';
@@ -82,6 +83,8 @@ import 'features/planned/plan_payment_screen.dart';
 import 'features/transactions/add_transaction_screen.dart';
 import 'features/transactions/assisted_transaction_screen.dart';
 import 'features/accounts/cash_count_screen.dart';
+import 'features/capture/bank_alerts_screen.dart';
+import 'features/capture/review_screen.dart';
 import 'features/settings/rules_screen.dart';
 import 'features/transactions/pay_with_change_screen.dart';
 import 'features/transactions/quick_add_screen.dart';
@@ -181,6 +184,16 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
               state: state,
             );
           },
+        ),
+        GoRoute(
+          path: '/bank-alerts',
+          pageBuilder: (_, state) =>
+              slideUpPage(child: const BankAlertsScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/review',
+          pageBuilder: (_, state) =>
+              slideUpPage(child: const ReviewScreen(), state: state),
         ),
         GoRoute(
           path: '/rules',
@@ -463,6 +476,8 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
       _checkTravelAccounts();
       // Post bills that fell due while the app sat in memory, then alerts.
       _processDueWork();
+      // Bank alerts that arrived meanwhile go to "To review".
+      ref.invalidate(alertInboxProvider);
     } else if (state == AppLifecycleState.paused) {
       _updateHomeWidget();
       // Sync on app pause (upload local changes)
@@ -846,7 +861,7 @@ class _EntryModeRouterState extends ConsumerState<_EntryModeRouter> {
       editFromAccountId: extra?['editFromAccountId'] as String?,
       editDestAccountId: extra?['editDestAccountId'] as String?,
       initialReceipts: extra?['editReceipts'] as List<String>?,
-      captureShop: extra?['captureShop'] as String?,
+      capture: extra?['capture'] as Map<String, dynamic>?,
     );
   }
 }

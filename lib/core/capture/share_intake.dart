@@ -8,6 +8,7 @@ import '../../shared/utils/ocr_service.dart';
 import '../../shared/utils/receipt_helper.dart';
 import '../database/app_database.dart';
 import '../services/last_used_service.dart';
+import 'bank_alerts.dart';
 import 'capture_rules.dart';
 import 'text_reader.dart';
 
@@ -84,8 +85,54 @@ Future<Map<String, dynamic>?> shareFormArgs(
     if (saved != null) receipts.add(saved);
   }
   if (text.trim().isEmpty && receipts.isEmpty) return null;
+  return captureFormArgs(
+    text: text,
+    receiptTotal: receiptTotal,
+    receiptShop: receiptShop,
+    receipts: receipts,
+    db: db,
+    householdId: householdId,
+    baseCurrency: baseCurrency,
+  );
+}
 
-  final draft = readCapturedText(text, fallbackCurrency: baseCurrency);
+/// The `/add-transaction` extra for a bank alert in "To review": dated
+/// when it arrived, read the way this bank's messages were learned, and
+/// tied to the alert (saving it removes it from the inbox).
+Future<Map<String, dynamic>> alertFormArgs(
+  AlertItem item, {
+  required AppDatabase db,
+  required String householdId,
+  required String baseCurrency,
+}) async =>
+    captureFormArgs(
+      text: item.fullText,
+      when: item.at,
+      amountIndex: await BankAlerts.amountIndex(item.app),
+      capture: {'alertId': item.id, 'app': item.app},
+      db: db,
+      householdId: householdId,
+      baseCurrency: baseCurrency,
+    );
+
+/// The form's extra for a captured payment: [readCapturedText], a rule
+/// for its shop (category, account, title), an account in its currency
+/// (the rule's, else the last one used, else the first). The extra's
+/// `capture` (shop, alert, app, text) goes back to [captureSaved].
+Future<Map<String, dynamic>> captureFormArgs({
+  required String text,
+  double? receiptTotal,
+  String? receiptShop,
+  List<String> receipts = const [],
+  DateTime? when,
+  int amountIndex = 0,
+  Map<String, Object?> capture = const {},
+  required AppDatabase db,
+  required String householdId,
+  required String baseCurrency,
+}) async {
+  final draft = readCapturedText(text,
+      fallbackCurrency: baseCurrency, amountIndex: amountIndex);
   // A receipt's TOTAL line beats the first number in its text (an item).
   final amount = receiptTotal ?? draft.amount;
   final accounts = await (db.select(db.accounts)
@@ -105,16 +152,17 @@ Future<Map<String, dynamic>?> shareFormArgs(
       inCurrency.where((a) => a.id == last).firstOrNull ??
       inCurrency.firstOrNull;
   final now = DateTime.now();
-  final date = draft.date == null
-      ? null
-      : DateTime(draft.date!.year, draft.date!.month, draft.date!.day,
-          now.hour, now.minute);
+  final date = when ??
+      (draft.date == null
+          ? null
+          : DateTime(draft.date!.year, draft.date!.month, draft.date!.day,
+              now.hour, now.minute));
 
   return {
     'editType': draft.type,
     'editNote': rule?.title ?? shop ?? '',
-    // The forms learn a rule for it when it's saved with a category.
-    if (shop != null) 'captureShop': shop,
+    // Back to captureSaved() when it's saved.
+    'capture': {...capture, if (shop != null) 'shop': shop, 'text': text},
     if (date != null && !date.isAfter(now)) 'editDate': date,
     'editLines': [
       {
@@ -127,4 +175,33 @@ Future<Map<String, dynamic>?> shareFormArgs(
     ],
     if (receipts.isNotEmpty) 'editReceipts': receipts,
   };
+}
+
+/// A captured payment ([capture], from the form's extra) was saved as
+/// [amount] with [categoryId] / [accountId]: its shop becomes a rule
+/// (learned), a bank alert leaves "To review", and if the amount was
+/// another one in the alert's text, that bank's wording is learned.
+Future<void> captureSaved(
+  AppDatabase db, {
+  required String householdId,
+  required Map<String, dynamic> capture,
+  required double amount,
+  required String? categoryId,
+  required String? accountId,
+}) async {
+  final shop = capture['shop'] as String?;
+  if (shop != null) {
+    await learnCaptureRule(db,
+        householdId: householdId,
+        shop: shop,
+        categoryId: categoryId,
+        accountId: accountId);
+  }
+  final alertId = capture['alertId'] as String?;
+  if (alertId != null) await BankAlerts.remove(alertId);
+  final app = capture['app'] as String?;
+  final text = capture['text'] as String?;
+  if (app != null && text != null) {
+    await BankAlerts.learnAmount(app, text, amount);
+  }
 }

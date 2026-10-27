@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
 
+import '../../core/capture/bank_alerts.dart';
 import '../../core/database/app_database.dart';
 import '../../core/providers/accent_color_provider.dart';
 import '../../core/providers/biometric_provider.dart';
@@ -1380,6 +1381,15 @@ class _SettingsDetailScreenState extends ConsumerState<SettingsDetailScreen> {
               iconColor: SettingsRowStyle.hue(35),
               onTap: () => context.push('/rules'),
             )),
+          if (BankAlerts.supported)
+            _Find(keys: (t) => [t.tileBankAlerts, t.tileBankAlertsSub],
+                child: _SettingsTile(
+                icon: AppIcons.bellRinging,
+                title: l.tileBankAlerts,
+                subtitle: l.tileBankAlertsSub,
+                iconColor: SettingsRowStyle.hue(35),
+                onTap: () => context.push('/bank-alerts'),
+              )),
           _Find(keys: (t) => [t.tilePeriodStartDay],
               child: _SettingsTile(
               icon: AppIcons.calendarBlank,

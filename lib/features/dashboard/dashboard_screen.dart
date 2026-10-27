@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:drift/drift.dart' hide Column;
 
+import '../capture/review_screen.dart';
 import '../../core/database/app_database.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/allocations_provider.dart';
@@ -541,7 +542,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
 
     // Build ordered list from provider layout; the getting-started
     // checklist (new budgets only) leads.
-    final result = <Widget>[const GettingStartedCard()];
+    // Bank alerts waiting to be added lead after it.
+    final result = <Widget>[
+      const GettingStartedCard(),
+      const ReviewAlertsCard(),
+    ];
     for (final config in layout) {
       if (config.visible && sectionWidgets.containsKey(config.section)) {
         result.addAll(sectionWidgets[config.section]!);

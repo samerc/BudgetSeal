@@ -3885,6 +3885,114 @@ abstract class S {
   /// **'Rule deleted'**
   String get rulesDeleted;
 
+  /// Bank alerts (notifications from bank apps) and To review
+  ///
+  /// In en, this message translates to:
+  /// **'Bank alerts'**
+  String get tileBankAlerts;
+
+  /// Bank alerts (notifications from bank apps) and To review
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest transactions from your bank’s notifications'**
+  String get tileBankAlertsSub;
+
+  /// Bank alerts (notifications from bank apps) and To review
+  ///
+  /// In en, this message translates to:
+  /// **'BudgetSeal can read the notifications your bank and wallet apps post, to suggest the transactions they mention. It reads only the apps you pick below, keeps their text on this phone, and never sends it anywhere. Nothing is recorded until you add it from To review.'**
+  String get alertsDisclosure;
+
+  /// Bank alerts (notifications from bank apps) and To review
+  ///
+  /// In en, this message translates to:
+  /// **'Notification access is on'**
+  String get alertsAccessOn;
+
+  /// Bank alerts (notifications from bank apps) and To review
+  ///
+  /// In en, this message translates to:
+  /// **'Notification access is off'**
+  String get alertsAccessOff;
+
+  /// Bank alerts (notifications from bank apps) and To review
+  ///
+  /// In en, this message translates to:
+  /// **'Allow in settings'**
+  String get alertsAllow;
+
+  /// Bank alerts (notifications from bank apps) and To review
+  ///
+  /// In en, this message translates to:
+  /// **'Change in settings'**
+  String get alertsChange;
+
+  /// Bank alerts (notifications from bank apps) and To review
+  ///
+  /// In en, this message translates to:
+  /// **'Apps to read'**
+  String get alertsApps;
+
+  /// Bank alerts (notifications from bank apps) and To review
+  ///
+  /// In en, this message translates to:
+  /// **'Apps show up here once they post a notification after access is on. Then pick your bank’s.'**
+  String get alertsAppsEmpty;
+
+  /// Bank alerts (notifications from bank apps) and To review
+  ///
+  /// In en, this message translates to:
+  /// **'Reading bank notifications works on Android phones only.'**
+  String get alertsNotAndroid;
+
+  /// Bank alerts (notifications from bank apps) and To review
+  ///
+  /// In en, this message translates to:
+  /// **'To review'**
+  String get reviewTitle;
+
+  /// Bank alerts (notifications from bank apps) and To review
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to review'**
+  String get reviewEmpty;
+
+  /// Bank alerts (notifications from bank apps) and To review
+  ///
+  /// In en, this message translates to:
+  /// **'Payments read from your bank’s notifications. Add the ones you want; nothing is recorded until you do.'**
+  String get reviewIntro;
+
+  /// Bank alerts (notifications from bank apps) and To review
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get reviewAdd;
+
+  /// Bank alerts (notifications from bank apps) and To review
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get reviewDismiss;
+
+  /// Bank alerts (notifications from bank apps) and To review
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissed'**
+  String get reviewDismissed;
+
+  /// Bank alerts (notifications from bank apps) and To review
+  ///
+  /// In en, this message translates to:
+  /// **'No amount found'**
+  String get reviewNoAmount;
+
+  /// Bank alerts (notifications from bank apps) and To review
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 payment to review} other{{n} payments to review}}'**
+  String reviewCard(int n);
+
   /// No description provided for @allocArchivedTitle.
   ///
   /// In en, this message translates to:

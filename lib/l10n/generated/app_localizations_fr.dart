@@ -2195,6 +2195,73 @@ class SFr extends S {
   String get rulesDeleted => 'Règle supprimée';
 
   @override
+  String get tileBankAlerts => 'Alertes bancaires';
+
+  @override
+  String get tileBankAlertsSub =>
+      'Proposer des transactions à partir des notifications de votre banque';
+
+  @override
+  String get alertsDisclosure =>
+      'BudgetSeal peut lire les notifications de vos applications bancaires et de portefeuille pour proposer les transactions qu’elles mentionnent. Il ne lit que les applications choisies ci-dessous, garde leur texte sur ce téléphone et ne l’envoie nulle part. Rien n’est enregistré avant que vous l’ajoutiez depuis À vérifier.';
+
+  @override
+  String get alertsAccessOn => 'L’accès aux notifications est activé';
+
+  @override
+  String get alertsAccessOff => 'L’accès aux notifications est désactivé';
+
+  @override
+  String get alertsAllow => 'Autoriser dans les réglages';
+
+  @override
+  String get alertsChange => 'Modifier dans les réglages';
+
+  @override
+  String get alertsApps => 'Applications à lire';
+
+  @override
+  String get alertsAppsEmpty =>
+      'Les applications apparaissent ici dès qu’elles publient une notification, une fois l’accès activé. Choisissez alors celle de votre banque.';
+
+  @override
+  String get alertsNotAndroid =>
+      'La lecture des notifications bancaires ne fonctionne que sur Android.';
+
+  @override
+  String get reviewTitle => 'À vérifier';
+
+  @override
+  String get reviewEmpty => 'Rien à vérifier';
+
+  @override
+  String get reviewIntro =>
+      'Paiements lus dans les notifications de votre banque. Ajoutez ceux que vous voulez ; rien n’est enregistré avant.';
+
+  @override
+  String get reviewAdd => 'Ajouter';
+
+  @override
+  String get reviewDismiss => 'Ignorer';
+
+  @override
+  String get reviewDismissed => 'Ignorée';
+
+  @override
+  String get reviewNoAmount => 'Aucun montant trouvé';
+
+  @override
+  String reviewCard(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n paiements à vérifier',
+      one: '1 paiement à vérifier',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get allocArchivedTitle => 'Enveloppes archivées';
 
   @override
