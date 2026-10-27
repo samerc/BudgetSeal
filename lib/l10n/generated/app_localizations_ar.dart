@@ -2048,6 +2048,50 @@ class SAr extends S {
       'تستخدم المعاملات الجديدة والتقارير السعر الذي تختاره. في الميزانية المشتركة يستخدم الجميع السعر نفسه.';
 
   @override
+  String get payChangeTitle => 'دفع مع باقٍ';
+
+  @override
+  String get payChangeButton => 'الباقي';
+
+  @override
+  String get payChangeIntro =>
+      'دفعت بعملة وأخذت الباقي بعملة أخرى؟ أدخل ما دفعته والباقي الذي أخذته.';
+
+  @override
+  String get payChangePrice => 'السعر';
+
+  @override
+  String get payChangePriceHint => 'اختياري، لحساب الباقي';
+
+  @override
+  String get payChangePaid => 'دفعت';
+
+  @override
+  String get payChangeChange => 'الباقي الذي أخذته';
+
+  @override
+  String get payChangeRate => 'السعر';
+
+  @override
+  String get payChangeRateHint => 'للمتجر سعر خاص؟ اضغط لتغييره.';
+
+  @override
+  String payChangeSpent(String amount) {
+    return 'أُنفق $amount';
+  }
+
+  @override
+  String payChangeInto(String amount, String account) {
+    return 'الباقي $amount إلى $account';
+  }
+
+  @override
+  String get payChangeTooMuch => 'قيمة الباقي تساوي ما دفعته أو أكثر.';
+
+  @override
+  String get payChangeNeedOther => 'أضف حسابًا بعملة أخرى لتحفظ الباقي فيه.';
+
+  @override
   String get tileExchangeRatesSub => 'أسعار مباشرة، أو حدّد سعرك';
 
   @override

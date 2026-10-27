@@ -549,6 +549,23 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   /// Combine date + time into a single DateTime.
+  /// A new expense, with accounts in more than one currency: it can be a
+  /// payment with change in another currency instead.
+  bool get _canPayWithChange =>
+      _type == _TxType.expense &&
+      widget.editTransactionId == null &&
+      (ref.read(accountsProvider).value ?? const <Account>[])
+              .map((a) => a.currency)
+              .toSet()
+              .length >
+          1;
+
+  void _payWithChange() => context.pushReplacement('/pay-with-change', extra: {
+        'title': _titleCtrl.text.trim(),
+        'categoryId': _lines.isEmpty ? null : _lines.first.categoryId,
+        'date': _effectiveDateTime,
+      });
+
   DateTime get _effectiveDateTime => DateTime(
         _selectedDate.year,
         _selectedDate.month,
@@ -2059,6 +2076,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           icon: AppIcons.plus,
           label: S.of(context).txFormAddItem,
           onTap: _addLine,
+        ),
+      if (_canPayWithChange)
+        _ActionChip(
+          icon: AppIcons.coins,
+          label: S.of(context).payChangeButton,
+          onTap: _payWithChange,
         ),
       if (receiptCard == null) ...[
         _ActionChip(

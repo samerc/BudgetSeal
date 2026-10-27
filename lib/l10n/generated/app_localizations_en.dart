@@ -2042,6 +2042,53 @@ class SEn extends S {
       'New transactions and reports use the rate you choose. On a shared budget everyone uses the same one.';
 
   @override
+  String get payChangeTitle => 'Pay with change';
+
+  @override
+  String get payChangeButton => 'Change';
+
+  @override
+  String get payChangeIntro =>
+      'Paid in one currency and got change in another? Enter what you handed over and the change you got.';
+
+  @override
+  String get payChangePrice => 'Price';
+
+  @override
+  String get payChangePriceHint => 'Optional, to work out the change';
+
+  @override
+  String get payChangePaid => 'You handed over';
+
+  @override
+  String get payChangeChange => 'Change you got';
+
+  @override
+  String get payChangeRate => 'Rate';
+
+  @override
+  String get payChangeRateHint =>
+      'The shop uses its own rate? Tap to change it.';
+
+  @override
+  String payChangeSpent(String amount) {
+    return 'Spent $amount';
+  }
+
+  @override
+  String payChangeInto(String amount, String account) {
+    return '$amount change into $account';
+  }
+
+  @override
+  String get payChangeTooMuch =>
+      'The change is worth all you handed over, or more.';
+
+  @override
+  String get payChangeNeedOther =>
+      'Add an account in another currency to keep change in it.';
+
+  @override
   String get tileExchangeRatesSub => 'Live rates, or set your own';
 
   @override

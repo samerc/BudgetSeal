@@ -1775,6 +1775,19 @@ fx_source_fixed_none,Exchange rates: rate source per currency,Set your own rate,
 fx_got_tag,Exchange rates: rate source per currency,Rate you got,السعر الذي حصلت عليه,Taux obtenu
 fx_rate_sheet,Exchange rates: rate source per currency,1 {from} in {to},1 {from} بـ{to},1 {from} en {to}
 fx_source_hint,Exchange rates: rate source per currency,New transactions and reports use the rate you choose. On a shared budget everyone uses the same one.,تستخدم المعاملات الجديدة والتقارير السعر الذي تختاره. في الميزانية المشتركة يستخدم الجميع السعر نفسه.,"Les nouvelles transactions et les rapports utilisent le taux choisi. Sur un budget partagé, tout le monde utilise le même."
+pay_change_title,"Pay with change (cash in one currency, change in another)",Pay with change,دفع مع باقٍ,Payer avec monnaie rendue
+pay_change_button,"Pay with change (cash in one currency, change in another)",Change,الباقي,Monnaie
+pay_change_intro,"Pay with change (cash in one currency, change in another)",Paid in one currency and got change in another? Enter what you handed over and the change you got.,دفعت بعملة وأخذت الباقي بعملة أخرى؟ أدخل ما دفعته والباقي الذي أخذته.,Payé dans une devise et reçu la monnaie dans une autre ? Saisissez ce que vous avez donné et la monnaie reçue.
+pay_change_price,"Pay with change (cash in one currency, change in another)",Price,السعر,Prix
+pay_change_price_hint,"Pay with change (cash in one currency, change in another)","Optional, to work out the change",اختياري، لحساب الباقي,"Facultatif, pour calculer la monnaie"
+pay_change_paid,"Pay with change (cash in one currency, change in another)",You handed over,دفعت,Vous avez donné
+pay_change_change,"Pay with change (cash in one currency, change in another)",Change you got,الباقي الذي أخذته,Monnaie reçue
+pay_change_rate,"Pay with change (cash in one currency, change in another)",Rate,السعر,Taux
+pay_change_rate_hint,"Pay with change (cash in one currency, change in another)",The shop uses its own rate? Tap to change it.,للمتجر سعر خاص؟ اضغط لتغييره.,Le commerçant a son propre taux ? Touchez pour le modifier.
+pay_change_spent,"Pay with change (cash in one currency, change in another)",Spent {amount},أُنفق {amount},Dépensé {amount}
+pay_change_into,"Pay with change (cash in one currency, change in another)",{amount} change into {account},الباقي {amount} إلى {account},{amount} de monnaie vers {account}
+pay_change_too_much,"Pay with change (cash in one currency, change in another)","The change is worth all you handed over, or more.",قيمة الباقي تساوي ما دفعته أو أكثر.,"La monnaie vaut tout ce que vous avez donné, ou plus."
+pay_change_need_other,"Pay with change (cash in one currency, change in another)",Add an account in another currency to keep change in it.,أضف حسابًا بعملة أخرى لتحفظ الباقي فيه.,Ajoutez un compte dans une autre devise pour y garder la monnaie.
 tile_exchange_rates_sub,,"Live rates, or set your own",أسعار مباشرة، أو حدّد سعرك,"Taux en direct, ou les vôtres"
 alloc_archived_title,,Archived envelopes,الأظرف المؤرشفة,Enveloppes archivées
 alloc_no_archived,,No archived envelopes,لا توجد أظرف مؤرشفة,Aucune enveloppe archivée

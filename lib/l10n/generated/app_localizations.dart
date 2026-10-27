@@ -3657,6 +3657,84 @@ abstract class S {
   /// **'New transactions and reports use the rate you choose. On a shared budget everyone uses the same one.'**
   String get fxSourceHint;
 
+  /// Pay with change (cash in one currency, change in another)
+  ///
+  /// In en, this message translates to:
+  /// **'Pay with change'**
+  String get payChangeTitle;
+
+  /// Pay with change (cash in one currency, change in another)
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get payChangeButton;
+
+  /// Pay with change (cash in one currency, change in another)
+  ///
+  /// In en, this message translates to:
+  /// **'Paid in one currency and got change in another? Enter what you handed over and the change you got.'**
+  String get payChangeIntro;
+
+  /// Pay with change (cash in one currency, change in another)
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get payChangePrice;
+
+  /// Pay with change (cash in one currency, change in another)
+  ///
+  /// In en, this message translates to:
+  /// **'Optional, to work out the change'**
+  String get payChangePriceHint;
+
+  /// Pay with change (cash in one currency, change in another)
+  ///
+  /// In en, this message translates to:
+  /// **'You handed over'**
+  String get payChangePaid;
+
+  /// Pay with change (cash in one currency, change in another)
+  ///
+  /// In en, this message translates to:
+  /// **'Change you got'**
+  String get payChangeChange;
+
+  /// Pay with change (cash in one currency, change in another)
+  ///
+  /// In en, this message translates to:
+  /// **'Rate'**
+  String get payChangeRate;
+
+  /// Pay with change (cash in one currency, change in another)
+  ///
+  /// In en, this message translates to:
+  /// **'The shop uses its own rate? Tap to change it.'**
+  String get payChangeRateHint;
+
+  /// Pay with change (cash in one currency, change in another)
+  ///
+  /// In en, this message translates to:
+  /// **'Spent {amount}'**
+  String payChangeSpent(String amount);
+
+  /// Pay with change (cash in one currency, change in another)
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} change into {account}'**
+  String payChangeInto(String amount, String account);
+
+  /// Pay with change (cash in one currency, change in another)
+  ///
+  /// In en, this message translates to:
+  /// **'The change is worth all you handed over, or more.'**
+  String get payChangeTooMuch;
+
+  /// Pay with change (cash in one currency, change in another)
+  ///
+  /// In en, this message translates to:
+  /// **'Add an account in another currency to keep change in it.'**
+  String get payChangeNeedOther;
+
   /// No description provided for @tileExchangeRatesSub.
   ///
   /// In en, this message translates to:

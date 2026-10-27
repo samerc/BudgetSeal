@@ -2235,6 +2235,24 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
             badge: _receipts.length),
         const SizedBox(width: 8),
         btn(tr.quickPhoto, AppIcons.image, () => _addReceipt(camera: false)),
+        // A new expense, with accounts in more than one currency: it can be
+        // a payment with change in another currency instead.
+        if (_type == 'expense' &&
+            !_editing &&
+            !_split &&
+            (ref.read(accountsProvider).value ?? const <Account>[])
+                    .map((a) => a.currency)
+                    .toSet()
+                    .length >
+                1) ...[
+          const SizedBox(width: 8),
+          btn(tr.payChangeButton, AppIcons.coins,
+              () => context.pushReplacement('/pay-with-change', extra: {
+                    'title': _titleCtrl.text.trim(),
+                    'categoryId': _categoryId,
+                    'date': _saveDate,
+                  })),
+        ],
       ]),
     );
   }

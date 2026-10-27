@@ -142,6 +142,10 @@ Both the funding screen (bulk) and envelope detail screen (single fund) check if
 - **Payment history**: payments are linked by `[obj:UUID]` tag embedded in the transaction note. Query searches by ID tag first, falls back to name matching for legacy payments. The tag is stripped from display. Renaming an objective does not break payment history.
 - **Loan direction hint**: a text hint below the direction toggle explains what each direction means ("You gave money — payments are incoming" / "You owe money — payments are outgoing").
 
+## Pay with Change (roadmap #3, Oct 27 2026)
+
+`/pay-with-change` (`features/transactions/pay_with_change_screen.dart`): pay in one currency, get change in another. Entry: the **Change** extra in the one-screen form (5th button) and a `_ActionChip` in the classic form — only for a new expense when the accounts use more than one currency; `pushReplacement` with the form's title, category and date. Fields: optional price (in either currency; works the change out until the change is typed), what was handed over + account (defaults: cash in the base currency), change + account (another currency, cash first), rate (`latestCachedRate` → the pair's source; tap to type the shop's own rate, calculator). Saved by **`AllocationEngine.recordPaymentWithChange()`**: user's decision — the spending counts in what was handed over: `spent = round(paid − change ÷ rate)` in the paying currency, an expense on the paying account (envelope debit in that currency; line rate to base = 1 / the rate got when the change is in base / cached); the rest (`paid − spent`) is a transfer to the change account delivering exactly `change` (`recordTransfer(receivedAmount:)`); both share note + `createdAt` (Related transactions); `noteRateGot()` stores the rate. No change → a plain expense; change worth it all → ArgumentError. Phone only (not in the Web Companion yet). Tests: `pay_with_change_test.dart` (the $20 / LBP 440,000 example), `money_model_test.dart` step 10, `pay_with_change_screen_test.dart` (builds at 360 dp, EN/AR).
+
 ## Travel Exchange
 
 `lib/features/travel/travel_exchange_screen.dart` — temporary currency wallets for trips.

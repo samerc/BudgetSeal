@@ -80,6 +80,7 @@ import 'features/planned/fund_payment_screen.dart';
 import 'features/planned/plan_payment_screen.dart';
 import 'features/transactions/add_transaction_screen.dart';
 import 'features/transactions/assisted_transaction_screen.dart';
+import 'features/transactions/pay_with_change_screen.dart';
 import 'features/transactions/quick_add_screen.dart';
 import 'features/transactions/transaction_detail_screen.dart';
 import 'features/splash/splash_screen.dart';
@@ -171,6 +172,20 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
             final extra = state.extra as Map<String, dynamic>?;
             return slideUpPage(
               child: _EntryModeRouter(extra: extra),
+              state: state,
+            );
+          },
+        ),
+        GoRoute(
+          path: '/pay-with-change',
+          pageBuilder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            return slideUpPage(
+              child: PayWithChangeScreen(
+                initialTitle: extra?['title'] as String?,
+                initialCategoryId: extra?['categoryId'] as String?,
+                initialDate: extra?['date'] as DateTime?,
+              ),
               state: state,
             );
           },

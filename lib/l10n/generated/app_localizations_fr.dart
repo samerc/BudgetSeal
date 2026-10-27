@@ -2056,6 +2056,53 @@ class SFr extends S {
       'Les nouvelles transactions et les rapports utilisent le taux choisi. Sur un budget partagé, tout le monde utilise le même.';
 
   @override
+  String get payChangeTitle => 'Payer avec monnaie rendue';
+
+  @override
+  String get payChangeButton => 'Monnaie';
+
+  @override
+  String get payChangeIntro =>
+      'Payé dans une devise et reçu la monnaie dans une autre ? Saisissez ce que vous avez donné et la monnaie reçue.';
+
+  @override
+  String get payChangePrice => 'Prix';
+
+  @override
+  String get payChangePriceHint => 'Facultatif, pour calculer la monnaie';
+
+  @override
+  String get payChangePaid => 'Vous avez donné';
+
+  @override
+  String get payChangeChange => 'Monnaie reçue';
+
+  @override
+  String get payChangeRate => 'Taux';
+
+  @override
+  String get payChangeRateHint =>
+      'Le commerçant a son propre taux ? Touchez pour le modifier.';
+
+  @override
+  String payChangeSpent(String amount) {
+    return 'Dépensé $amount';
+  }
+
+  @override
+  String payChangeInto(String amount, String account) {
+    return '$amount de monnaie vers $account';
+  }
+
+  @override
+  String get payChangeTooMuch =>
+      'La monnaie vaut tout ce que vous avez donné, ou plus.';
+
+  @override
+  String get payChangeNeedOther =>
+      'Ajoutez un compte dans une autre devise pour y garder la monnaie.';
+
+  @override
   String get tileExchangeRatesSub => 'Taux en direct, ou les vôtres';
 
   @override

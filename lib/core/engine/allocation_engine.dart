@@ -309,7 +309,10 @@ class AllocationEngine {
     String? id,
     String? editing,
     bool rateGot = false,
+    double? receivedAmount,
   }) async {
+    // What arrived: given exactly (a payment's change), or amount × rate.
+    final received = receivedAmount ?? amount * exchangeRateToBase;
     if (rateGot) {
       final dest = await (_db.select(_db.accounts)
             ..where((a) => a.id.equals(toAccountId)))
@@ -338,7 +341,7 @@ class AllocationEngine {
           amount: Value(amount),
           currency: Value(currency),
           exchangeRateToBase: Value(exchangeRateToBase),
-          destinationAmount: Value(amount * exchangeRateToBase),
+          destinationAmount: Value(received),
           note: Value(note),
           createdAt: Value(date ?? old.createdAt),
           status: const Value(null),
@@ -362,13 +365,100 @@ class AllocationEngine {
           currency: currency,
           // Still written for phones on 0.11, which read the rate.
           exchangeRateToBase: Value(exchangeRateToBase),
-          destinationAmount: Value(amount * exchangeRateToBase),
+          destinationAmount: Value(received),
           createdBy: createdBy,
           deviceId: DeviceIdentity.stamp(deviceId),
           note: Value(note),
           createdAt: Value(date ?? DateTime.now()),
         ));
     return txId;
+  }
+
+  /// A cash payment with change in another currency (roadmap #3): [paid]
+  /// handed over from [payAccountId] (in its currency), [change] received
+  /// into [changeAccountId] (in its currency), at [rate] — 1 paid currency
+  /// = [rate] change currency, the shop's or street rate.
+  ///
+  /// The spending counts in what was handed over (user's decision):
+  /// paid − change ÷ rate, rounded to the currency, as an expense on the
+  /// paying account (its envelope debit in that currency). The rest is an
+  /// exchange into the change account that delivers exactly [change]. Both
+  /// share the note and time (Related transactions) and [rate] becomes the
+  /// pair's "last rate you got". With no change it's a plain expense.
+  Future<({String expenseId, String? exchangeId, double spent})>
+      recordPaymentWithChange({
+    required String householdId,
+    required String payAccountId,
+    required double paid,
+    required String changeAccountId,
+    required double change,
+    required double rate,
+    required String baseCurrency,
+    String? categoryId,
+    String note = '',
+    DateTime? date,
+    String deviceId = 'local',
+  }) async {
+    Future<Account> account(String id) =>
+        (_db.select(_db.accounts)..where((a) => a.id.equals(id))).getSingle();
+    final pay = await account(payAccountId);
+    final into = await account(changeAccountId);
+    if (pay.currency == into.currency) {
+      throw ArgumentError('change must be in another currency');
+    }
+    if (paid <= 0 || change < 0 || rate <= 0) {
+      throw ArgumentError('paid and rate must be positive, change not negative');
+    }
+    final scale = math.pow(10, currencyDecimals(pay.currency)).toDouble();
+    final spent = ((paid - change / rate) * scale).round() / scale;
+    if (spent <= 0) throw ArgumentError('the change is worth all of it or more');
+    final exchanged = ((paid - spent) * scale).round() / scale;
+    // The spending's rate to base: the rate got when the change is in the
+    // base currency, else the usual one.
+    final toBase = pay.currency == baseCurrency
+        ? 1.0
+        : into.currency == baseCurrency
+            ? rate
+            : await latestCachedRate(_db, pay.currency, baseCurrency) ?? 1.0;
+    final when = date ?? DateTime.now();
+    return _db.transaction(() async {
+      final expenseId = await recordTransaction(
+        householdId: householdId,
+        accountId: payAccountId,
+        type: 'expense',
+        lines: [
+          TxLine(
+            amount: spent,
+            currency: pay.currency,
+            categoryId: categoryId,
+            accountId: payAccountId,
+            exchangeRateToBase: toBase,
+          ),
+        ],
+        baseCurrency: baseCurrency,
+        note: note,
+        deviceId: deviceId,
+        date: when,
+      );
+      String? exchangeId;
+      if (change > 0 && exchanged > 0) {
+        exchangeId = await recordTransfer(
+          householdId: householdId,
+          fromAccountId: payAccountId,
+          toAccountId: changeAccountId,
+          amount: exchanged,
+          currency: pay.currency,
+          exchangeRateToBase: change / exchanged,
+          receivedAmount: change,
+          createdBy: 'user',
+          deviceId: deviceId,
+          note: note,
+          date: when,
+        );
+      }
+      await noteRateGot(_db, pay.currency, into.currency, rate);
+      return (expenseId: expenseId, exchangeId: exchangeId, spent: spent);
+    });
   }
 
   /// Move funds from Unallocated pool into an allocation.

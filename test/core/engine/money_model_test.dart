@@ -196,7 +196,7 @@ Future<void> _run(int seed, int steps) async {
 
   // ── Random operations ───────────────────────────────────────────
   for (var step = 0; step < steps; step++) {
-    final op = rnd.nextInt(11);
+    final op = rnd.nextInt(12);
     String what;
     switch (op) {
       case 0: // income
@@ -348,6 +348,42 @@ Future<void> _run(int seed, int steps) async {
         apply(e);
         txs[id] = _Tx('expense', e);
         what = 'edit $id → ${built.length} line(s)';
+      case 10: // pay cash in one currency, change in another
+        final pay = pick(_accounts.keys.toList());
+        final into = pick(
+            _accounts.keys.where((x) => cur(x) != cur(pay)).toList());
+        final c = pick(_spendCats.keys.toList());
+        final paid = amountIn(cur(pay));
+        final rate = _toBase[cur(pay)]! / _toBase[cur(into)]!;
+        // Some of it back as change (sometimes none).
+        final change = rnd.nextInt(4) == 0
+            ? 0.0
+            : round(paid * rate * (rnd.nextInt(90) + 5) / 100, cur(into));
+        final spent = round(paid - change / rate, cur(pay));
+        if (spent <= 0) continue;
+        final r = await engine.recordPaymentWithChange(
+          householdId: hh,
+          payAccountId: pay,
+          paid: paid,
+          changeAccountId: into,
+          change: change,
+          rate: rate,
+          baseCurrency: _base,
+          categoryId: c,
+        );
+        expect(r.spent, closeTo(spent, 1e-9), reason: 'seed $seed: spent');
+        final e = expenseEffect([(pay, c, spent)]);
+        apply(e);
+        txs[r.expenseId] = _Tx('expense', e);
+        if (r.exchangeId != null) {
+          final x = _Effect()
+            ..acct(pay, -round(paid - spent, cur(pay)))
+            ..acct(into, change);
+          apply(x);
+          txs[r.exchangeId!] = _Tx('transfer', x);
+        }
+        what = 'pay $paid ${cur(pay)} from $pay, change $change ${cur(into)} '
+            '→ $into for $c';
       default: // move an expense to another account, maybe another currency
         final ids = txs.entries
             .where((e) => e.value.type == 'expense')
