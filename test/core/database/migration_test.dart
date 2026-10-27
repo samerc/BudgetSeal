@@ -7,6 +7,17 @@ import 'package:path/path.dart' as p;
 import 'package:budgetseal/core/database/app_database.dart';
 import 'package:budgetseal/core/engine/balance_calculator.dart';
 
+/// An old database had none of today's triggers, and SQLite won't drop a
+/// column a trigger names: remove them before rewinding a schema.
+Future<void> dropTriggers(AppDatabase db) async {
+  final names = await db
+      .customSelect("SELECT name FROM sqlite_master WHERE type = 'trigger'")
+      .get();
+  for (final r in names) {
+    await db.customStatement('DROP TRIGGER IF EXISTS ${r.read<String>('name')}');
+  }
+}
+
 void main() {
   // Regression: a database that already has the v18 soft-delete columns but is
   // still marked as v17 (a partially-applied upgrade, or a fresh install created
@@ -21,6 +32,7 @@ void main() {
       // 1. Create a full current-schema DB (all v18 columns present), then
       //    rewind its recorded version to 17 — the exact "stuck" state.
       var db = AppDatabase.forTesting(NativeDatabase(file));
+      await dropTriggers(db);
       await db.customStatement('PRAGMA user_version = 17');
       await db.close();
 
@@ -46,6 +58,7 @@ void main() {
     final file = File(p.join(dir.path, 'v17.db'));
     try {
       var db = AppDatabase.forTesting(NativeDatabase(file));
+      await dropTriggers(db);
       // A real v17 database has no sync triggers (they're created on open,
       // after migrating), and they'd block dropping last_modified below.
       for (final t in AppDatabase.syncedTables) {
@@ -85,6 +98,7 @@ void main() {
     final file = File(p.join(dir.path, 'v18.db'));
     try {
       var db = AppDatabase.forTesting(NativeDatabase(file));
+      await dropTriggers(db);
       await db.customStatement(
           'ALTER TABLE recurring_transactions DROP COLUMN anchor_day');
       await db.customStatement('PRAGMA user_version = 18');
@@ -110,6 +124,7 @@ void main() {
     final file = File(p.join(dir.path, 'v19.db'));
     try {
       var db = AppDatabase.forTesting(NativeDatabase(file));
+      await dropTriggers(db);
       await db.customStatement('ALTER TABLE allocations DROP COLUMN sort_order');
       await db.customStatement('PRAGMA user_version = 19');
       await db.close();
@@ -133,6 +148,7 @@ void main() {
     final file = File(p.join(dir.path, 'v20.db'));
     try {
       var db = AppDatabase.forTesting(NativeDatabase(file));
+      await dropTriggers(db);
       await db.customStatement('ALTER TABLE allocations DROP COLUMN behind_mode');
       await db.customStatement('PRAGMA user_version = 20');
       await db.close();
@@ -156,6 +172,7 @@ void main() {
     final file = File(p.join(dir.path, 'v21.db'));
     try {
       var db = AppDatabase.forTesting(NativeDatabase(file));
+      await dropTriggers(db);
       await db.customStatement(
           'ALTER TABLE recurring_transactions DROP COLUMN ask_first');
       await db.customStatement(
@@ -187,6 +204,7 @@ void main() {
     final file = File(p.join(dir.path, 'v22.db'));
     try {
       var db = AppDatabase.forTesting(NativeDatabase(file));
+      await dropTriggers(db);
       await db.customStatement(
           'ALTER TABLE transactions DROP COLUMN destination_amount');
       for (final s in const [
@@ -259,6 +277,7 @@ void main() {
     final file = File(p.join(dir.path, 'v1.db'));
     try {
       var db = AppDatabase.forTesting(NativeDatabase(file));
+      await dropTriggers(db);
       await db.customStatement('PRAGMA user_version = 1');
       await db.close();
 

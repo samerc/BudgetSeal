@@ -264,6 +264,8 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
         batch.deleteAll(db.fxRates);
         batch.deleteAll(db.users);
         batch.deleteAll(db.households);
+        // The change log holds a copy of every row: erase it too.
+        batch.customStatement('DELETE FROM sync_ops');
       });
 
       // Clear preferences

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../sync/op_log.dart';
 import 'normalize_transactions.dart';
 import 'daos/accounts_dao.dart';
 import 'daos/allocations_dao.dart';
@@ -212,6 +213,8 @@ class AppDatabase extends _$AppDatabase {
           }
         },
         beforeOpen: (_) async {
+          // First, so every change after it is logged.
+          await ensureOpLog(this);
           await _ensureIndexes();
           await _ensureSyncTriggers();
           // Rows from before v23, or restored from an old .db backup.
@@ -232,12 +235,6 @@ class AppDatabase extends _$AppDatabase {
     'objectives',
   ];
 
-  /// An update that doesn't set `last_modified` itself (a forgotten
-  /// `lastModified:` in a companion, raw SQL) never reached other devices:
-  /// the merge keeps the row with the newer stamp. These triggers stamp such
-  /// updates with the current time. An update that sets a new stamp (every
-  /// sync merge, explicit writes) is left alone. Idempotent; created on every
-  /// open, so no schema version is needed. Dates are stored as Unix seconds.
   /// Indexes for the hot queries. Created on every open (IF NOT EXISTS):
   /// `createAll()` makes none, so until Oct 2026 an install made at schema
   /// 16 or later had no indexes at all — every "lines of this transaction"
@@ -262,18 +259,38 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
+  /// An update that doesn't set `last_modified` itself (a forgotten
+  /// `lastModified:` in a companion, raw SQL) never reached other devices:
+  /// the merge keeps the row with the newer stamp. These triggers stamp such
+  /// updates with the current time. An update that sets a new stamp (every
+  /// sync merge, explicit writes) is left alone. Idempotent; created on every
+  /// open, so no schema version is needed. Dates are stored as Unix seconds.
+  /// Not for an update that changes nothing (the same values written
+  /// again), and not while the operation log is being applied
+  /// (`sync_clock.applying`): those rows must keep the stamps they came with.
   Future<void> _ensureSyncTriggers() async {
     for (final t in syncedTables) {
+      final cols = [
+        for (final c in allTables
+            .firstWhere((x) => x.actualTableName == t)
+            .$columns)
+          if (c.$name != 'last_modified') c.$name,
+      ];
+      // Recreated on every open: the columns follow the current schema.
+      await customStatement('DROP TRIGGER IF EXISTS bump_last_modified_$t');
       await customStatement('''
-        CREATE TRIGGER IF NOT EXISTS bump_last_modified_$t
+        CREATE TRIGGER bump_last_modified_$t
         AFTER UPDATE ON $t
         FOR EACH ROW WHEN NEW.last_modified IS OLD.last_modified
+          AND (SELECT applying FROM sync_clock WHERE id = 1) = 0
+          AND (${cols.map((c) => 'NEW.$c IS NOT OLD.$c').join(' OR ')})
         BEGIN
           UPDATE $t SET last_modified = CAST(strftime('%s', 'now') AS INTEGER)
           WHERE id = NEW.id;
         END''');
     }
   }
+
 
   /// Adds [column] to [table] only if the SQLite table does not already have
   /// it. Prevents "duplicate column name" when a migration re-runs or the

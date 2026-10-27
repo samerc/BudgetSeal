@@ -128,6 +128,19 @@ All filters (date range, type, category, amount, search) applied in a single `.w
 - Old backups auto-deleted beyond retention limit
 - Backup history visible on the Backup & Restore screen with per-file restore/delete
 
+## Operation log (sync step 1, Oct 27 2026)
+
+Roadmap #1 replaces row-merge sync with an exchange of change logs (decisions: everyone switches at once — no old-file dual write; local-file sync will pick a folder; the same field edited on two phones → the later edit wins and Change history shows both; undo stays local). **Step 1 (done): the log is recorded locally; sync is unchanged.** `core/sync/op_log.dart`:
+
+- `ensureOpLog()` runs first in `beforeOpen`: tables `sync_ops` (n, hlc, device, seq, tbl, row_id, kind, data, old) and one-row `sync_clock` (device, ms, counter, seq, applying), then AFTER INSERT/UPDATE/DELETE triggers `oplog_<kind>_<table>` on the 12 `opLogTables` (every shared table, incl. lines, ledger and fx rates) — recreated on every open so they follow the schema. Raw SQL tables, not Drift ones, and no schema version.
+- Insert → `data` = the whole row; update → `data`/`old` = only the changed columns (no entry when nothing changed); delete → `old` = the row. Values are raw column values (dates in Unix seconds, booleans 0/1).
+- Stamp `hlc` = `printf('%013d-%08d-%s', ms, counter, device)`: wall-clock ms that never goes back (counter within a ms), sorts the same on every phone; `seq` counts this device's entries. The device is `DeviceIdentity.id`.
+- An empty log with data (first open after updating) logs every existing row once, stamp `0000000000000-00000000-<device>`, negative seq — older than any real change.
+- `replayOps()` applies entries in stamp order with `applying = 1` (no new entries, no `last_modified` bump): insert = INSERT OR REPLACE, update = set the changed fields, delete. Replaying the whole log into an empty database rebuilds it exactly (`test/core/sync/op_log_test.dart`; the 3-year scale test: 36,600 entries, 10.9 MB of JSON, replay 1.4 s on a PC). Writes are ~10–15 % slower.
+- The `bump_last_modified_*` triggers now skip updates that change nothing and the replay.
+- **Never `DROP COLUMN` on a shared table without dropping its triggers first** (SQLite refuses a column a trigger names; `migration_test.dart` drops all triggers before rewinding a schema). Reset everything also deletes `sync_ops` (it holds a copy of every row).
+- Next: step 2 sends each phone's log as its own file (plus snapshots) and applies the others' entries per field (later stamp wins); step 3 conflicts in Change history and shared base-currency change; step 4 snapshots/compaction and removing the row merge.
+
 ## Crash reports (Oct 27 2026)
 
 Opt-in, offline: `CrashReports` (`core/services/crash_reports.dart`). Off by default (pref `crash_reports_enabled`). `main.dart`'s three handlers — `FlutterError.onError` (`flutter`), the `runZonedGuarded` callback (`async`), `PlatformDispatcher.instance.onError` (`platform`) — call `CrashReports.record()`, which does nothing when off. When on it appends to `crash_reports.json` in the app support folder (not synced, not in backups): time, source, error text (≤1,000 chars), stack (≤30 lines), app version (build), OS + version; newest first, at most 50; a repeat of the newest (same error and top frame) bumps its `count` instead. Writes are queued (bursts) and never throw. Settings › Data › Crash reports (`/crash-reports`, `settings/crash_reports_screen.dart`): the switch (turning off deletes the file), the reports (tap to expand, selectable, LTR), Share (system share sheet, plain text via `shareText()`) and Clear. The Settings row says Off / On · N saved (`CrashReports.changes`). Only uncaught errors land here — errors the app catches and maps to a message are not reports. Tests: `test/core/services/crash_reports_test.dart`.

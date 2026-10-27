@@ -30,6 +30,7 @@ import 'package:budgetseal/core/providers/household_provider.dart';
 import 'package:budgetseal/core/providers/report_stats_provider.dart';
 import 'package:budgetseal/core/providers/transactions_provider.dart';
 import 'package:budgetseal/core/services/autofill_service.dart';
+import 'package:budgetseal/core/sync/op_log.dart';
 import 'package:budgetseal/core/sync/sync_engine.dart';
 import 'package:budgetseal/features/accounts/account_detail_screen.dart';
 import 'package:budgetseal/features/accounts/accounts_screen.dart';
@@ -401,6 +402,27 @@ void main() {
     final running = await timed('40,000 transactions: web account history',
         () => accountRunning(big, account), limitMs: 20000);
     expect(running, hasLength(n));
+  });
+
+  test('the operation log rebuilds the whole budget', () async {
+    final ops = await timed('op log: read', () => loadOps(db),
+        note: (o) => '${o.length} entries');
+    final size = (await db
+            .customSelect('SELECT SUM(LENGTH(data)) + SUM(IFNULL(LENGTH(old), 0)) '
+                'AS b FROM sync_ops')
+            .getSingle())
+        .read<int>('b');
+    timings.add(('op log: size', 0, '${(size / 1024 / 1024).toStringAsFixed(1)} MB of JSON'));
+    final copy = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(copy.close);
+    await timed('op log: replay into an empty app', () => replayOps(copy, ops),
+        limitMs: 60000);
+    for (final t in opLogTables) {
+      final q = 'SELECT * FROM $t ORDER BY id';
+      expect([for (final r in await copy.customSelect(q).get()) r.data],
+          [for (final r in await db.customSelect(q).get()) r.data],
+          reason: t);
+    }
   });
 
   test('saving one more expense refreshes the history', () async {
