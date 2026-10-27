@@ -57,6 +57,9 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
   final String? editFromAccountId;
   final String? editDestAccountId;
 
+  /// Receipt filenames already attached (a shared photo).
+  final List<String>? initialReceipts;
+
   const AddTransactionScreen({
     super.key,
     this.editTransactionId,
@@ -66,6 +69,7 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
     this.editLines,
     this.editFromAccountId,
     this.editDestAccountId,
+    this.initialReceipts,
   });
 
   @override
@@ -275,6 +279,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
     if (_lines.isEmpty) _addLine();
     if (widget.editTransactionId != null) _loadEditReceipts();
+    if (widget.initialReceipts case final r? when r.isNotEmpty) {
+      _receiptFilenames = [...r];
+      _resolveReceiptPaths();
+    }
   }
 
   /// An edit re-saves the transaction under a new id — carry its receipts

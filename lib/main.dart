@@ -19,6 +19,7 @@ import 'core/providers/premium_provider.dart';
 import 'core/services/daily_reminder_service.dart';
 import 'core/services/app_shortcuts_service.dart';
 import 'core/services/crash_reports.dart';
+import 'core/capture/share_intake.dart';
 import 'core/services/home_widget_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/household_members.dart';
@@ -115,6 +116,8 @@ Future<void> _startApp() async {
   await AppShortcutsService.init();
   // Home-screen widget taps (Android).
   await HomeWidgetService.init();
+  // Shared into BudgetSeal from another app (Android).
+  await ShareIntake.init();
 
   final container = ProviderContainer();
   await container.read(householdServiceProvider).loadSavedHousehold();

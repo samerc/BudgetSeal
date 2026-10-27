@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'core/capture/share_intake.dart';
 import 'core/providers/accent_color_provider.dart';
 import 'core/providers/arabic_digits_provider.dart';
 import 'core/providers/locale_provider.dart';
@@ -111,6 +112,9 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
     NotificationService.openRoute.addListener(_openNotificationRoute);
     // Launched by a notification tap (set before the app was built).
     _openNotificationRoute();
+    // Shared from another app (Android): the add form, filled in from it.
+    ShareIntake.incoming.addListener(_openShare);
+    _openShare();
     _router = GoRouter(
       redirect: (context, state) {
         final householdId = ref.read(currentHouseholdIdProvider);
@@ -430,6 +434,7 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     NotificationService.openRoute.removeListener(_openNotificationRoute);
+    ShareIntake.incoming.removeListener(_openShare);
     _router.dispose();
     super.dispose();
   }
@@ -526,6 +531,36 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
       if (ref.read(currentHouseholdIdProvider) == null) return;
       _router.push(route);
     });
+  }
+
+  /// A bank message, receipt photo or screenshot shared into the app opens
+  /// the add form, filled in from it (roadmap #2).
+  void _openShare() {
+    final item = ShareIntake.incoming.value;
+    if (item == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (ShareIntake.incoming.value != item) return;
+      ShareIntake.incoming.value = null;
+      final householdId = ref.read(currentHouseholdIdProvider);
+      if (householdId == null) return;
+      try {
+        final db = ref.read(databaseProvider);
+        final household = await (db.select(db.households)
+              ..where((h) => h.id.equals(householdId)))
+            .getSingleOrNull();
+        final extra = await shareFormArgs(item,
+            db: db,
+            householdId: householdId,
+            baseCurrency: household?.baseCurrency ?? 'USD');
+        if (extra != null && mounted) {
+          _router.push('/add-transaction', extra: extra);
+        }
+      } catch (e) {
+        debugPrint('[Share] Opening the form failed: $e');
+      }
+    });
+    // A share reaching the app on screen comes with no new frame.
+    WidgetsBinding.instance.scheduleFrame();
   }
 
   Future<void> _processDueWork() async {
@@ -798,6 +833,7 @@ class _EntryModeRouterState extends ConsumerState<_EntryModeRouter> {
       editLines: extra?['editLines'] as List<Map<String, dynamic>>?,
       editFromAccountId: extra?['editFromAccountId'] as String?,
       editDestAccountId: extra?['editDestAccountId'] as String?,
+      initialReceipts: extra?['editReceipts'] as List<String>?,
     );
   }
 }

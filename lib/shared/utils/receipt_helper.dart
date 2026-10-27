@@ -171,3 +171,7 @@ Future<String?> _savePickedFile(XFile picked) async {
 
   return fileName; // Return filename only, not the full path
 }
+
+/// Keeps the image at [path] (a shared photo) as a receipt. Returns its
+/// filename, or null when it isn't an image.
+Future<String?> saveReceiptFromPath(String path) => _savePickedFile(XFile(path));

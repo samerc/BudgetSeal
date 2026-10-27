@@ -60,6 +60,9 @@ class QuickAddScreen extends ConsumerStatefulWidget {
   final List<Map<String, dynamic>>? editLines;
   final String? editFromAccountId;
   final String? editDestAccountId;
+
+  /// Receipt filenames already attached (a shared photo).
+  final List<String>? initialReceipts;
   const QuickAddScreen({
     super.key,
     this.initialType,
@@ -69,6 +72,7 @@ class QuickAddScreen extends ConsumerStatefulWidget {
     this.editLines,
     this.editFromAccountId,
     this.editDestAccountId,
+    this.initialReceipts,
   });
 
   /// Built from the `/add-transaction` route extra.
@@ -81,6 +85,7 @@ class QuickAddScreen extends ConsumerStatefulWidget {
         editLines: extra?['editLines'] as List<Map<String, dynamic>>?,
         editFromAccountId: extra?['editFromAccountId'] as String?,
         editDestAccountId: extra?['editDestAccountId'] as String?,
+        initialReceipts: extra?['editReceipts'] as List<String>?,
       );
 
   /// One account and one currency per transaction here; lines spread over
@@ -138,7 +143,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
   late DateTime _date;
   TimeOfDay _time = TimeOfDay.now();
   String _note = '';
-  List<String> _receipts = [];
+  late List<String> _receipts = [...?widget.initialReceipts];
 
   /// Expense/income in a foreign account: account-currency units per 1 base.
   /// Transfer across currencies: destination units per 1 source unit.
@@ -2210,12 +2215,16 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
                   ],
                 ]),
                 const SizedBox(height: 2),
+                // Shrinks to fit rather than cut ("Receipt" with five
+                // buttons on a 360 dp phone, longer words in French).
                 Flexible(
-                  child: Text(label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.w700)),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(label,
+                        maxLines: 1,
+                        style: const TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w700)),
+                  ),
                 ),
               ],
             ),
