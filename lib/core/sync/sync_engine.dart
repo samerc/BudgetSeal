@@ -240,6 +240,8 @@ class SyncEngine {
         'rollover': a.rollover,
         'targetAmount': a.targetAmount,
         'targetCurrency': a.targetCurrency,
+        'secondTargetAmount': a.secondTargetAmount,
+        'secondTargetCurrency': a.secondTargetCurrency,
         'icon': a.icon,
         'autoReset': a.autoReset,
         'archived': a.archived,
@@ -421,6 +423,9 @@ class SyncEngine {
         rollover: Value(m['rollover'] as bool? ?? false),
         targetAmount: Value((m['targetAmount'] as num?)?.toDouble()),
         targetCurrency: Value(m['targetCurrency'] as String?),
+        secondTargetAmount:
+            Value((m['secondTargetAmount'] as num?)?.toDouble()),
+        secondTargetCurrency: Value(m['secondTargetCurrency'] as String?),
         icon: Value(m['icon'] as String?),
         autoReset: Value(m['autoReset'] as bool? ?? true),
         archived: Value(m['archived'] as bool? ?? false),

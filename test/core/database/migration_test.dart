@@ -41,7 +41,7 @@ void main() {
       db = AppDatabase.forTesting(NativeDatabase(file));
       await db.select(db.accounts).get(); // forces open + migration
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 25);
+      expect(row.data['user_version'], 26);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -86,7 +86,7 @@ void main() {
       await db.select(db.recurringTransactions).get(); // forces migration
       await db.select(db.transactionTemplates).get();
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 25);
+      expect(row.data['user_version'], 26);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -111,7 +111,7 @@ void main() {
           .get();
       expect(cols.any((c) => c.data['name'] == 'anchor_day'), isTrue);
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 25);
+      expect(row.data['user_version'], 26);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -135,7 +135,7 @@ void main() {
           await db.customSelect('PRAGMA table_info(allocations)').get();
       expect(cols.any((c) => c.data['name'] == 'sort_order'), isTrue);
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 25);
+      expect(row.data['user_version'], 26);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -159,7 +159,7 @@ void main() {
           await db.customSelect('PRAGMA table_info(allocations)').get();
       expect(cols.any((c) => c.data['name'] == 'behind_mode'), isTrue);
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 25);
+      expect(row.data['user_version'], 26);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -188,7 +188,31 @@ void main() {
       expect(cols.any((c) => c.data['name'] == 'ask_first'), isTrue);
       expect(cols.any((c) => c.data['name'] == 'remind_days'), isTrue);
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 25);
+      expect(row.data['user_version'], 26);
+      await db.close();
+    } finally {
+      dir.deleteSync(recursive: true);
+    }
+  });
+
+  // v26: allocations' second target.
+  test('v26 migration adds the second target columns', () async {
+    final dir = Directory.systemTemp.createTempSync('bs_mig_test11');
+    final file = File(p.join(dir.path, 'v25.db'));
+    try {
+      var db = AppDatabase.forTesting(NativeDatabase(file));
+      await dropTriggers(db);
+      for (final c in ['second_target_amount', 'second_target_currency']) {
+        await db.customStatement('ALTER TABLE allocations DROP COLUMN $c');
+      }
+      await db.customStatement('PRAGMA user_version = 25');
+      await db.close();
+
+      db = AppDatabase.forTesting(NativeDatabase(file));
+      expect(await db.select(db.allocations).get(), isEmpty);
+      final cols = await db.customSelect('PRAGMA table_info(allocations)').get();
+      expect(cols.map((c) => c.data['name']),
+          containsAll(['second_target_amount', 'second_target_currency']));
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -232,7 +256,7 @@ void main() {
       final cols = await db.customSelect('PRAGMA table_info(transactions)').get();
       expect(cols.map((c) => c.data['name']), contains('revision'));
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 25);
+      expect(row.data['user_version'], 26);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -295,7 +319,7 @@ void main() {
       expect(balances['usd'], -100);
       expect(balances['lbp'], 8950000 + 450000);
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 25);
+      expect(row.data['user_version'], 26);
       await db.close();
 
       // Opening again changes nothing.
@@ -328,7 +352,7 @@ void main() {
       db = AppDatabase.forTesting(NativeDatabase(file));
       await db.select(db.transactionLines).get(); // forces the full 1->18 run
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 25);
+      expect(row.data['user_version'], 26);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -360,9 +384,9 @@ void main() {
       await db.select(db.transactionTemplates).get();
     });
 
-    test('schema version is 25', () {
+    test('schema version is 26', () {
       db = AppDatabase.forTesting(NativeDatabase.memory());
-      expect(db.schemaVersion, 25);
+      expect(db.schemaVersion, 26);
     });
 
     test('tables return empty results on fresh database', () async {

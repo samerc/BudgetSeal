@@ -1750,6 +1750,18 @@ class $AllocationsTable extends Allocations
   late final GeneratedColumn<String> targetCurrency = GeneratedColumn<String>(
       'target_currency', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _secondTargetAmountMeta =
+      const VerificationMeta('secondTargetAmount');
+  @override
+  late final GeneratedColumn<double> secondTargetAmount =
+      GeneratedColumn<double>('second_target_amount', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _secondTargetCurrencyMeta =
+      const VerificationMeta('secondTargetCurrency');
+  @override
+  late final GeneratedColumn<String> secondTargetCurrency =
+      GeneratedColumn<String>('second_target_currency', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _iconMeta = const VerificationMeta('icon');
   @override
   late final GeneratedColumn<String> icon = GeneratedColumn<String>(
@@ -1830,6 +1842,8 @@ class $AllocationsTable extends Allocations
         rollover,
         targetAmount,
         targetCurrency,
+        secondTargetAmount,
+        secondTargetCurrency,
         icon,
         autoReset,
         archived,
@@ -1903,6 +1917,18 @@ class $AllocationsTable extends Allocations
           targetCurrency.isAcceptableOrUnknown(
               data['target_currency']!, _targetCurrencyMeta));
     }
+    if (data.containsKey('second_target_amount')) {
+      context.handle(
+          _secondTargetAmountMeta,
+          secondTargetAmount.isAcceptableOrUnknown(
+              data['second_target_amount']!, _secondTargetAmountMeta));
+    }
+    if (data.containsKey('second_target_currency')) {
+      context.handle(
+          _secondTargetCurrencyMeta,
+          secondTargetCurrency.isAcceptableOrUnknown(
+              data['second_target_currency']!, _secondTargetCurrencyMeta));
+    }
     if (data.containsKey('icon')) {
       context.handle(
           _iconMeta, icon.isAcceptableOrUnknown(data['icon']!, _iconMeta));
@@ -1972,6 +1998,11 @@ class $AllocationsTable extends Allocations
           .read(DriftSqlType.double, data['${effectivePrefix}target_amount']),
       targetCurrency: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}target_currency']),
+      secondTargetAmount: attachedDatabase.typeMapping.read(
+          DriftSqlType.double, data['${effectivePrefix}second_target_amount']),
+      secondTargetCurrency: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}second_target_currency']),
       icon: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}icon']),
       autoReset: attachedDatabase.typeMapping
@@ -2010,6 +2041,12 @@ class Allocation extends DataClass implements Insertable<Allocation> {
   final double? targetAmount;
   final String? targetCurrency;
 
+  /// Optional second target in another currency (v26, roadmap #3: e.g.
+  /// Groceries $100 + LBP 2,000,000). Funded, spent and shown on its own —
+  /// never added to the first.
+  final double? secondTargetAmount;
+  final String? secondTargetCurrency;
+
   /// Emoji icon for this envelope (e.g. '⛽', '🛒'). Null = use linked category icon.
   final String? icon;
 
@@ -2042,6 +2079,8 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       required this.rollover,
       this.targetAmount,
       this.targetCurrency,
+      this.secondTargetAmount,
+      this.secondTargetCurrency,
       this.icon,
       required this.autoReset,
       required this.archived,
@@ -2066,6 +2105,12 @@ class Allocation extends DataClass implements Insertable<Allocation> {
     }
     if (!nullToAbsent || targetCurrency != null) {
       map['target_currency'] = Variable<String>(targetCurrency);
+    }
+    if (!nullToAbsent || secondTargetAmount != null) {
+      map['second_target_amount'] = Variable<double>(secondTargetAmount);
+    }
+    if (!nullToAbsent || secondTargetCurrency != null) {
+      map['second_target_currency'] = Variable<String>(secondTargetCurrency);
     }
     if (!nullToAbsent || icon != null) {
       map['icon'] = Variable<String>(icon);
@@ -2100,6 +2145,12 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       targetCurrency: targetCurrency == null && nullToAbsent
           ? const Value.absent()
           : Value(targetCurrency),
+      secondTargetAmount: secondTargetAmount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(secondTargetAmount),
+      secondTargetCurrency: secondTargetCurrency == null && nullToAbsent
+          ? const Value.absent()
+          : Value(secondTargetCurrency),
       icon: icon == null && nullToAbsent ? const Value.absent() : Value(icon),
       autoReset: Value(autoReset),
       archived: Value(archived),
@@ -2129,6 +2180,10 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       rollover: serializer.fromJson<bool>(json['rollover']),
       targetAmount: serializer.fromJson<double?>(json['targetAmount']),
       targetCurrency: serializer.fromJson<String?>(json['targetCurrency']),
+      secondTargetAmount:
+          serializer.fromJson<double?>(json['secondTargetAmount']),
+      secondTargetCurrency:
+          serializer.fromJson<String?>(json['secondTargetCurrency']),
       icon: serializer.fromJson<String?>(json['icon']),
       autoReset: serializer.fromJson<bool>(json['autoReset']),
       archived: serializer.fromJson<bool>(json['archived']),
@@ -2153,6 +2208,8 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       'rollover': serializer.toJson<bool>(rollover),
       'targetAmount': serializer.toJson<double?>(targetAmount),
       'targetCurrency': serializer.toJson<String?>(targetCurrency),
+      'secondTargetAmount': serializer.toJson<double?>(secondTargetAmount),
+      'secondTargetCurrency': serializer.toJson<String?>(secondTargetCurrency),
       'icon': serializer.toJson<String?>(icon),
       'autoReset': serializer.toJson<bool>(autoReset),
       'archived': serializer.toJson<bool>(archived),
@@ -2175,6 +2232,8 @@ class Allocation extends DataClass implements Insertable<Allocation> {
           bool? rollover,
           Value<double?> targetAmount = const Value.absent(),
           Value<String?> targetCurrency = const Value.absent(),
+          Value<double?> secondTargetAmount = const Value.absent(),
+          Value<String?> secondTargetCurrency = const Value.absent(),
           Value<String?> icon = const Value.absent(),
           bool? autoReset,
           bool? archived,
@@ -2196,6 +2255,12 @@ class Allocation extends DataClass implements Insertable<Allocation> {
             targetAmount.present ? targetAmount.value : this.targetAmount,
         targetCurrency:
             targetCurrency.present ? targetCurrency.value : this.targetCurrency,
+        secondTargetAmount: secondTargetAmount.present
+            ? secondTargetAmount.value
+            : this.secondTargetAmount,
+        secondTargetCurrency: secondTargetCurrency.present
+            ? secondTargetCurrency.value
+            : this.secondTargetCurrency,
         icon: icon.present ? icon.value : this.icon,
         autoReset: autoReset ?? this.autoReset,
         archived: archived ?? this.archived,
@@ -2224,6 +2289,12 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       targetCurrency: data.targetCurrency.present
           ? data.targetCurrency.value
           : this.targetCurrency,
+      secondTargetAmount: data.secondTargetAmount.present
+          ? data.secondTargetAmount.value
+          : this.secondTargetAmount,
+      secondTargetCurrency: data.secondTargetCurrency.present
+          ? data.secondTargetCurrency.value
+          : this.secondTargetCurrency,
       icon: data.icon.present ? data.icon.value : this.icon,
       autoReset: data.autoReset.present ? data.autoReset.value : this.autoReset,
       archived: data.archived.present ? data.archived.value : this.archived,
@@ -2251,6 +2322,8 @@ class Allocation extends DataClass implements Insertable<Allocation> {
           ..write('rollover: $rollover, ')
           ..write('targetAmount: $targetAmount, ')
           ..write('targetCurrency: $targetCurrency, ')
+          ..write('secondTargetAmount: $secondTargetAmount, ')
+          ..write('secondTargetCurrency: $secondTargetCurrency, ')
           ..write('icon: $icon, ')
           ..write('autoReset: $autoReset, ')
           ..write('archived: $archived, ')
@@ -2275,6 +2348,8 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       rollover,
       targetAmount,
       targetCurrency,
+      secondTargetAmount,
+      secondTargetCurrency,
       icon,
       autoReset,
       archived,
@@ -2297,6 +2372,8 @@ class Allocation extends DataClass implements Insertable<Allocation> {
           other.rollover == this.rollover &&
           other.targetAmount == this.targetAmount &&
           other.targetCurrency == this.targetCurrency &&
+          other.secondTargetAmount == this.secondTargetAmount &&
+          other.secondTargetCurrency == this.secondTargetCurrency &&
           other.icon == this.icon &&
           other.autoReset == this.autoReset &&
           other.archived == this.archived &&
@@ -2318,6 +2395,8 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
   final Value<bool> rollover;
   final Value<double?> targetAmount;
   final Value<String?> targetCurrency;
+  final Value<double?> secondTargetAmount;
+  final Value<String?> secondTargetCurrency;
   final Value<String?> icon;
   final Value<bool> autoReset;
   final Value<bool> archived;
@@ -2338,6 +2417,8 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
     this.rollover = const Value.absent(),
     this.targetAmount = const Value.absent(),
     this.targetCurrency = const Value.absent(),
+    this.secondTargetAmount = const Value.absent(),
+    this.secondTargetCurrency = const Value.absent(),
     this.icon = const Value.absent(),
     this.autoReset = const Value.absent(),
     this.archived = const Value.absent(),
@@ -2359,6 +2440,8 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
     this.rollover = const Value.absent(),
     this.targetAmount = const Value.absent(),
     this.targetCurrency = const Value.absent(),
+    this.secondTargetAmount = const Value.absent(),
+    this.secondTargetCurrency = const Value.absent(),
     this.icon = const Value.absent(),
     this.autoReset = const Value.absent(),
     this.archived = const Value.absent(),
@@ -2384,6 +2467,8 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
     Expression<bool>? rollover,
     Expression<double>? targetAmount,
     Expression<String>? targetCurrency,
+    Expression<double>? secondTargetAmount,
+    Expression<String>? secondTargetCurrency,
     Expression<String>? icon,
     Expression<bool>? autoReset,
     Expression<bool>? archived,
@@ -2405,6 +2490,10 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
       if (rollover != null) 'rollover': rollover,
       if (targetAmount != null) 'target_amount': targetAmount,
       if (targetCurrency != null) 'target_currency': targetCurrency,
+      if (secondTargetAmount != null)
+        'second_target_amount': secondTargetAmount,
+      if (secondTargetCurrency != null)
+        'second_target_currency': secondTargetCurrency,
       if (icon != null) 'icon': icon,
       if (autoReset != null) 'auto_reset': autoReset,
       if (archived != null) 'archived': archived,
@@ -2428,6 +2517,8 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
       Value<bool>? rollover,
       Value<double?>? targetAmount,
       Value<String?>? targetCurrency,
+      Value<double?>? secondTargetAmount,
+      Value<String?>? secondTargetCurrency,
       Value<String?>? icon,
       Value<bool>? autoReset,
       Value<bool>? archived,
@@ -2448,6 +2539,8 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
       rollover: rollover ?? this.rollover,
       targetAmount: targetAmount ?? this.targetAmount,
       targetCurrency: targetCurrency ?? this.targetCurrency,
+      secondTargetAmount: secondTargetAmount ?? this.secondTargetAmount,
+      secondTargetCurrency: secondTargetCurrency ?? this.secondTargetCurrency,
       icon: icon ?? this.icon,
       autoReset: autoReset ?? this.autoReset,
       archived: archived ?? this.archived,
@@ -2490,6 +2583,13 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
     }
     if (targetCurrency.present) {
       map['target_currency'] = Variable<String>(targetCurrency.value);
+    }
+    if (secondTargetAmount.present) {
+      map['second_target_amount'] = Variable<double>(secondTargetAmount.value);
+    }
+    if (secondTargetCurrency.present) {
+      map['second_target_currency'] =
+          Variable<String>(secondTargetCurrency.value);
     }
     if (icon.present) {
       map['icon'] = Variable<String>(icon.value);
@@ -2536,6 +2636,8 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
           ..write('rollover: $rollover, ')
           ..write('targetAmount: $targetAmount, ')
           ..write('targetCurrency: $targetCurrency, ')
+          ..write('secondTargetAmount: $secondTargetAmount, ')
+          ..write('secondTargetCurrency: $secondTargetCurrency, ')
           ..write('icon: $icon, ')
           ..write('autoReset: $autoReset, ')
           ..write('archived: $archived, ')
@@ -10721,6 +10823,8 @@ typedef $$AllocationsTableCreateCompanionBuilder = AllocationsCompanion
   Value<bool> rollover,
   Value<double?> targetAmount,
   Value<String?> targetCurrency,
+  Value<double?> secondTargetAmount,
+  Value<String?> secondTargetCurrency,
   Value<String?> icon,
   Value<bool> autoReset,
   Value<bool> archived,
@@ -10743,6 +10847,8 @@ typedef $$AllocationsTableUpdateCompanionBuilder = AllocationsCompanion
   Value<bool> rollover,
   Value<double?> targetAmount,
   Value<String?> targetCurrency,
+  Value<double?> secondTargetAmount,
+  Value<String?> secondTargetCurrency,
   Value<String?> icon,
   Value<bool> autoReset,
   Value<bool> archived,
@@ -10837,6 +10943,14 @@ class $$AllocationsTableFilterComposer
 
   ColumnFilters<String> get targetCurrency => $composableBuilder(
       column: $table.targetCurrency,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get secondTargetAmount => $composableBuilder(
+      column: $table.secondTargetAmount,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get secondTargetCurrency => $composableBuilder(
+      column: $table.secondTargetCurrency,
       builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get icon => $composableBuilder(
@@ -10964,6 +11078,14 @@ class $$AllocationsTableOrderingComposer
       column: $table.targetCurrency,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<double> get secondTargetAmount => $composableBuilder(
+      column: $table.secondTargetAmount,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get secondTargetCurrency => $composableBuilder(
+      column: $table.secondTargetCurrency,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get icon => $composableBuilder(
       column: $table.icon, builder: (column) => ColumnOrderings(column));
 
@@ -11045,6 +11167,12 @@ class $$AllocationsTableAnnotationComposer
 
   GeneratedColumn<String> get targetCurrency => $composableBuilder(
       column: $table.targetCurrency, builder: (column) => column);
+
+  GeneratedColumn<double> get secondTargetAmount => $composableBuilder(
+      column: $table.secondTargetAmount, builder: (column) => column);
+
+  GeneratedColumn<String> get secondTargetCurrency => $composableBuilder(
+      column: $table.secondTargetCurrency, builder: (column) => column);
 
   GeneratedColumn<String> get icon =>
       $composableBuilder(column: $table.icon, builder: (column) => column);
@@ -11171,6 +11299,8 @@ class $$AllocationsTableTableManager extends RootTableManager<
             Value<bool> rollover = const Value.absent(),
             Value<double?> targetAmount = const Value.absent(),
             Value<String?> targetCurrency = const Value.absent(),
+            Value<double?> secondTargetAmount = const Value.absent(),
+            Value<String?> secondTargetCurrency = const Value.absent(),
             Value<String?> icon = const Value.absent(),
             Value<bool> autoReset = const Value.absent(),
             Value<bool> archived = const Value.absent(),
@@ -11192,6 +11322,8 @@ class $$AllocationsTableTableManager extends RootTableManager<
             rollover: rollover,
             targetAmount: targetAmount,
             targetCurrency: targetCurrency,
+            secondTargetAmount: secondTargetAmount,
+            secondTargetCurrency: secondTargetCurrency,
             icon: icon,
             autoReset: autoReset,
             archived: archived,
@@ -11213,6 +11345,8 @@ class $$AllocationsTableTableManager extends RootTableManager<
             Value<bool> rollover = const Value.absent(),
             Value<double?> targetAmount = const Value.absent(),
             Value<String?> targetCurrency = const Value.absent(),
+            Value<double?> secondTargetAmount = const Value.absent(),
+            Value<String?> secondTargetCurrency = const Value.absent(),
             Value<String?> icon = const Value.absent(),
             Value<bool> autoReset = const Value.absent(),
             Value<bool> archived = const Value.absent(),
@@ -11234,6 +11368,8 @@ class $$AllocationsTableTableManager extends RootTableManager<
             rollover: rollover,
             targetAmount: targetAmount,
             targetCurrency: targetCurrency,
+            secondTargetAmount: secondTargetAmount,
+            secondTargetCurrency: secondTargetCurrency,
             icon: icon,
             autoReset: autoReset,
             archived: archived,

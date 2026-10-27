@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/database/app_database.dart' show Allocation;
 import '../../core/database/daos/ledger_dao.dart';
 import '../../core/engine/period_engine.dart' show budgetPeriodFor;
 import '../../core/engine/spending_average.dart';
@@ -39,6 +40,16 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
   final Map<String, double> _amounts = {};
   /// Sinking funds: one amount per currency (fund → currency → amount).
   final Map<String, Map<String, double>> _fundAmounts = {};
+
+  /// Envelopes with a second target: what goes in, in its currency.
+  final Map<String, double> _amounts2 = {};
+
+  /// The envelope's second target currency, when it has a real one.
+  static String? _cur2(Allocation alloc, String baseCurrency) {
+    final c = alloc.secondTargetCurrency;
+    if ((alloc.secondTargetAmount ?? 0) <= 0 || c == null) return null;
+    return c == (alloc.targetCurrency ?? baseCurrency) ? null : c;
+  }
   bool _isFunding = false;
   bool _instructionsExpanded = false;
 
@@ -100,6 +111,13 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
         } else {
           _amounts.remove(alloc.id);
         }
+        final c2 = _cur2(alloc, baseCurrency);
+        final v2 = c2 == null ? 0.0 : source[alloc.id]?[c2] ?? 0;
+        if (v2 > 0) {
+          _amounts2[alloc.id] = v2;
+        } else {
+          _amounts2.remove(alloc.id);
+        }
       }
     });
   }
@@ -124,6 +142,11 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
       final currency = a.data.allocation.targetCurrency ?? baseCurrency;
       totals[currency] = (totals[currency] ?? 0.0) + amount;
     }
+    for (final a in allocations) {
+      final c2 = _cur2(a.data.allocation, baseCurrency);
+      final v = _amounts2[a.data.allocation.id] ?? 0;
+      if (c2 != null && v > 0) totals[c2] = (totals[c2] ?? 0) + v;
+    }
     return totals;
   }
 
@@ -142,6 +165,11 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
         if (gap > 0) {
           _amounts[alloc.id] = gap;
         }
+        final c2 = _cur2(alloc, baseCurrency);
+        if (c2 != null) {
+          final gap2 = alloc.secondTargetAmount! - (a.balanceByCurrency[c2] ?? 0);
+          if (gap2 > 0) _amounts2[alloc.id] = gap2;
+        }
       }
     }
     final left = Map.of(ref.read(unallocatedProvider).value ?? {});
@@ -152,6 +180,11 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
       if (amount <= 0) continue;
       final c = alloc.targetCurrency ?? baseCurrency;
       left[c] = (left[c] ?? 0) - amount;
+    }
+    for (final a in allocations) {
+      final c2 = _cur2(a.data.allocation, baseCurrency);
+      final v = _amounts2[a.data.allocation.id] ?? 0;
+      if (c2 != null && v > 0) left[c2] = (left[c2] ?? 0) - v;
     }
     final funds = (ref.read(sinkingFundsProvider).value ?? const {})
         .values
@@ -254,6 +287,18 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
             note: fundNote,
           );
         }
+        for (final a in allocations) {
+          final c2 = _cur2(a.data.allocation, baseCurrency);
+          final v = _amounts2[a.data.allocation.id] ?? 0;
+          if (c2 == null || v <= 0) continue;
+          await engine.fundAllocation(
+            allocationId: a.data.allocation.id,
+            amount: v,
+            currency: c2,
+            deviceId: 'local',
+            note: fundNote,
+          );
+        }
       });
 
       if (mounted) {
@@ -335,7 +380,12 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
             }
             final currency = alloc.targetCurrency ?? baseCurrency;
             final bal = a.balanceByCurrency[currency] ?? 0.0;
-            return alloc.targetAmount! - bal > 0;
+            final c2 = _cur2(alloc, baseCurrency);
+            return alloc.targetAmount! - bal > 0 ||
+                (c2 != null &&
+                    alloc.secondTargetAmount! -
+                            (a.balanceByCurrency[c2] ?? 0) >
+                        0);
           }).length;
 
           final envelopes = [
@@ -343,6 +393,13 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
               if (a.data.allocation.type != 'sinking' ||
                   !funds.containsKey(a.data.allocation.id))
                 a,
+          ];
+          // A second target is a row of its own, under the envelope.
+          final rows = [
+            for (final a in envelopes) ...[
+              (a, false),
+              if (_cur2(a.data.allocation, baseCurrency) != null) (a, true),
+            ],
           ];
           final fundList = [
             for (final a in allocations)
@@ -387,12 +444,12 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
                             horizontal: 16, vertical: 8),
                         // +1 for the quick-fill tile at the top; sinking
                         // funds after the envelopes, under their header.
-                        itemCount: envelopes.length +
+                        itemCount: rows.length +
                             1 +
                             (fundList.isEmpty ? 0 : fundList.length + 1),
                         itemBuilder: (context, i) {
-                          if (i > envelopes.length) {
-                            final j = i - envelopes.length - 1;
+                          if (i > rows.length) {
+                            final j = i - rows.length - 1;
                             if (j == 0) {
                               return Padding(
                                 padding: const EdgeInsetsDirectional.only(
@@ -473,6 +530,7 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
                                               _avgSpent),
                                         ),
                                       if (_amounts.isNotEmpty ||
+                                          _amounts2.isNotEmpty ||
                                           _fundAmounts.isNotEmpty)
                                         ActionChip(
                                           avatar: const Icon(
@@ -482,6 +540,7 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
                                               S.of(context).fundPresetClear),
                                           onPressed: () => setState(() {
                                             _amounts.clear();
+                                            _amounts2.clear();
                                             _fundAmounts.clear();
                                           }),
                                         ),
@@ -493,8 +552,25 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
                           }
 
                           final idx = i - 1;
-                          final a = envelopes[idx];
+                          final (a, second) = rows[idx];
                           final alloc = a.data.allocation;
+                          if (second) {
+                            final c2 = _cur2(alloc, baseCurrency)!;
+                            final bal2 = a.balanceByCurrency[c2] ?? 0.0;
+                            final gap2 = alloc.secondTargetAmount! - bal2;
+                            return _FundingAllocationTile(
+                              name: alloc.name,
+                              currentBalance: bal2,
+                              currency: c2,
+                              targetAmount: alloc.secondTargetAmount,
+                              suggestedAmount: gap2 > 0 ? gap2 : null,
+                              usualSpend: _avgSpent[alloc.id]?[c2],
+                              isFunded: gap2 <= 0,
+                              amount: _amounts2[alloc.id] ?? 0.0,
+                              onAmountChanged: (value) =>
+                                  setState(() => _amounts2[alloc.id] = value),
+                            );
+                          }
                           final currency =
                               alloc.targetCurrency ?? baseCurrency;
                           final currentBalance =

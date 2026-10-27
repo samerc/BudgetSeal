@@ -31,15 +31,24 @@ final sealedEnvelopesProvider = FutureProvider<Set<String>>((ref) async {
 });
 
 /// The seal rule, shared with the Web Companion: [funded] is what went into
-/// the envelope this period (`LedgerDao.fundedInPeriod`) by currency.
+/// the envelope this period (`LedgerDao.fundedInPeriod`) by currency. With
+/// a second target in another currency, both must be met.
 bool isEnvelopeSealed(Allocation alloc, Map<String, double> balances,
     Map<String, double>? funded, String baseCurrency) {
+  bool met(double target, String cur) {
+    if ((balances[cur] ?? 0) < -0.005) return false;
+    final have = alloc.type == 'spending'
+        ? (funded?[cur] ?? 0)
+        : (balances[cur] ?? 0);
+    return have >= target - 0.005;
+  }
+
   final target = alloc.targetAmount ?? 0;
   if (target <= 0) return false;
   final cur = alloc.targetCurrency ?? baseCurrency;
-  if ((balances[cur] ?? 0) < -0.005) return false;
-  final have = alloc.type == 'spending'
-      ? (funded?[cur] ?? 0)
-      : (balances[cur] ?? 0);
-  return have >= target - 0.005;
+  if (!met(target, cur)) return false;
+  final target2 = alloc.secondTargetAmount ?? 0;
+  final cur2 = alloc.secondTargetCurrency;
+  if (target2 > 0 && cur2 != null && cur2 != cur) return met(target2, cur2);
+  return true;
 }

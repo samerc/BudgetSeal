@@ -2115,6 +2115,16 @@ class SAr extends S {
   }
 
   @override
+  String get allocSecondTargetAdd => 'أضف هدفًا بعملة أخرى';
+
+  @override
+  String get allocSecondTarget => 'وبعملة أخرى';
+
+  @override
+  String get allocSecondTargetDesc =>
+      'يُموَّل ويُصرف وحده، ولا يُجمع مع الأول.';
+
+  @override
   String get tileExchangeRatesSub => 'أسعار مباشرة، أو حدّد سعرك';
 
   @override

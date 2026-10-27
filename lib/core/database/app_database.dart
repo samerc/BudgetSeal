@@ -55,7 +55,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 25;
+  int get schemaVersion => 26;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -218,6 +218,13 @@ class AppDatabase extends _$AppDatabase {
           if (from < 25) {
             // Base-currency changes on a shared budget.
             await _addColumnIfMissing(m, households, households.baseHistory);
+          }
+          if (from < 26) {
+            // A second envelope target in another currency.
+            await _addColumnIfMissing(
+                m, allocations, allocations.secondTargetAmount);
+            await _addColumnIfMissing(
+                m, allocations, allocations.secondTargetCurrency);
           }
         },
         beforeOpen: (_) async {

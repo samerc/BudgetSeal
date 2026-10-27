@@ -642,6 +642,11 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
         baseCurrency: baseCurrency,
         targetAmount: alloc.targetAmount,
         targetCurrency: alloc.targetCurrency,
+        secondTargetAmount: alloc.secondTargetAmount,
+        secondTargetCurrency: alloc.secondTargetCurrency,
+        secondSpent: alloc.secondTargetCurrency == null
+            ? 0
+            : spending[alloc.id]?[alloc.secondTargetCurrency] ?? 0,
         envelopeIcon: alloc.icon,
         categoryName: cat?.name,
         categoryIcon: cat?.icon,

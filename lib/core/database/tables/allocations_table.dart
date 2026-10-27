@@ -20,6 +20,11 @@ class Allocations extends Table {
   // Optional savings target amount
   RealColumn get targetAmount => real().nullable()();
   TextColumn get targetCurrency => text().nullable()();
+  /// Optional second target in another currency (v26, roadmap #3: e.g.
+  /// Groceries $100 + LBP 2,000,000). Funded, spent and shown on its own —
+  /// never added to the first.
+  RealColumn get secondTargetAmount => real().nullable()();
+  TextColumn get secondTargetCurrency => text().nullable()();
   /// Emoji icon for this envelope (e.g. '⛽', '🛒'). Null = use linked category icon.
   TextColumn get icon => text().nullable()();
   /// Whether this periodic envelope resets automatically at period start.

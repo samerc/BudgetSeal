@@ -25,7 +25,7 @@ Developer notes moved out of CLAUDE.md (Oct 2026). Read before changing this are
 
 ## Database
 
-### Schema Version: 25
+### Schema Version: 26
 12 tables: households, users, accounts, categories, allocations, transactions, transaction_lines, allocation_ledger, recurring_transactions, transaction_templates, fx_rates, objectives.
 
 v9→v10 added `isSubscription` and `priceHistory` columns to `recurring_transactions` for subscription tracking.
@@ -48,6 +48,8 @@ v22→v23 added `transactions.destinationAmount` (nullable REAL, synced as `dest
 v23→v24 added `transactions.revision` (nullable TEXT, synced as `revision`): set by an edit that rewrote the lines; that edit's lines and debits have ids starting `<id>:<revision>:` (see Cloud Sync "Edits in place").
 
 v24→v25 added `households.baseHistory` (nullable TEXT, synced as `baseHistory`): every base-currency change `[{from, to, rate}]`, so a transaction recorded against an old base on another phone is converted when it arrives (see budget.md "Changing the base currency").
+
+v25→v26 added `allocations.secondTargetAmount` / `secondTargetCurrency` (nullable; synced): an optional second envelope target in another currency (see budget.md).
 v18→v19 added `anchorDay` (nullable INT) to `recurring_transactions`: the day of month a series was set up on. `advanceRecurringDate()` (recurring_engine.dart) clamps monthly/yearly dates to short months and returns to the anchor (Jan 31 → Feb 28 → Mar 31); legacy rows get the anchor filled from their due day the next time they post.
 
 ### Migrations

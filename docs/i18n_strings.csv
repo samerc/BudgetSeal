@@ -1794,6 +1794,9 @@ cash_count_other,Count cash by notes (cash account menu),Other (coins…),أخر
 cash_count_total,Count cash by notes (cash account menu),Counted {amount},المعدود {amount},Compté {amount}
 cash_count_use,Count cash by notes (cash account menu),Use this count,اعتمد هذا العدّ,Utiliser ce comptage
 cash_count_how_many,Count cash by notes (cash account menu),How many {note}?,كم ورقة من فئة {note}؟,Combien de {note} ?
+alloc_second_target_add,Envelope: optional second target in another currency,Add a target in another currency,أضف هدفًا بعملة أخرى,Ajouter un objectif dans une autre devise
+alloc_second_target,Envelope: optional second target in another currency,And in another currency,وبعملة أخرى,Et dans une autre devise
+alloc_second_target_desc,Envelope: optional second target in another currency,"Funded and spent on its own, never added to the first.",يُموَّل ويُصرف وحده، ولا يُجمع مع الأول.,"Alimenté et dépensé à part, jamais ajouté au premier."
 tile_exchange_rates_sub,,"Live rates, or set your own",أسعار مباشرة، أو حدّد سعرك,"Taux en direct, ou les vôtres"
 alloc_archived_title,,Archived envelopes,الأظرف المؤرشفة,Enveloppes archivées
 alloc_no_archived,,No archived envelopes,لا توجد أظرف مؤرشفة,Aucune enveloppe archivée

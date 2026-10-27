@@ -114,6 +114,8 @@ Map<String, dynamic> allocationToJson(
       'rollover': a.rollover,
       'targetAmount': a.targetAmount,
       'targetCurrency': a.targetCurrency,
+      'secondTargetAmount': a.secondTargetAmount,
+      'secondTargetCurrency': a.secondTargetCurrency,
       'balanceByCurrency': balanceByCurrency,
       'spentByCurrency': spentByCurrency,
     };

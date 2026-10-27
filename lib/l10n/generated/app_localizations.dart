@@ -3771,6 +3771,24 @@ abstract class S {
   /// **'How many {note}?'**
   String cashCountHowMany(String note);
 
+  /// Envelope: optional second target in another currency
+  ///
+  /// In en, this message translates to:
+  /// **'Add a target in another currency'**
+  String get allocSecondTargetAdd;
+
+  /// Envelope: optional second target in another currency
+  ///
+  /// In en, this message translates to:
+  /// **'And in another currency'**
+  String get allocSecondTarget;
+
+  /// Envelope: optional second target in another currency
+  ///
+  /// In en, this message translates to:
+  /// **'Funded and spent on its own, never added to the first.'**
+  String get allocSecondTargetDesc;
+
   /// No description provided for @tileExchangeRatesSub.
   ///
   /// In en, this message translates to:

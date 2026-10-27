@@ -2112,6 +2112,16 @@ class SEn extends S {
   }
 
   @override
+  String get allocSecondTargetAdd => 'Add a target in another currency';
+
+  @override
+  String get allocSecondTarget => 'And in another currency';
+
+  @override
+  String get allocSecondTargetDesc =>
+      'Funded and spent on its own, never added to the first.';
+
+  @override
   String get tileExchangeRatesSub => 'Live rates, or set your own';
 
   @override

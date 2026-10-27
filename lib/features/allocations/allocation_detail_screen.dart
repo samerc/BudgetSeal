@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 
 
+import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import 'move_money_sheet.dart';
@@ -59,6 +60,9 @@ class _AllocationDetailScreenState
     extends ConsumerState<AllocationDetailScreen> {
   final _nameController = TextEditingController();
   double _targetAmount = 0;
+  // Optional second target in another currency (roadmap #3).
+  double _target2 = 0;
+  String? _target2Currency;
   final _targetCurrencyController = TextEditingController();
   String _type = 'spending';
   /// The type as saved (the settings form edits [_type]).
@@ -110,6 +114,8 @@ class _AllocationDetailScreenState
         if (alloc.targetAmount != null) {
           _targetAmount = alloc.targetAmount!;
         }
+        _target2 = alloc.secondTargetAmount ?? 0;
+        _target2Currency = alloc.secondTargetCurrency;
         _targetCurrencyController.text = alloc.targetCurrency ??
             ref.read(householdProvider).value?.baseCurrency ??
             'USD';
@@ -607,6 +613,63 @@ class _AllocationDetailScreenState
                     ),
                   ),
                 ]),
+                // A second target in another currency.
+                if (_target2Currency == null)
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TextButton.icon(
+                      onPressed: () => setState(() => _target2Currency =
+                          _otherCurrency(_targetCurrencyController.text)),
+                      icon: const Icon(AppIcons.plus, size: 18),
+                      label: Text(l.allocSecondTargetAdd),
+                    ),
+                  )
+                else ...[
+                  const SizedBox(height: 14),
+                  Row(children: [
+                    Expanded(
+                      child: Text(l.allocSecondTarget,
+                          style: const TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w700)),
+                    ),
+                    IconButton(
+                      tooltip: l.commonRemove,
+                      icon: Icon(AppIcons.x,
+                          size: 18, color: AppColors.th(context)),
+                      onPressed: () => setState(() {
+                        _target2 = 0;
+                        _target2Currency = null;
+                      }),
+                    ),
+                  ]),
+                  Text(l.allocSecondTargetDesc,
+                      style:
+                          TextStyle(fontSize: 12, color: AppColors.ts(context))),
+                  const SizedBox(height: 8),
+                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Expanded(
+                      flex: 3,
+                      child: CalculatorAmountField(
+                        value: _target2,
+                        label: _type == 'spending'
+                            ? l.allocBudgetAmount
+                            : l.allocTargetAmount,
+                        fontSize: 20,
+                        onChanged: (v) => setState(() => _target2 = v),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      flex: 2,
+                      child: CurrencyPickerField(
+                        label: l.commonCurrency,
+                        value: _target2Currency!,
+                        onChanged: (v) =>
+                            setState(() => _target2Currency = v),
+                      ),
+                    ),
+                  ]),
+                ],
               ]),
               const SizedBox(height: 16),
             ],
@@ -712,7 +775,12 @@ class _AllocationDetailScreenState
         .firstOrNull;
     final balances = alloc?.balanceByCurrency ?? {};
     final mainBalance = balances[targetCurrency] ?? 0;
-    final otherBalances = Map.of(balances)..remove(targetCurrency);
+    final cur2 = _target2 > 0 && _target2Currency != targetCurrency
+        ? _target2Currency
+        : null;
+    final otherBalances = Map.of(balances)
+      ..remove(targetCurrency)
+      ..remove(cur2);
     final hasTarget = _targetAmount > 0;
 
     // Fully funded → the wax seal (stamped on if it happens here).
@@ -860,6 +928,52 @@ class _AllocationDetailScreenState
               ],
             ),
           ],
+          if (cur2 != null) ...[
+            const SizedBox(height: 14),
+            Row(children: [
+              Expanded(
+                child: Text(
+                  formatAmount(balances[cur2] ?? 0, currency: cur2),
+                  style: TextStyle(
+                    color: (balances[cur2] ?? 0) < 0
+                        ? AppColors.overspent
+                        : onHero,
+                    fontSize: 20,
+                    fontFamily: TypographyTokens.displayFamily,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              Text(
+                S.of(context).objOfTarget(
+                    formatAmount(_target2, currency: cur2)),
+                style: TextStyle(color: AppColors.ts(context), fontSize: 13),
+              ),
+            ]),
+            const SizedBox(height: 6),
+            BudgetProgress(
+              progress: (balances[cur2] ?? 0) / _target2,
+              color: envColor,
+              height: 10,
+              trackColor: AppColors.pastel(context, envColor,
+                  light: 0.62, dark: 0.6),
+              overspent: (balances[cur2] ?? 0) < 0,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              isSpending
+                  ? S.of(context).allocAmountSpent(formatAmount(
+                      ref.watch(periodSpendingProvider).value?[
+                              widget.allocationId]?[cur2] ??
+                          0,
+                      currency: cur2))
+                  : S.of(context).allocAmountToGo(formatAmount(
+                      (_target2 - (balances[cur2] ?? 0))
+                          .clamp(0, double.infinity),
+                      currency: cur2)),
+              style: TextStyle(color: AppColors.ts(context), fontSize: 13),
+            ),
+          ],
           const SizedBox(height: 16),
           // Fund, and Spend from it (the Budget list's rows have no cart).
           Row(children: [
@@ -884,6 +998,17 @@ class _AllocationDetailScreenState
         ],
       ),
     );
+  }
+
+  /// A currency for a new second target: one the budget's accounts use
+  /// other than [first], else the base, else none.
+  String _otherCurrency(String first) {
+    final used = {
+      for (final a in ref.read(accountsProvider).value ?? const <Account>[])
+        a.currency,
+      ref.read(householdProvider).value?.baseCurrency ?? 'USD',
+    }..remove(first);
+    return used.isNotEmpty ? (used.toList()..sort()).first : 'EUR';
   }
 
   /// New expense prefilled with this envelope's category (top level first).
@@ -2024,6 +2149,11 @@ class _AllocationDetailScreenState
       final targetAmount =
           _targetAmount > 0 && !sinking ? _targetAmount : null;
       final targetCurrency = _targetCurrencyController.text.trim();
+      // Only a real second target, in a currency other than the first's.
+      final hasTarget2 = !sinking &&
+          _target2 > 0 &&
+          _target2Currency != null &&
+          _target2Currency != targetCurrency;
       final effectivePeriodicity = sinking ? 'permanent' : _periodicity;
 
       await dao.upsert(AllocationsCompanion.insert(
@@ -2038,6 +2168,8 @@ class _AllocationDetailScreenState
         icon: Value(_icon),
         targetAmount: Value(targetAmount),
         targetCurrency: Value(targetCurrency.isEmpty ? null : targetCurrency),
+        secondTargetAmount: Value(hasTarget2 ? _target2 : null),
+        secondTargetCurrency: Value(hasTarget2 ? _target2Currency : null),
         deviceId: 'local',
       ));
       // Persist the categories the user linked during creation, now that the

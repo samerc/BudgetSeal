@@ -2126,6 +2126,17 @@ class SFr extends S {
   }
 
   @override
+  String get allocSecondTargetAdd =>
+      'Ajouter un objectif dans une autre devise';
+
+  @override
+  String get allocSecondTarget => 'Et dans une autre devise';
+
+  @override
+  String get allocSecondTargetDesc =>
+      'Alimenté et dépensé à part, jamais ajouté au premier.';
+
+  @override
   String get tileExchangeRatesSub => 'Taux en direct, ou les vôtres';
 
   @override

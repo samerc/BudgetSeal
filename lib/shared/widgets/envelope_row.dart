@@ -33,6 +33,13 @@ class EnvelopeRow extends StatelessWidget {
   final String baseCurrency;
   final double? targetAmount;
   final String? targetCurrency;
+
+  /// A second target in another currency: its own bar and line.
+  final double? secondTargetAmount;
+  final String? secondTargetCurrency;
+
+  /// Spent this period in the second target's currency.
+  final double secondSpent;
   final String? envelopeIcon;
   final String? categoryName;
   final String? categoryIcon;
@@ -57,6 +64,9 @@ class EnvelopeRow extends StatelessWidget {
     required this.baseCurrency,
     this.targetAmount,
     this.targetCurrency,
+    this.secondTargetAmount,
+    this.secondTargetCurrency,
+    this.secondSpent = 0,
     this.envelopeIcon,
     this.categoryName,
     this.categoryIcon,
@@ -123,8 +133,14 @@ class EnvelopeRow extends StatelessWidget {
     final target = (targetAmount ?? 0) > 0 ? targetAmount! : null;
     final overCur = overspentCurrency(balanceByCurrency, cur);
     final over = overCur != null;
+    final cur2 = (secondTargetAmount ?? 0) > 0 &&
+            secondTargetCurrency != null &&
+            secondTargetCurrency != cur
+        ? secondTargetCurrency
+        : null;
     final otherDebts = balanceByCurrency.entries
-        .where((e) => e.key != cur && e.key != overCur && e.value < -0.01)
+        .where((e) =>
+            e.key != cur && e.key != cur2 && e.key != overCur && e.value < -0.01)
         .length;
     final color = categoryColorHex != null
         ? AppColors.fromHex(categoryColorHex!)
@@ -158,6 +174,23 @@ class EnvelopeRow extends StatelessWidget {
     if (extras.isNotEmpty) {
       sub = [if (sub != null) sub, ...extras].join(' · ');
     }
+    // The second target: its own bar and "left · spent of" line.
+    double? used2;
+    String? sub2;
+    if (cur2 != null) {
+      final target2 = secondTargetAmount!;
+      final balance2 = balanceByCurrency[cur2] ?? 0;
+      String money2(double v) => formatAmount(v, currency: cur2);
+      if (_isFlexible) {
+        used2 = (balance2 / target2).clamp(0.0, 1.0);
+        sub2 = '${money2(balance2)} · '
+            '${tr.allocPercentSaved((used2 * 100).round())}';
+      } else {
+        used2 = (secondSpent / target2).clamp(0.0, 1.0);
+        sub2 = '${money2(balance2)} · '
+            '${secondSpent > 0.005 ? tr.allocSpentOf(money2(secondSpent), money2(target2)) : tr.allocNothingSpent}';
+      }
+    }
     // Spending envelopes nearly empty turn the bar amber.
     final low = !_isFlexible &&
         target != null &&
@@ -171,6 +204,7 @@ class EnvelopeRow extends StatelessWidget {
       name,
       money(balance),
       if (sub != null) sub,
+      if (sub2 != null) sub2,
       if (needsReview) tr.a11yNeedsReview,
     ].join(', ');
 
@@ -241,6 +275,31 @@ class EnvelopeRow extends StatelessWidget {
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: over ? bad : AppColors.ts(context))),
+                  ],
+                  if (used2 != null) ...[
+                    const SizedBox(height: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(3),
+                      child: SizedBox(
+                        height: 4,
+                        child: Stack(children: [
+                          Container(color: AppColors.sfv(context)),
+                          FractionallySizedBox(
+                            widthFactor: used2,
+                            alignment: AlignmentDirectional.centerStart,
+                            child: Container(color: barColor),
+                          ),
+                        ]),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(sub2!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.ts(context))),
                   ],
                   if (otherDebts > 0)
                     Text(tr.allocOtherCurrencies(otherDebts),

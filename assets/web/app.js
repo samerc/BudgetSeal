@@ -905,8 +905,22 @@ function envFigures(e) {
   } else if (!flexible && spent > 0) {
     meta = t('web_env_spent', { amount: fmt(spent, cur) });
   }
-  const others = Object.entries(balances).filter(([c, v]) => c !== cur && Math.abs(v) >= 0.005);
-  return { cur, bal, spent, target, pct, meta, metaEnd, others, over: bal < 0, flexible };
+  // A second target in another currency: its own bar and line.
+  const cur2 = (Number(e.secondTargetAmount) || 0) > 0 && e.secondTargetCurrency && e.secondTargetCurrency !== cur ? e.secondTargetCurrency : null;
+  let second = null;
+  if (cur2) {
+    const target2 = Number(e.secondTargetAmount);
+    const bal2 = balances[cur2] || 0;
+    const spent2 = (e.spentByCurrency || {})[cur2] || 0;
+    const pct2 = Math.max(0, Math.min(100, ((flexible ? bal2 : spent2) / target2) * 100));
+    second = {
+      cur: cur2, bal: bal2, pct: pct2, over: bal2 < 0, flexible,
+      meta: flexible ? (bal2 >= target2 ? t('web_env_reached') : t('web_env_to_go', { amount: fmt(target2 - bal2, cur2) })) : t('web_env_spent', { amount: fmt(spent2, cur2) }),
+      metaEnd: t('web_env_of', { amount: fmt(target2, cur2) }),
+    };
+  }
+  const others = Object.entries(balances).filter(([c, v]) => c !== cur && c !== cur2 && Math.abs(v) >= 0.005);
+  return { cur, bal, spent, target, pct, meta, metaEnd, others, over: bal < 0, flexible, second };
 }
 
 function envChip(e, cls = '') {
@@ -967,6 +981,9 @@ async function renderBudget(quiet) {
       </div>
       ${f.pct != null ? `<div class="bar"><span style="width:${f.pct.toFixed(1)}%;background:${barColor(f)}"></span></div>` : ''}
       ${f.meta || f.metaEnd ? `<div class="env-meta"><span>${esc(f.meta)}</span><span>${esc(f.metaEnd)}</span></div>` : ''}
+      ${f.second ? `<div class="env-amount num" style="font-size:1.1em;margin-top:8px">${esc(fmt(f.second.bal, f.second.cur))}</div>
+      <div class="bar thin"><span style="width:${f.second.pct.toFixed(1)}%;background:${barColor(f.second)}"></span></div>
+      <div class="env-meta"><span>${esc(f.second.meta)}</span><span>${esc(f.second.metaEnd)}</span></div>` : ''}
       <div class="env-foot">
         <span class="env-cross num">${f.others.map(([c, v]) => esc((v < 0 ? '' : '+ ') + fmt(v, c))).join(' · ')}</span>
         <span class="env-actions">
