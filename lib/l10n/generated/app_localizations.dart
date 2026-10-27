@@ -4041,6 +4041,96 @@ abstract class S {
   /// **'No amounts found. Try a screenshot of your bank’s transaction list.'**
   String get shotNone;
 
+  /// Forecast: the next 90 days and safe to spend today
+  ///
+  /// In en, this message translates to:
+  /// **'Forecast'**
+  String get forecastTitle;
+
+  /// Forecast: the next 90 days and safe to spend today
+  ///
+  /// In en, this message translates to:
+  /// **'Your money over the next 90 days, from your recurring bills and incomes, planned payments and sinking funds.'**
+  String get forecastIntro;
+
+  /// Forecast: the next 90 days and safe to spend today
+  ///
+  /// In en, this message translates to:
+  /// **'Safe to spend today'**
+  String get forecastSafeToday;
+
+  /// Forecast: the next 90 days and safe to spend today
+  ///
+  /// In en, this message translates to:
+  /// **'until your next income on {date}'**
+  String forecastUntil(String date);
+
+  /// Forecast: the next 90 days and safe to spend today
+  ///
+  /// In en, this message translates to:
+  /// **'until your usual income around {date}'**
+  String forecastUntilEst(String date);
+
+  /// Forecast: the next 90 days and safe to spend today
+  ///
+  /// In en, this message translates to:
+  /// **'for the next 30 days (no income coming up)'**
+  String get forecastNoIncome;
+
+  /// Forecast: the next 90 days and safe to spend today
+  ///
+  /// In en, this message translates to:
+  /// **'Short by {amount} before then'**
+  String forecastShort(String amount);
+
+  /// Forecast: the next 90 days and safe to spend today
+  ///
+  /// In en, this message translates to:
+  /// **'Lowest {amount} on {date}'**
+  String forecastLowest(String amount, String date);
+
+  /// Forecast: the next 90 days and safe to spend today
+  ///
+  /// In en, this message translates to:
+  /// **'In your accounts'**
+  String get forecastCashNow;
+
+  /// Forecast: the next 90 days and safe to spend today
+  ///
+  /// In en, this message translates to:
+  /// **'Due before then'**
+  String get forecastDue;
+
+  /// Forecast: the next 90 days and safe to spend today
+  ///
+  /// In en, this message translates to:
+  /// **'Kept for sinking funds'**
+  String get forecastReserved;
+
+  /// Forecast: the next 90 days and safe to spend today
+  ///
+  /// In en, this message translates to:
+  /// **'Coming up'**
+  String get forecastUpcoming;
+
+  /// Forecast: the next 90 days and safe to spend today
+  ///
+  /// In en, this message translates to:
+  /// **'Usual income (estimate)'**
+  String get forecastEstimate;
+
+  /// Forecast: the next 90 days and safe to spend today
+  ///
+  /// In en, this message translates to:
+  /// **'Add a recurring bill or income, or a planned payment, to see what’s coming.'**
+  String get forecastEmpty;
+
+  /// Forecast: the next 90 days and safe to spend today
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} a day'**
+  String forecastPerDay(String amount);
+
   /// No description provided for @allocArchivedTitle.
   ///
   /// In en, this message translates to:

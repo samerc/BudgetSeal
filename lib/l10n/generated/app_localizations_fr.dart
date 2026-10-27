@@ -2290,6 +2290,64 @@ class SFr extends S {
       'Aucun montant trouvé. Essayez une capture de la liste des opérations de votre banque.';
 
   @override
+  String get forecastTitle => 'Prévisions';
+
+  @override
+  String get forecastIntro =>
+      'Votre argent sur les 90 prochains jours, d’après vos factures et revenus récurrents, paiements prévus et fonds d’épargne.';
+
+  @override
+  String get forecastSafeToday => 'Dépensable aujourd’hui';
+
+  @override
+  String forecastUntil(String date) {
+    return 'jusqu’à votre prochain revenu le $date';
+  }
+
+  @override
+  String forecastUntilEst(String date) {
+    return 'jusqu’à votre revenu habituel vers le $date';
+  }
+
+  @override
+  String get forecastNoIncome =>
+      'pour les 30 prochains jours (aucun revenu prévu)';
+
+  @override
+  String forecastShort(String amount) {
+    return 'Il manque $amount d’ici là';
+  }
+
+  @override
+  String forecastLowest(String amount, String date) {
+    return 'Au plus bas $amount le $date';
+  }
+
+  @override
+  String get forecastCashNow => 'Sur vos comptes';
+
+  @override
+  String get forecastDue => 'À payer d’ici là';
+
+  @override
+  String get forecastReserved => 'Gardé pour les fonds d’épargne';
+
+  @override
+  String get forecastUpcoming => 'À venir';
+
+  @override
+  String get forecastEstimate => 'Revenu habituel (estimation)';
+
+  @override
+  String get forecastEmpty =>
+      'Ajoutez une facture ou un revenu récurrent, ou un paiement prévu, pour voir ce qui arrive.';
+
+  @override
+  String forecastPerDay(String amount) {
+    return '$amount par jour';
+  }
+
+  @override
   String get allocArchivedTitle => 'Enveloppes archivées';
 
   @override

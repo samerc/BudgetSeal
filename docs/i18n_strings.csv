@@ -1839,6 +1839,21 @@ shot_missing,Check an account against a screenshot of the bank list,Not recorded
 shot_matched,Check an account against a screenshot of the bank list,Already recorded,مسجّلة,Déjà enregistrées
 shot_all_matched,Check an account against a screenshot of the bank list,Everything on the screenshot is recorded.,كل ما في اللقطة مسجّل.,Tout ce qui figure sur la capture est enregistré.
 shot_none,Check an account against a screenshot of the bank list,No amounts found. Try a screenshot of your bank’s transaction list.,لم يُعثر على مبالغ. جرّب لقطة لقائمة معاملات البنك.,Aucun montant trouvé. Essayez une capture de la liste des opérations de votre banque.
+forecast_title,Forecast: the next 90 days and safe to spend today,Forecast,التوقّعات,Prévisions
+forecast_intro,Forecast: the next 90 days and safe to spend today,"Your money over the next 90 days, from your recurring bills and incomes, planned payments and sinking funds.",أموالك خلال الـ90 يومًا القادمة، من فواتيرك ومداخيلك المتكررة والدفعات المخطَّطة والصناديق الادخارية.,"Votre argent sur les 90 prochains jours, d’après vos factures et revenus récurrents, paiements prévus et fonds d’épargne."
+forecast_safe_today,Forecast: the next 90 days and safe to spend today,Safe to spend today,يمكنك إنفاقه اليوم,Dépensable aujourd’hui
+forecast_until,Forecast: the next 90 days and safe to spend today,until your next income on {date},حتى دخلك القادم في {date},jusqu’à votre prochain revenu le {date}
+forecast_until_est,Forecast: the next 90 days and safe to spend today,until your usual income around {date},حتى دخلك المعتاد نحو {date},jusqu’à votre revenu habituel vers le {date}
+forecast_no_income,Forecast: the next 90 days and safe to spend today,for the next 30 days (no income coming up),للأيام الـ30 القادمة (لا دخل قادم),pour les 30 prochains jours (aucun revenu prévu)
+forecast_short,Forecast: the next 90 days and safe to spend today,Short by {amount} before then,ينقصك {amount} قبل ذلك,Il manque {amount} d’ici là
+forecast_lowest,Forecast: the next 90 days and safe to spend today,Lowest {amount} on {date},الأدنى {amount} في {date},Au plus bas {amount} le {date}
+forecast_cash_now,Forecast: the next 90 days and safe to spend today,In your accounts,في حساباتك,Sur vos comptes
+forecast_due,Forecast: the next 90 days and safe to spend today,Due before then,مستحق قبل ذلك,À payer d’ici là
+forecast_reserved,Forecast: the next 90 days and safe to spend today,Kept for sinking funds,محفوظ للصناديق الادخارية,Gardé pour les fonds d’épargne
+forecast_upcoming,Forecast: the next 90 days and safe to spend today,Coming up,القادم,À venir
+forecast_estimate,Forecast: the next 90 days and safe to spend today,Usual income (estimate),الدخل المعتاد (تقدير),Revenu habituel (estimation)
+forecast_empty,Forecast: the next 90 days and safe to spend today,"Add a recurring bill or income, or a planned payment, to see what’s coming.",أضف فاتورة أو دخلًا متكررًا، أو دفعة مخطَّطة، لترى ما هو قادم.,"Ajoutez une facture ou un revenu récurrent, ou un paiement prévu, pour voir ce qui arrive."
+forecast_per_day,Forecast: the next 90 days and safe to spend today,{amount} a day,{amount} في اليوم,{amount} par jour
 alloc_archived_title,,Archived envelopes,الأظرف المؤرشفة,Enveloppes archivées
 alloc_no_archived,,No archived envelopes,لا توجد أظرف مؤرشفة,Aucune enveloppe archivée
 alloc_unarchived,,{name} unarchived,تم إلغاء أرشفة {name},{name} désarchivée

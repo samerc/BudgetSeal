@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:drift/drift.dart' hide Column;
 
 import '../capture/review_screen.dart';
+import '../forecast/forecast_screen.dart';
 import '../../core/database/app_database.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/allocations_provider.dart';
@@ -387,6 +388,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     sectionWidgets[DashboardSection.budget] = [
                   BudgetFocus(baseCurrency: baseCurrency),
                   const SizedBox(height: 12),
+                  // Safe to spend today and the lowest point ahead.
+                  const ForecastCard(),
     ];
 
     sectionWidgets[DashboardSection.money] = [

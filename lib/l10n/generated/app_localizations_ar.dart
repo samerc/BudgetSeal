@@ -2274,6 +2274,63 @@ class SAr extends S {
   String get shotNone => 'لم يُعثر على مبالغ. جرّب لقطة لقائمة معاملات البنك.';
 
   @override
+  String get forecastTitle => 'التوقّعات';
+
+  @override
+  String get forecastIntro =>
+      'أموالك خلال الـ90 يومًا القادمة، من فواتيرك ومداخيلك المتكررة والدفعات المخطَّطة والصناديق الادخارية.';
+
+  @override
+  String get forecastSafeToday => 'يمكنك إنفاقه اليوم';
+
+  @override
+  String forecastUntil(String date) {
+    return 'حتى دخلك القادم في $date';
+  }
+
+  @override
+  String forecastUntilEst(String date) {
+    return 'حتى دخلك المعتاد نحو $date';
+  }
+
+  @override
+  String get forecastNoIncome => 'للأيام الـ30 القادمة (لا دخل قادم)';
+
+  @override
+  String forecastShort(String amount) {
+    return 'ينقصك $amount قبل ذلك';
+  }
+
+  @override
+  String forecastLowest(String amount, String date) {
+    return 'الأدنى $amount في $date';
+  }
+
+  @override
+  String get forecastCashNow => 'في حساباتك';
+
+  @override
+  String get forecastDue => 'مستحق قبل ذلك';
+
+  @override
+  String get forecastReserved => 'محفوظ للصناديق الادخارية';
+
+  @override
+  String get forecastUpcoming => 'القادم';
+
+  @override
+  String get forecastEstimate => 'الدخل المعتاد (تقدير)';
+
+  @override
+  String get forecastEmpty =>
+      'أضف فاتورة أو دخلًا متكررًا، أو دفعة مخطَّطة، لترى ما هو قادم.';
+
+  @override
+  String forecastPerDay(String amount) {
+    return '$amount في اليوم';
+  }
+
+  @override
   String get allocArchivedTitle => 'الأظرف المؤرشفة';
 
   @override

@@ -2273,6 +2273,63 @@ class SEn extends S {
       'No amounts found. Try a screenshot of your bank’s transaction list.';
 
   @override
+  String get forecastTitle => 'Forecast';
+
+  @override
+  String get forecastIntro =>
+      'Your money over the next 90 days, from your recurring bills and incomes, planned payments and sinking funds.';
+
+  @override
+  String get forecastSafeToday => 'Safe to spend today';
+
+  @override
+  String forecastUntil(String date) {
+    return 'until your next income on $date';
+  }
+
+  @override
+  String forecastUntilEst(String date) {
+    return 'until your usual income around $date';
+  }
+
+  @override
+  String get forecastNoIncome => 'for the next 30 days (no income coming up)';
+
+  @override
+  String forecastShort(String amount) {
+    return 'Short by $amount before then';
+  }
+
+  @override
+  String forecastLowest(String amount, String date) {
+    return 'Lowest $amount on $date';
+  }
+
+  @override
+  String get forecastCashNow => 'In your accounts';
+
+  @override
+  String get forecastDue => 'Due before then';
+
+  @override
+  String get forecastReserved => 'Kept for sinking funds';
+
+  @override
+  String get forecastUpcoming => 'Coming up';
+
+  @override
+  String get forecastEstimate => 'Usual income (estimate)';
+
+  @override
+  String get forecastEmpty =>
+      'Add a recurring bill or income, or a planned payment, to see what’s coming.';
+
+  @override
+  String forecastPerDay(String amount) {
+    return '$amount a day';
+  }
+
+  @override
   String get allocArchivedTitle => 'Archived envelopes';
 
   @override
