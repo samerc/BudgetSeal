@@ -8984,6 +8984,973 @@ class CaptureRulesCompanion extends UpdateCompanion<CaptureRule> {
   }
 }
 
+class $MoneyRequestsTable extends MoneyRequests
+    with TableInfo<$MoneyRequestsTable, MoneyRequest> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MoneyRequestsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _householdIdMeta =
+      const VerificationMeta('householdId');
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+      'household_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES households (id) ON DELETE CASCADE'));
+  static const VerificationMeta _fromDeviceIdMeta =
+      const VerificationMeta('fromDeviceId');
+  @override
+  late final GeneratedColumn<String> fromDeviceId = GeneratedColumn<String>(
+      'from_device_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _allocationIdMeta =
+      const VerificationMeta('allocationId');
+  @override
+  late final GeneratedColumn<String> allocationId = GeneratedColumn<String>(
+      'allocation_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+      'amount', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _currencyMeta =
+      const VerificationMeta('currency');
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+      'currency', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+      'note', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+      'status', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('open'));
+  static const VerificationMeta _decidedByMeta =
+      const VerificationMeta('decidedBy');
+  @override
+  late final GeneratedColumn<String> decidedBy = GeneratedColumn<String>(
+      'decided_by', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _lastModifiedMeta =
+      const VerificationMeta('lastModified');
+  @override
+  late final GeneratedColumn<DateTime> lastModified = GeneratedColumn<DateTime>(
+      'last_modified', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _deletedMeta =
+      const VerificationMeta('deleted');
+  @override
+  late final GeneratedColumn<bool> deleted = GeneratedColumn<bool>(
+      'deleted', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("deleted" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        householdId,
+        fromDeviceId,
+        allocationId,
+        amount,
+        currency,
+        note,
+        status,
+        decidedBy,
+        createdAt,
+        lastModified,
+        deleted
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'money_requests';
+  @override
+  VerificationContext validateIntegrity(Insertable<MoneyRequest> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+          _householdIdMeta,
+          householdId.isAcceptableOrUnknown(
+              data['household_id']!, _householdIdMeta));
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('from_device_id')) {
+      context.handle(
+          _fromDeviceIdMeta,
+          fromDeviceId.isAcceptableOrUnknown(
+              data['from_device_id']!, _fromDeviceIdMeta));
+    } else if (isInserting) {
+      context.missing(_fromDeviceIdMeta);
+    }
+    if (data.containsKey('allocation_id')) {
+      context.handle(
+          _allocationIdMeta,
+          allocationId.isAcceptableOrUnknown(
+              data['allocation_id']!, _allocationIdMeta));
+    } else if (isInserting) {
+      context.missing(_allocationIdMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(_amountMeta,
+          amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('currency')) {
+      context.handle(_currencyMeta,
+          currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta));
+    } else if (isInserting) {
+      context.missing(_currencyMeta);
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+          _noteMeta, note.isAcceptableOrUnknown(data['note']!, _noteMeta));
+    }
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    }
+    if (data.containsKey('decided_by')) {
+      context.handle(_decidedByMeta,
+          decidedBy.isAcceptableOrUnknown(data['decided_by']!, _decidedByMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('last_modified')) {
+      context.handle(
+          _lastModifiedMeta,
+          lastModified.isAcceptableOrUnknown(
+              data['last_modified']!, _lastModifiedMeta));
+    }
+    if (data.containsKey('deleted')) {
+      context.handle(_deletedMeta,
+          deleted.isAcceptableOrUnknown(data['deleted']!, _deletedMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MoneyRequest map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MoneyRequest(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      householdId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}household_id'])!,
+      fromDeviceId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}from_device_id'])!,
+      allocationId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}allocation_id'])!,
+      amount: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}amount'])!,
+      currency: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}currency'])!,
+      note: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}note'])!,
+      status: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      decidedBy: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}decided_by']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      lastModified: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}last_modified'])!,
+      deleted: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}deleted'])!,
+    );
+  }
+
+  @override
+  $MoneyRequestsTable createAlias(String alias) {
+    return $MoneyRequestsTable(attachedDatabase, alias);
+  }
+}
+
+class MoneyRequest extends DataClass implements Insertable<MoneyRequest> {
+  final String id;
+  final String householdId;
+
+  /// The asker's device.
+  final String fromDeviceId;
+  final String allocationId;
+  final double amount;
+  final String currency;
+  final String note;
+
+  /// 'open' | 'approved' | 'declined'
+  final String status;
+
+  /// The grown-up's device that decided.
+  final String? decidedBy;
+  final DateTime createdAt;
+  final DateTime lastModified;
+  final bool deleted;
+  const MoneyRequest(
+      {required this.id,
+      required this.householdId,
+      required this.fromDeviceId,
+      required this.allocationId,
+      required this.amount,
+      required this.currency,
+      required this.note,
+      required this.status,
+      this.decidedBy,
+      required this.createdAt,
+      required this.lastModified,
+      required this.deleted});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['household_id'] = Variable<String>(householdId);
+    map['from_device_id'] = Variable<String>(fromDeviceId);
+    map['allocation_id'] = Variable<String>(allocationId);
+    map['amount'] = Variable<double>(amount);
+    map['currency'] = Variable<String>(currency);
+    map['note'] = Variable<String>(note);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || decidedBy != null) {
+      map['decided_by'] = Variable<String>(decidedBy);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['last_modified'] = Variable<DateTime>(lastModified);
+    map['deleted'] = Variable<bool>(deleted);
+    return map;
+  }
+
+  MoneyRequestsCompanion toCompanion(bool nullToAbsent) {
+    return MoneyRequestsCompanion(
+      id: Value(id),
+      householdId: Value(householdId),
+      fromDeviceId: Value(fromDeviceId),
+      allocationId: Value(allocationId),
+      amount: Value(amount),
+      currency: Value(currency),
+      note: Value(note),
+      status: Value(status),
+      decidedBy: decidedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(decidedBy),
+      createdAt: Value(createdAt),
+      lastModified: Value(lastModified),
+      deleted: Value(deleted),
+    );
+  }
+
+  factory MoneyRequest.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MoneyRequest(
+      id: serializer.fromJson<String>(json['id']),
+      householdId: serializer.fromJson<String>(json['householdId']),
+      fromDeviceId: serializer.fromJson<String>(json['fromDeviceId']),
+      allocationId: serializer.fromJson<String>(json['allocationId']),
+      amount: serializer.fromJson<double>(json['amount']),
+      currency: serializer.fromJson<String>(json['currency']),
+      note: serializer.fromJson<String>(json['note']),
+      status: serializer.fromJson<String>(json['status']),
+      decidedBy: serializer.fromJson<String?>(json['decidedBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      lastModified: serializer.fromJson<DateTime>(json['lastModified']),
+      deleted: serializer.fromJson<bool>(json['deleted']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'householdId': serializer.toJson<String>(householdId),
+      'fromDeviceId': serializer.toJson<String>(fromDeviceId),
+      'allocationId': serializer.toJson<String>(allocationId),
+      'amount': serializer.toJson<double>(amount),
+      'currency': serializer.toJson<String>(currency),
+      'note': serializer.toJson<String>(note),
+      'status': serializer.toJson<String>(status),
+      'decidedBy': serializer.toJson<String?>(decidedBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'lastModified': serializer.toJson<DateTime>(lastModified),
+      'deleted': serializer.toJson<bool>(deleted),
+    };
+  }
+
+  MoneyRequest copyWith(
+          {String? id,
+          String? householdId,
+          String? fromDeviceId,
+          String? allocationId,
+          double? amount,
+          String? currency,
+          String? note,
+          String? status,
+          Value<String?> decidedBy = const Value.absent(),
+          DateTime? createdAt,
+          DateTime? lastModified,
+          bool? deleted}) =>
+      MoneyRequest(
+        id: id ?? this.id,
+        householdId: householdId ?? this.householdId,
+        fromDeviceId: fromDeviceId ?? this.fromDeviceId,
+        allocationId: allocationId ?? this.allocationId,
+        amount: amount ?? this.amount,
+        currency: currency ?? this.currency,
+        note: note ?? this.note,
+        status: status ?? this.status,
+        decidedBy: decidedBy.present ? decidedBy.value : this.decidedBy,
+        createdAt: createdAt ?? this.createdAt,
+        lastModified: lastModified ?? this.lastModified,
+        deleted: deleted ?? this.deleted,
+      );
+  MoneyRequest copyWithCompanion(MoneyRequestsCompanion data) {
+    return MoneyRequest(
+      id: data.id.present ? data.id.value : this.id,
+      householdId:
+          data.householdId.present ? data.householdId.value : this.householdId,
+      fromDeviceId: data.fromDeviceId.present
+          ? data.fromDeviceId.value
+          : this.fromDeviceId,
+      allocationId: data.allocationId.present
+          ? data.allocationId.value
+          : this.allocationId,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      currency: data.currency.present ? data.currency.value : this.currency,
+      note: data.note.present ? data.note.value : this.note,
+      status: data.status.present ? data.status.value : this.status,
+      decidedBy: data.decidedBy.present ? data.decidedBy.value : this.decidedBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      lastModified: data.lastModified.present
+          ? data.lastModified.value
+          : this.lastModified,
+      deleted: data.deleted.present ? data.deleted.value : this.deleted,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MoneyRequest(')
+          ..write('id: $id, ')
+          ..write('householdId: $householdId, ')
+          ..write('fromDeviceId: $fromDeviceId, ')
+          ..write('allocationId: $allocationId, ')
+          ..write('amount: $amount, ')
+          ..write('currency: $currency, ')
+          ..write('note: $note, ')
+          ..write('status: $status, ')
+          ..write('decidedBy: $decidedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastModified: $lastModified, ')
+          ..write('deleted: $deleted')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      householdId,
+      fromDeviceId,
+      allocationId,
+      amount,
+      currency,
+      note,
+      status,
+      decidedBy,
+      createdAt,
+      lastModified,
+      deleted);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MoneyRequest &&
+          other.id == this.id &&
+          other.householdId == this.householdId &&
+          other.fromDeviceId == this.fromDeviceId &&
+          other.allocationId == this.allocationId &&
+          other.amount == this.amount &&
+          other.currency == this.currency &&
+          other.note == this.note &&
+          other.status == this.status &&
+          other.decidedBy == this.decidedBy &&
+          other.createdAt == this.createdAt &&
+          other.lastModified == this.lastModified &&
+          other.deleted == this.deleted);
+}
+
+class MoneyRequestsCompanion extends UpdateCompanion<MoneyRequest> {
+  final Value<String> id;
+  final Value<String> householdId;
+  final Value<String> fromDeviceId;
+  final Value<String> allocationId;
+  final Value<double> amount;
+  final Value<String> currency;
+  final Value<String> note;
+  final Value<String> status;
+  final Value<String?> decidedBy;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> lastModified;
+  final Value<bool> deleted;
+  final Value<int> rowid;
+  const MoneyRequestsCompanion({
+    this.id = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.fromDeviceId = const Value.absent(),
+    this.allocationId = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.note = const Value.absent(),
+    this.status = const Value.absent(),
+    this.decidedBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.lastModified = const Value.absent(),
+    this.deleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MoneyRequestsCompanion.insert({
+    required String id,
+    required String householdId,
+    required String fromDeviceId,
+    required String allocationId,
+    required double amount,
+    required String currency,
+    this.note = const Value.absent(),
+    this.status = const Value.absent(),
+    this.decidedBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.lastModified = const Value.absent(),
+    this.deleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        householdId = Value(householdId),
+        fromDeviceId = Value(fromDeviceId),
+        allocationId = Value(allocationId),
+        amount = Value(amount),
+        currency = Value(currency);
+  static Insertable<MoneyRequest> custom({
+    Expression<String>? id,
+    Expression<String>? householdId,
+    Expression<String>? fromDeviceId,
+    Expression<String>? allocationId,
+    Expression<double>? amount,
+    Expression<String>? currency,
+    Expression<String>? note,
+    Expression<String>? status,
+    Expression<String>? decidedBy,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? lastModified,
+    Expression<bool>? deleted,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (householdId != null) 'household_id': householdId,
+      if (fromDeviceId != null) 'from_device_id': fromDeviceId,
+      if (allocationId != null) 'allocation_id': allocationId,
+      if (amount != null) 'amount': amount,
+      if (currency != null) 'currency': currency,
+      if (note != null) 'note': note,
+      if (status != null) 'status': status,
+      if (decidedBy != null) 'decided_by': decidedBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (lastModified != null) 'last_modified': lastModified,
+      if (deleted != null) 'deleted': deleted,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MoneyRequestsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? householdId,
+      Value<String>? fromDeviceId,
+      Value<String>? allocationId,
+      Value<double>? amount,
+      Value<String>? currency,
+      Value<String>? note,
+      Value<String>? status,
+      Value<String?>? decidedBy,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? lastModified,
+      Value<bool>? deleted,
+      Value<int>? rowid}) {
+    return MoneyRequestsCompanion(
+      id: id ?? this.id,
+      householdId: householdId ?? this.householdId,
+      fromDeviceId: fromDeviceId ?? this.fromDeviceId,
+      allocationId: allocationId ?? this.allocationId,
+      amount: amount ?? this.amount,
+      currency: currency ?? this.currency,
+      note: note ?? this.note,
+      status: status ?? this.status,
+      decidedBy: decidedBy ?? this.decidedBy,
+      createdAt: createdAt ?? this.createdAt,
+      lastModified: lastModified ?? this.lastModified,
+      deleted: deleted ?? this.deleted,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (fromDeviceId.present) {
+      map['from_device_id'] = Variable<String>(fromDeviceId.value);
+    }
+    if (allocationId.present) {
+      map['allocation_id'] = Variable<String>(allocationId.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (decidedBy.present) {
+      map['decided_by'] = Variable<String>(decidedBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (lastModified.present) {
+      map['last_modified'] = Variable<DateTime>(lastModified.value);
+    }
+    if (deleted.present) {
+      map['deleted'] = Variable<bool>(deleted.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MoneyRequestsCompanion(')
+          ..write('id: $id, ')
+          ..write('householdId: $householdId, ')
+          ..write('fromDeviceId: $fromDeviceId, ')
+          ..write('allocationId: $allocationId, ')
+          ..write('amount: $amount, ')
+          ..write('currency: $currency, ')
+          ..write('note: $note, ')
+          ..write('status: $status, ')
+          ..write('decidedBy: $decidedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastModified: $lastModified, ')
+          ..write('deleted: $deleted, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MonthReviewsTable extends MonthReviews
+    with TableInfo<$MonthReviewsTable, MonthReview> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MonthReviewsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _householdIdMeta =
+      const VerificationMeta('householdId');
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+      'household_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES households (id) ON DELETE CASCADE'));
+  static const VerificationMeta _periodMeta = const VerificationMeta('period');
+  @override
+  late final GeneratedColumn<String> period = GeneratedColumn<String>(
+      'period', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _deviceIdMeta =
+      const VerificationMeta('deviceId');
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+      'device_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _lastModifiedMeta =
+      const VerificationMeta('lastModified');
+  @override
+  late final GeneratedColumn<DateTime> lastModified = GeneratedColumn<DateTime>(
+      'last_modified', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, householdId, period, deviceId, createdAt, lastModified];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'month_reviews';
+  @override
+  VerificationContext validateIntegrity(Insertable<MonthReview> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+          _householdIdMeta,
+          householdId.isAcceptableOrUnknown(
+              data['household_id']!, _householdIdMeta));
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('period')) {
+      context.handle(_periodMeta,
+          period.isAcceptableOrUnknown(data['period']!, _periodMeta));
+    } else if (isInserting) {
+      context.missing(_periodMeta);
+    }
+    if (data.containsKey('device_id')) {
+      context.handle(_deviceIdMeta,
+          deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta));
+    } else if (isInserting) {
+      context.missing(_deviceIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('last_modified')) {
+      context.handle(
+          _lastModifiedMeta,
+          lastModified.isAcceptableOrUnknown(
+              data['last_modified']!, _lastModifiedMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MonthReview map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MonthReview(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      householdId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}household_id'])!,
+      period: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}period'])!,
+      deviceId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}device_id'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      lastModified: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}last_modified'])!,
+    );
+  }
+
+  @override
+  $MonthReviewsTable createAlias(String alias) {
+    return $MonthReviewsTable(attachedDatabase, alias);
+  }
+}
+
+class MonthReview extends DataClass implements Insertable<MonthReview> {
+  final String id;
+  final String householdId;
+
+  /// Start of the reviewed period, yyyy-MM-dd.
+  final String period;
+  final String deviceId;
+  final DateTime createdAt;
+  final DateTime lastModified;
+  const MonthReview(
+      {required this.id,
+      required this.householdId,
+      required this.period,
+      required this.deviceId,
+      required this.createdAt,
+      required this.lastModified});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['household_id'] = Variable<String>(householdId);
+    map['period'] = Variable<String>(period);
+    map['device_id'] = Variable<String>(deviceId);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['last_modified'] = Variable<DateTime>(lastModified);
+    return map;
+  }
+
+  MonthReviewsCompanion toCompanion(bool nullToAbsent) {
+    return MonthReviewsCompanion(
+      id: Value(id),
+      householdId: Value(householdId),
+      period: Value(period),
+      deviceId: Value(deviceId),
+      createdAt: Value(createdAt),
+      lastModified: Value(lastModified),
+    );
+  }
+
+  factory MonthReview.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MonthReview(
+      id: serializer.fromJson<String>(json['id']),
+      householdId: serializer.fromJson<String>(json['householdId']),
+      period: serializer.fromJson<String>(json['period']),
+      deviceId: serializer.fromJson<String>(json['deviceId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      lastModified: serializer.fromJson<DateTime>(json['lastModified']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'householdId': serializer.toJson<String>(householdId),
+      'period': serializer.toJson<String>(period),
+      'deviceId': serializer.toJson<String>(deviceId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'lastModified': serializer.toJson<DateTime>(lastModified),
+    };
+  }
+
+  MonthReview copyWith(
+          {String? id,
+          String? householdId,
+          String? period,
+          String? deviceId,
+          DateTime? createdAt,
+          DateTime? lastModified}) =>
+      MonthReview(
+        id: id ?? this.id,
+        householdId: householdId ?? this.householdId,
+        period: period ?? this.period,
+        deviceId: deviceId ?? this.deviceId,
+        createdAt: createdAt ?? this.createdAt,
+        lastModified: lastModified ?? this.lastModified,
+      );
+  MonthReview copyWithCompanion(MonthReviewsCompanion data) {
+    return MonthReview(
+      id: data.id.present ? data.id.value : this.id,
+      householdId:
+          data.householdId.present ? data.householdId.value : this.householdId,
+      period: data.period.present ? data.period.value : this.period,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      lastModified: data.lastModified.present
+          ? data.lastModified.value
+          : this.lastModified,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MonthReview(')
+          ..write('id: $id, ')
+          ..write('householdId: $householdId, ')
+          ..write('period: $period, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastModified: $lastModified')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, householdId, period, deviceId, createdAt, lastModified);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MonthReview &&
+          other.id == this.id &&
+          other.householdId == this.householdId &&
+          other.period == this.period &&
+          other.deviceId == this.deviceId &&
+          other.createdAt == this.createdAt &&
+          other.lastModified == this.lastModified);
+}
+
+class MonthReviewsCompanion extends UpdateCompanion<MonthReview> {
+  final Value<String> id;
+  final Value<String> householdId;
+  final Value<String> period;
+  final Value<String> deviceId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> lastModified;
+  final Value<int> rowid;
+  const MonthReviewsCompanion({
+    this.id = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.period = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.lastModified = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MonthReviewsCompanion.insert({
+    required String id,
+    required String householdId,
+    required String period,
+    required String deviceId,
+    this.createdAt = const Value.absent(),
+    this.lastModified = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        householdId = Value(householdId),
+        period = Value(period),
+        deviceId = Value(deviceId);
+  static Insertable<MonthReview> custom({
+    Expression<String>? id,
+    Expression<String>? householdId,
+    Expression<String>? period,
+    Expression<String>? deviceId,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? lastModified,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (householdId != null) 'household_id': householdId,
+      if (period != null) 'period': period,
+      if (deviceId != null) 'device_id': deviceId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (lastModified != null) 'last_modified': lastModified,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MonthReviewsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? householdId,
+      Value<String>? period,
+      Value<String>? deviceId,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? lastModified,
+      Value<int>? rowid}) {
+    return MonthReviewsCompanion(
+      id: id ?? this.id,
+      householdId: householdId ?? this.householdId,
+      period: period ?? this.period,
+      deviceId: deviceId ?? this.deviceId,
+      createdAt: createdAt ?? this.createdAt,
+      lastModified: lastModified ?? this.lastModified,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (period.present) {
+      map['period'] = Variable<String>(period.value);
+    }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (lastModified.present) {
+      map['last_modified'] = Variable<DateTime>(lastModified.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MonthReviewsCompanion(')
+          ..write('id: $id, ')
+          ..write('householdId: $householdId, ')
+          ..write('period: $period, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastModified: $lastModified, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -9004,6 +9971,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $TransactionTemplatesTable(this);
   late final $ObjectivesTable objectives = $ObjectivesTable(this);
   late final $CaptureRulesTable captureRules = $CaptureRulesTable(this);
+  late final $MoneyRequestsTable moneyRequests = $MoneyRequestsTable(this);
+  late final $MonthReviewsTable monthReviews = $MonthReviewsTable(this);
   late final AccountsDao accountsDao = AccountsDao(this as AppDatabase);
   late final TransactionsDao transactionsDao =
       TransactionsDao(this as AppDatabase);
@@ -9027,7 +9996,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         recurringTransactions,
         transactionTemplates,
         objectives,
-        captureRules
+        captureRules,
+        moneyRequests,
+        monthReviews
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -9177,6 +10148,20 @@ abstract class _$AppDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('capture_rules', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('households',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('money_requests', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('households',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('month_reviews', kind: UpdateKind.delete),
             ],
           ),
         ],
@@ -9346,6 +10331,34 @@ final class $$HouseholdsTableReferences
         .filter((f) => f.householdId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_captureRulesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$MoneyRequestsTable, List<MoneyRequest>>
+      _moneyRequestsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.moneyRequests,
+              aliasName: 'households__id__money_requests__household_id');
+
+  $$MoneyRequestsTableProcessedTableManager get moneyRequestsRefs {
+    final manager = $$MoneyRequestsTableTableManager($_db, $_db.moneyRequests)
+        .filter((f) => f.householdId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_moneyRequestsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$MonthReviewsTable, List<MonthReview>>
+      _monthReviewsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.monthReviews,
+              aliasName: 'households__id__month_reviews__household_id');
+
+  $$MonthReviewsTableProcessedTableManager get monthReviewsRefs {
+    final manager = $$MonthReviewsTableTableManager($_db, $_db.monthReviews)
+        .filter((f) => f.householdId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_monthReviewsRefsTable($_db));
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
@@ -9581,6 +10594,48 @@ class $$HouseholdsTableFilterComposer
             $$CaptureRulesTableFilterComposer(
               $db: $db,
               $table: $db.captureRules,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> moneyRequestsRefs(
+      Expression<bool> Function($$MoneyRequestsTableFilterComposer f) f) {
+    final $$MoneyRequestsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.moneyRequests,
+        getReferencedColumn: (t) => t.householdId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MoneyRequestsTableFilterComposer(
+              $db: $db,
+              $table: $db.moneyRequests,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> monthReviewsRefs(
+      Expression<bool> Function($$MonthReviewsTableFilterComposer f) f) {
+    final $$MonthReviewsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.monthReviews,
+        getReferencedColumn: (t) => t.householdId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MonthReviewsTableFilterComposer(
+              $db: $db,
+              $table: $db.monthReviews,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -9874,6 +10929,48 @@ class $$HouseholdsTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> moneyRequestsRefs<T extends Object>(
+      Expression<T> Function($$MoneyRequestsTableAnnotationComposer a) f) {
+    final $$MoneyRequestsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.moneyRequests,
+        getReferencedColumn: (t) => t.householdId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MoneyRequestsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.moneyRequests,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<T> monthReviewsRefs<T extends Object>(
+      Expression<T> Function($$MonthReviewsTableAnnotationComposer a) f) {
+    final $$MonthReviewsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.monthReviews,
+        getReferencedColumn: (t) => t.householdId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MonthReviewsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.monthReviews,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$HouseholdsTableTableManager extends RootTableManager<
@@ -9896,7 +10993,9 @@ class $$HouseholdsTableTableManager extends RootTableManager<
         bool recurringTransactionsRefs,
         bool transactionTemplatesRefs,
         bool objectivesRefs,
-        bool captureRulesRefs})> {
+        bool captureRulesRefs,
+        bool moneyRequestsRefs,
+        bool monthReviewsRefs})> {
   $$HouseholdsTableTableManager(_$AppDatabase db, $HouseholdsTable table)
       : super(TableManagerState(
           db: db,
@@ -9978,7 +11077,9 @@ class $$HouseholdsTableTableManager extends RootTableManager<
               recurringTransactionsRefs = false,
               transactionTemplatesRefs = false,
               objectivesRefs = false,
-              captureRulesRefs = false}) {
+              captureRulesRefs = false,
+              moneyRequestsRefs = false,
+              monthReviewsRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
@@ -9990,7 +11091,9 @@ class $$HouseholdsTableTableManager extends RootTableManager<
                 if (recurringTransactionsRefs) db.recurringTransactions,
                 if (transactionTemplatesRefs) db.transactionTemplates,
                 if (objectivesRefs) db.objectives,
-                if (captureRulesRefs) db.captureRules
+                if (captureRulesRefs) db.captureRules,
+                if (moneyRequestsRefs) db.moneyRequests,
+                if (monthReviewsRefs) db.monthReviews
               ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
@@ -10110,6 +11213,32 @@ class $$HouseholdsTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem:
                             (item, referencedItems) => referencedItems
                                 .where((e) => e.householdId == item.id),
+                        typedResults: items),
+                  if (moneyRequestsRefs)
+                    await $_getPrefetchedData<Household, $HouseholdsTable,
+                            MoneyRequest>(
+                        currentTable: table,
+                        referencedTable: $$HouseholdsTableReferences
+                            ._moneyRequestsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$HouseholdsTableReferences(db, table, p0)
+                                .moneyRequestsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.householdId == item.id),
+                        typedResults: items),
+                  if (monthReviewsRefs)
+                    await $_getPrefetchedData<Household, $HouseholdsTable,
+                            MonthReview>(
+                        currentTable: table,
+                        referencedTable: $$HouseholdsTableReferences
+                            ._monthReviewsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$HouseholdsTableReferences(db, table, p0)
+                                .monthReviewsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.householdId == item.id),
                         typedResults: items)
                 ];
               },
@@ -10138,7 +11267,9 @@ typedef $$HouseholdsTableProcessedTableManager = ProcessedTableManager<
         bool recurringTransactionsRefs,
         bool transactionTemplatesRefs,
         bool objectivesRefs,
-        bool captureRulesRefs})>;
+        bool captureRulesRefs,
+        bool moneyRequestsRefs,
+        bool monthReviewsRefs})>;
 typedef $$UsersTableCreateCompanionBuilder = UsersCompanion Function({
   required String id,
   required String householdId,
@@ -17471,6 +18602,679 @@ typedef $$CaptureRulesTableProcessedTableManager = ProcessedTableManager<
     (CaptureRule, $$CaptureRulesTableReferences),
     CaptureRule,
     PrefetchHooks Function({bool householdId})>;
+typedef $$MoneyRequestsTableCreateCompanionBuilder = MoneyRequestsCompanion
+    Function({
+  required String id,
+  required String householdId,
+  required String fromDeviceId,
+  required String allocationId,
+  required double amount,
+  required String currency,
+  Value<String> note,
+  Value<String> status,
+  Value<String?> decidedBy,
+  Value<DateTime> createdAt,
+  Value<DateTime> lastModified,
+  Value<bool> deleted,
+  Value<int> rowid,
+});
+typedef $$MoneyRequestsTableUpdateCompanionBuilder = MoneyRequestsCompanion
+    Function({
+  Value<String> id,
+  Value<String> householdId,
+  Value<String> fromDeviceId,
+  Value<String> allocationId,
+  Value<double> amount,
+  Value<String> currency,
+  Value<String> note,
+  Value<String> status,
+  Value<String?> decidedBy,
+  Value<DateTime> createdAt,
+  Value<DateTime> lastModified,
+  Value<bool> deleted,
+  Value<int> rowid,
+});
+
+final class $$MoneyRequestsTableReferences
+    extends BaseReferences<_$AppDatabase, $MoneyRequestsTable, MoneyRequest> {
+  $$MoneyRequestsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $HouseholdsTable _householdIdTable(_$AppDatabase db) =>
+      db.households.createAlias('money_requests__household_id__households__id');
+
+  $$HouseholdsTableProcessedTableManager get householdId {
+    final $_column = $_itemColumn<String>('household_id')!;
+
+    final manager = $$HouseholdsTableTableManager($_db, $_db.households)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_householdIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$MoneyRequestsTableFilterComposer
+    extends Composer<_$AppDatabase, $MoneyRequestsTable> {
+  $$MoneyRequestsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get fromDeviceId => $composableBuilder(
+      column: $table.fromDeviceId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get allocationId => $composableBuilder(
+      column: $table.allocationId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get note => $composableBuilder(
+      column: $table.note, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get decidedBy => $composableBuilder(
+      column: $table.decidedBy, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastModified => $composableBuilder(
+      column: $table.lastModified, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+      column: $table.deleted, builder: (column) => ColumnFilters(column));
+
+  $$HouseholdsTableFilterComposer get householdId {
+    final $$HouseholdsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.householdId,
+        referencedTable: $db.households,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$HouseholdsTableFilterComposer(
+              $db: $db,
+              $table: $db.households,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$MoneyRequestsTableOrderingComposer
+    extends Composer<_$AppDatabase, $MoneyRequestsTable> {
+  $$MoneyRequestsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get fromDeviceId => $composableBuilder(
+      column: $table.fromDeviceId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get allocationId => $composableBuilder(
+      column: $table.allocationId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get note => $composableBuilder(
+      column: $table.note, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get decidedBy => $composableBuilder(
+      column: $table.decidedBy, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get lastModified => $composableBuilder(
+      column: $table.lastModified,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+      column: $table.deleted, builder: (column) => ColumnOrderings(column));
+
+  $$HouseholdsTableOrderingComposer get householdId {
+    final $$HouseholdsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.householdId,
+        referencedTable: $db.households,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$HouseholdsTableOrderingComposer(
+              $db: $db,
+              $table: $db.households,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$MoneyRequestsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MoneyRequestsTable> {
+  $$MoneyRequestsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get fromDeviceId => $composableBuilder(
+      column: $table.fromDeviceId, builder: (column) => column);
+
+  GeneratedColumn<String> get allocationId => $composableBuilder(
+      column: $table.allocationId, builder: (column) => column);
+
+  GeneratedColumn<double> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get decidedBy =>
+      $composableBuilder(column: $table.decidedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastModified => $composableBuilder(
+      column: $table.lastModified, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
+
+  $$HouseholdsTableAnnotationComposer get householdId {
+    final $$HouseholdsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.householdId,
+        referencedTable: $db.households,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$HouseholdsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.households,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$MoneyRequestsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $MoneyRequestsTable,
+    MoneyRequest,
+    $$MoneyRequestsTableFilterComposer,
+    $$MoneyRequestsTableOrderingComposer,
+    $$MoneyRequestsTableAnnotationComposer,
+    $$MoneyRequestsTableCreateCompanionBuilder,
+    $$MoneyRequestsTableUpdateCompanionBuilder,
+    (MoneyRequest, $$MoneyRequestsTableReferences),
+    MoneyRequest,
+    PrefetchHooks Function({bool householdId})> {
+  $$MoneyRequestsTableTableManager(_$AppDatabase db, $MoneyRequestsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MoneyRequestsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MoneyRequestsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MoneyRequestsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> householdId = const Value.absent(),
+            Value<String> fromDeviceId = const Value.absent(),
+            Value<String> allocationId = const Value.absent(),
+            Value<double> amount = const Value.absent(),
+            Value<String> currency = const Value.absent(),
+            Value<String> note = const Value.absent(),
+            Value<String> status = const Value.absent(),
+            Value<String?> decidedBy = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> lastModified = const Value.absent(),
+            Value<bool> deleted = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MoneyRequestsCompanion(
+            id: id,
+            householdId: householdId,
+            fromDeviceId: fromDeviceId,
+            allocationId: allocationId,
+            amount: amount,
+            currency: currency,
+            note: note,
+            status: status,
+            decidedBy: decidedBy,
+            createdAt: createdAt,
+            lastModified: lastModified,
+            deleted: deleted,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String householdId,
+            required String fromDeviceId,
+            required String allocationId,
+            required double amount,
+            required String currency,
+            Value<String> note = const Value.absent(),
+            Value<String> status = const Value.absent(),
+            Value<String?> decidedBy = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> lastModified = const Value.absent(),
+            Value<bool> deleted = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MoneyRequestsCompanion.insert(
+            id: id,
+            householdId: householdId,
+            fromDeviceId: fromDeviceId,
+            allocationId: allocationId,
+            amount: amount,
+            currency: currency,
+            note: note,
+            status: status,
+            decidedBy: decidedBy,
+            createdAt: createdAt,
+            lastModified: lastModified,
+            deleted: deleted,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable<$MoneyRequestsTable, MoneyRequest>(table),
+                    $$MoneyRequestsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({householdId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (householdId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.householdId,
+                    referencedTable:
+                        $$MoneyRequestsTableReferences._householdIdTable(db),
+                    referencedColumn:
+                        $$MoneyRequestsTableReferences._householdIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$MoneyRequestsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $MoneyRequestsTable,
+    MoneyRequest,
+    $$MoneyRequestsTableFilterComposer,
+    $$MoneyRequestsTableOrderingComposer,
+    $$MoneyRequestsTableAnnotationComposer,
+    $$MoneyRequestsTableCreateCompanionBuilder,
+    $$MoneyRequestsTableUpdateCompanionBuilder,
+    (MoneyRequest, $$MoneyRequestsTableReferences),
+    MoneyRequest,
+    PrefetchHooks Function({bool householdId})>;
+typedef $$MonthReviewsTableCreateCompanionBuilder = MonthReviewsCompanion
+    Function({
+  required String id,
+  required String householdId,
+  required String period,
+  required String deviceId,
+  Value<DateTime> createdAt,
+  Value<DateTime> lastModified,
+  Value<int> rowid,
+});
+typedef $$MonthReviewsTableUpdateCompanionBuilder = MonthReviewsCompanion
+    Function({
+  Value<String> id,
+  Value<String> householdId,
+  Value<String> period,
+  Value<String> deviceId,
+  Value<DateTime> createdAt,
+  Value<DateTime> lastModified,
+  Value<int> rowid,
+});
+
+final class $$MonthReviewsTableReferences
+    extends BaseReferences<_$AppDatabase, $MonthReviewsTable, MonthReview> {
+  $$MonthReviewsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $HouseholdsTable _householdIdTable(_$AppDatabase db) =>
+      db.households.createAlias('month_reviews__household_id__households__id');
+
+  $$HouseholdsTableProcessedTableManager get householdId {
+    final $_column = $_itemColumn<String>('household_id')!;
+
+    final manager = $$HouseholdsTableTableManager($_db, $_db.households)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_householdIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$MonthReviewsTableFilterComposer
+    extends Composer<_$AppDatabase, $MonthReviewsTable> {
+  $$MonthReviewsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get period => $composableBuilder(
+      column: $table.period, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get deviceId => $composableBuilder(
+      column: $table.deviceId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastModified => $composableBuilder(
+      column: $table.lastModified, builder: (column) => ColumnFilters(column));
+
+  $$HouseholdsTableFilterComposer get householdId {
+    final $$HouseholdsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.householdId,
+        referencedTable: $db.households,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$HouseholdsTableFilterComposer(
+              $db: $db,
+              $table: $db.households,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$MonthReviewsTableOrderingComposer
+    extends Composer<_$AppDatabase, $MonthReviewsTable> {
+  $$MonthReviewsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get period => $composableBuilder(
+      column: $table.period, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+      column: $table.deviceId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get lastModified => $composableBuilder(
+      column: $table.lastModified,
+      builder: (column) => ColumnOrderings(column));
+
+  $$HouseholdsTableOrderingComposer get householdId {
+    final $$HouseholdsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.householdId,
+        referencedTable: $db.households,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$HouseholdsTableOrderingComposer(
+              $db: $db,
+              $table: $db.households,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$MonthReviewsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MonthReviewsTable> {
+  $$MonthReviewsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get period =>
+      $composableBuilder(column: $table.period, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastModified => $composableBuilder(
+      column: $table.lastModified, builder: (column) => column);
+
+  $$HouseholdsTableAnnotationComposer get householdId {
+    final $$HouseholdsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.householdId,
+        referencedTable: $db.households,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$HouseholdsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.households,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$MonthReviewsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $MonthReviewsTable,
+    MonthReview,
+    $$MonthReviewsTableFilterComposer,
+    $$MonthReviewsTableOrderingComposer,
+    $$MonthReviewsTableAnnotationComposer,
+    $$MonthReviewsTableCreateCompanionBuilder,
+    $$MonthReviewsTableUpdateCompanionBuilder,
+    (MonthReview, $$MonthReviewsTableReferences),
+    MonthReview,
+    PrefetchHooks Function({bool householdId})> {
+  $$MonthReviewsTableTableManager(_$AppDatabase db, $MonthReviewsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MonthReviewsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MonthReviewsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MonthReviewsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> householdId = const Value.absent(),
+            Value<String> period = const Value.absent(),
+            Value<String> deviceId = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> lastModified = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MonthReviewsCompanion(
+            id: id,
+            householdId: householdId,
+            period: period,
+            deviceId: deviceId,
+            createdAt: createdAt,
+            lastModified: lastModified,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String householdId,
+            required String period,
+            required String deviceId,
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> lastModified = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MonthReviewsCompanion.insert(
+            id: id,
+            householdId: householdId,
+            period: period,
+            deviceId: deviceId,
+            createdAt: createdAt,
+            lastModified: lastModified,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable<$MonthReviewsTable, MonthReview>(table),
+                    $$MonthReviewsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({householdId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (householdId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.householdId,
+                    referencedTable:
+                        $$MonthReviewsTableReferences._householdIdTable(db),
+                    referencedColumn:
+                        $$MonthReviewsTableReferences._householdIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$MonthReviewsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $MonthReviewsTable,
+    MonthReview,
+    $$MonthReviewsTableFilterComposer,
+    $$MonthReviewsTableOrderingComposer,
+    $$MonthReviewsTableAnnotationComposer,
+    $$MonthReviewsTableCreateCompanionBuilder,
+    $$MonthReviewsTableUpdateCompanionBuilder,
+    (MonthReview, $$MonthReviewsTableReferences),
+    MonthReview,
+    PrefetchHooks Function({bool householdId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -17501,4 +19305,8 @@ class $AppDatabaseManager {
       $$ObjectivesTableTableManager(_db, _db.objectives);
   $$CaptureRulesTableTableManager get captureRules =>
       $$CaptureRulesTableTableManager(_db, _db.captureRules);
+  $$MoneyRequestsTableTableManager get moneyRequests =>
+      $$MoneyRequestsTableTableManager(_db, _db.moneyRequests);
+  $$MonthReviewsTableTableManager get monthReviews =>
+      $$MonthReviewsTableTableManager(_db, _db.monthReviews);
 }

@@ -263,6 +263,8 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
         batch.deleteAll(db.transactionTemplates);
         batch.deleteAll(db.objectives);
         batch.deleteAll(db.captureRules);
+        batch.deleteAll(db.moneyRequests);
+        batch.deleteAll(db.monthReviews);
         batch.deleteAll(db.fxRates);
         batch.deleteAll(db.users);
         batch.deleteAll(db.households);

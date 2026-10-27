@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:drift/drift.dart' hide Column;
 
 import '../capture/review_screen.dart';
+import '../family/requests_screen.dart';
 import '../forecast/forecast_screen.dart';
 import '../../core/database/app_database.dart';
 import '../../core/providers/accounts_provider.dart';
@@ -549,6 +550,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     final result = <Widget>[
       const GettingStartedCard(),
       const ReviewAlertsCard(),
+      const RequestsCard(),
     ];
     for (final config in layout) {
       if (config.visible && sectionWidgets.containsKey(config.section)) {

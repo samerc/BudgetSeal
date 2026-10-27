@@ -1868,6 +1868,30 @@ members_grownup,"Family: members, roles, private envelopes",Grown-up,كبير,Ad
 members_you,"Family: members, roles, private envelopes",{name} (you),{name} (أنت),{name} (vous)
 members_only_grownups,"Family: members, roles, private envelopes",Only a grown-up can change this.,وحده أحد الكبار يمكنه تغيير ذلك.,Seul un adulte peut modifier cela.
 members_none,"Family: members, roles, private envelopes",Members appear here once they’ve joined this budget and named themselves.,يظهر الأعضاء هنا بعد انضمامهم إلى هذه الميزانية وتسمية أنفسهم.,Les membres apparaissent ici une fois qu’ils ont rejoint ce budget et indiqué leur nom.
+req_title,"Family: money requests, kid home, monthly review",Money requests,طلبات المال,Demandes d’argent
+req_ask,"Family: money requests, kid home, monthly review",Ask for money,اطلب مالًا,Demander de l’argent
+req_for,"Family: money requests, kid home, monthly review",For,من أجل,Pour
+req_note_hint,"Family: money requests, kid home, monthly review",What is it for? (e.g. school trip),لأي غرض؟ (مثلًا رحلة مدرسية),Pour quoi ? (ex. sortie scolaire)
+req_send,"Family: money requests, kid home, monthly review",Send request,أرسل الطلب,Envoyer la demande
+req_sent,"Family: money requests, kid home, monthly review",Request sent,أُرسل الطلب,Demande envoyée
+req_approve,"Family: money requests, kid home, monthly review",Approve,موافقة,Accepter
+req_decline,"Family: money requests, kid home, monthly review",Decline,رفض,Refuser
+req_approved,"Family: money requests, kid home, monthly review",Approved,تمت الموافقة,Acceptée
+req_declined,"Family: money requests, kid home, monthly review",Declined,مرفوض,Refusée
+req_waiting,"Family: money requests, kid home, monthly review",Waiting,قيد الانتظار,En attente
+req_open,"Family: money requests, kid home, monthly review",To decide,بانتظار القرار,À décider
+req_past,"Family: money requests, kid home, monthly review",Earlier,سابقًا,Plus tôt
+req_none,"Family: money requests, kid home, monthly review",No requests,لا طلبات,Aucune demande
+req_card,"Family: money requests, kid home, monthly review","{n, plural, =1{1 money request} other{{n} money requests}}","{n, plural, =1{طلب مال واحد} other{{n} طلبات مال}}","{n, plural, =1{1 demande d’argent} other{{n} demandes d’argent}}"
+req_asked,"Family: money requests, kid home, monthly review",{name} asks for {amount},{name} يطلب {amount},{name} demande {amount}
+req_into,"Family: money requests, kid home, monthly review",into {envelope},إلى {envelope},dans {envelope}
+req_no_envelope,"Family: money requests, kid home, monthly review",A grown-up needs to give you an envelope first.,على أحد الكبار أن يمنحك مغلّفًا أولًا.,Un adulte doit d’abord vous donner une enveloppe.
+kid_my_envelopes,"Family: money requests, kid home, monthly review",My envelopes,مغلّفاتي,Mes enveloppes
+kid_add_spending,"Family: money requests, kid home, monthly review",Add spending,أضف مصروفًا,Ajouter une dépense
+kid_recent,"Family: money requests, kid home, monthly review",My spending,مصاريفي,Mes dépenses
+review_family_done,"Family: money requests, kid home, monthly review",I’ve reviewed this month,راجعتُ هذا الشهر,J’ai revu ce mois
+review_family_waiting,"Family: money requests, kid home, monthly review",Sealed once everyone has reviewed it. Waiting for {names}.,يُختم حين يراجعه الجميع. بانتظار {names}.,Scellé une fois revu par tous. En attente de {names}.
+review_family_sealed,"Family: money requests, kid home, monthly review",Reviewed by everyone,راجعه الجميع,Revu par tout le monde
 alloc_archived_title,,Archived envelopes,الأظرف المؤرشفة,Enveloppes archivées
 alloc_no_archived,,No archived envelopes,لا توجد أظرف مؤرشفة,Aucune enveloppe archivée
 alloc_unarchived,,{name} unarchived,تم إلغاء أرشفة {name},{name} désarchivée

@@ -210,6 +210,10 @@ Exchange rates: `id`, `baseCurrency`, `targetCurrency`, `rate` (1 `baseCurrency`
 
 Rules for payments shared into the app or read from bank alerts: `id`, `householdId`, `match` (text looked for, any case), `categoryId`, `accountId`, `title` (each may be null: left as read), `learned` (made by the app from the user's choices), `uses`, `createdAt`, `lastModified`, `deleted`.
 
+### moneyRequests and monthReviews
+
+Family features, written in the app database's own JSON (dates as milliseconds since 1970). `moneyRequests`: a kid asking for money — `id`, `householdId`, `fromDeviceId`, `allocationId` (their envelope), `amount`, `currency`, `note`, `status` (`open`, `approved`, `declined`), `decidedBy`, `createdAt`, `lastModified`, `deleted`. Approving one adds an `allocationLedger` funding row with id `req:<request id>`. `monthReviews`: a grown-up reviewed a budget period — `id` (`<period start>:<device>`), `householdId`, `period` (yyyy-MM-dd), `deviceId`, `createdAt`, `lastModified`.
+
 ## Computing balances
 
 Balances are not stored; they are computed from the rows above. Skip rows with `deleted: true` and transactions whose `status` isn't null.

@@ -2378,6 +2378,92 @@ class SAr extends S {
       'يظهر الأعضاء هنا بعد انضمامهم إلى هذه الميزانية وتسمية أنفسهم.';
 
   @override
+  String get reqTitle => 'طلبات المال';
+
+  @override
+  String get reqAsk => 'اطلب مالًا';
+
+  @override
+  String get reqFor => 'من أجل';
+
+  @override
+  String get reqNoteHint => 'لأي غرض؟ (مثلًا رحلة مدرسية)';
+
+  @override
+  String get reqSend => 'أرسل الطلب';
+
+  @override
+  String get reqSent => 'أُرسل الطلب';
+
+  @override
+  String get reqApprove => 'موافقة';
+
+  @override
+  String get reqDecline => 'رفض';
+
+  @override
+  String get reqApproved => 'تمت الموافقة';
+
+  @override
+  String get reqDeclined => 'مرفوض';
+
+  @override
+  String get reqWaiting => 'قيد الانتظار';
+
+  @override
+  String get reqOpen => 'بانتظار القرار';
+
+  @override
+  String get reqPast => 'سابقًا';
+
+  @override
+  String get reqNone => 'لا طلبات';
+
+  @override
+  String reqCard(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n طلبات مال',
+      one: 'طلب مال واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reqAsked(String name, String amount) {
+    return '$name يطلب $amount';
+  }
+
+  @override
+  String reqInto(String envelope) {
+    return 'إلى $envelope';
+  }
+
+  @override
+  String get reqNoEnvelope => 'على أحد الكبار أن يمنحك مغلّفًا أولًا.';
+
+  @override
+  String get kidMyEnvelopes => 'مغلّفاتي';
+
+  @override
+  String get kidAddSpending => 'أضف مصروفًا';
+
+  @override
+  String get kidRecent => 'مصاريفي';
+
+  @override
+  String get reviewFamilyDone => 'راجعتُ هذا الشهر';
+
+  @override
+  String reviewFamilyWaiting(String names) {
+    return 'يُختم حين يراجعه الجميع. بانتظار $names.';
+  }
+
+  @override
+  String get reviewFamilySealed => 'راجعه الجميع';
+
+  @override
   String get allocArchivedTitle => 'الأظرف المؤرشفة';
 
   @override

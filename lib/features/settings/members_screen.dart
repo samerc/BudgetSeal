@@ -63,29 +63,34 @@ class MembersScreen extends ConsumerWidget {
                   Padding(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    child: Row(children: [
-                      Expanded(
-                        child: Text(
+                    // The name, then the choice (side by side they don't
+                    // fit a small phone with large text).
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
                           u.deviceId == DeviceIdentity.id
                               ? tr.membersYou(u.name)
                               : u.name,
                           style: const TextStyle(
                               fontSize: 15, fontWeight: FontWeight.w600),
                         ),
-                      ),
-                      SegmentedButton<bool>(
-                        showSelectedIcon: false,
-                        segments: [
-                          ButtonSegment(
-                              value: false, label: Text(tr.membersGrownup)),
-                          ButtonSegment(value: true, label: Text(tr.membersKid)),
-                        ],
-                        selected: {u.role == kidRole},
-                        onSelectionChanged: iAmKid
-                            ? null
-                            : (v) => _setRole(context, ref, u, v.first),
-                      ),
-                    ]),
+                        const SizedBox(height: 8),
+                        SegmentedButton<bool>(
+                          showSelectedIcon: false,
+                          segments: [
+                            ButtonSegment(
+                                value: false, label: Text(tr.membersGrownup)),
+                            ButtonSegment(
+                                value: true, label: Text(tr.membersKid)),
+                          ],
+                          selected: {u.role == kidRole},
+                          onSelectionChanged: iAmKid
+                              ? null
+                              : (v) => _setRole(context, ref, u, v.first),
+                        ),
+                      ],
+                    ),
                   ),
               ]),
             ),

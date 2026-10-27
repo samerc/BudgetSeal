@@ -35,6 +35,8 @@ class SyncEngine {
     final fxRates = await _db.select(_db.fxRates).get();
     final objectivesList = await _db.select(_db.objectives).get();
     final rules = await _db.select(_db.captureRules).get();
+    final requests = await _db.select(_db.moneyRequests).get();
+    final reviews = await _db.select(_db.monthReviews).get();
 
     final data = {
       'version': 1,
@@ -53,6 +55,8 @@ class SyncEngine {
       'fxRates': fxRates.map(_fxRateToMap).toList(),
       'objectives': objectivesList.map(_objectiveToMap).toList(),
       'captureRules': rules.map(_ruleToMap).toList(),
+      'moneyRequests': requests.map((r) => r.toJson()).toList(),
+      'monthReviews': reviews.map((r) => r.toJson()).toList(),
     };
 
     // A few MB of JSON for a long history: encode off the UI thread.
@@ -78,6 +82,8 @@ class SyncEngine {
       await _db.delete(_db.recurringTransactions).go();
       await _db.delete(_db.objectives).go();
       await _db.delete(_db.captureRules).go();
+      await _db.delete(_db.moneyRequests).go();
+      await _db.delete(_db.monthReviews).go();
       await _db.delete(_db.fxRates).go();
       await _db.delete(_db.categories).go();
       await _db.delete(_db.allocations).go();
@@ -138,6 +144,17 @@ class SyncEngine {
         for (final r in _list(data, 'captureRules')) {
           b.insert(_db.captureRules, _ruleFromMap(r),
               onConflict: DoUpdate((_) => _ruleFromMap(r)));
+        }
+        // Family rows, in Drift's own JSON (ISO dates come back as they went).
+        for (final r in _list(data, 'moneyRequests')) {
+          b.insert(_db.moneyRequests,
+              MoneyRequest.fromJson(r as Map<String, dynamic>),
+              mode: InsertMode.insertOrReplace);
+        }
+        for (final r in _list(data, 'monthReviews')) {
+          b.insert(_db.monthReviews,
+              MonthReview.fromJson(r as Map<String, dynamic>),
+              mode: InsertMode.insertOrReplace);
         }
       });
       await normalizeTransactions(_db);

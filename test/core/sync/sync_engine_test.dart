@@ -110,6 +110,12 @@ void main() {
         targetCurrency: 'USD', deviceId: 'a'));
     await a.into(a.captureRules).insert(CaptureRulesCompanion.insert(
         id: 'rule', householdId: 'hh', match: 'spinneys'));
+    await a.into(a.moneyRequests).insert(MoneyRequestsCompanion.insert(
+        id: 'req', householdId: 'hh', fromDeviceId: 'kid',
+        allocationId: 'env', amount: 20, currency: 'USD'));
+    await a.into(a.monthReviews).insert(MonthReviewsCompanion.insert(
+        id: '2026-10-01:a', householdId: 'hh', period: '2026-10-01',
+        deviceId: 'a'));
 
     await sync(a, b);
 

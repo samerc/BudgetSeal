@@ -4215,6 +4215,150 @@ abstract class S {
   /// **'Members appear here once they’ve joined this budget and named themselves.'**
   String get membersNone;
 
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'Money requests'**
+  String get reqTitle;
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for money'**
+  String get reqAsk;
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'For'**
+  String get reqFor;
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'What is it for? (e.g. school trip)'**
+  String get reqNoteHint;
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'Send request'**
+  String get reqSend;
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent'**
+  String get reqSent;
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get reqApprove;
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get reqDecline;
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get reqApproved;
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get reqDeclined;
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get reqWaiting;
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'To decide'**
+  String get reqOpen;
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'Earlier'**
+  String get reqPast;
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'No requests'**
+  String get reqNone;
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 money request} other{{n} money requests}}'**
+  String reqCard(int n);
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'{name} asks for {amount}'**
+  String reqAsked(String name, String amount);
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'into {envelope}'**
+  String reqInto(String envelope);
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'A grown-up needs to give you an envelope first.'**
+  String get reqNoEnvelope;
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'My envelopes'**
+  String get kidMyEnvelopes;
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'Add spending'**
+  String get kidAddSpending;
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'My spending'**
+  String get kidRecent;
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'I’ve reviewed this month'**
+  String get reviewFamilyDone;
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'Sealed once everyone has reviewed it. Waiting for {names}.'**
+  String reviewFamilyWaiting(String names);
+
+  /// Family: money requests, kid home, monthly review
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewed by everyone'**
+  String get reviewFamilySealed;
+
   /// No description provided for @allocArchivedTitle.
   ///
   /// In en, this message translates to:

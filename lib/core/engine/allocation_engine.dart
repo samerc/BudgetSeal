@@ -461,7 +461,8 @@ class AllocationEngine {
     });
   }
 
-  /// Move funds from Unallocated pool into an allocation.
+  /// Move funds from Unallocated pool into an allocation. A fixed [id]
+  /// (an approved money request) funds once even when two phones do it.
   Future<void> fundAllocation({
     required String allocationId,
     required double amount,
@@ -469,9 +470,10 @@ class AllocationEngine {
     required String deviceId,
     double exchangeRateToBase = 1.0,
     String note = '',
+    String? id,
   }) async {
     await _ledgerDao.appendEntry(AllocationLedgerCompanion.insert(
-      id: _uuid.v4(),
+      id: id ?? _uuid.v4(),
       allocationId: allocationId,
       entryType: 'funding',
       amount: amount,

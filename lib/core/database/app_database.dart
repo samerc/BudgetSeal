@@ -18,6 +18,7 @@ import 'tables/allocations_table.dart';
 import 'tables/categories_table.dart';
 import 'tables/fx_rates_table.dart';
 import 'tables/capture_rules_table.dart';
+import 'tables/family_tables.dart';
 import 'tables/households_table.dart';
 import 'tables/objectives_table.dart';
 import 'tables/recurring_transactions_table.dart';
@@ -43,6 +44,8 @@ part 'app_database.g.dart';
     TransactionTemplates,
     Objectives,
     CaptureRules,
+    MoneyRequests,
+    MonthReviews,
   ],
   daos: [
     AccountsDao,
@@ -57,7 +60,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 28;
+  int get schemaVersion => 29;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -237,6 +240,11 @@ class AppDatabase extends _$AppDatabase {
             await _addColumnIfMissing(m, allocations, allocations.ownerDeviceId);
             await _addColumnIfMissing(m, allocations, allocations.isPrivate);
           }
+          if (from < 29) {
+            // Family: money requests and the monthly review.
+            await _createTableIfMissing(m, moneyRequests);
+            await _createTableIfMissing(m, monthReviews);
+          }
         },
         beforeOpen: (_) async {
           // First, so every change after it is logged.
@@ -260,6 +268,8 @@ class AppDatabase extends _$AppDatabase {
     'transaction_templates',
     'objectives',
     'capture_rules',
+    'money_requests',
+    'month_reviews',
   ];
 
   /// Indexes for the hot queries. Created on every open (IF NOT EXISTS):

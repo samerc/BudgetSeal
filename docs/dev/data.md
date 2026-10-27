@@ -25,8 +25,8 @@ Developer notes moved out of CLAUDE.md (Oct 2026). Read before changing this are
 
 ## Database
 
-### Schema Version: 28
-13 tables: households, users, accounts, categories, allocations, transactions, transaction_lines, allocation_ledger, recurring_transactions, transaction_templates, fx_rates, objectives, capture_rules.
+### Schema Version: 29
+15 tables: households, users, accounts, categories, allocations, transactions, transaction_lines, allocation_ledger, recurring_transactions, transaction_templates, fx_rates, objectives, capture_rules, money_requests, month_reviews.
 
 v9→v10 added `isSubscription` and `priceHistory` columns to `recurring_transactions` for subscription tracking.
 v10→v11 added `icon` (nullable TEXT) to `allocations` for envelope emoji icons.
@@ -54,6 +54,8 @@ v25→v26 added `allocations.secondTargetAmount` / `secondTargetCurrency` (nulla
 v26→v27 created `capture_rules` (synced, in `opLogTables` and `syncedTables`; snapshot key `captureRules`): rules for captured payments (see transactions.md "Rules").
 
 v27→v28 added `allocations.ownerDeviceId` and `allocations.isPrivate` (synced): whose envelope it is, and private (hidden on the other members' phones; see budget.md "Family").
+
+v28→v29 created `money_requests` and `month_reviews` (synced; in `opLogTables`, `syncedTables`, the snapshot as `moneyRequests`/`monthReviews` in Drift's JSON): family money requests and the monthly review (see budget.md "Family").
 v18→v19 added `anchorDay` (nullable INT) to `recurring_transactions`: the day of month a series was set up on. `advanceRecurringDate()` (recurring_engine.dart) clamps monthly/yearly dates to short months and returns to the anchor (Jan 31 → Feb 28 → Mar 31); legacy rows get the anchor filled from their due day the next time they post.
 
 ### Migrations

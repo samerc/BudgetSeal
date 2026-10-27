@@ -2377,6 +2377,92 @@ class SEn extends S {
       'Members appear here once they’ve joined this budget and named themselves.';
 
   @override
+  String get reqTitle => 'Money requests';
+
+  @override
+  String get reqAsk => 'Ask for money';
+
+  @override
+  String get reqFor => 'For';
+
+  @override
+  String get reqNoteHint => 'What is it for? (e.g. school trip)';
+
+  @override
+  String get reqSend => 'Send request';
+
+  @override
+  String get reqSent => 'Request sent';
+
+  @override
+  String get reqApprove => 'Approve';
+
+  @override
+  String get reqDecline => 'Decline';
+
+  @override
+  String get reqApproved => 'Approved';
+
+  @override
+  String get reqDeclined => 'Declined';
+
+  @override
+  String get reqWaiting => 'Waiting';
+
+  @override
+  String get reqOpen => 'To decide';
+
+  @override
+  String get reqPast => 'Earlier';
+
+  @override
+  String get reqNone => 'No requests';
+
+  @override
+  String reqCard(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n money requests',
+      one: '1 money request',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reqAsked(String name, String amount) {
+    return '$name asks for $amount';
+  }
+
+  @override
+  String reqInto(String envelope) {
+    return 'into $envelope';
+  }
+
+  @override
+  String get reqNoEnvelope => 'A grown-up needs to give you an envelope first.';
+
+  @override
+  String get kidMyEnvelopes => 'My envelopes';
+
+  @override
+  String get kidAddSpending => 'Add spending';
+
+  @override
+  String get kidRecent => 'My spending';
+
+  @override
+  String get reviewFamilyDone => 'I’ve reviewed this month';
+
+  @override
+  String reviewFamilyWaiting(String names) {
+    return 'Sealed once everyone has reviewed it. Waiting for $names.';
+  }
+
+  @override
+  String get reviewFamilySealed => 'Reviewed by everyone';
+
+  @override
   String get allocArchivedTitle => 'Archived envelopes';
 
   @override

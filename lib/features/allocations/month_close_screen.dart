@@ -8,6 +8,10 @@ import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../core/database/app_database.dart' show User;
+import '../../core/providers/family_provider.dart';
+import '../../core/services/household_members.dart';
+import '../../core/services/family_service.dart';
 import '../../core/database/daos/ledger_dao.dart';
 import '../../core/engine/budget_history.dart';
 import '../../core/engine/period_engine.dart' show budgetPeriodFor;
@@ -65,6 +69,10 @@ class _Recap {
 }
 
 class _MonthCloseScreenState extends ConsumerState<MonthCloseScreen> {
+  // Family (roadmap #5): who has reviewed the closed period.
+  DateTime? _periodStart;
+  Set<String> _reviewed = const {};
+
   _Recap? _recap;
   bool _loading = true;
   bool _failed = false;
@@ -91,6 +99,8 @@ class _MonthCloseScreenState extends ConsumerState<MonthCloseScreen> {
       final last = budgetPeriodFor(household.periodStartDay,
           current.start.subtract(const Duration(days: 1)));
       final db = ref.read(databaseProvider);
+      _periodStart = last.start;
+      _reviewed = await FamilyService(db).reviewedBy(household.id, last.start);
       final dao = LedgerDao(db);
       final base = household.baseCurrency;
       final stats = await envelopePeriodStats(dao,
@@ -190,8 +200,33 @@ class _MonthCloseScreenState extends ConsumerState<MonthCloseScreen> {
     );
   }
 
+  Future<void> _confirmReview() async {
+    final household = ref.read(householdProvider).value;
+    if (household == null || _periodStart == null) return;
+    try {
+      final service = FamilyService(ref.read(databaseProvider));
+      await service.confirmReview(household.id, _periodStart!);
+      final reviewed = await service.reviewedBy(household.id, _periodStart!);
+      if (mounted) setState(() => _reviewed = reviewed);
+    } catch (e) {
+      debugPrint('[MonthClose] Review failed: $e');
+    }
+  }
+
   Widget _body(BuildContext context, S tr, _Recap r) {
     final month = formatMonth(r.lastMid);
+    // A family budget: sealed once every grown-up has reviewed it (user's
+    // decision), as well as kept within budget.
+    final grownUps = [
+      for (final u in ref.watch(membersProvider).value ?? const <User>[])
+        if (u.role != kidRole) u,
+    ];
+    final family = grownUps.length > 1;
+    final waiting = [
+      for (final u in grownUps)
+        if (!_reviewed.contains(u.deviceId)) u,
+    ];
+    final sealed = r.sealed && (!family || waiting.isEmpty);
     String money(double v) => formatAmount(v, currency: r.currency);
     final pending = ref.watch(pendingResetProvider).value ?? const <String>[];
     final story = [
@@ -219,7 +254,7 @@ class _MonthCloseScreenState extends ConsumerState<MonthCloseScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Center(
-                    child: r.sealed
+                    child: sealed
                         // Stamped on once: drops in large, settles.
                         ? TweenAnimationBuilder<double>(
                             tween: Tween(begin: 0, end: 1),
@@ -249,7 +284,7 @@ class _MonthCloseScreenState extends ConsumerState<MonthCloseScreen> {
                   ),
                   const SizedBox(height: 14),
                   Text(
-                    r.sealed ? tr.periodSealedTitle(month) : tr.closeDone(month),
+                    sealed ? tr.periodSealedTitle(month) : tr.closeDone(month),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                         fontFamily: TypographyTokens.displayFamily,
@@ -337,6 +372,25 @@ class _MonthCloseScreenState extends ConsumerState<MonthCloseScreen> {
             onPressed: () => context.push('/period-transition'),
             child: Text(tr.closeReview(pending.length)),
           ),
+        ],
+        if (family) ...[
+          const SizedBox(height: 18),
+          Text(
+            waiting.isEmpty
+                ? tr.reviewFamilySealed
+                : tr.reviewFamilyWaiting(
+                    waiting.map((u) => u.name).join(', ')),
+            style: TextStyle(
+                fontSize: 14, height: 1.4, color: AppColors.ts(context)),
+          ),
+          if (!_reviewed.contains(DeviceIdentity.id)) ...[
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: _confirmReview,
+              icon: const Icon(AppIcons.checkCircle, size: 20),
+              label: Text(tr.reviewFamilyDone),
+            ),
+          ],
         ],
         const SizedBox(height: 24),
         FilledButton(

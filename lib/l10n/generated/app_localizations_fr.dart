@@ -2395,6 +2395,93 @@ class SFr extends S {
       'Les membres apparaissent ici une fois qu’ils ont rejoint ce budget et indiqué leur nom.';
 
   @override
+  String get reqTitle => 'Demandes d’argent';
+
+  @override
+  String get reqAsk => 'Demander de l’argent';
+
+  @override
+  String get reqFor => 'Pour';
+
+  @override
+  String get reqNoteHint => 'Pour quoi ? (ex. sortie scolaire)';
+
+  @override
+  String get reqSend => 'Envoyer la demande';
+
+  @override
+  String get reqSent => 'Demande envoyée';
+
+  @override
+  String get reqApprove => 'Accepter';
+
+  @override
+  String get reqDecline => 'Refuser';
+
+  @override
+  String get reqApproved => 'Acceptée';
+
+  @override
+  String get reqDeclined => 'Refusée';
+
+  @override
+  String get reqWaiting => 'En attente';
+
+  @override
+  String get reqOpen => 'À décider';
+
+  @override
+  String get reqPast => 'Plus tôt';
+
+  @override
+  String get reqNone => 'Aucune demande';
+
+  @override
+  String reqCard(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n demandes d’argent',
+      one: '1 demande d’argent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reqAsked(String name, String amount) {
+    return '$name demande $amount';
+  }
+
+  @override
+  String reqInto(String envelope) {
+    return 'dans $envelope';
+  }
+
+  @override
+  String get reqNoEnvelope =>
+      'Un adulte doit d’abord vous donner une enveloppe.';
+
+  @override
+  String get kidMyEnvelopes => 'Mes enveloppes';
+
+  @override
+  String get kidAddSpending => 'Ajouter une dépense';
+
+  @override
+  String get kidRecent => 'Mes dépenses';
+
+  @override
+  String get reviewFamilyDone => 'J’ai revu ce mois';
+
+  @override
+  String reviewFamilyWaiting(String names) {
+    return 'Scellé une fois revu par tous. En attente de $names.';
+  }
+
+  @override
+  String get reviewFamilySealed => 'Revu par tout le monde';
+
+  @override
   String get allocArchivedTitle => 'Enveloppes archivées';
 
   @override

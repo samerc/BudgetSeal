@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/engine/recurring_engine.dart';
+import '../../core/providers/family_provider.dart';
 import '../../core/providers/home_tab_provider.dart';
 import '../../core/providers/activity_filter_provider.dart';
 import '../../core/providers/sync_provider.dart';
@@ -12,6 +13,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../allocations/allocations_screen.dart';
 import '../dashboard/dashboard_screen.dart';
+import '../family/requests_screen.dart';
 import '../reports/reports_hub_screen.dart';
 import '../settings/member_name_dialog.dart';
 import '../settings/settings_screen.dart';
@@ -133,6 +135,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     ref.listen(syncProvider.select((s) => s.status), (prev, next) {
       if (prev != SyncStatus.success && next == SyncStatus.success) _askName();
     });
+    // A kid's phone: only their envelopes (roadmap #5).
+    if (ref.watch(amKidProvider)) return const KidHomeScreen();
     // Read the preferred home tab and jump to it once on first build.
     final homeTab = ref.watch(homeTabProvider);
     if (!_initialized && homeTab > 0 && homeTab < _tabs.length) {

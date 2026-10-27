@@ -34,6 +34,8 @@ const opLogTables = [
   'fx_rates',
   'objectives',
   'capture_rules',
+  'money_requests',
+  'month_reviews',
 ];
 
 class SyncOp {
