@@ -107,6 +107,12 @@ Future<void> ensureOpLog(AppDatabase db) async {
       kind TEXT NOT NULL,
       data TEXT,
       old TEXT)''');
+  // Log sync bookkeeping (log_sync.dart): the other phones' files already
+  // read (name → version), and how far this phone has written its own.
+  await db.customStatement(
+      'CREATE TABLE IF NOT EXISTS sync_files (name TEXT PRIMARY KEY, version TEXT NOT NULL)');
+  await db.customStatement(
+      'CREATE TABLE IF NOT EXISTS sync_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)');
   await db.customStatement(
       'CREATE UNIQUE INDEX IF NOT EXISTS idx_sync_ops_id ON sync_ops (device, seq)');
   await db.customStatement(

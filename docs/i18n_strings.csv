@@ -635,7 +635,7 @@ sync_share_household,Button / sheet title,Share household,مشاركة الأس�
 sync_disconnect,Button / dialog title,Disconnect,قطع الاتصال,Déconnecter
 sync_connect_section,Section header,Connect a provider,ربط مزود,Connecter un fournisseur
 sync_receipt_coming_soon,Note,Receipt sync coming soon for this provider,مزامنة الإيصالات قريباً لهذا المزود,Synchronisation des reçus bientôt disponible
-sync_provider_info,Info text,Local file uses your phone's file picker: keep the sync file wherever you like. Receipt photos sync only with Google Drive.,الملف المحلي يستخدم منتقي الملفات في هاتفك: احفظ ملف المزامنة حيث تشاء. صور الإيصالات تُزامن مع Google Drive فقط.,Fichier local utilise le sélecteur de fichiers du téléphone : gardez le fichier de synchronisation où vous voulez. Les photos de reçus ne se synchronisent qu'avec Google Drive.
+sync_provider_info,Info text,Folder uses your phone's file picker: keep the sync folder wherever you like. Each phone keeps its own files there. Receipt photos sync only with Google Drive.,خيار المجلد يستخدم منتقي الملفات في هاتفك: احفظ مجلد المزامنة حيث تشاء، ولكل هاتف ملفاته فيه. صور الإيصالات تُزامن مع Google Drive فقط.,Dossier utilise le sélecteur de fichiers du téléphone : gardez le dossier de synchronisation où vous voulez ; chaque téléphone y a ses propres fichiers. Les photos de reçus ne se synchronisent qu'avec Google Drive.
 sync_connection_failed,Dialog title,Connection failed,فشل الاتصال,Échec de la connexion
 sync_failed_to_connect,Default error,Failed to connect,فشل الاتصال,Échec de la connexion
 sync_disconnect_msg,Dialog content,"Your data will remain on your device, but automatic sync will stop. You can reconnect at any time.",ستبقى بياناتك على جهازك، لكن المزامنة التلقائية ستتوقف. يمكنك إعادة الاتصال في أي وقت.,"Vos données resteront sur votre appareil, mais la synchronisation automatique s'arrêtera. Vous pourrez vous reconnecter à tout moment."
@@ -805,9 +805,9 @@ onboard_all_set,Done page title,You're all set!,أنت جاهز!,Vous êtes prê
 onboard_done_subtitle,Done page subtitle,"The checklist on Home shows your next steps: record your income, then give it jobs in envelopes.",تعرض القائمة في الرئيسية خطواتك التالية: سجّل دخلك، ثم وزّعه على الأظرف.,"La liste sur l'Accueil montre les prochaines étapes : enregistrez vos revenus, puis répartissez-les dans des enveloppes."
 onboard_start_using,Button,Start using BudgetSeal,ابدأ استخدام BudgetSeal,Commencer à utiliser BudgetSeal
 onboard_restore_title,Sheet title,Restore your budget,استعادة ميزانيتك,Restaurer votre budget
-onboard_restore_desc,Sheet description,"Choose where your sync file is: Google Drive, or a file saved on this phone or in another app. It replaces any data on this phone.",اختر مكان ملف المزامنة: Google Drive، أو ملف محفوظ على هذا الهاتف أو في تطبيق آخر. سيحلّ محلّ أي بيانات على هذا الهاتف.,"Choisissez où se trouve votre fichier de synchronisation : Google Drive, ou un fichier enregistré sur ce téléphone ou dans une autre app. Il remplace les données de ce téléphone."
+onboard_restore_desc,Sheet description,"Choose where your budget syncs: Google Drive, or a folder on this phone or one another app keeps in sync. It replaces any data on this phone.",اختر مكان مزامنة ميزانيتك: Google Drive، أو مجلد على هذا الهاتف أو مجلد يزامنه تطبيق آخر. سيحلّ محلّ أي بيانات على هذا الهاتف.,"Choisissez où votre budget se synchronise : Google Drive, ou un dossier sur ce téléphone ou synchronisé par une autre app. Il remplace les données de ce téléphone."
 onboard_google_drive,Button,Google Drive,Google Drive,Google Drive
-onboard_pick_file,Button,Pick a file,اختر ملفاً,Choisir un fichier
+onboard_pick_file,Button,Pick a folder,اختر مجلدًا,Choisir un dossier
 onboard_join_desc,Sheet description,Enter the invite code shared with you to join an existing BudgetSeal household.,أدخل رمز الدعوة المُشارَك لك للانضمام لأسرة BudgetSeal موجودة.,Entrez le code d'invitation partagé avec vous pour rejoindre un foyer BudgetSeal existant.
 onboard_invite_code,Field label,Invite code,رمز الدعوة,Code d'invitation
 onboard_invite_hint,Field hint,PP-...,PP-...,PP-...
@@ -1159,7 +1159,7 @@ planned_post,Action button,Post,ترحيل,Enregistrer
 # ──────────────────────────────────────────────,,,,
 # SYNC ERRORS,,,,
 # ──────────────────────────────────────────────,,,,
-file_picker_title,Dialog title,Select BudgetSeal sync file,اختر ملف مزامنة BudgetSeal,Sélectionnez le fichier de synchronisation BudgetSeal
+file_picker_title,Dialog title,Select a folder for BudgetSeal sync,اختر مجلدًا لمزامنة BudgetSeal,Sélectionnez un dossier pour la synchronisation BudgetSeal
 # ──────────────────────────────────────────────,,,,
 # SHARED WIDGETS,,,,
 # ──────────────────────────────────────────────,,,,
@@ -1190,18 +1190,21 @@ share_household_failed,,Couldn't create the invite. Check your connection and tr
 a11y_pct_of_target,,{pct}% of {amount},{pct}٪ من {amount},{pct} % de {amount}
 a11y_flexible_envelope,,flexible envelope,مغلف مرن,enveloppe flexible
 a11y_needs_review,,needs review,بحاجة إلى مراجعة,à vérifier
-sync_local_file,,Local file,ملف محلي,Fichier local
+sync_local_file,,Folder,مجلد,Dossier
 sync_google_sub,,Sign in with your Google account,سجّل الدخول بحساب Google,Connectez-vous avec votre compte Google
 sync_one_drive_sub,,Requires the OneDrive app installed,يتطلب تثبيت تطبيق OneDrive,Nécessite l'application OneDrive
 sync_dropbox_sub,,Requires the Dropbox app installed,يتطلب تثبيت تطبيق Dropbox,Nécessite l'application Dropbox
-sync_local_file_sub,,Pick any file on your device,اختر أي ملف على جهازك,Choisissez n'importe quel fichier sur l'appareil
+sync_local_file_sub,,Pick a folder on your phone (or one Dropbox or OneDrive keeps in sync),اختر مجلدًا على هاتفك (أو مجلدًا يزامنه Dropbox أو OneDrive),Choisissez un dossier sur le téléphone (ou un dossier synchronisé par Dropbox ou OneDrive)
+sync_pick_folder_title,Cloud sync: folder prompt,Pick a folder for sync,اختر مجلدًا للمزامنة,Choisissez un dossier de synchronisation
+sync_pick_folder_body,Cloud sync: folder prompt,"Sync now keeps each phone's changes in its own file, so it needs a folder instead of a single file. Pick the folder your sync file was in, or any folder your phones share.",أصبحت المزامنة تحفظ تغييرات كل هاتف في ملف خاص به، لذا تحتاج إلى مجلد بدل ملف واحد. اختر المجلد الذي كان فيه ملف المزامنة، أو أي مجلد تتشاركه هواتفك.,"La synchronisation garde désormais les modifications de chaque téléphone dans son propre fichier : elle a besoin d'un dossier plutôt que d'un seul fichier. Choisissez le dossier où se trouvait votre fichier de synchronisation, ou tout dossier partagé par vos téléphones."
+sync_pick_folder_button,Cloud sync: folder prompt,Pick a folder,اختيار مجلد,Choisir un dossier
 sync_err_google_not_configured,,Google Sign-In is not set up for this build of the app. Use another sync option.,تسجيل الدخول عبر Google غير مُعد في هذا الإصدار من التطبيق. استخدم خيار مزامنة آخر.,La connexion Google n'est pas configurée pour cette version de l'application. Utilisez une autre option de synchronisation.
 sync_err_network,,Network error. Check your internet connection.,خطأ في الشبكة. تحقق من اتصالك بالإنترنت.,Erreur réseau. Vérifiez votre connexion Internet.
 sync_err_connect_failed,,Couldn't connect. Please try again.,تعذّر الاتصال. حاول مرة أخرى.,Connexion impossible. Veuillez réessayer.
 onboard_connect_failed,,Couldn't connect to {provider},تعذّر الاتصال بـ {provider},Impossible de se connecter à {provider}
-onboard_no_sync_file,,No sync file found,لم يُعثر على ملف مزامنة,Aucun fichier de synchronisation trouvé
+onboard_no_sync_file,,No budget found in this folder,لم يُعثر على ميزانية في هذا المجلد,Aucun budget trouvé dans ce dossier
 onboard_drive_join_failed,,Couldn't connect to Google Drive. Make sure you're signed in and have access to the shared folder.,تعذّر الاتصال بـ Google Drive. تأكد من تسجيل الدخول ومن إمكانية الوصول إلى المجلد المشترك.,Impossible de se connecter à Google Drive. Vérifiez que vous êtes connecté et que vous avez accès au dossier partagé.
-onboard_no_sync_file_shared,,No sync file found in the shared folder,لم يُعثر على ملف مزامنة في المجلد المشترك,Aucun fichier de synchronisation dans le dossier partagé
+onboard_no_sync_file_shared,,No budget found in the shared folder,لم يُعثر على ميزانية في المجلد المشترك,Aucun budget trouvé dans le dossier partagé
 bill_note_title,,Bill split,تقسيم الفاتورة,Partage de facture
 bill_note_total,,Bill: {total},الفاتورة: {total},Facture : {total}
 bill_note_split_with,,Split with {people} · Total: {total},مقسّمة مع {people} · الإجمالي: {total},Partagé avec {people} · Total : {total}
@@ -1732,7 +1735,7 @@ recurring_form_starts,,Starts: {date},تبدأ: {date},Début : {date}
 common_per_day,,{amount}/day,{amount}/يوم,{amount}/jour
 commonNOfM,,{n} of {m},{n} من {m},{n} sur {m}
 fund_amount_of_available,,{currency}: {amount} of {available},{currency}: {amount} من {available},{currency} : {amount} sur {available}
-sync_no_sync_file,,No sync file found,لم يُعثر على ملف مزامنة,Aucun fichier de synchronisation trouvé
+sync_no_sync_file,,No budget found in this folder,لم يُعثر على ميزانية في هذا المجلد,Aucun budget trouvé dans ce dossier
 sync_err_needs_password,,The sync file is encrypted. Enter your sync password in Cloud sync to read it.,ملف المزامنة مشفّر. أدخل كلمة مرور المزامنة في المزامنة السحابية لقراءته.,Le fichier de synchronisation est chiffré. Saisissez votre mot de passe de synchronisation dans Synchronisation cloud.
 travel_exchange_note,,Travel exchange → {currency},صرف سفر ← {currency},Change de voyage → {currency}
 travel_convert_back_note,,Travel convert back → {currency},إعادة تحويل السفر ← {currency},Reconversion de voyage → {currency}

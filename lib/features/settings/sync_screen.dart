@@ -127,6 +127,30 @@ class SyncScreen extends ConsumerWidget {
             const SizedBox(height: 24),
           ],
 
+          // ── Was synced to one file before log sync: pick a folder ──
+          if (!isConnected)
+            FutureBuilder<bool>(
+              future: notifier.needsFolderPick(),
+              builder: (context, snap) => snap.data != true
+                  ? const SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.only(bottom: Spacing.xl),
+                      child: IconHeaderCard(
+                        icon: AppIcons.folderOpen,
+                        iconColor: SettingsRowStyle.hue(36),
+                        title: S.of(context).syncPickFolderTitle,
+                        description: S.of(context).syncPickFolderBody,
+                        children: [
+                          FilledButton(
+                            onPressed: () =>
+                                _connect(context, ref, notifier.filePicker),
+                            child: Text(S.of(context).syncPickFolderButton),
+                          ),
+                        ],
+                      ),
+                    ),
+            ),
+
           // ── Provider list ─────────────────────────────────────
           if (!isConnected) ...[
             SectionHeader(S.of(context).syncConnectSection,

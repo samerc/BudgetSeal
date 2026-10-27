@@ -25,6 +25,16 @@ abstract class CloudProvider {
 
   /// Check if a sync file exists on this provider.
   Future<bool> syncFileExists();
+
+  /// Log sync (`log_sync.dart`): the log files here, name → a version
+  /// that changes with the file.
+  Future<Map<String, String>> listLogFiles();
+
+  /// One log file's content, or null when it's gone.
+  Future<String?> readLogFile(String name);
+
+  /// Writes (creates or replaces) one log file.
+  Future<void> writeLogFile(String name, String content);
 }
 
 /// The provider has no signed-in account (or lost it); the user has to

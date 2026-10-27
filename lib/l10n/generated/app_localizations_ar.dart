@@ -2094,7 +2094,7 @@ class SAr extends S {
   }
 
   @override
-  String get syncNoSyncFile => 'لم يُعثر على ملف مزامنة';
+  String get syncNoSyncFile => 'لم يُعثر على ميزانية في هذا المجلد';
 
   @override
   String get syncErrNeedsPassword =>
@@ -2156,7 +2156,7 @@ class SAr extends S {
   String get a11yNeedsReview => 'بحاجة إلى مراجعة';
 
   @override
-  String get syncLocalFile => 'ملف محلي';
+  String get syncLocalFile => 'مجلد';
 
   @override
   String get syncGoogleSub => 'سجّل الدخول بحساب Google';
@@ -2168,7 +2168,18 @@ class SAr extends S {
   String get syncDropboxSub => 'يتطلب تثبيت تطبيق Dropbox';
 
   @override
-  String get syncLocalFileSub => 'اختر أي ملف على جهازك';
+  String get syncLocalFileSub =>
+      'اختر مجلدًا على هاتفك (أو مجلدًا يزامنه Dropbox أو OneDrive)';
+
+  @override
+  String get syncPickFolderTitle => 'اختر مجلدًا للمزامنة';
+
+  @override
+  String get syncPickFolderBody =>
+      'أصبحت المزامنة تحفظ تغييرات كل هاتف في ملف خاص به، لذا تحتاج إلى مجلد بدل ملف واحد. اختر المجلد الذي كان فيه ملف المزامنة، أو أي مجلد تتشاركه هواتفك.';
+
+  @override
+  String get syncPickFolderButton => 'اختيار مجلد';
 
   @override
   String get syncErrGoogleNotConfigured =>
@@ -2186,7 +2197,7 @@ class SAr extends S {
   }
 
   @override
-  String get onboardNoSyncFile => 'لم يُعثر على ملف مزامنة';
+  String get onboardNoSyncFile => 'لم يُعثر على ميزانية في هذا المجلد';
 
   @override
   String get onboardDriveJoinFailed =>
@@ -2194,7 +2205,7 @@ class SAr extends S {
 
   @override
   String get onboardNoSyncFileShared =>
-      'لم يُعثر على ملف مزامنة في المجلد المشترك';
+      'لم يُعثر على ميزانية في المجلد المشترك';
 
   @override
   String get billNoteTitle => 'تقسيم الفاتورة';
@@ -4546,7 +4557,7 @@ class SAr extends S {
 
   @override
   String get syncProviderInfo =>
-      'الملف المحلي يستخدم منتقي الملفات في هاتفك: احفظ ملف المزامنة حيث تشاء. صور الإيصالات تُزامن مع Google Drive فقط.';
+      'خيار المجلد يستخدم منتقي الملفات في هاتفك: احفظ مجلد المزامنة حيث تشاء، ولكل هاتف ملفاته فيه. صور الإيصالات تُزامن مع Google Drive فقط.';
 
   @override
   String get syncConnectionFailed => 'فشل الاتصال';
@@ -6081,7 +6092,7 @@ class SAr extends S {
   String get defcatOther => 'أخرى';
 
   @override
-  String get filePickerTitle => 'اختر ملف مزامنة BudgetSeal';
+  String get filePickerTitle => 'اختر مجلدًا لمزامنة BudgetSeal';
 
   @override
   String get heatmapNoData => 'لا بيانات بعد';
@@ -6179,13 +6190,13 @@ class SAr extends S {
 
   @override
   String get onboardRestoreDesc =>
-      'اختر مكان ملف المزامنة: Google Drive، أو ملف محفوظ على هذا الهاتف أو في تطبيق آخر. سيحلّ محلّ أي بيانات على هذا الهاتف.';
+      'اختر مكان مزامنة ميزانيتك: Google Drive، أو مجلد على هذا الهاتف أو مجلد يزامنه تطبيق آخر. سيحلّ محلّ أي بيانات على هذا الهاتف.';
 
   @override
   String get onboardGoogleDrive => 'Google Drive';
 
   @override
-  String get onboardPickFile => 'اختر ملفاً';
+  String get onboardPickFile => 'اختر مجلدًا';
 
   @override
   String get onboardJoinDesc =>

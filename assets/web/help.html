@@ -454,7 +454,7 @@
 <p>You'll see a quick overview of how envelope budgeting works. From here you can:</p>
 <ul>
   <li><strong>Get started</strong> — set up a new household</li>
-  <li><strong>Restore my budget</strong> — bring back a budget from its sync file, on Google Drive or saved on your phone or in another app, or from a <strong>backup file</strong> (the .db file from Settings › Backup &amp; restore). After a backup file the app closes; open it again and your budget is back</li>
+  <li><strong>Restore my budget</strong> — bring back a budget from its sync folder, on Google Drive or a folder on your phone or in another app, or from a <strong>backup file</strong> (the .db file from Settings › Backup &amp; restore). After a backup file the app closes; open it again and your budget is back</li>
   <li><strong>Join a household</strong> — enter an invite code to join someone else's BudgetSeal</li>
 </ul>
 
@@ -1210,7 +1210,7 @@
 <!-- ══════════════════════════════════════════ -->
 <h2 id="cloud-sync">Cloud sync</h2>
 
-<p>Sync your data to the cloud so you have a backup or can share with a partner. BudgetSeal uses a single JSON file — no server, no account registration.</p>
+<p>Sync your data to the cloud so you have a backup or can share with a partner. BudgetSeal keeps everything in one folder — no server, no account registration. Each phone writes its own changes there, so two phones never overwrite each other.</p>
 
 <h3>Setting up sync</h3>
 <ol>
@@ -1218,16 +1218,17 @@
   <li>Choose a provider:
     <ul>
       <li><strong>Google Drive</strong> — sign in with your Google account</li>
-      <li><strong>Local file</strong> — your phone's file picker opens: choose or create the sync file wherever you like (on your phone, or in another app that shows up in the picker)</li>
+      <li><strong>Folder</strong> — your phone's file picker opens: choose a folder on your phone, or one that an app like Dropbox or OneDrive keeps in sync. If you used to sync to a single file, Cloud sync asks you once to pick a folder instead</li>
     </ul>
   </li>
-  <li>Tap to connect — the app syncs right away: it creates the sync file, or merges with the one already there. If that file holds a budget made on another device, the app asks whether to use it on this device (your current data is backed up first) or disconnect. The Cloud sync row in Settings then shows when you last synced (or that the last sync failed)</li>
+  <li>Tap to connect — the app syncs right away: it starts the sync folder, or brings in what's already there. If the folder holds a budget made on another device, the app asks whether to use it on this device (your current data is backed up first) or disconnect. The Cloud sync row in Settings then shows when you last synced (or that the last sync failed)</li>
 </ol>
 
 <p>Once connected, the app syncs automatically when you open or close it. You can also tap <strong>Sync now</strong> anytime, or <strong>Disconnect</strong> to stop syncing (your data stays on this phone).</p>
 <p><strong>Sync receipts</strong> (in Settings, once sync is on) uploads your receipt photos with the sync; with it off, receipts stay on this phone. Only Google Drive syncs receipts for now.</p>
 
-<p>Edits made on two devices merge row by row — the newer edit wins. A recurring bill that comes due on both devices before they sync is posted only once. Restoring from the sync file first saves a copy of your current data, which you'll find under <strong>Backup &amp; restore</strong>.</p>
+<p>Changes made on two phones merge field by field: if you rename an account while your partner archives it, both happen. If you both change the same thing, the later change wins. A phone that was offline for days catches up the same way. A recurring bill that comes due on both phones before they sync is posted only once. Using the budget from the sync folder first saves a copy of your current data, which you'll find under <strong>Backup &amp; restore</strong>.</p>
+<p>The folder also holds <code>BudgetSeal_Sync.json</code>, a readable copy of your whole budget refreshed once a day (see <a href="#faq">Can I read my data without BudgetSeal?</a>).</p>
 
 <h3>Sync encryption</h3>
 <p>For extra security, encrypt your sync file with a password:</p>
@@ -1433,7 +1434,7 @@
 <p>No. Everything stays on your device. Cloud sync is optional: it uses your own Google Drive, or a file you pick with your phone's file picker — BudgetSeal never sees your data. The only thing the app downloads is exchange rates. There are no BudgetSeal servers, no accounts, and no tracking. Even <a href="#crash-reports">crash reports</a>, if you turn them on, stay on your phone until you share them.</p>
 
 <h3>Can I read my data without BudgetSeal?</h3>
-<p>Yes. The sync file (<code>BudgetSeal_Sync.json</code> on your Google Drive or wherever you saved it) is plain JSON, and its format is published: every field, how balances are worked out, and how to open a file protected by a sync password. You'll find it at <strong>github.com/samerc/BudgetSeal</strong>, in <code>docs/file-format.md</code>. Your data never depends on the app to stay readable.</p>
+<p>Yes. The sync folder's <code>BudgetSeal_Sync.json</code> (on your Google Drive or in the folder you picked; refreshed once a day) is plain JSON, and its format is published: every field, how balances are worked out, and how to open a file protected by a sync password. You'll find it at <strong>github.com/samerc/BudgetSeal</strong>, in <code>docs/file-format.md</code>. Your data never depends on the app to stay readable.</p>
 
 <h3>What happens if I delete a transaction?</h3>
 <p>Deleted transactions are soft-deleted — they're hidden but not permanently removed. Any envelope deductions are reversed. You can permanently purge them from Health Check.</p>

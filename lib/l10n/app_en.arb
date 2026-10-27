@@ -705,7 +705,7 @@
   "@commonNOfM": {"placeholders": {"n": {"type": "int"}, "m": {"type": "int"}}},
   "fundAmountOfAvailable": "{currency}: {amount} of {available}",
   "@fundAmountOfAvailable": {"placeholders": {"currency": {"type": "String"}, "amount": {"type": "String"}, "available": {"type": "String"}}},
-  "syncNoSyncFile": "No sync file found",
+  "syncNoSyncFile": "No budget found in this folder",
   "syncErrNeedsPassword": "The sync file is encrypted. Enter your sync password in Cloud sync to read it.",
   "@syncShareInviteText": {"placeholders": {"code": {"type": "String"}}},
   "travelExchangeNote": "Travel exchange → {currency}",
@@ -729,19 +729,25 @@
   "@a11yPctOfTarget": {"placeholders": {"pct": {"type": "int"}, "amount": {"type": "String"}}},
   "a11yFlexibleEnvelope": "flexible envelope",
   "a11yNeedsReview": "needs review",
-  "syncLocalFile": "Local file",
+  "syncLocalFile": "Folder",
   "syncGoogleSub": "Sign in with your Google account",
   "syncOneDriveSub": "Requires the OneDrive app installed",
   "syncDropboxSub": "Requires the Dropbox app installed",
-  "syncLocalFileSub": "Pick any file on your device",
+  "syncLocalFileSub": "Pick a folder on your phone (or one Dropbox or OneDrive keeps in sync)",
+  "syncPickFolderTitle": "Pick a folder for sync",
+  "@syncPickFolderTitle": {"description": "Cloud sync: folder prompt"},
+  "syncPickFolderBody": "Sync now keeps each phone's changes in its own file, so it needs a folder instead of a single file. Pick the folder your sync file was in, or any folder your phones share.",
+  "@syncPickFolderBody": {"description": "Cloud sync: folder prompt"},
+  "syncPickFolderButton": "Pick a folder",
+  "@syncPickFolderButton": {"description": "Cloud sync: folder prompt"},
   "syncErrGoogleNotConfigured": "Google Sign-In is not set up for this build of the app. Use another sync option.",
   "syncErrNetwork": "Network error. Check your internet connection.",
   "syncErrConnectFailed": "Couldn't connect. Please try again.",
   "onboardConnectFailed": "Couldn't connect to {provider}",
   "@onboardConnectFailed": {"placeholders": {"provider": {"type": "String"}}},
-  "onboardNoSyncFile": "No sync file found",
+  "onboardNoSyncFile": "No budget found in this folder",
   "onboardDriveJoinFailed": "Couldn't connect to Google Drive. Make sure you're signed in and have access to the shared folder.",
-  "onboardNoSyncFileShared": "No sync file found in the shared folder",
+  "onboardNoSyncFileShared": "No budget found in the shared folder",
   "billNoteTitle": "Bill split",
   "billNoteTotal": "Bill: {total}",
   "@billNoteTotal": {"placeholders": {"total": {"type": "String"}}},
@@ -3137,7 +3143,7 @@
   "@syncReceiptComingSoon": {
     "description": "Note"
   },
-  "syncProviderInfo": "Local file uses your phone's file picker: keep the sync file wherever you like. Receipt photos sync only with Google Drive.",
+  "syncProviderInfo": "Folder uses your phone's file picker: keep the sync folder wherever you like. Each phone keeps its own files there. Receipt photos sync only with Google Drive.",
   "@syncProviderInfo": {
     "description": "Info text"
   },
@@ -4863,7 +4869,7 @@
   "@defcatOther": {
     "description": "Default category preset"
   },
-  "filePickerTitle": "Select BudgetSeal sync file",
+  "filePickerTitle": "Select a folder for BudgetSeal sync",
   "@filePickerTitle": {
     "description": "Dialog title"
   },
@@ -4992,7 +4998,7 @@
   "@onboardRestoreTitle": {
     "description": "Onboarding restore sheet title"
   },
-  "onboardRestoreDesc": "Choose where your sync file is: Google Drive, or a file saved on this phone or in another app. It replaces any data on this phone.",
+  "onboardRestoreDesc": "Choose where your budget syncs: Google Drive, or a folder on this phone or one another app keeps in sync. It replaces any data on this phone.",
   "@onboardRestoreDesc": {
     "description": "Onboarding restore sheet description"
   },
@@ -5000,7 +5006,7 @@
   "@onboardGoogleDrive": {
     "description": "Onboarding restore option"
   },
-  "onboardPickFile": "Pick a file",
+  "onboardPickFile": "Pick a folder",
   "@onboardPickFile": {
     "description": "Onboarding restore option"
   },

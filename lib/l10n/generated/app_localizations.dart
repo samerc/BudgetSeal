@@ -3739,7 +3739,7 @@ abstract class S {
   /// No description provided for @syncNoSyncFile.
   ///
   /// In en, this message translates to:
-  /// **'No sync file found'**
+  /// **'No budget found in this folder'**
   String get syncNoSyncFile;
 
   /// No description provided for @syncErrNeedsPassword.
@@ -3823,7 +3823,7 @@ abstract class S {
   /// No description provided for @syncLocalFile.
   ///
   /// In en, this message translates to:
-  /// **'Local file'**
+  /// **'Folder'**
   String get syncLocalFile;
 
   /// No description provided for @syncGoogleSub.
@@ -3847,8 +3847,26 @@ abstract class S {
   /// No description provided for @syncLocalFileSub.
   ///
   /// In en, this message translates to:
-  /// **'Pick any file on your device'**
+  /// **'Pick a folder on your phone (or one Dropbox or OneDrive keeps in sync)'**
   String get syncLocalFileSub;
+
+  /// Cloud sync: folder prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a folder for sync'**
+  String get syncPickFolderTitle;
+
+  /// Cloud sync: folder prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now keeps each phone\'s changes in its own file, so it needs a folder instead of a single file. Pick the folder your sync file was in, or any folder your phones share.'**
+  String get syncPickFolderBody;
+
+  /// Cloud sync: folder prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a folder'**
+  String get syncPickFolderButton;
 
   /// No description provided for @syncErrGoogleNotConfigured.
   ///
@@ -3877,7 +3895,7 @@ abstract class S {
   /// No description provided for @onboardNoSyncFile.
   ///
   /// In en, this message translates to:
-  /// **'No sync file found'**
+  /// **'No budget found in this folder'**
   String get onboardNoSyncFile;
 
   /// No description provided for @onboardDriveJoinFailed.
@@ -3889,7 +3907,7 @@ abstract class S {
   /// No description provided for @onboardNoSyncFileShared.
   ///
   /// In en, this message translates to:
-  /// **'No sync file found in the shared folder'**
+  /// **'No budget found in the shared folder'**
   String get onboardNoSyncFileShared;
 
   /// No description provided for @billNoteTitle.
@@ -7969,7 +7987,7 @@ abstract class S {
   /// Info text
   ///
   /// In en, this message translates to:
-  /// **'Local file uses your phone\'s file picker: keep the sync file wherever you like. Receipt photos sync only with Google Drive.'**
+  /// **'Folder uses your phone\'s file picker: keep the sync folder wherever you like. Each phone keeps its own files there. Receipt photos sync only with Google Drive.'**
   String get syncProviderInfo;
 
   /// Dialog title
@@ -10867,7 +10885,7 @@ abstract class S {
   /// Dialog title
   ///
   /// In en, this message translates to:
-  /// **'Select BudgetSeal sync file'**
+  /// **'Select a folder for BudgetSeal sync'**
   String get filePickerTitle;
 
   /// Empty state
@@ -11059,7 +11077,7 @@ abstract class S {
   /// Onboarding restore sheet description
   ///
   /// In en, this message translates to:
-  /// **'Choose where your sync file is: Google Drive, or a file saved on this phone or in another app. It replaces any data on this phone.'**
+  /// **'Choose where your budget syncs: Google Drive, or a folder on this phone or one another app keeps in sync. It replaces any data on this phone.'**
   String get onboardRestoreDesc;
 
   /// Onboarding restore option
@@ -11071,7 +11089,7 @@ abstract class S {
   /// Onboarding restore option
   ///
   /// In en, this message translates to:
-  /// **'Pick a file'**
+  /// **'Pick a folder'**
   String get onboardPickFile;
 
   /// Onboarding join sheet description

@@ -2102,7 +2102,7 @@ class SFr extends S {
   }
 
   @override
-  String get syncNoSyncFile => 'Aucun fichier de synchronisation trouvé';
+  String get syncNoSyncFile => 'Aucun budget trouvé dans ce dossier';
 
   @override
   String get syncErrNeedsPassword =>
@@ -2164,7 +2164,7 @@ class SFr extends S {
   String get a11yNeedsReview => 'à vérifier';
 
   @override
-  String get syncLocalFile => 'Fichier local';
+  String get syncLocalFile => 'Dossier';
 
   @override
   String get syncGoogleSub => 'Connectez-vous avec votre compte Google';
@@ -2177,7 +2177,17 @@ class SFr extends S {
 
   @override
   String get syncLocalFileSub =>
-      'Choisissez n\'importe quel fichier sur l\'appareil';
+      'Choisissez un dossier sur le téléphone (ou un dossier synchronisé par Dropbox ou OneDrive)';
+
+  @override
+  String get syncPickFolderTitle => 'Choisissez un dossier de synchronisation';
+
+  @override
+  String get syncPickFolderBody =>
+      'La synchronisation garde désormais les modifications de chaque téléphone dans son propre fichier : elle a besoin d\'un dossier plutôt que d\'un seul fichier. Choisissez le dossier où se trouvait votre fichier de synchronisation, ou tout dossier partagé par vos téléphones.';
+
+  @override
+  String get syncPickFolderButton => 'Choisir un dossier';
 
   @override
   String get syncErrGoogleNotConfigured =>
@@ -2197,7 +2207,7 @@ class SFr extends S {
   }
 
   @override
-  String get onboardNoSyncFile => 'Aucun fichier de synchronisation trouvé';
+  String get onboardNoSyncFile => 'Aucun budget trouvé dans ce dossier';
 
   @override
   String get onboardDriveJoinFailed =>
@@ -2205,7 +2215,7 @@ class SFr extends S {
 
   @override
   String get onboardNoSyncFileShared =>
-      'Aucun fichier de synchronisation dans le dossier partagé';
+      'Aucun budget trouvé dans le dossier partagé';
 
   @override
   String get billNoteTitle => 'Partage de facture';
@@ -4570,7 +4580,7 @@ class SFr extends S {
 
   @override
   String get syncProviderInfo =>
-      'Fichier local utilise le sélecteur de fichiers du téléphone : gardez le fichier de synchronisation où vous voulez. Les photos de reçus ne se synchronisent qu\'avec Google Drive.';
+      'Dossier utilise le sélecteur de fichiers du téléphone : gardez le dossier de synchronisation où vous voulez ; chaque téléphone y a ses propres fichiers. Les photos de reçus ne se synchronisent qu\'avec Google Drive.';
 
   @override
   String get syncConnectionFailed => 'Échec de la connexion';
@@ -6141,7 +6151,7 @@ class SFr extends S {
 
   @override
   String get filePickerTitle =>
-      'Sélectionnez le fichier de synchronisation BudgetSeal';
+      'Sélectionnez un dossier pour la synchronisation BudgetSeal';
 
   @override
   String get heatmapNoData => 'Pas encore de données';
@@ -6241,13 +6251,13 @@ class SFr extends S {
 
   @override
   String get onboardRestoreDesc =>
-      'Choisissez où se trouve votre fichier de synchronisation : Google Drive, ou un fichier enregistré sur ce téléphone ou dans une autre app. Il remplace les données de ce téléphone.';
+      'Choisissez où votre budget se synchronise : Google Drive, ou un dossier sur ce téléphone ou synchronisé par une autre app. Il remplace les données de ce téléphone.';
 
   @override
   String get onboardGoogleDrive => 'Google Drive';
 
   @override
-  String get onboardPickFile => 'Choisir un fichier';
+  String get onboardPickFile => 'Choisir un dossier';
 
   @override
   String get onboardJoinDesc =>

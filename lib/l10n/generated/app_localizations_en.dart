@@ -2088,7 +2088,7 @@ class SEn extends S {
   }
 
   @override
-  String get syncNoSyncFile => 'No sync file found';
+  String get syncNoSyncFile => 'No budget found in this folder';
 
   @override
   String get syncErrNeedsPassword =>
@@ -2150,7 +2150,7 @@ class SEn extends S {
   String get a11yNeedsReview => 'needs review';
 
   @override
-  String get syncLocalFile => 'Local file';
+  String get syncLocalFile => 'Folder';
 
   @override
   String get syncGoogleSub => 'Sign in with your Google account';
@@ -2162,7 +2162,18 @@ class SEn extends S {
   String get syncDropboxSub => 'Requires the Dropbox app installed';
 
   @override
-  String get syncLocalFileSub => 'Pick any file on your device';
+  String get syncLocalFileSub =>
+      'Pick a folder on your phone (or one Dropbox or OneDrive keeps in sync)';
+
+  @override
+  String get syncPickFolderTitle => 'Pick a folder for sync';
+
+  @override
+  String get syncPickFolderBody =>
+      'Sync now keeps each phone\'s changes in its own file, so it needs a folder instead of a single file. Pick the folder your sync file was in, or any folder your phones share.';
+
+  @override
+  String get syncPickFolderButton => 'Pick a folder';
 
   @override
   String get syncErrGoogleNotConfigured =>
@@ -2180,15 +2191,14 @@ class SEn extends S {
   }
 
   @override
-  String get onboardNoSyncFile => 'No sync file found';
+  String get onboardNoSyncFile => 'No budget found in this folder';
 
   @override
   String get onboardDriveJoinFailed =>
       'Couldn\'t connect to Google Drive. Make sure you\'re signed in and have access to the shared folder.';
 
   @override
-  String get onboardNoSyncFileShared =>
-      'No sync file found in the shared folder';
+  String get onboardNoSyncFileShared => 'No budget found in the shared folder';
 
   @override
   String get billNoteTitle => 'Bill split';
@@ -4526,7 +4536,7 @@ class SEn extends S {
 
   @override
   String get syncProviderInfo =>
-      'Local file uses your phone\'s file picker: keep the sync file wherever you like. Receipt photos sync only with Google Drive.';
+      'Folder uses your phone\'s file picker: keep the sync folder wherever you like. Each phone keeps its own files there. Receipt photos sync only with Google Drive.';
 
   @override
   String get syncConnectionFailed => 'Connection failed';
@@ -6068,7 +6078,7 @@ class SEn extends S {
   String get defcatOther => 'Other';
 
   @override
-  String get filePickerTitle => 'Select BudgetSeal sync file';
+  String get filePickerTitle => 'Select a folder for BudgetSeal sync';
 
   @override
   String get heatmapNoData => 'No data yet';
@@ -6167,13 +6177,13 @@ class SEn extends S {
 
   @override
   String get onboardRestoreDesc =>
-      'Choose where your sync file is: Google Drive, or a file saved on this phone or in another app. It replaces any data on this phone.';
+      'Choose where your budget syncs: Google Drive, or a folder on this phone or one another app keeps in sync. It replaces any data on this phone.';
 
   @override
   String get onboardGoogleDrive => 'Google Drive';
 
   @override
-  String get onboardPickFile => 'Pick a file';
+  String get onboardPickFile => 'Pick a folder';
 
   @override
   String get onboardJoinDesc =>

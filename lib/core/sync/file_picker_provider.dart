@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,13 +8,18 @@ import '../../l10n/s_lookup.dart';
 import 'cloud_provider.dart';
 
 const _syncFileName = 'BudgetSeal_Sync.json';
-const _prefKeyPath = 'file_sync_path';
+const _prefKeyFolder = 'file_sync_folder';
 
-/// File-based sync adapter. User picks a file from the system file picker,
-/// which on Android can access Google Drive, Dropbox, OneDrive, or local storage.
-/// This is the universal fallback for any cloud storage provider.
+/// Before log sync this provider used one picked file (`file_sync_path`);
+/// a phone that still has it is asked once to pick a folder instead.
+const legacyFileSyncPathKey = 'file_sync_path';
+
+/// Folder-based sync adapter: the user picks a folder with the system
+/// picker (on the phone, or one a Dropbox/OneDrive app keeps in sync), and
+/// each phone writes its own log files there, next to the daily
+/// `BudgetSeal_Sync.json` snapshot.
 class FilePickerProvider implements CloudProvider {
-  String? _filePath;
+  String? _folder;
 
   @override
   String get displayName => 'Cloud File';
@@ -26,63 +30,74 @@ class FilePickerProvider implements CloudProvider {
   @override
   Future<bool> get isConnected async {
     final prefs = await SharedPreferences.getInstance();
-    _filePath = prefs.getString(_prefKeyPath);
-    return _filePath != null && await File(_filePath!).exists();
+    _folder = prefs.getString(_prefKeyFolder);
+    return _folder != null && await Directory(_folder!).exists();
   }
 
   @override
   Future<bool> connect() async {
-    // Let user pick or create a file
-    final file = await FilePicker.pickFile(
-      type: FileType.any,
-      dialogTitle: currentS().filePickerTitle,
-    );
-
-    if (file?.path != null) {
-      _filePath = file!.path!;
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_prefKeyPath, _filePath!);
-      return true;
-    }
-
-    // If no file selected, create a new one in documents
-    return false;
-  }
-
-  /// Connect by creating a new sync file in app documents.
-  /// Returns the path of the created file.
-  Future<String> createNew() async {
-    final dir = await getApplicationDocumentsDirectory();
-    _filePath = p.join(dir.path, _syncFileName);
+    final folder = await FilePicker.getDirectoryPath(
+        dialogTitle: currentS().filePickerTitle);
+    if (folder == null) return false;
+    _folder = folder;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_prefKeyPath, _filePath!);
-    return _filePath!;
+    await prefs.setString(_prefKeyFolder, folder);
+    await prefs.remove(legacyFileSyncPathKey);
+    return true;
   }
 
   @override
   Future<void> disconnect() async {
-    _filePath = null;
+    _folder = null;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_prefKeyPath);
+    await prefs.remove(_prefKeyFolder);
+  }
+
+  File _file(String name) {
+    if (_folder == null) throw StateError('No sync folder set');
+    return File(p.join(_folder!, name));
   }
 
   @override
-  Future<void> upload(String jsonContent) async {
-    if (_filePath == null) throw StateError('No sync file path set');
-    await File(_filePath!).writeAsString(jsonContent);
-  }
+  Future<void> upload(String jsonContent) =>
+      _file(_syncFileName).writeAsString(jsonContent, flush: true);
 
   @override
   Future<String?> download() async {
-    if (_filePath == null) return null;
-    final file = File(_filePath!);
-    if (!await file.exists()) return null;
-    return file.readAsString();
+    if (_folder == null) return null;
+    final file = _file(_syncFileName);
+    return await file.exists() ? file.readAsString() : null;
   }
 
   @override
-  Future<bool> syncFileExists() async {
-    if (_filePath == null) return false;
-    return File(_filePath!).exists();
+  Future<bool> syncFileExists() async =>
+      _folder != null && await _file(_syncFileName).exists();
+
+  @override
+  Future<Map<String, String>> listLogFiles() async {
+    if (_folder == null) throw StateError('No sync folder set');
+    final out = <String, String>{};
+    await for (final e in Directory(_folder!).list()) {
+      final name = p.basename(e.path);
+      if (e is! File || !name.startsWith('log-')) continue;
+      final stat = await e.stat();
+      out[name] = '${stat.size}:${stat.modified.millisecondsSinceEpoch}';
+    }
+    return out;
+  }
+
+  @override
+  Future<String?> readLogFile(String name) async {
+    final file = _file(name);
+    return await file.exists() ? file.readAsString() : null;
+  }
+
+  @override
+  Future<void> writeLogFile(String name, String content) async {
+    // Write beside it, then rename: another phone's sync app never sees a
+    // half-written file.
+    final tmp = _file('.$name.tmp');
+    await tmp.writeAsString(content, flush: true);
+    await tmp.rename(_file(name).path);
   }
 }

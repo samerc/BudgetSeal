@@ -90,6 +90,7 @@ class GoogleDriveProvider implements CloudProvider {
     _account = null;
     _driveApi = null;
     _syncFileId = null;
+    _logIds.clear();
     _folderId = null;
     _sharedFolder = false;
   }
@@ -130,6 +131,65 @@ class GoogleDriveProvider implements CloudProvider {
         final folderId = await _getOrCreateFolder(api);
         return await _findSyncFile(api, folderId) != null;
       });
+
+  // ── Log files (log sync) ──────────────────────────────────────
+
+  /// Log file name → Drive id, from the last listing.
+  final _logIds = <String, String>{};
+
+  @override
+  Future<Map<String, String>> listLogFiles() => _retryIfGone((api) async {
+        final folderId = await _getOrCreateFolder(api);
+        final out = <String, String>{};
+        _logIds.clear();
+        String? page;
+        do {
+          final list = await api.files.list(
+            q: "'${_escGdql(folderId)}' in parents and name contains 'log-' "
+                'and trashed = false',
+            spaces: 'drive',
+            pageSize: 1000,
+            pageToken: page,
+            $fields: 'nextPageToken, files(id, name, md5Checksum, modifiedTime)',
+          );
+          for (final f in list.files ?? const <drive.File>[]) {
+            if (f.name == null || f.id == null) continue;
+            _logIds[f.name!] = f.id!;
+            out[f.name!] =
+                f.md5Checksum ?? f.modifiedTime?.toIso8601String() ?? f.id!;
+          }
+          page = list.nextPageToken;
+        } while (page != null);
+        return out;
+      });
+
+  @override
+  Future<String?> readLogFile(String name) => _retryIfGone((api) async {
+        final id = _logIds[name];
+        if (id == null) return null;
+        return utf8.decode(await _fetch(api, id));
+      });
+
+  @override
+  Future<void> writeLogFile(String name, String content) async {
+    final bytes = utf8.encode(content);
+    await _retryIfGone((api) async {
+      final media = drive.Media(Stream.value(bytes), bytes.length,
+          contentType: 'application/json');
+      final id = _logIds[name];
+      if (id != null) {
+        await api.files.update(drive.File(), id, uploadMedia: media);
+        return;
+      }
+      final created = await api.files.create(
+          drive.File()
+            ..name = name
+            ..parents = [await _getOrCreateFolder(api)]
+            ..mimeType = 'application/json',
+          uploadMedia: media);
+      _logIds[name] = created.id!;
+    });
+  }
 
   // ── Receipt sync ──────────────────────────────────────────────
 
@@ -234,6 +294,7 @@ class GoogleDriveProvider implements CloudProvider {
     } on drive.DetailedApiRequestError catch (e) {
       if (e.status != 404) rethrow;
       _syncFileId = null;
+      _logIds.clear();
       // A joined (shared) folder that's gone stays an error.
       if (!_sharedFolder) _folderId = null;
       return job(api);

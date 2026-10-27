@@ -2,7 +2,12 @@
 
 Your budget belongs to you. This document describes the file BudgetSeal syncs and backs up, so you can read your data without the app: to check it, convert it, or move it somewhere else.
 
-It covers the **sync file** (`BudgetSeal_Sync.json`), which Cloud Sync writes to Google Drive or to a file you pick. The app's own backup (`.db`) is a SQLite database with the same tables and fields, written in `snake_case` (`account_id` for `accountId`).
+It covers the two kinds of file Cloud Sync keeps in its folder (on Google Drive, or a folder you pick):
+
+- **`BudgetSeal_Sync.json`** — the whole budget as it stood, rewritten at most once a day. This is the one to read. Most of this page is about it.
+- **`log-<phone>-<number>.json`** — each phone's changes, which is how phones actually sync. See [Change logs](#change-logs).
+
+The app's own backup (`.db`) is a SQLite database with the same tables and fields, written in `snake_case` (`account_id` for `accountId`).
 
 This describes format version 1 as written by the app versions after 0.11 (database schema 23).
 
@@ -249,6 +254,34 @@ for a in accounts:
     print(f'{a["name"]}: {balance[a["id"]]:,.2f} {a["currency"]}')
 ```
 
+## Change logs
+
+Each phone records every change it makes and writes them to its own files: `log-<phone id>-00000.json`, `log-<phone id>-00001.json` and so on, 1,000 changes per file, oldest first. A phone only ever writes its own files. They are encrypted like the sync file when a sync password is set.
+
+```json
+{
+  "format": "budgetseal-log",
+  "version": 1,
+  "device": "dev-1b2c…",
+  "chunk": 0,
+  "entries": [
+    {"hlc": "1793108333123-00000000-dev-1b2c…", "seq": 1, "table": "accounts",
+     "row": "acc-1", "kind": "insert", "data": {"id": "acc-1", "name": "Bank", …}},
+    {"hlc": "1793108400456-00000000-dev-1b2c…", "seq": 2, "table": "accounts",
+     "row": "acc-1", "kind": "update", "data": {"name": "Main bank"}, "old": {"name": "Bank"}}
+  ]
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `hlc` | When the change was made: milliseconds since 1970, a counter, and the phone. Compared as text, it puts every phone's changes in one order. |
+| `seq` | The phone's own count of its changes (negative for the starting entries a phone writes for data it had before change logs). |
+| `table`, `row` | The list and the row's `id`. Tables and columns are those of the `.db` backup (`snake_case`). |
+| `kind` | `insert` (`data` is the whole row), `update` (`data` holds only the changed columns, `old` their previous values), or `delete` (`old` is the row). |
+
+To rebuild a budget from the logs, take every entry for a row from all phones' files: each column takes its value from the entry with the latest `hlc` that set it, and the row exists if its latest `insert` or `delete` is an `insert`. Values are as stored in the database: dates in seconds since 1970, true/false as 1/0.
+
 ## Encrypted files
 
 With a sync password set, the file is one line of text:
@@ -262,7 +295,7 @@ All three parts are Base64. To decrypt:
 1. Derive a 32-byte key with PBKDF2-HMAC-SHA256 from the password (UTF-8), using the salt and 100,000 iterations.
 2. Decrypt the ciphertext with AES-256-CBC, using that key and the IV. The padding is PKCS#7.
 
-The result is the JSON above. A file that doesn't start with `ENC:` is not encrypted.
+The result is the JSON above (or a change log). A file that doesn't start with `ENC:` is not encrypted.
 
 ```python
 import base64, hashlib
@@ -277,9 +310,9 @@ unpadder = padding.PKCS7(128).unpadder()
 json_text = (unpadder.update(padded) + unpadder.finalize()).decode("utf-8")
 ```
 
-## Writing a file for BudgetSeal
+## Writing changes for BudgetSeal
 
-The app reads files written by other tools, but it **merges** them into the budget rather than replacing it. Keep the ids of rows you change, and give each changed row a newer `lastModified`, or it will be ignored. Follow the rules above for new rows:
+The app syncs from the change logs, not from `BudgetSeal_Sync.json`, so editing the snapshot changes nothing. A tool can add its own changes as a log of its own: a `log-<your tool's id>-00000.json` file in the same folder, with entries stamped later than the changes they follow. Follow the rules above for new rows:
 
 - every income or expense has at least one line;
 - a transfer has `destinationAmount`;

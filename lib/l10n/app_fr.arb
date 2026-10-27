@@ -605,7 +605,7 @@
   "commonPerDay": "{amount}/jour",
   "commonNOfM": "{n} sur {m}",
   "fundAmountOfAvailable": "{currency} : {amount} sur {available}",
-  "syncNoSyncFile": "Aucun fichier de synchronisation trouvé",
+  "syncNoSyncFile": "Aucun budget trouvé dans ce dossier",
   "syncErrNeedsPassword": "Le fichier de synchronisation est chiffré. Saisissez votre mot de passe de synchronisation dans Synchronisation cloud.",
   "travelExchangeNote": "Change de voyage → {currency}",
   "travelConvertBackNote": "Reconversion de voyage → {currency}",
@@ -619,18 +619,21 @@
   "a11yPctOfTarget": "{pct} % de {amount}",
   "a11yFlexibleEnvelope": "enveloppe flexible",
   "a11yNeedsReview": "à vérifier",
-  "syncLocalFile": "Fichier local",
+  "syncLocalFile": "Dossier",
   "syncGoogleSub": "Connectez-vous avec votre compte Google",
   "syncOneDriveSub": "Nécessite l'application OneDrive",
   "syncDropboxSub": "Nécessite l'application Dropbox",
-  "syncLocalFileSub": "Choisissez n'importe quel fichier sur l'appareil",
+  "syncLocalFileSub": "Choisissez un dossier sur le téléphone (ou un dossier synchronisé par Dropbox ou OneDrive)",
+  "syncPickFolderTitle": "Choisissez un dossier de synchronisation",
+  "syncPickFolderBody": "La synchronisation garde désormais les modifications de chaque téléphone dans son propre fichier : elle a besoin d'un dossier plutôt que d'un seul fichier. Choisissez le dossier où se trouvait votre fichier de synchronisation, ou tout dossier partagé par vos téléphones.",
+  "syncPickFolderButton": "Choisir un dossier",
   "syncErrGoogleNotConfigured": "La connexion Google n'est pas configurée pour cette version de l'application. Utilisez une autre option de synchronisation.",
   "syncErrNetwork": "Erreur réseau. Vérifiez votre connexion Internet.",
   "syncErrConnectFailed": "Connexion impossible. Veuillez réessayer.",
   "onboardConnectFailed": "Impossible de se connecter à {provider}",
-  "onboardNoSyncFile": "Aucun fichier de synchronisation trouvé",
+  "onboardNoSyncFile": "Aucun budget trouvé dans ce dossier",
   "onboardDriveJoinFailed": "Impossible de se connecter à Google Drive. Vérifiez que vous êtes connecté et que vous avez accès au dossier partagé.",
-  "onboardNoSyncFileShared": "Aucun fichier de synchronisation dans le dossier partagé",
+  "onboardNoSyncFileShared": "Aucun budget trouvé dans le dossier partagé",
   "billNoteTitle": "Partage de facture",
   "billNoteTotal": "Facture : {total}",
   "billNoteSplitWith": "Partagé avec {people} · Total : {total}",
@@ -2887,7 +2890,7 @@
   "@syncReceiptComingSoon": {
     "description": "Note"
   },
-  "syncProviderInfo": "Fichier local utilise le sélecteur de fichiers du téléphone : gardez le fichier de synchronisation où vous voulez. Les photos de reçus ne se synchronisent qu'avec Google Drive.",
+  "syncProviderInfo": "Dossier utilise le sélecteur de fichiers du téléphone : gardez le dossier de synchronisation où vous voulez ; chaque téléphone y a ses propres fichiers. Les photos de reçus ne se synchronisent qu'avec Google Drive.",
   "@syncProviderInfo": {
     "description": "Info text"
   },
@@ -3746,7 +3749,7 @@
   "@onboardRestoreTitle": {
     "description": "Sheet title"
   },
-  "onboardRestoreDesc": "Choisissez où se trouve votre fichier de synchronisation : Google Drive, ou un fichier enregistré sur ce téléphone ou dans une autre app. Il remplace les données de ce téléphone.",
+  "onboardRestoreDesc": "Choisissez où votre budget se synchronise : Google Drive, ou un dossier sur ce téléphone ou synchronisé par une autre app. Il remplace les données de ce téléphone.",
   "@onboardRestoreDesc": {
     "description": "Sheet description"
   },
@@ -3754,7 +3757,7 @@
   "@onboardGoogleDrive": {
     "description": "Button"
   },
-  "onboardPickFile": "Choisir un fichier",
+  "onboardPickFile": "Choisir un dossier",
   "@onboardPickFile": {
     "description": "Button"
   },
@@ -4782,7 +4785,7 @@
   "@defcatOther": {
     "description": "Default category preset"
   },
-  "filePickerTitle": "Sélectionnez le fichier de synchronisation BudgetSeal",
+  "filePickerTitle": "Sélectionnez un dossier pour la synchronisation BudgetSeal",
   "@filePickerTitle": {
     "description": "Dialog title"
   },

@@ -16,6 +16,7 @@ import '../sync/cloud_provider.dart';
 import '../sync/file_picker_provider.dart';
 import '../sync/google_drive_provider.dart';
 import '../sync/sync_encryption.dart';
+import '../sync/log_sync.dart';
 import '../sync/sync_engine.dart';
 import 'age_of_money_provider.dart';
 import 'daily_spending_provider.dart';
@@ -29,6 +30,7 @@ import '../services/household_members.dart';
 
 const _prefActiveProvider = 'sync_active_provider';
 const _prefLastSync = 'sync_last_sync';
+const _prefLastSnapshot = 'sync_last_snapshot';
 
 enum SyncStatus { idle, syncing, success, error }
 
@@ -175,8 +177,9 @@ class SyncNotifier extends Notifier<SyncState> {
     state = state.copyWith(clearProvider: true, status: SyncStatus.idle);
   }
 
-  /// Full sync: download remote → merge → upload local → sync receipts.
-  /// A call while one is running waits for that one instead.
+  /// Full sync: apply the other phones' log entries, write this phone's
+  /// (`LogSync`), refresh the daily snapshot, sync receipts. A call while
+  /// one is running waits for that one instead.
   Future<void> sync() => _exclusive(_sync);
 
   Future<void> _sync() async {
@@ -190,16 +193,12 @@ class SyncNotifier extends Notifier<SyncState> {
     try {
       int totalChanges = 0;
 
-      // 1. Download and merge remote changes
-      final remoteJson = await provider.download();
-      if (remoteJson != null) {
-        totalChanges += await _engine.mergeFromJson(remoteJson);
-        if (totalChanges > 0) _refreshAfterMerge();
-      }
+      // 1. The other phones' changes in, ours out.
+      totalChanges += await _logSync.sync(ProviderLogStore(provider));
+      if (totalChanges > 0) _refreshAfterMerge();
 
-      // 2. Export local state and upload
-      final localJson = await _engine.exportToJson();
-      await provider.upload(localJson);
+      // 2. The readable copy (docs/file-format.md), at most once a day.
+      await _snapshotIfDue(provider);
 
       // 3. Sync receipts if enabled and provider supports it
       if (provider is GoogleDriveProvider) {
@@ -228,6 +227,31 @@ class SyncNotifier extends Notifier<SyncState> {
     }
   }
 
+  LogSync get _logSync => LogSync(ref.read(databaseProvider));
+
+  /// Writes `BudgetSeal_Sync.json` (the whole budget, readable without the
+  /// app) when the last one is a day old. Sync itself uses the logs.
+  Future<void> _snapshotIfDue(CloudProvider provider, {bool force = false}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final last = DateTime.tryParse(prefs.getString(_prefLastSnapshot) ?? '');
+    if (!force &&
+        last != null &&
+        DateTime.now().difference(last) < const Duration(days: 1)) {
+      return;
+    }
+    await provider.upload(await _engine.exportToJson());
+    await prefs.setString(_prefLastSnapshot, DateTime.now().toIso8601String());
+  }
+
+  /// A phone that synced to one picked file before log sync: it has to
+  /// pick a folder (Settings › Cloud sync shows the prompt).
+  Future<bool> needsFolderPick() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_prefActiveProvider) == 'file' &&
+        prefs.getString(legacyFileSyncPathKey) != null &&
+        !await filePicker.isConnected;
+  }
+
   /// Most screens read Drift streams and redraw by themselves after a
   /// merge; these providers load once and need a nudge.
   void _refreshAfterMerge() {
@@ -248,9 +272,13 @@ class SyncNotifier extends Notifier<SyncState> {
   Future<RemoteMatch> checkRemote() async {
     final provider = state.activeProvider;
     if (provider == null) return RemoteMatch.none;
-    final raw = await provider.download();
-    if (raw == null) return RemoteMatch.none;
-    final ids = await _engine.householdIdsIn(raw);
+    var ids = await _logSync.householdIdsIn(ProviderLogStore(provider));
+    if (ids.isEmpty) {
+      // A folder from before log sync: only the old whole-budget file.
+      final raw = await provider.download();
+      if (raw == null) return RemoteMatch.none;
+      ids = await _engine.householdIdsIn(raw);
+    }
     final local = ref.read(currentHouseholdIdProvider);
     if (ids.isEmpty) return RemoteMatch.none;
     return local != null && ids.contains(local)
@@ -297,15 +325,18 @@ class SyncNotifier extends Notifier<SyncState> {
         allFilenames.toList(), receiptsDir);
   }
 
-  /// Full restore from the sync file (replaces all local data).
+  /// Replaces all local data with the budget in the provider's folder
+  /// (its phones' logs; a folder from before log sync: the old file).
   Future<void> restoreFromProvider(CloudProvider provider) =>
       _exclusive(() => _restore(provider));
 
   Future<void> _restore(CloudProvider provider) async {
     state = state.copyWith(status: SyncStatus.syncing);
     try {
-      final json = await provider.download();
-      if (json == null) {
+      final store = ProviderLogStore(provider);
+      final hasLogs = (await store.list()).isNotEmpty;
+      final json = hasLogs ? null : await provider.download();
+      if (!hasLogs && json == null) {
         state = state.copyWith(
           status: SyncStatus.error,
           lastError: currentS().syncNoSyncFile,
@@ -325,7 +356,13 @@ class SyncNotifier extends Notifier<SyncState> {
         );
         return;
       }
-      await _engine.restoreFromJson(json);
+      if (hasLogs) {
+        await _logSync.replaceFrom(store);
+      } else {
+        // Its rows are logged as this phone's: the next sync shares them.
+        await _engine.restoreFromJson(json!);
+        await _logSync.push(store);
+      }
 
       // The restored household has its own UUID. Point the app at it —
       // restoreFromJson only writes DB rows, it does not set the active
@@ -362,7 +399,8 @@ class SyncNotifier extends Notifier<SyncState> {
     }
   }
 
-  /// Export and upload without downloading first (initial sync).
+  /// Write this phone's log without reading first (first connection to an
+  /// empty folder).
   Future<void> initialUpload() => _exclusive(_initialUpload);
 
   Future<void> _initialUpload() async {
@@ -371,8 +409,8 @@ class SyncNotifier extends Notifier<SyncState> {
 
     state = state.copyWith(status: SyncStatus.syncing);
     try {
-      final json = await _engine.exportToJson();
-      await provider.upload(json);
+      await _logSync.push(ProviderLogStore(provider));
+      await _snapshotIfDue(provider, force: true);
 
       final now = DateTime.now();
       final prefs = await SharedPreferences.getInstance();
