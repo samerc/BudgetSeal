@@ -5128,7 +5128,7 @@ class SEn extends S {
   String get privacyPolicyTitle => 'Privacy policy';
 
   @override
-  String get privacyLastUpdated => 'Last updated: May 2026';
+  String get privacyLastUpdated => 'Last updated: October 2026';
 
   @override
   String get privacyIntro =>
@@ -5160,7 +5160,7 @@ class SEn extends S {
 
   @override
   String get privacyAnalyticsBody =>
-      'BudgetSeal does not include any analytics SDKs, crash reporting tools, advertising libraries, or tracking pixels. No usage data, device identifiers, or behavioral metrics are collected.';
+      'BudgetSeal does not include any analytics SDKs, third-party crash reporting services, advertising libraries, or tracking pixels. No usage data, device identifiers, or behavioral metrics are collected. If you turn on crash reports (off by default), errors are saved on your device only, and leave it only if you choose to share them.';
 
   @override
   String get privacyPermissionsTitle => '5. Permissions';
@@ -9247,6 +9247,74 @@ class SEn extends S {
 
   @override
   String get tileChangeLogSub => 'What was added, edited or deleted, and when';
+
+  @override
+  String get tileCrashReports => 'Crash reports';
+
+  @override
+  String get tileCrashReportsOff => 'Off · nothing is saved';
+
+  @override
+  String tileCrashReportsOn(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'On · $count saved',
+      one: 'On · 1 saved',
+      zero: 'On · none saved',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get crashKeep => 'Save crash reports on this phone';
+
+  @override
+  String get crashKeepSub =>
+      'If something goes wrong, BudgetSeal saves what happened here. Nothing is sent: you choose whether to share a report.';
+
+  @override
+  String get crashWhatsIn =>
+      'A report holds the error, where in the app it happened, the app version and your phone\'s system version. It doesn\'t include your budget, but an error can quote something that was on screen, so read it before you share it.';
+
+  @override
+  String get crashEmpty => 'No crash reports';
+
+  @override
+  String get crashEmptySubOn => 'If something goes wrong, it will show here.';
+
+  @override
+  String get crashEmptySubOff =>
+      'Turn on saving to keep a report when something goes wrong.';
+
+  @override
+  String get crashShare => 'Share';
+
+  @override
+  String get crashClear => 'Clear';
+
+  @override
+  String get crashCleared => 'Crash reports cleared';
+
+  @override
+  String crashTimes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count times',
+      one: 'once',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get crashOnSnack => 'Crash reports will be saved on this phone';
+
+  @override
+  String get crashOffSnack => 'Crash reports off. Saved reports deleted.';
+
+  @override
+  String get crashShareSubject => 'BudgetSeal crash reports';
 
   @override
   String get changeLogTitle => 'Change history';

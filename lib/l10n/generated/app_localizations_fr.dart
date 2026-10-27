@@ -5189,7 +5189,7 @@ class SFr extends S {
   String get privacyPolicyTitle => 'Politique de confidentialité';
 
   @override
-  String get privacyLastUpdated => 'Dernière mise à jour : mai 2026';
+  String get privacyLastUpdated => 'Dernière mise à jour : octobre 2026';
 
   @override
   String get privacyIntro =>
@@ -5221,7 +5221,7 @@ class SFr extends S {
 
   @override
   String get privacyAnalyticsBody =>
-      'BudgetSeal n\'inclut aucun SDK d\'analyse, outil de rapport de plantage, bibliothèque publicitaire ou pixel de suivi. Aucune donnée d\'utilisation, identifiant d\'appareil ou métrique comportementale n\'est collectée.';
+      'BudgetSeal n\'inclut aucun SDK d\'analyse, service tiers de rapport de plantage, bibliothèque publicitaire ou pixel de suivi. Aucune donnée d\'utilisation, identifiant d\'appareil ou métrique comportementale n\'est collectée. Si vous activez les rapports de plantage (désactivés par défaut), les erreurs sont enregistrées uniquement sur votre appareil et ne le quittent que si vous choisissez de les partager.';
 
   @override
   String get privacyPermissionsTitle => '5. Autorisations';
@@ -9347,6 +9347,78 @@ class SFr extends S {
   @override
   String get tileChangeLogSub =>
       'Ce qui a été ajouté, modifié ou supprimé, et quand';
+
+  @override
+  String get tileCrashReports => 'Rapports de plantage';
+
+  @override
+  String get tileCrashReportsOff => 'Désactivés · rien n\'est enregistré';
+
+  @override
+  String tileCrashReportsOn(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Activés · $count enregistrés',
+      one: 'Activés · 1 enregistré',
+      zero: 'Activés · aucun enregistré',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get crashKeep =>
+      'Enregistrer les rapports de plantage sur ce téléphone';
+
+  @override
+  String get crashKeepSub =>
+      'En cas d\'erreur, BudgetSeal enregistre ici ce qui s\'est passé. Rien n\'est envoyé : c\'est vous qui choisissez de partager un rapport.';
+
+  @override
+  String get crashWhatsIn =>
+      'Un rapport contient l\'erreur, l\'endroit de l\'appli où elle s\'est produite, la version de l\'appli et celle du système de votre téléphone. Il ne contient pas votre budget, mais une erreur peut citer ce qui était à l\'écran : lisez-le avant de le partager.';
+
+  @override
+  String get crashEmpty => 'Aucun rapport de plantage';
+
+  @override
+  String get crashEmptySubOn =>
+      'Si une erreur se produit, elle apparaîtra ici.';
+
+  @override
+  String get crashEmptySubOff =>
+      'Activez l\'enregistrement pour garder un rapport en cas d\'erreur.';
+
+  @override
+  String get crashShare => 'Partager';
+
+  @override
+  String get crashClear => 'Effacer';
+
+  @override
+  String get crashCleared => 'Rapports de plantage effacés';
+
+  @override
+  String crashTimes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fois',
+      one: 'une fois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get crashOnSnack =>
+      'Les rapports de plantage seront enregistrés sur ce téléphone';
+
+  @override
+  String get crashOffSnack =>
+      'Rapports de plantage désactivés. Les rapports enregistrés ont été supprimés.';
+
+  @override
+  String get crashShareSubject => 'Rapports de plantage BudgetSeal';
 
   @override
   String get changeLogTitle => 'Historique';

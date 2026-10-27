@@ -9091,7 +9091,7 @@ abstract class S {
   /// Date
   ///
   /// In en, this message translates to:
-  /// **'Last updated: May 2026'**
+  /// **'Last updated: October 2026'**
   String get privacyLastUpdated;
 
   /// Introduction
@@ -9145,7 +9145,7 @@ abstract class S {
   /// Body
   ///
   /// In en, this message translates to:
-  /// **'BudgetSeal does not include any analytics SDKs, crash reporting tools, advertising libraries, or tracking pixels. No usage data, device identifiers, or behavioral metrics are collected.'**
+  /// **'BudgetSeal does not include any analytics SDKs, third-party crash reporting services, advertising libraries, or tracking pixels. No usage data, device identifiers, or behavioral metrics are collected. If you turn on crash reports (off by default), errors are saved on your device only, and leave it only if you choose to share them.'**
   String get privacyAnalyticsBody;
 
   /// Heading
@@ -15947,6 +15947,102 @@ abstract class S {
   /// In en, this message translates to:
   /// **'What was added, edited or deleted, and when'**
   String get tileChangeLogSub;
+
+  /// Crash reports
+  ///
+  /// In en, this message translates to:
+  /// **'Crash reports'**
+  String get tileCrashReports;
+
+  /// Crash reports
+  ///
+  /// In en, this message translates to:
+  /// **'Off · nothing is saved'**
+  String get tileCrashReportsOff;
+
+  /// Crash reports
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{On · none saved} =1{On · 1 saved} other{On · {count} saved}}'**
+  String tileCrashReportsOn(int count);
+
+  /// Crash reports
+  ///
+  /// In en, this message translates to:
+  /// **'Save crash reports on this phone'**
+  String get crashKeep;
+
+  /// Crash reports
+  ///
+  /// In en, this message translates to:
+  /// **'If something goes wrong, BudgetSeal saves what happened here. Nothing is sent: you choose whether to share a report.'**
+  String get crashKeepSub;
+
+  /// Crash reports
+  ///
+  /// In en, this message translates to:
+  /// **'A report holds the error, where in the app it happened, the app version and your phone\'s system version. It doesn\'t include your budget, but an error can quote something that was on screen, so read it before you share it.'**
+  String get crashWhatsIn;
+
+  /// Crash reports
+  ///
+  /// In en, this message translates to:
+  /// **'No crash reports'**
+  String get crashEmpty;
+
+  /// Crash reports
+  ///
+  /// In en, this message translates to:
+  /// **'If something goes wrong, it will show here.'**
+  String get crashEmptySubOn;
+
+  /// Crash reports
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on saving to keep a report when something goes wrong.'**
+  String get crashEmptySubOff;
+
+  /// Crash reports
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get crashShare;
+
+  /// Crash reports
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get crashClear;
+
+  /// Crash reports
+  ///
+  /// In en, this message translates to:
+  /// **'Crash reports cleared'**
+  String get crashCleared;
+
+  /// Crash reports
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{once} other{{count} times}}'**
+  String crashTimes(int count);
+
+  /// Crash reports
+  ///
+  /// In en, this message translates to:
+  /// **'Crash reports will be saved on this phone'**
+  String get crashOnSnack;
+
+  /// Crash reports
+  ///
+  /// In en, this message translates to:
+  /// **'Crash reports off. Saved reports deleted.'**
+  String get crashOffSnack;
+
+  /// Crash reports
+  ///
+  /// In en, this message translates to:
+  /// **'BudgetSeal crash reports'**
+  String get crashShareSubject;
 
   /// Change history
   ///

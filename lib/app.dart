@@ -72,6 +72,7 @@ import 'features/settings/notifications_screen.dart';
 import 'features/settings/exchange_rates_screen.dart';
 import 'features/settings/export_screen.dart';
 import 'features/settings/change_log_screen.dart';
+import 'features/settings/crash_reports_screen.dart';
 import 'features/settings/import_export_screen.dart';
 import 'features/settings/sync_screen.dart';
 import 'features/planned/planned_payments_screen.dart';
@@ -254,6 +255,11 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
           path: '/change-log',
           pageBuilder: (_, state) =>
               slideUpPage(child: const ChangeLogScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/crash-reports',
+          pageBuilder: (_, state) =>
+              slideUpPage(child: const CrashReportsScreen(), state: state),
         ),
         GoRoute(
           path: '/export',

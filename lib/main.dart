@@ -7,6 +7,7 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
@@ -17,6 +18,7 @@ import 'core/providers/household_provider.dart';
 import 'core/providers/premium_provider.dart';
 import 'core/services/daily_reminder_service.dart';
 import 'core/services/app_shortcuts_service.dart';
+import 'core/services/crash_reports.dart';
 import 'core/services/home_widget_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/household_members.dart';
@@ -26,6 +28,7 @@ void main() {
   // Global error handler for Flutter framework errors (build, layout, paint)
   FlutterError.onError = (details) {
     debugPrint('[FlutterError] ${details.exceptionAsString()}');
+    CrashReports.record(details.exception, details.stack, source: 'flutter');
     // In release mode, silently log — don't show red screen
     if (kReleaseMode) {
       FlutterError.presentError(details);
@@ -37,6 +40,12 @@ void main() {
   // mismatch and errors escape the handler).
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
+    // Errors outside the zone (platform channels, other isolates' callbacks).
+    PlatformDispatcher.instance.onError = (error, stack) {
+      debugPrint('[Platform] $error');
+      CrashReports.record(error, stack, source: 'platform');
+      return true;
+    };
     // Load the real app version/build so the About & Settings screens never
     // show a stale hardcoded version.
     await initAppInfo();
@@ -49,6 +58,7 @@ void main() {
     await _startApp();
   }, (error, stackTrace) {
     debugPrint('[Uncaught] $error');
+    CrashReports.record(error, stackTrace, source: 'async');
   });
 }
 
@@ -79,6 +89,12 @@ Future<void> _startApp() async {
   // This install's id, stamped on the transactions it saves (who added what
   // in a shared budget).
   await DeviceIdentity.init(prefs);
+  // Opt-in crash reports (off unless the user turned them on).
+  try {
+    CrashReports.init(prefs, await getApplicationSupportDirectory());
+  } catch (e) {
+    debugPrint('Crash reports init failed: $e');
+  }
   Intl.defaultLocale = prefs.getString('app_locale') ??
       WidgetsBinding.instance.platformDispatcher.locale.languageCode;
   // Dates use Western digits like every amount does ("21 أكتوبر 2026", not

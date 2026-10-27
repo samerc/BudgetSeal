@@ -52,6 +52,7 @@ import 'member_name_dialog.dart';
 import 'share_household_sheet.dart';
 import '../../shared/utils/biometric_errors.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../core/services/crash_reports.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -1267,6 +1268,8 @@ class _SettingsDetailScreenState extends ConsumerState<SettingsDetailScreen> {
                 subtitle: l.tileChangeLogSub,
                 iconColor: SettingsRowStyle.hue(40),
                 onTap: () => context.push('/change-log'))),
+          _Find(keys: (t) => [t.tileCrashReports, t.crashKeep],
+              child: const _CrashReportsTile()),
           // ── Receipt Sync toggle ──
           _Find(keys: (t) => [t.tileSyncReceipts],
               child: Builder(builder: (context) {
@@ -1527,6 +1530,31 @@ class _Find extends StatelessWidget {
       return const SizedBox.shrink();
     }
     return child;
+  }
+}
+
+/// Off, or On with how many reports are saved (updates as they change).
+class _CrashReportsTile extends StatelessWidget {
+  const _CrashReportsTile();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = S.of(context);
+    return ValueListenableBuilder<int>(
+      valueListenable: CrashReports.changes,
+      builder: (context, _, __) => FutureBuilder<List<CrashReport>>(
+        future: CrashReports.enabled ? CrashReports.load() : null,
+        builder: (context, snap) => _SettingsTile(
+          icon: AppIcons.bug,
+          title: l.tileCrashReports,
+          subtitle: CrashReports.enabled
+              ? l.tileCrashReportsOn(snap.data?.length ?? 0)
+              : l.tileCrashReportsOff,
+          iconColor: SettingsRowStyle.hue(8),
+          onTap: () => context.push('/crash-reports'),
+        ),
+      ),
+    );
   }
 }
 

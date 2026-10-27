@@ -5144,7 +5144,7 @@ class SAr extends S {
   String get privacyPolicyTitle => 'سياسة الخصوصية';
 
   @override
-  String get privacyLastUpdated => 'آخر تحديث: مايو 2026';
+  String get privacyLastUpdated => 'آخر تحديث: أكتوبر 2026';
 
   @override
   String get privacyIntro =>
@@ -5176,7 +5176,7 @@ class SAr extends S {
 
   @override
   String get privacyAnalyticsBody =>
-      'BudgetSeal لا يتضمن أي أدوات تحليل أو تقارير أعطال أو مكتبات إعلانية أو بكسلات تتبع. لا يتم جمع أي بيانات استخدام أو معرفات أجهزة أو مقاييس سلوكية.';
+      'BudgetSeal لا يتضمن أي أدوات تحليل أو خدمات خارجية لتقارير الأعطال أو مكتبات إعلانية أو بكسلات تتبع. لا يتم جمع أي بيانات استخدام أو معرفات أجهزة أو مقاييس سلوكية. إذا فعّلت تقارير الأعطال (متوقفة افتراضيًا)، تُحفظ الأخطاء على جهازك فقط، ولا تغادره إلا إذا اخترت مشاركتها.';
 
   @override
   String get privacyPermissionsTitle => '5. الأذونات';
@@ -9264,6 +9264,79 @@ class SAr extends S {
 
   @override
   String get tileChangeLogSub => 'ما أُضيف أو عُدّل أو حُذف، ومتى';
+
+  @override
+  String get tileCrashReports => 'تقارير الأعطال';
+
+  @override
+  String get tileCrashReportsOff => 'متوقفة · لا يُحفظ شيء';
+
+  @override
+  String tileCrashReportsOn(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'مفعّلة · $count تقرير',
+      many: 'مفعّلة · $count تقريرًا',
+      few: 'مفعّلة · $count تقارير',
+      two: 'مفعّلة · تقريران',
+      one: 'مفعّلة · تقرير واحد',
+      zero: 'مفعّلة · لا شيء محفوظ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get crashKeep => 'حفظ تقارير الأعطال على هذا الهاتف';
+
+  @override
+  String get crashKeepSub =>
+      'إذا حدث خطأ، يحفظ BudgetSeal ما جرى هنا. لا يُرسَل شيء: أنت من يقرّر مشاركة التقرير.';
+
+  @override
+  String get crashWhatsIn =>
+      'يحتوي التقرير على الخطأ ومكان حدوثه في التطبيق وإصدار التطبيق ونظام هاتفك. لا يتضمن ميزانيتك، لكن رسالة الخطأ قد تقتبس شيئًا كان على الشاشة، فاقرأه قبل مشاركته.';
+
+  @override
+  String get crashEmpty => 'لا توجد تقارير أعطال';
+
+  @override
+  String get crashEmptySubOn => 'إذا حدث خطأ، سيظهر هنا.';
+
+  @override
+  String get crashEmptySubOff => 'فعّل الحفظ للاحتفاظ بتقرير عند حدوث خطأ.';
+
+  @override
+  String get crashShare => 'مشاركة';
+
+  @override
+  String get crashClear => 'مسح';
+
+  @override
+  String get crashCleared => 'تم مسح تقارير الأعطال';
+
+  @override
+  String crashTimes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count مرة',
+      many: '$count مرة',
+      few: '$count مرات',
+      two: 'مرتان',
+      one: 'مرة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get crashOnSnack => 'سيتم حفظ تقارير الأعطال على هذا الهاتف';
+
+  @override
+  String get crashOffSnack => 'تم إيقاف تقارير الأعطال وحذف المحفوظ منها.';
+
+  @override
+  String get crashShareSubject => 'تقارير أعطال BudgetSeal';
 
   @override
   String get changeLogTitle => 'سجل التغييرات';

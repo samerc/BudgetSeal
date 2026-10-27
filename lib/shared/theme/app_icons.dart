@@ -36,6 +36,7 @@ abstract final class AppIcons {
   static const bookOpen = IconData(0xe0e6, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const boxArrowUp = IconData(0xee54, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const broom = IconData(0xec54, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
+  static const bug = IconData(0xe5f4, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const calendar = IconData(0xe108, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const calendarBlank = IconData(0xe10a, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const calendarCheck = IconData(0xe712, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
