@@ -34,6 +34,7 @@ class SyncEngine {
         await _db.select(_db.transactionTemplates).get();
     final fxRates = await _db.select(_db.fxRates).get();
     final objectivesList = await _db.select(_db.objectives).get();
+    final rules = await _db.select(_db.captureRules).get();
 
     final data = {
       'version': 1,
@@ -51,6 +52,7 @@ class SyncEngine {
       'transactionTemplates': transactionTemplates.map(_templateToMap).toList(),
       'fxRates': fxRates.map(_fxRateToMap).toList(),
       'objectives': objectivesList.map(_objectiveToMap).toList(),
+      'captureRules': rules.map(_ruleToMap).toList(),
     };
 
     // A few MB of JSON for a long history: encode off the UI thread.
@@ -75,6 +77,7 @@ class SyncEngine {
       await _db.delete(_db.transactionTemplates).go();
       await _db.delete(_db.recurringTransactions).go();
       await _db.delete(_db.objectives).go();
+      await _db.delete(_db.captureRules).go();
       await _db.delete(_db.fxRates).go();
       await _db.delete(_db.categories).go();
       await _db.delete(_db.allocations).go();
@@ -131,6 +134,10 @@ class SyncEngine {
         for (final o in _list(data, 'objectives')) {
           b.insert(_db.objectives, _objectiveFromMap(o),
               onConflict: DoUpdate((_) => _objectiveFromMap(o)));
+        }
+        for (final r in _list(data, 'captureRules')) {
+          b.insert(_db.captureRules, _ruleFromMap(r),
+              onConflict: DoUpdate((_) => _ruleFromMap(r)));
         }
       });
       await normalizeTransactions(_db);
@@ -546,6 +553,37 @@ class SyncEngine {
         rate: (m['rate'] as num).toDouble(),
         source: Value(m['source'] as String? ?? 'api'),
         fetchedAt: Value(_parseDate(m['fetchedAt']) ?? DateTime.now()),
+      );
+
+  // ── Capture rules ───────────────────────────────────────────────
+
+  Map<String, dynamic> _ruleToMap(CaptureRule r) => {
+        'id': r.id,
+        'householdId': r.householdId,
+        'match': r.match,
+        'categoryId': r.categoryId,
+        'accountId': r.accountId,
+        'title': r.title,
+        'learned': r.learned,
+        'uses': r.uses,
+        'createdAt': r.createdAt.toUtc().toIso8601String(),
+        'lastModified': r.lastModified.toUtc().toIso8601String(),
+        'deleted': r.deleted,
+      };
+
+  CaptureRulesCompanion _ruleFromMap(Map<String, dynamic> m) =>
+      CaptureRulesCompanion.insert(
+        id: m['id'] as String,
+        householdId: m['householdId'] as String,
+        match: m['match'] as String,
+        categoryId: Value(m['categoryId'] as String?),
+        accountId: Value(m['accountId'] as String?),
+        title: Value(m['title'] as String?),
+        learned: Value(m['learned'] as bool? ?? false),
+        uses: Value(m['uses'] as int? ?? 0),
+        createdAt: Value(_parseDate(m['createdAt']) ?? DateTime.now()),
+        lastModified: Value(_parseDate(m['lastModified']) ?? DateTime.now()),
+        deleted: Value(m['deleted'] as bool? ?? false),
       );
 
   // ── Objectives ──────────────────────────────────────────────────

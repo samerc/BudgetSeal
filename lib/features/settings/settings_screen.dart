@@ -261,6 +261,7 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
         batch.deleteAll(db.recurringTransactions);
         batch.deleteAll(db.transactionTemplates);
         batch.deleteAll(db.objectives);
+        batch.deleteAll(db.captureRules);
         batch.deleteAll(db.fxRates);
         batch.deleteAll(db.users);
         batch.deleteAll(db.households);
@@ -1370,6 +1371,14 @@ class _SettingsDetailScreenState extends ConsumerState<SettingsDetailScreen> {
               subtitle: l.tileExchangeRatesSub,
               iconColor: SettingsRowStyle.hue(35),
               onTap: () => context.push('/exchange-rates'),
+            )),
+          _Find(keys: (t) => [t.tileRules, t.tileRulesSub],
+              child: _SettingsTile(
+              icon: AppIcons.tag,
+              title: l.tileRules,
+              subtitle: l.tileRulesSub,
+              iconColor: SettingsRowStyle.hue(35),
+              onTap: () => context.push('/rules'),
             )),
           _Find(keys: (t) => [t.tilePeriodStartDay],
               child: _SettingsTile(

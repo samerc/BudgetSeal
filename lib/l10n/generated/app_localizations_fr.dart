@@ -2140,6 +2140,61 @@ class SFr extends S {
   String get tileExchangeRatesSub => 'Taux en direct, ou les vôtres';
 
   @override
+  String get tileRules => 'Règles';
+
+  @override
+  String get tileRulesSub =>
+      'Remplir les paiements partagés et les alertes bancaires';
+
+  @override
+  String get rulesIntro =>
+      'Quand un message partagé, un ticket ou une alerte bancaire contient ce texte, BudgetSeal remplit la catégorie et le compte. Enregistrer un paiement partagé avec une catégorie lui apprend aussi une règle.';
+
+  @override
+  String get rulesEmpty => 'Aucune règle pour l’instant';
+
+  @override
+  String get rulesLearned => 'Apprise';
+
+  @override
+  String rulesUsed(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Utilisée $n fois',
+      one: 'Utilisée une fois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulesAdd => 'Ajouter une règle';
+
+  @override
+  String get rulesEdit => 'Modifier la règle';
+
+  @override
+  String get rulesMatch => 'Quand le texte contient';
+
+  @override
+  String get rulesMatchHint => 'ex. Carrefour';
+
+  @override
+  String get rulesTitleField => 'Titre à utiliser (facultatif)';
+
+  @override
+  String get rulesKeep => 'Laisser tel quel';
+
+  @override
+  String get rulesNeedMatch => 'Saisissez le texte à rechercher';
+
+  @override
+  String get rulesSaved => 'Règle enregistrée';
+
+  @override
+  String get rulesDeleted => 'Règle supprimée';
+
+  @override
   String get allocArchivedTitle => 'Enveloppes archivées';
 
   @override

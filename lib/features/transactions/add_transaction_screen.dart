@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart' show Value;
 
+import '../../core/capture/capture_rules.dart';
 import '../../core/database/app_database.dart';
 import '../../core/engine/allocation_engine.dart';
 import '../../core/providers/accounts_provider.dart';
@@ -60,6 +61,9 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
   /// Receipt filenames already attached (a shared photo).
   final List<String>? initialReceipts;
 
+  /// A captured payment's shop: saved with a category, it becomes a rule.
+  final String? captureShop;
+
   const AddTransactionScreen({
     super.key,
     this.editTransactionId,
@@ -70,6 +74,7 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
     this.editFromAccountId,
     this.editDestAccountId,
     this.initialReceipts,
+    this.captureShop,
   });
 
   @override
@@ -966,6 +971,19 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         LastUsedService.rememberTransfer(_fromAccountId!, _destAccountId!);
       } else if (_lines.first.accountId != null) {
         LastUsedService.rememberAccount(_lines.first.accountId!);
+      }
+
+      // A captured payment saved with a category: remember its shop.
+      if (widget.captureShop != null && _type != _TxType.transfer) {
+        try {
+          await learnCaptureRule(ref.read(databaseProvider),
+              householdId: householdId,
+              shop: widget.captureShop!,
+              categoryId: _lines.first.categoryId,
+              accountId: _lines.first.accountId);
+        } catch (e) {
+          debugPrint('[AddTransaction] Learning the rule failed: $e');
+        }
       }
 
       // Save receipt filenames if attached.

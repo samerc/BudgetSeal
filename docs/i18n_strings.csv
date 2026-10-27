@@ -1798,6 +1798,21 @@ alloc_second_target_add,Envelope: optional second target in another currency,Add
 alloc_second_target,Envelope: optional second target in another currency,And in another currency,وبعملة أخرى,Et dans une autre devise
 alloc_second_target_desc,Envelope: optional second target in another currency,"Funded and spent on its own, never added to the first.",يُموَّل ويُصرف وحده، ولا يُجمع مع الأول.,"Alimenté et dépensé à part, jamais ajouté au premier."
 tile_exchange_rates_sub,,"Live rates, or set your own",أسعار مباشرة، أو حدّد سعرك,"Taux en direct, ou les vôtres"
+tile_rules,Rules for captured payments (Settings › Rules),Rules,القواعد,Règles
+tile_rules_sub,Rules for captured payments (Settings › Rules),Fill in shared payments and bank alerts,تعبئة الدفعات المشارَكة وتنبيهات البنك,Remplir les paiements partagés et les alertes bancaires
+rules_intro,Rules for captured payments (Settings › Rules),"When a shared message, a receipt or a bank alert mentions this text, BudgetSeal fills in the category and account. Saving a shared payment with a category also teaches it a rule.",عندما تذكر رسالة مشارَكة أو إيصال أو تنبيه من البنك هذا النص، يعبّئ BudgetSeal الفئة والحساب. وحفظ دفعة مشارَكة مع فئة يعلّمه قاعدة أيضًا.,"Quand un message partagé, un ticket ou une alerte bancaire contient ce texte, BudgetSeal remplit la catégorie et le compte. Enregistrer un paiement partagé avec une catégorie lui apprend aussi une règle."
+rules_empty,Rules for captured payments (Settings › Rules),No rules yet,لا قواعد بعد,Aucune règle pour l’instant
+rules_learned,Rules for captured payments (Settings › Rules),Learned,مُتعلَّمة,Apprise
+rules_used,Rules for captured payments (Settings › Rules),"{n, plural, =1{Used once} other{Used {n} times}}","{n, plural, =1{استُخدمت مرة} other{استُخدمت {n} مرة}}","{n, plural, =1{Utilisée une fois} other{Utilisée {n} fois}}"
+rules_add,Rules for captured payments (Settings › Rules),Add rule,إضافة قاعدة,Ajouter une règle
+rules_edit,Rules for captured payments (Settings › Rules),Edit rule,تعديل القاعدة,Modifier la règle
+rules_match,Rules for captured payments (Settings › Rules),When the text contains,عندما يحتوي النص على,Quand le texte contient
+rules_match_hint,Rules for captured payments (Settings › Rules),e.g. Spinneys,مثلًا: سبينيس,ex. Carrefour
+rules_title_field,Rules for captured payments (Settings › Rules),Title to use (optional),العنوان المستخدم (اختياري),Titre à utiliser (facultatif)
+rules_keep,Rules for captured payments (Settings › Rules),Leave as is,اتركه كما هو,Laisser tel quel
+rules_need_match,Rules for captured payments (Settings › Rules),Enter the text to look for,أدخل النص المطلوب البحث عنه,Saisissez le texte à rechercher
+rules_saved,Rules for captured payments (Settings › Rules),Rule saved,حُفظت القاعدة,Règle enregistrée
+rules_deleted,Rules for captured payments (Settings › Rules),Rule deleted,حُذفت القاعدة,Règle supprimée
 alloc_archived_title,,Archived envelopes,الأظرف المؤرشفة,Enveloppes archivées
 alloc_no_archived,,No archived envelopes,لا توجد أظرف مؤرشفة,Aucune enveloppe archivée
 alloc_unarchived,,{name} unarchived,تم إلغاء أرشفة {name},{name} désarchivée

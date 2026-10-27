@@ -205,6 +205,10 @@ Exchange rates: `id`, `baseCurrency`, `targetCurrency`, `rate` (1 `baseCurrency`
 | `contactName`, `direction` | Loans: the other person, and `lent` (they owe you) or `borrowed` (you owe them). |
 | `archived`, `deviceId`, `createdAt`, `lastModified`, `deleted` | |
 
+### captureRules
+
+Rules for payments shared into the app or read from bank alerts: `id`, `householdId`, `match` (text looked for, any case), `categoryId`, `accountId`, `title` (each may be null: left as read), `learned` (made by the app from the user's choices), `uses`, `createdAt`, `lastModified`, `deleted`.
+
 ## Computing balances
 
 Balances are not stored; they are computed from the rows above. Skip rows with `deleted: true` and transactions whose `status` isn't null.

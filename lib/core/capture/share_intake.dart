@@ -8,6 +8,7 @@ import '../../shared/utils/ocr_service.dart';
 import '../../shared/utils/receipt_helper.dart';
 import '../database/app_database.dart';
 import '../services/last_used_service.dart';
+import 'capture_rules.dart';
 import 'text_reader.dart';
 
 /// Something shared into BudgetSeal from another app: a bank message's
@@ -94,9 +95,14 @@ Future<Map<String, dynamic>?> shareFormArgs(
             a.deleted.equals(false)))
       .get();
   final currency = draft.currency ?? baseCurrency;
+  final shop = draft.merchant ?? receiptShop;
+  // A rule for this shop or message: its category, account and title.
+  final rule = await findCaptureRule(
+      db, householdId, [if (shop != null) shop, text].join('\n'));
   final last = await LastUsedService.defaultAccount(accounts);
   final inCurrency = accounts.where((a) => a.currency == currency).toList();
-  final account = inCurrency.where((a) => a.id == last).firstOrNull ??
+  final account = inCurrency.where((a) => a.id == rule?.accountId).firstOrNull ??
+      inCurrency.where((a) => a.id == last).firstOrNull ??
       inCurrency.firstOrNull;
   final now = DateTime.now();
   final date = draft.date == null
@@ -106,14 +112,16 @@ Future<Map<String, dynamic>?> shareFormArgs(
 
   return {
     'editType': draft.type,
-    'editNote': draft.merchant ?? receiptShop ?? '',
+    'editNote': rule?.title ?? shop ?? '',
+    // The forms learn a rule for it when it's saved with a category.
+    if (shop != null) 'captureShop': shop,
     if (date != null && !date.isAfter(now)) 'editDate': date,
     'editLines': [
       {
         'amount': amount ?? 0.0,
         'currency': currency,
         'accountId': account?.id,
-        'categoryId': null,
+        'categoryId': rule?.categoryId,
         'note': '',
       },
     ],

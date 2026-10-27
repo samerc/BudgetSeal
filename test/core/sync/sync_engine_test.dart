@@ -108,6 +108,8 @@ void main() {
     await a.into(a.objectives).insert(ObjectivesCompanion.insert(
         id: 'obj', householdId: 'hh', name: 'Trip', type: 'goal',
         targetCurrency: 'USD', deviceId: 'a'));
+    await a.into(a.captureRules).insert(CaptureRulesCompanion.insert(
+        id: 'rule', householdId: 'hh', match: 'spinneys'));
 
     await sync(a, b);
 

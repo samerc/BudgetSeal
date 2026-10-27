@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/capture/capture_rules.dart';
 import '../../core/database/app_database.dart';
 import '../../core/engine/allocation_engine.dart';
 import '../../core/engine/envelope_for_category.dart';
@@ -63,6 +64,9 @@ class QuickAddScreen extends ConsumerStatefulWidget {
 
   /// Receipt filenames already attached (a shared photo).
   final List<String>? initialReceipts;
+
+  /// A captured payment's shop: saved with a category, it becomes a rule.
+  final String? captureShop;
   const QuickAddScreen({
     super.key,
     this.initialType,
@@ -73,6 +77,7 @@ class QuickAddScreen extends ConsumerStatefulWidget {
     this.editFromAccountId,
     this.editDestAccountId,
     this.initialReceipts,
+    this.captureShop,
   });
 
   /// Built from the `/add-transaction` route extra.
@@ -86,6 +91,7 @@ class QuickAddScreen extends ConsumerStatefulWidget {
         editFromAccountId: extra?['editFromAccountId'] as String?,
         editDestAccountId: extra?['editDestAccountId'] as String?,
         initialReceipts: extra?['editReceipts'] as List<String>?,
+        captureShop: extra?['captureShop'] as String?,
       );
 
   /// One account and one currency per transaction here; lines spread over
@@ -1075,6 +1081,18 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
           editing: widget.editTransactionId,
         );
         LastUsedService.rememberAccount(_accountId!);
+      }
+      // A captured payment saved with a category: remember its shop.
+      if (widget.captureShop != null && _type != 'transfer') {
+        try {
+          await learnCaptureRule(db,
+              householdId: householdId,
+              shop: widget.captureShop!,
+              categoryId: _split ? _items.first.categoryId : _categoryId,
+              accountId: _accountId);
+        } catch (e) {
+          debugPrint('[QuickAdd] Learning the rule failed: $e');
+        }
       }
       if (_receipts.isNotEmpty) {
         try {

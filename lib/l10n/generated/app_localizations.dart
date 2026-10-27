@@ -3795,6 +3795,96 @@ abstract class S {
   /// **'Live rates, or set your own'**
   String get tileExchangeRatesSub;
 
+  /// Rules for captured payments (Settings › Rules)
+  ///
+  /// In en, this message translates to:
+  /// **'Rules'**
+  String get tileRules;
+
+  /// Rules for captured payments (Settings › Rules)
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in shared payments and bank alerts'**
+  String get tileRulesSub;
+
+  /// Rules for captured payments (Settings › Rules)
+  ///
+  /// In en, this message translates to:
+  /// **'When a shared message, a receipt or a bank alert mentions this text, BudgetSeal fills in the category and account. Saving a shared payment with a category also teaches it a rule.'**
+  String get rulesIntro;
+
+  /// Rules for captured payments (Settings › Rules)
+  ///
+  /// In en, this message translates to:
+  /// **'No rules yet'**
+  String get rulesEmpty;
+
+  /// Rules for captured payments (Settings › Rules)
+  ///
+  /// In en, this message translates to:
+  /// **'Learned'**
+  String get rulesLearned;
+
+  /// Rules for captured payments (Settings › Rules)
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Used once} other{Used {n} times}}'**
+  String rulesUsed(int n);
+
+  /// Rules for captured payments (Settings › Rules)
+  ///
+  /// In en, this message translates to:
+  /// **'Add rule'**
+  String get rulesAdd;
+
+  /// Rules for captured payments (Settings › Rules)
+  ///
+  /// In en, this message translates to:
+  /// **'Edit rule'**
+  String get rulesEdit;
+
+  /// Rules for captured payments (Settings › Rules)
+  ///
+  /// In en, this message translates to:
+  /// **'When the text contains'**
+  String get rulesMatch;
+
+  /// Rules for captured payments (Settings › Rules)
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Spinneys'**
+  String get rulesMatchHint;
+
+  /// Rules for captured payments (Settings › Rules)
+  ///
+  /// In en, this message translates to:
+  /// **'Title to use (optional)'**
+  String get rulesTitleField;
+
+  /// Rules for captured payments (Settings › Rules)
+  ///
+  /// In en, this message translates to:
+  /// **'Leave as is'**
+  String get rulesKeep;
+
+  /// Rules for captured payments (Settings › Rules)
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the text to look for'**
+  String get rulesNeedMatch;
+
+  /// Rules for captured payments (Settings › Rules)
+  ///
+  /// In en, this message translates to:
+  /// **'Rule saved'**
+  String get rulesSaved;
+
+  /// Rules for captured payments (Settings › Rules)
+  ///
+  /// In en, this message translates to:
+  /// **'Rule deleted'**
+  String get rulesDeleted;
+
   /// No description provided for @allocArchivedTitle.
   ///
   /// In en, this message translates to:

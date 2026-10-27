@@ -82,6 +82,7 @@ import 'features/planned/plan_payment_screen.dart';
 import 'features/transactions/add_transaction_screen.dart';
 import 'features/transactions/assisted_transaction_screen.dart';
 import 'features/accounts/cash_count_screen.dart';
+import 'features/settings/rules_screen.dart';
 import 'features/transactions/pay_with_change_screen.dart';
 import 'features/transactions/quick_add_screen.dart';
 import 'features/transactions/transaction_detail_screen.dart';
@@ -180,6 +181,17 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
               state: state,
             );
           },
+        ),
+        GoRoute(
+          path: '/rules',
+          pageBuilder: (_, state) =>
+              slideUpPage(child: const RulesScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/rules/edit',
+          pageBuilder: (_, state) => slideUpPage(
+              child: RuleEditScreen(ruleId: state.extra as String?),
+              state: state),
         ),
         GoRoute(
           path: '/count-cash',
@@ -834,6 +846,7 @@ class _EntryModeRouterState extends ConsumerState<_EntryModeRouter> {
       editFromAccountId: extra?['editFromAccountId'] as String?,
       editDestAccountId: extra?['editDestAccountId'] as String?,
       initialReceipts: extra?['editReceipts'] as List<String>?,
+      captureShop: extra?['captureShop'] as String?,
     );
   }
 }

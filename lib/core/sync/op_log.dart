@@ -33,6 +33,7 @@ const opLogTables = [
   'transaction_templates',
   'fx_rates',
   'objectives',
+  'capture_rules',
 ];
 
 class SyncOp {

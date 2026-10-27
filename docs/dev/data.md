@@ -25,8 +25,8 @@ Developer notes moved out of CLAUDE.md (Oct 2026). Read before changing this are
 
 ## Database
 
-### Schema Version: 26
-12 tables: households, users, accounts, categories, allocations, transactions, transaction_lines, allocation_ledger, recurring_transactions, transaction_templates, fx_rates, objectives.
+### Schema Version: 27
+13 tables: households, users, accounts, categories, allocations, transactions, transaction_lines, allocation_ledger, recurring_transactions, transaction_templates, fx_rates, objectives, capture_rules.
 
 v9→v10 added `isSubscription` and `priceHistory` columns to `recurring_transactions` for subscription tracking.
 v10→v11 added `icon` (nullable TEXT) to `allocations` for envelope emoji icons.
@@ -50,6 +50,8 @@ v23→v24 added `transactions.revision` (nullable TEXT, synced as `revision`): s
 v24→v25 added `households.baseHistory` (nullable TEXT, synced as `baseHistory`): every base-currency change `[{from, to, rate}]`, so a transaction recorded against an old base on another phone is converted when it arrives (see budget.md "Changing the base currency").
 
 v25→v26 added `allocations.secondTargetAmount` / `secondTargetCurrency` (nullable; synced): an optional second envelope target in another currency (see budget.md).
+
+v26→v27 created `capture_rules` (synced, in `opLogTables` and `syncedTables`; snapshot key `captureRules`): rules for captured payments (see transactions.md "Rules").
 v18→v19 added `anchorDay` (nullable INT) to `recurring_transactions`: the day of month a series was set up on. `advanceRecurringDate()` (recurring_engine.dart) clamps monthly/yearly dates to short months and returns to the anchor (Jan 31 → Feb 28 → Mar 31); legacy rows get the anchor filled from their due day the next time they post.
 
 ### Migrations

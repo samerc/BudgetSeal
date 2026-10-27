@@ -8334,6 +8334,565 @@ class ObjectivesCompanion extends UpdateCompanion<Objective> {
   }
 }
 
+class $CaptureRulesTable extends CaptureRules
+    with TableInfo<$CaptureRulesTable, CaptureRule> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CaptureRulesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _householdIdMeta =
+      const VerificationMeta('householdId');
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+      'household_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES households (id) ON DELETE CASCADE'));
+  static const VerificationMeta _matchMeta = const VerificationMeta('match');
+  @override
+  late final GeneratedColumn<String> match = GeneratedColumn<String>(
+      'match', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _categoryIdMeta =
+      const VerificationMeta('categoryId');
+  @override
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+      'category_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _accountIdMeta =
+      const VerificationMeta('accountId');
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+      'account_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _learnedMeta =
+      const VerificationMeta('learned');
+  @override
+  late final GeneratedColumn<bool> learned = GeneratedColumn<bool>(
+      'learned', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("learned" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _usesMeta = const VerificationMeta('uses');
+  @override
+  late final GeneratedColumn<int> uses = GeneratedColumn<int>(
+      'uses', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _lastModifiedMeta =
+      const VerificationMeta('lastModified');
+  @override
+  late final GeneratedColumn<DateTime> lastModified = GeneratedColumn<DateTime>(
+      'last_modified', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _deletedMeta =
+      const VerificationMeta('deleted');
+  @override
+  late final GeneratedColumn<bool> deleted = GeneratedColumn<bool>(
+      'deleted', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("deleted" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        householdId,
+        match,
+        categoryId,
+        accountId,
+        title,
+        learned,
+        uses,
+        createdAt,
+        lastModified,
+        deleted
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'capture_rules';
+  @override
+  VerificationContext validateIntegrity(Insertable<CaptureRule> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+          _householdIdMeta,
+          householdId.isAcceptableOrUnknown(
+              data['household_id']!, _householdIdMeta));
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('match')) {
+      context.handle(
+          _matchMeta, match.isAcceptableOrUnknown(data['match']!, _matchMeta));
+    } else if (isInserting) {
+      context.missing(_matchMeta);
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+          _categoryIdMeta,
+          categoryId.isAcceptableOrUnknown(
+              data['category_id']!, _categoryIdMeta));
+    }
+    if (data.containsKey('account_id')) {
+      context.handle(_accountIdMeta,
+          accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta));
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    }
+    if (data.containsKey('learned')) {
+      context.handle(_learnedMeta,
+          learned.isAcceptableOrUnknown(data['learned']!, _learnedMeta));
+    }
+    if (data.containsKey('uses')) {
+      context.handle(
+          _usesMeta, uses.isAcceptableOrUnknown(data['uses']!, _usesMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('last_modified')) {
+      context.handle(
+          _lastModifiedMeta,
+          lastModified.isAcceptableOrUnknown(
+              data['last_modified']!, _lastModifiedMeta));
+    }
+    if (data.containsKey('deleted')) {
+      context.handle(_deletedMeta,
+          deleted.isAcceptableOrUnknown(data['deleted']!, _deletedMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CaptureRule map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CaptureRule(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      householdId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}household_id'])!,
+      match: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}match'])!,
+      categoryId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}category_id']),
+      accountId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}account_id']),
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title']),
+      learned: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}learned'])!,
+      uses: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}uses'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      lastModified: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}last_modified'])!,
+      deleted: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}deleted'])!,
+    );
+  }
+
+  @override
+  $CaptureRulesTable createAlias(String alias) {
+    return $CaptureRulesTable(attachedDatabase, alias);
+  }
+}
+
+class CaptureRule extends DataClass implements Insertable<CaptureRule> {
+  final String id;
+  final String householdId;
+
+  /// Matched case-insensitively anywhere in the text.
+  final String match;
+  final String? categoryId;
+  final String? accountId;
+
+  /// The title to use instead of the shop as written ("SPINNEYS ACHRAF…"
+  /// → "Spinneys").
+  final String? title;
+  final bool learned;
+  final int uses;
+  final DateTime createdAt;
+  final DateTime lastModified;
+  final bool deleted;
+  const CaptureRule(
+      {required this.id,
+      required this.householdId,
+      required this.match,
+      this.categoryId,
+      this.accountId,
+      this.title,
+      required this.learned,
+      required this.uses,
+      required this.createdAt,
+      required this.lastModified,
+      required this.deleted});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['household_id'] = Variable<String>(householdId);
+    map['match'] = Variable<String>(match);
+    if (!nullToAbsent || categoryId != null) {
+      map['category_id'] = Variable<String>(categoryId);
+    }
+    if (!nullToAbsent || accountId != null) {
+      map['account_id'] = Variable<String>(accountId);
+    }
+    if (!nullToAbsent || title != null) {
+      map['title'] = Variable<String>(title);
+    }
+    map['learned'] = Variable<bool>(learned);
+    map['uses'] = Variable<int>(uses);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['last_modified'] = Variable<DateTime>(lastModified);
+    map['deleted'] = Variable<bool>(deleted);
+    return map;
+  }
+
+  CaptureRulesCompanion toCompanion(bool nullToAbsent) {
+    return CaptureRulesCompanion(
+      id: Value(id),
+      householdId: Value(householdId),
+      match: Value(match),
+      categoryId: categoryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(categoryId),
+      accountId: accountId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(accountId),
+      title:
+          title == null && nullToAbsent ? const Value.absent() : Value(title),
+      learned: Value(learned),
+      uses: Value(uses),
+      createdAt: Value(createdAt),
+      lastModified: Value(lastModified),
+      deleted: Value(deleted),
+    );
+  }
+
+  factory CaptureRule.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CaptureRule(
+      id: serializer.fromJson<String>(json['id']),
+      householdId: serializer.fromJson<String>(json['householdId']),
+      match: serializer.fromJson<String>(json['match']),
+      categoryId: serializer.fromJson<String?>(json['categoryId']),
+      accountId: serializer.fromJson<String?>(json['accountId']),
+      title: serializer.fromJson<String?>(json['title']),
+      learned: serializer.fromJson<bool>(json['learned']),
+      uses: serializer.fromJson<int>(json['uses']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      lastModified: serializer.fromJson<DateTime>(json['lastModified']),
+      deleted: serializer.fromJson<bool>(json['deleted']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'householdId': serializer.toJson<String>(householdId),
+      'match': serializer.toJson<String>(match),
+      'categoryId': serializer.toJson<String?>(categoryId),
+      'accountId': serializer.toJson<String?>(accountId),
+      'title': serializer.toJson<String?>(title),
+      'learned': serializer.toJson<bool>(learned),
+      'uses': serializer.toJson<int>(uses),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'lastModified': serializer.toJson<DateTime>(lastModified),
+      'deleted': serializer.toJson<bool>(deleted),
+    };
+  }
+
+  CaptureRule copyWith(
+          {String? id,
+          String? householdId,
+          String? match,
+          Value<String?> categoryId = const Value.absent(),
+          Value<String?> accountId = const Value.absent(),
+          Value<String?> title = const Value.absent(),
+          bool? learned,
+          int? uses,
+          DateTime? createdAt,
+          DateTime? lastModified,
+          bool? deleted}) =>
+      CaptureRule(
+        id: id ?? this.id,
+        householdId: householdId ?? this.householdId,
+        match: match ?? this.match,
+        categoryId: categoryId.present ? categoryId.value : this.categoryId,
+        accountId: accountId.present ? accountId.value : this.accountId,
+        title: title.present ? title.value : this.title,
+        learned: learned ?? this.learned,
+        uses: uses ?? this.uses,
+        createdAt: createdAt ?? this.createdAt,
+        lastModified: lastModified ?? this.lastModified,
+        deleted: deleted ?? this.deleted,
+      );
+  CaptureRule copyWithCompanion(CaptureRulesCompanion data) {
+    return CaptureRule(
+      id: data.id.present ? data.id.value : this.id,
+      householdId:
+          data.householdId.present ? data.householdId.value : this.householdId,
+      match: data.match.present ? data.match.value : this.match,
+      categoryId:
+          data.categoryId.present ? data.categoryId.value : this.categoryId,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      title: data.title.present ? data.title.value : this.title,
+      learned: data.learned.present ? data.learned.value : this.learned,
+      uses: data.uses.present ? data.uses.value : this.uses,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      lastModified: data.lastModified.present
+          ? data.lastModified.value
+          : this.lastModified,
+      deleted: data.deleted.present ? data.deleted.value : this.deleted,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CaptureRule(')
+          ..write('id: $id, ')
+          ..write('householdId: $householdId, ')
+          ..write('match: $match, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('accountId: $accountId, ')
+          ..write('title: $title, ')
+          ..write('learned: $learned, ')
+          ..write('uses: $uses, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastModified: $lastModified, ')
+          ..write('deleted: $deleted')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, householdId, match, categoryId, accountId,
+      title, learned, uses, createdAt, lastModified, deleted);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CaptureRule &&
+          other.id == this.id &&
+          other.householdId == this.householdId &&
+          other.match == this.match &&
+          other.categoryId == this.categoryId &&
+          other.accountId == this.accountId &&
+          other.title == this.title &&
+          other.learned == this.learned &&
+          other.uses == this.uses &&
+          other.createdAt == this.createdAt &&
+          other.lastModified == this.lastModified &&
+          other.deleted == this.deleted);
+}
+
+class CaptureRulesCompanion extends UpdateCompanion<CaptureRule> {
+  final Value<String> id;
+  final Value<String> householdId;
+  final Value<String> match;
+  final Value<String?> categoryId;
+  final Value<String?> accountId;
+  final Value<String?> title;
+  final Value<bool> learned;
+  final Value<int> uses;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> lastModified;
+  final Value<bool> deleted;
+  final Value<int> rowid;
+  const CaptureRulesCompanion({
+    this.id = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.match = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.learned = const Value.absent(),
+    this.uses = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.lastModified = const Value.absent(),
+    this.deleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CaptureRulesCompanion.insert({
+    required String id,
+    required String householdId,
+    required String match,
+    this.categoryId = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.learned = const Value.absent(),
+    this.uses = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.lastModified = const Value.absent(),
+    this.deleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        householdId = Value(householdId),
+        match = Value(match);
+  static Insertable<CaptureRule> custom({
+    Expression<String>? id,
+    Expression<String>? householdId,
+    Expression<String>? match,
+    Expression<String>? categoryId,
+    Expression<String>? accountId,
+    Expression<String>? title,
+    Expression<bool>? learned,
+    Expression<int>? uses,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? lastModified,
+    Expression<bool>? deleted,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (householdId != null) 'household_id': householdId,
+      if (match != null) 'match': match,
+      if (categoryId != null) 'category_id': categoryId,
+      if (accountId != null) 'account_id': accountId,
+      if (title != null) 'title': title,
+      if (learned != null) 'learned': learned,
+      if (uses != null) 'uses': uses,
+      if (createdAt != null) 'created_at': createdAt,
+      if (lastModified != null) 'last_modified': lastModified,
+      if (deleted != null) 'deleted': deleted,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CaptureRulesCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? householdId,
+      Value<String>? match,
+      Value<String?>? categoryId,
+      Value<String?>? accountId,
+      Value<String?>? title,
+      Value<bool>? learned,
+      Value<int>? uses,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? lastModified,
+      Value<bool>? deleted,
+      Value<int>? rowid}) {
+    return CaptureRulesCompanion(
+      id: id ?? this.id,
+      householdId: householdId ?? this.householdId,
+      match: match ?? this.match,
+      categoryId: categoryId ?? this.categoryId,
+      accountId: accountId ?? this.accountId,
+      title: title ?? this.title,
+      learned: learned ?? this.learned,
+      uses: uses ?? this.uses,
+      createdAt: createdAt ?? this.createdAt,
+      lastModified: lastModified ?? this.lastModified,
+      deleted: deleted ?? this.deleted,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (match.present) {
+      map['match'] = Variable<String>(match.value);
+    }
+    if (categoryId.present) {
+      map['category_id'] = Variable<String>(categoryId.value);
+    }
+    if (accountId.present) {
+      map['account_id'] = Variable<String>(accountId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (learned.present) {
+      map['learned'] = Variable<bool>(learned.value);
+    }
+    if (uses.present) {
+      map['uses'] = Variable<int>(uses.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (lastModified.present) {
+      map['last_modified'] = Variable<DateTime>(lastModified.value);
+    }
+    if (deleted.present) {
+      map['deleted'] = Variable<bool>(deleted.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CaptureRulesCompanion(')
+          ..write('id: $id, ')
+          ..write('householdId: $householdId, ')
+          ..write('match: $match, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('accountId: $accountId, ')
+          ..write('title: $title, ')
+          ..write('learned: $learned, ')
+          ..write('uses: $uses, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastModified: $lastModified, ')
+          ..write('deleted: $deleted, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -8353,6 +8912,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $TransactionTemplatesTable transactionTemplates =
       $TransactionTemplatesTable(this);
   late final $ObjectivesTable objectives = $ObjectivesTable(this);
+  late final $CaptureRulesTable captureRules = $CaptureRulesTable(this);
   late final AccountsDao accountsDao = AccountsDao(this as AppDatabase);
   late final TransactionsDao transactionsDao =
       TransactionsDao(this as AppDatabase);
@@ -8375,7 +8935,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         fxRates,
         recurringTransactions,
         transactionTemplates,
-        objectives
+        objectives,
+        captureRules
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -8518,6 +9079,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('objectives', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('households',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('capture_rules', kind: UpdateKind.delete),
             ],
           ),
         ],
@@ -8673,6 +9241,20 @@ final class $$HouseholdsTableReferences
         .filter((f) => f.householdId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_objectivesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$CaptureRulesTable, List<CaptureRule>>
+      _captureRulesRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.captureRules,
+              aliasName: 'households__id__capture_rules__household_id');
+
+  $$CaptureRulesTableProcessedTableManager get captureRulesRefs {
+    final manager = $$CaptureRulesTableTableManager($_db, $_db.captureRules)
+        .filter((f) => f.householdId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_captureRulesRefsTable($_db));
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
@@ -8887,6 +9469,27 @@ class $$HouseholdsTableFilterComposer
             $$ObjectivesTableFilterComposer(
               $db: $db,
               $table: $db.objectives,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> captureRulesRefs(
+      Expression<bool> Function($$CaptureRulesTableFilterComposer f) f) {
+    final $$CaptureRulesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.captureRules,
+        getReferencedColumn: (t) => t.householdId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CaptureRulesTableFilterComposer(
+              $db: $db,
+              $table: $db.captureRules,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -9159,6 +9762,27 @@ class $$HouseholdsTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> captureRulesRefs<T extends Object>(
+      Expression<T> Function($$CaptureRulesTableAnnotationComposer a) f) {
+    final $$CaptureRulesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.captureRules,
+        getReferencedColumn: (t) => t.householdId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CaptureRulesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.captureRules,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$HouseholdsTableTableManager extends RootTableManager<
@@ -9180,7 +9804,8 @@ class $$HouseholdsTableTableManager extends RootTableManager<
         bool transactionsRefs,
         bool recurringTransactionsRefs,
         bool transactionTemplatesRefs,
-        bool objectivesRefs})> {
+        bool objectivesRefs,
+        bool captureRulesRefs})> {
   $$HouseholdsTableTableManager(_$AppDatabase db, $HouseholdsTable table)
       : super(TableManagerState(
           db: db,
@@ -9261,7 +9886,8 @@ class $$HouseholdsTableTableManager extends RootTableManager<
               transactionsRefs = false,
               recurringTransactionsRefs = false,
               transactionTemplatesRefs = false,
-              objectivesRefs = false}) {
+              objectivesRefs = false,
+              captureRulesRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
@@ -9272,7 +9898,8 @@ class $$HouseholdsTableTableManager extends RootTableManager<
                 if (transactionsRefs) db.transactions,
                 if (recurringTransactionsRefs) db.recurringTransactions,
                 if (transactionTemplatesRefs) db.transactionTemplates,
-                if (objectivesRefs) db.objectives
+                if (objectivesRefs) db.objectives,
+                if (captureRulesRefs) db.captureRules
               ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
@@ -9379,6 +10006,19 @@ class $$HouseholdsTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem:
                             (item, referencedItems) => referencedItems
                                 .where((e) => e.householdId == item.id),
+                        typedResults: items),
+                  if (captureRulesRefs)
+                    await $_getPrefetchedData<Household, $HouseholdsTable,
+                            CaptureRule>(
+                        currentTable: table,
+                        referencedTable: $$HouseholdsTableReferences
+                            ._captureRulesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$HouseholdsTableReferences(db, table, p0)
+                                .captureRulesRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.householdId == item.id),
                         typedResults: items)
                 ];
               },
@@ -9406,7 +10046,8 @@ typedef $$HouseholdsTableProcessedTableManager = ProcessedTableManager<
         bool transactionsRefs,
         bool recurringTransactionsRefs,
         bool transactionTemplatesRefs,
-        bool objectivesRefs})>;
+        bool objectivesRefs,
+        bool captureRulesRefs})>;
 typedef $$UsersTableCreateCompanionBuilder = UsersCompanion Function({
   required String id,
   required String householdId,
@@ -16343,6 +16984,371 @@ typedef $$ObjectivesTableProcessedTableManager = ProcessedTableManager<
     (Objective, $$ObjectivesTableReferences),
     Objective,
     PrefetchHooks Function({bool householdId})>;
+typedef $$CaptureRulesTableCreateCompanionBuilder = CaptureRulesCompanion
+    Function({
+  required String id,
+  required String householdId,
+  required String match,
+  Value<String?> categoryId,
+  Value<String?> accountId,
+  Value<String?> title,
+  Value<bool> learned,
+  Value<int> uses,
+  Value<DateTime> createdAt,
+  Value<DateTime> lastModified,
+  Value<bool> deleted,
+  Value<int> rowid,
+});
+typedef $$CaptureRulesTableUpdateCompanionBuilder = CaptureRulesCompanion
+    Function({
+  Value<String> id,
+  Value<String> householdId,
+  Value<String> match,
+  Value<String?> categoryId,
+  Value<String?> accountId,
+  Value<String?> title,
+  Value<bool> learned,
+  Value<int> uses,
+  Value<DateTime> createdAt,
+  Value<DateTime> lastModified,
+  Value<bool> deleted,
+  Value<int> rowid,
+});
+
+final class $$CaptureRulesTableReferences
+    extends BaseReferences<_$AppDatabase, $CaptureRulesTable, CaptureRule> {
+  $$CaptureRulesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $HouseholdsTable _householdIdTable(_$AppDatabase db) =>
+      db.households.createAlias('capture_rules__household_id__households__id');
+
+  $$HouseholdsTableProcessedTableManager get householdId {
+    final $_column = $_itemColumn<String>('household_id')!;
+
+    final manager = $$HouseholdsTableTableManager($_db, $_db.households)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_householdIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$CaptureRulesTableFilterComposer
+    extends Composer<_$AppDatabase, $CaptureRulesTable> {
+  $$CaptureRulesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get match => $composableBuilder(
+      column: $table.match, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get categoryId => $composableBuilder(
+      column: $table.categoryId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get accountId => $composableBuilder(
+      column: $table.accountId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get learned => $composableBuilder(
+      column: $table.learned, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get uses => $composableBuilder(
+      column: $table.uses, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastModified => $composableBuilder(
+      column: $table.lastModified, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+      column: $table.deleted, builder: (column) => ColumnFilters(column));
+
+  $$HouseholdsTableFilterComposer get householdId {
+    final $$HouseholdsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.householdId,
+        referencedTable: $db.households,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$HouseholdsTableFilterComposer(
+              $db: $db,
+              $table: $db.households,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$CaptureRulesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CaptureRulesTable> {
+  $$CaptureRulesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get match => $composableBuilder(
+      column: $table.match, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get categoryId => $composableBuilder(
+      column: $table.categoryId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get accountId => $composableBuilder(
+      column: $table.accountId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get learned => $composableBuilder(
+      column: $table.learned, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get uses => $composableBuilder(
+      column: $table.uses, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get lastModified => $composableBuilder(
+      column: $table.lastModified,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+      column: $table.deleted, builder: (column) => ColumnOrderings(column));
+
+  $$HouseholdsTableOrderingComposer get householdId {
+    final $$HouseholdsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.householdId,
+        referencedTable: $db.households,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$HouseholdsTableOrderingComposer(
+              $db: $db,
+              $table: $db.households,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$CaptureRulesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CaptureRulesTable> {
+  $$CaptureRulesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get match =>
+      $composableBuilder(column: $table.match, builder: (column) => column);
+
+  GeneratedColumn<String> get categoryId => $composableBuilder(
+      column: $table.categoryId, builder: (column) => column);
+
+  GeneratedColumn<String> get accountId =>
+      $composableBuilder(column: $table.accountId, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<bool> get learned =>
+      $composableBuilder(column: $table.learned, builder: (column) => column);
+
+  GeneratedColumn<int> get uses =>
+      $composableBuilder(column: $table.uses, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastModified => $composableBuilder(
+      column: $table.lastModified, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
+
+  $$HouseholdsTableAnnotationComposer get householdId {
+    final $$HouseholdsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.householdId,
+        referencedTable: $db.households,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$HouseholdsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.households,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$CaptureRulesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $CaptureRulesTable,
+    CaptureRule,
+    $$CaptureRulesTableFilterComposer,
+    $$CaptureRulesTableOrderingComposer,
+    $$CaptureRulesTableAnnotationComposer,
+    $$CaptureRulesTableCreateCompanionBuilder,
+    $$CaptureRulesTableUpdateCompanionBuilder,
+    (CaptureRule, $$CaptureRulesTableReferences),
+    CaptureRule,
+    PrefetchHooks Function({bool householdId})> {
+  $$CaptureRulesTableTableManager(_$AppDatabase db, $CaptureRulesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CaptureRulesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CaptureRulesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CaptureRulesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> householdId = const Value.absent(),
+            Value<String> match = const Value.absent(),
+            Value<String?> categoryId = const Value.absent(),
+            Value<String?> accountId = const Value.absent(),
+            Value<String?> title = const Value.absent(),
+            Value<bool> learned = const Value.absent(),
+            Value<int> uses = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> lastModified = const Value.absent(),
+            Value<bool> deleted = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CaptureRulesCompanion(
+            id: id,
+            householdId: householdId,
+            match: match,
+            categoryId: categoryId,
+            accountId: accountId,
+            title: title,
+            learned: learned,
+            uses: uses,
+            createdAt: createdAt,
+            lastModified: lastModified,
+            deleted: deleted,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String householdId,
+            required String match,
+            Value<String?> categoryId = const Value.absent(),
+            Value<String?> accountId = const Value.absent(),
+            Value<String?> title = const Value.absent(),
+            Value<bool> learned = const Value.absent(),
+            Value<int> uses = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> lastModified = const Value.absent(),
+            Value<bool> deleted = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CaptureRulesCompanion.insert(
+            id: id,
+            householdId: householdId,
+            match: match,
+            categoryId: categoryId,
+            accountId: accountId,
+            title: title,
+            learned: learned,
+            uses: uses,
+            createdAt: createdAt,
+            lastModified: lastModified,
+            deleted: deleted,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable<$CaptureRulesTable, CaptureRule>(table),
+                    $$CaptureRulesTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({householdId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (householdId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.householdId,
+                    referencedTable:
+                        $$CaptureRulesTableReferences._householdIdTable(db),
+                    referencedColumn:
+                        $$CaptureRulesTableReferences._householdIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$CaptureRulesTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $CaptureRulesTable,
+    CaptureRule,
+    $$CaptureRulesTableFilterComposer,
+    $$CaptureRulesTableOrderingComposer,
+    $$CaptureRulesTableAnnotationComposer,
+    $$CaptureRulesTableCreateCompanionBuilder,
+    $$CaptureRulesTableUpdateCompanionBuilder,
+    (CaptureRule, $$CaptureRulesTableReferences),
+    CaptureRule,
+    PrefetchHooks Function({bool householdId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -16371,4 +17377,6 @@ class $AppDatabaseManager {
       $$TransactionTemplatesTableTableManager(_db, _db.transactionTemplates);
   $$ObjectivesTableTableManager get objectives =>
       $$ObjectivesTableTableManager(_db, _db.objectives);
+  $$CaptureRulesTableTableManager get captureRules =>
+      $$CaptureRulesTableTableManager(_db, _db.captureRules);
 }

@@ -2128,6 +2128,60 @@ class SAr extends S {
   String get tileExchangeRatesSub => 'أسعار مباشرة، أو حدّد سعرك';
 
   @override
+  String get tileRules => 'القواعد';
+
+  @override
+  String get tileRulesSub => 'تعبئة الدفعات المشارَكة وتنبيهات البنك';
+
+  @override
+  String get rulesIntro =>
+      'عندما تذكر رسالة مشارَكة أو إيصال أو تنبيه من البنك هذا النص، يعبّئ BudgetSeal الفئة والحساب. وحفظ دفعة مشارَكة مع فئة يعلّمه قاعدة أيضًا.';
+
+  @override
+  String get rulesEmpty => 'لا قواعد بعد';
+
+  @override
+  String get rulesLearned => 'مُتعلَّمة';
+
+  @override
+  String rulesUsed(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'استُخدمت $n مرة',
+      one: 'استُخدمت مرة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulesAdd => 'إضافة قاعدة';
+
+  @override
+  String get rulesEdit => 'تعديل القاعدة';
+
+  @override
+  String get rulesMatch => 'عندما يحتوي النص على';
+
+  @override
+  String get rulesMatchHint => 'مثلًا: سبينيس';
+
+  @override
+  String get rulesTitleField => 'العنوان المستخدم (اختياري)';
+
+  @override
+  String get rulesKeep => 'اتركه كما هو';
+
+  @override
+  String get rulesNeedMatch => 'أدخل النص المطلوب البحث عنه';
+
+  @override
+  String get rulesSaved => 'حُفظت القاعدة';
+
+  @override
+  String get rulesDeleted => 'حُذفت القاعدة';
+
+  @override
   String get allocArchivedTitle => 'الأظرف المؤرشفة';
 
   @override

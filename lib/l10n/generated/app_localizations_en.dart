@@ -2125,6 +2125,60 @@ class SEn extends S {
   String get tileExchangeRatesSub => 'Live rates, or set your own';
 
   @override
+  String get tileRules => 'Rules';
+
+  @override
+  String get tileRulesSub => 'Fill in shared payments and bank alerts';
+
+  @override
+  String get rulesIntro =>
+      'When a shared message, a receipt or a bank alert mentions this text, BudgetSeal fills in the category and account. Saving a shared payment with a category also teaches it a rule.';
+
+  @override
+  String get rulesEmpty => 'No rules yet';
+
+  @override
+  String get rulesLearned => 'Learned';
+
+  @override
+  String rulesUsed(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Used $n times',
+      one: 'Used once',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulesAdd => 'Add rule';
+
+  @override
+  String get rulesEdit => 'Edit rule';
+
+  @override
+  String get rulesMatch => 'When the text contains';
+
+  @override
+  String get rulesMatchHint => 'e.g. Spinneys';
+
+  @override
+  String get rulesTitleField => 'Title to use (optional)';
+
+  @override
+  String get rulesKeep => 'Leave as is';
+
+  @override
+  String get rulesNeedMatch => 'Enter the text to look for';
+
+  @override
+  String get rulesSaved => 'Rule saved';
+
+  @override
+  String get rulesDeleted => 'Rule deleted';
+
+  @override
   String get allocArchivedTitle => 'Archived envelopes';
 
   @override

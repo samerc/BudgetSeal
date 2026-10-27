@@ -17,6 +17,7 @@ import 'tables/allocation_ledger_table.dart';
 import 'tables/allocations_table.dart';
 import 'tables/categories_table.dart';
 import 'tables/fx_rates_table.dart';
+import 'tables/capture_rules_table.dart';
 import 'tables/households_table.dart';
 import 'tables/objectives_table.dart';
 import 'tables/recurring_transactions_table.dart';
@@ -41,6 +42,7 @@ part 'app_database.g.dart';
     RecurringTransactions,
     TransactionTemplates,
     Objectives,
+    CaptureRules,
   ],
   daos: [
     AccountsDao,
@@ -55,7 +57,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 26;
+  int get schemaVersion => 27;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -226,6 +228,10 @@ class AppDatabase extends _$AppDatabase {
             await _addColumnIfMissing(
                 m, allocations, allocations.secondTargetCurrency);
           }
+          if (from < 27) {
+            // Rules for captured payments (shop → category/account).
+            await _createTableIfMissing(m, captureRules);
+          }
         },
         beforeOpen: (_) async {
           // First, so every change after it is logged.
@@ -248,6 +254,7 @@ class AppDatabase extends _$AppDatabase {
     'recurring_transactions',
     'transaction_templates',
     'objectives',
+    'capture_rules',
   ];
 
   /// Indexes for the hot queries. Created on every open (IF NOT EXISTS):
