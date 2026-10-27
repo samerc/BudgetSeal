@@ -10,7 +10,11 @@ import 'package:budgetseal/shared/utils/format_number.dart';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:budgetseal/core/services/household_members.dart';
+import 'package:budgetseal/core/sync/log_sync.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../sync/log_sync_test.dart' show MemoryStore;
 
 /// Model-based test of the money engine.
 ///
@@ -376,12 +380,26 @@ Future<void> _run(int seed, int steps) async {
     await check(what);
   }
 
-  // ── A sync round trip changes nothing ───────────────────────────
-  final sync = SyncEngine(db);
-  final json = await sync.exportToJson();
-  expect(await sync.mergeFromJson(json), 0,
-      reason: 'seed $seed: merging our own file changed rows');
-  await check('merging our own sync file');
+  // ── Another phone joining through the log has the same money ────
+  final store = MemoryStore();
+  expect(await LogSync(db).sync(store), 0,
+      reason: 'seed $seed: syncing alone applied entries');
+  await check('syncing the log');
+  DeviceIdentity.debugSet('model-joiner');
+  final joiner = AppDatabase.forTesting(NativeDatabase.memory());
+  addTearDown(joiner.close);
+  await LogSync(joiner).replaceFrom(store);
+  DeviceIdentity.debugSet('local');
+  final joined = await BalanceCalculator(joiner).allAccountBalances(hh);
+  for (final id in _accounts.keys) {
+    expect(joined[id], closeTo(acct[id]!, 0.005),
+        reason: 'seed $seed: account $id on a phone that joined');
+  }
+  expect(await BalanceCalculator(joiner).allAllocationBalancesByCurrency(hh),
+      await calc.allAllocationBalancesByCurrency(hh),
+      reason: 'seed $seed: envelopes on a phone that joined');
+
+  final json = await SyncEngine(db).exportToJson();
 
   final copy = AppDatabase.forTesting(NativeDatabase.memory());
   addTearDown(copy.close);
@@ -400,8 +418,7 @@ Future<void> _run(int seed, int steps) async {
   // ── A file from a phone still on 0.11 ───────────────────────────
   // Older phones write no destinationAmount (the transfer's rate is on the
   // header) and record a balance adjustment as a header-only income in the
-  // account's currency. Their transfers come in as edited (newer), so the
-  // merge takes them; both must land on the same balances.
+  // account's currency. Restoring one must land on the same balances.
   final old = jsonDecode(json) as Map<String, dynamic>;
   final later = DateTime.now().add(const Duration(days: 1)).toUtc();
   for (final t in (old['transactions'] as List).cast<Map<String, dynamic>>()) {
@@ -425,15 +442,13 @@ Future<void> _run(int seed, int steps) async {
     'deleted': false,
   });
   final oldFile = jsonEncode(old);
-  await sync.mergeFromJson(oldFile);
-  acct['lbp'] = acct['lbp']! + adjustment;
-  await check('merging a file from a phone on 0.11');
   final fromOld = AppDatabase.forTesting(NativeDatabase.memory());
   addTearDown(fromOld.close);
   await SyncEngine(fromOld).restoreFromJson(oldFile);
   final restoredOld = await BalanceCalculator(fromOld).allAccountBalances(hh);
   for (final id in _accounts.keys) {
-    expect(restoredOld[id], closeTo(acct[id]!, 0.005),
+    expect(restoredOld[id],
+        closeTo(acct[id]! + (id == 'lbp' ? adjustment : 0), 0.005),
         reason: 'seed $seed: account $id after restoring a 0.11 file');
   }
 

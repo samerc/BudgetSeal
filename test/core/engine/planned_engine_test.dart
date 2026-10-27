@@ -1,11 +1,14 @@
 import 'package:budgetseal/core/database/app_database.dart';
 import 'package:budgetseal/core/engine/allocation_engine.dart';
 import 'package:budgetseal/core/engine/planned_engine.dart';
-import 'package:budgetseal/core/sync/sync_engine.dart';
+import 'package:budgetseal/core/services/household_members.dart';
+import 'package:budgetseal/core/sync/log_sync.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../sync/log_sync_test.dart' show MemoryStore;
 
 void main() {
   late AppDatabase db;
@@ -121,16 +124,20 @@ void main() {
   });
 
   test('a plan posted on two devices before syncing → one payment', () async {
+    final store = MemoryStore();
+    final id = await plan(db);
+    await LogSync(db).sync(store);
+    DeviceIdentity.debugSet('other-phone');
     final other = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(other.close);
-    await seed(other);
-    final id = await plan(db);
-    await SyncEngine(other).mergeFromJson(await SyncEngine(db).exportToJson());
+    await LogSync(other).replaceFrom(store);
+    DeviceIdentity.debugSet('local');
 
     await post(db, id);
     await post(other, id);
-    await SyncEngine(db).mergeFromJson(await SyncEngine(other).exportToJson());
-    await SyncEngine(other).mergeFromJson(await SyncEngine(db).exportToJson());
+    await LogSync(db).sync(store);
+    await LogSync(other).sync(store);
+    await LogSync(db).sync(store);
 
     expect(await posted(db), hasLength(1));
     expect(await posted(other), hasLength(1));

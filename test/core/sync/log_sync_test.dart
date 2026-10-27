@@ -24,8 +24,13 @@ class MemoryStore implements LogStore {
   Future<Map<String, String>> list() async =>
       {for (final e in versions.entries) e.key: '${e.value}'};
 
+  final reads = <String>[];
+
   @override
-  Future<String?> read(String name) async => files[name];
+  Future<String?> read(String name) async {
+    reads.add(name);
+    return files[name];
+  }
 
   @override
   Future<void> write(String name, String content) async {
@@ -421,6 +426,95 @@ void main() {
     await LogSync(a).sync(store);
     await LogSync(b).sync(store);
     await check();
+  });
+
+  test('a compacted log merges like the whole log, with entries still to '
+      'come', () {
+    final rnd = Random(7);
+    for (var round = 0; round < 200; round++) {
+      final ops = <SyncOp>[];
+      final seqs = <String, int>{};
+      for (var i = 0; i < 4 + rnd.nextInt(14); i++) {
+        final device = ['a', 'b', 'c'][rnd.nextInt(3)];
+        final kind = ['insert', 'update', 'update', 'update', 'delete'][
+            rnd.nextInt(5)];
+        final row = ['r1', 'r2'][rnd.nextInt(2)];
+        ops.add(SyncOp(
+          hlc: '${(1000 + rnd.nextInt(50)).toString().padLeft(13, '0')}-'
+              '00000000-$device',
+          device: device,
+          seq: seqs[device] = (seqs[device] ?? 0) + 1,
+          table: 't',
+          rowId: row,
+          kind: kind,
+          data: switch (kind) {
+            'insert' => {'id': row, 'x': rnd.nextInt(5), 'y': rnd.nextInt(5)},
+            'update' => {
+                if (rnd.nextBool()) 'x': rnd.nextInt(5),
+                if (rnd.nextBool()) 'y': rnd.nextInt(5),
+              },
+            _ => null,
+          },
+          old: kind == 'delete' ? {'id': row} : null,
+        ));
+      }
+      final cut = rnd.nextInt(ops.length + 1);
+      final held = ops.sublist(0, cut), later = ops.sublist(cut);
+      for (final row in ['r1', 'r2']) {
+        List<SyncOp> of(List<SyncOp> l) => [
+              for (final o in l)
+                if (o.rowId == row) o
+            ];
+        String show(Map<String, Object?>? m) => m == null
+            ? 'gone'
+            : ([...m.entries.map((e) => '${e.key}=${e.value}')]..sort())
+                .join(',');
+        expect(show(mergeRow(of([...compactOps(held), ...later]))),
+            show(mergeRow(of([...held, ...later]))),
+            reason: 'round $round, row $row');
+      }
+    }
+  });
+
+  test('a phone joins from a snapshot and reads only the files after it',
+      () async {
+    final store = MemoryStore();
+    final a = await phone('phone-a');
+    await household(a);
+    final engine = AllocationEngine(a);
+    Future<void> spend(int n) async {
+      for (var i = 0; i < n; i++) {
+        await engine.recordTransaction(
+          householdId: 'h', accountId: 'bank', type: 'expense',
+          lines: [TxLine(amount: i + 1.0, currency: 'USD', categoryId: 'food')],
+          baseCurrency: 'USD');
+      }
+    }
+
+    final sync = LogSync(a, chunkSize: 5, snapshotEvery: 20);
+    await spend(10);
+    await sync.sync(store);
+    expect(store.files.keys, contains(LogSync.snapshotName('phone-a')));
+    // Edits and new entries after the snapshot.
+    await (a.update(a.accounts)..where((x) => x.id.equals('bank')))
+        .write(const AccountsCompanion(name: Value('Main')));
+    await spend(2);
+    await sync.sync(store);
+
+    final b = await phone('phone-b');
+    store.reads.clear();
+    await LogSync(b, chunkSize: 5).replaceFrom(store);
+    expect(await dump(b), await dump(a));
+    final logs = store.files.keys.where((n) => !n.contains('snapshot'));
+    expect(store.reads.where((n) => !n.contains('snapshot')).length,
+        lessThan(logs.length ~/ 2),
+        reason: 'most files are covered by the snapshot');
+    // And it keeps syncing from there.
+    await (b.update(b.accounts)..where((x) => x.id.equals('cash')))
+        .write(const AccountsCompanion(name: Value('Wallet')));
+    await LogSync(b, chunkSize: 5).sync(store);
+    await sync.sync(store);
+    expect(await dump(b), await dump(a));
   });
 
   test('only files with new entries are written; files are encrypted with '

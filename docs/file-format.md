@@ -284,6 +284,15 @@ Each phone records every change it makes and writes them to its own files: `log-
 
 To rebuild a budget from the logs, take every entry for a row from all phones' files: each column takes its value from the entry with the latest `hlc` that set it, and the row exists if its latest `insert` or `delete` is an `insert`. Values are as stored in the database: dates in seconds since 1970, true/false as 1/0.
 
+Each phone also writes, now and then, `log-snapshot-<phone id>.json`: everything it had then, in the same entry format but with only the entries that still decide something (each cut down to the columns it decides, without `old`), the phone of each entry taken from the end of its `hlc`.
+
+```json
+{"format": "budgetseal-snapshot", "version": 1, "device": "dev-1b2c…",
+ "covers": {"dev-1b2c…": 41250, "dev-9f8e…": 3120}, "entries": [ … ]}
+```
+
+`covers` says how many of each phone's change-log entries it includes — the first ones, so of `log-<phone>-<nnnnn>.json` (1,000 entries per file) every file up to that count is already in it. Rebuilding from a snapshot plus the later log files gives the same budget as from all the logs.
+
 ## Encrypted files
 
 With a sync password set, the file is one line of text:

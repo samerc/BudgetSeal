@@ -6,7 +6,10 @@ import 'dart:io';
 import 'package:budgetseal/core/engine/allocation_engine.dart';
 import 'package:budgetseal/core/engine/recurring_engine.dart';
 import 'package:budgetseal/core/providers/sync_provider.dart';
+import 'package:budgetseal/core/services/household_members.dart';
 import 'package:budgetseal/core/sync/cloud_provider.dart';
+import 'package:budgetseal/core/sync/log_sync.dart';
+import 'package:budgetseal/core/sync/op_log.dart';
 import 'package:budgetseal/core/sync/sync_encryption.dart';
 import 'package:budgetseal/core/sync/sync_engine.dart';
 import 'package:drift/drift.dart';
@@ -14,17 +17,27 @@ import 'package:drift/native.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Two devices (in-memory databases) that sync through the JSON file.
+import 'log_sync_test.dart' show MemoryStore;
+
+/// Two devices (in-memory databases) that sync through their change logs,
+/// and the readable snapshot file (export / restore).
 void main() {
   late AppDatabase a;
   late AppDatabase b;
+  late MemoryStore store;
 
   setUpAll(() => driftRuntimeOptions.dontWarnAboutMultipleDatabases = true);
 
   setUp(() async {
     FlutterSecureStorage.setMockInitialValues({});
+    store = MemoryStore();
+    DeviceIdentity.debugSet('dev-a');
     a = AppDatabase.forTesting(NativeDatabase.memory());
+    await a.customSelect('SELECT 1').get();
+    DeviceIdentity.debugSet('dev-b');
     b = AppDatabase.forTesting(NativeDatabase.memory());
+    await b.customSelect('SELECT 1').get();
+    DeviceIdentity.debugSet('local');
     for (final db in [a, b]) {
       await db.into(db.households).insert(HouseholdsCompanion.insert(
           id: 'hh', name: 'Home', createdByDeviceId: 't',
@@ -37,9 +50,11 @@ void main() {
     await b.close();
   });
 
-  /// Pushes [from]'s file into [to], as `SyncNotifier.sync()` does.
-  Future<int> sync(AppDatabase from, AppDatabase to) async =>
-      SyncEngine(to).mergeFromJson(await SyncEngine(from).exportToJson());
+  /// [from] syncs, then [to]: what [to] applied.
+  Future<int> sync(AppDatabase from, AppDatabase to) async {
+    await LogSync(from).sync(store);
+    return LogSync(to).sync(store);
+  }
 
   Future<void> addAccount(AppDatabase db, {String name = 'Bank',
       DateTime? modified}) =>
@@ -105,13 +120,13 @@ void main() {
     expect(await sync(a, b), 0);
   });
 
-  test('the newer edit wins in both directions', () async {
-    await addAccount(a, name: 'Old', modified: DateTime(2026, 1, 1));
-    await addAccount(b, name: 'New', modified: DateTime(2026, 3, 1));
+  test('the same row added on both: the later one wins on both', () async {
+    await addAccount(a, name: 'Old');
+    await Future<void>.delayed(const Duration(milliseconds: 3));
+    await addAccount(b, name: 'New');
 
-    expect(await sync(a, b), 0); // older file doesn't overwrite
+    await sync(a, b);
     expect((await b.select(b.accounts).getSingle()).name, 'New');
-
     await sync(b, a);
     expect((await a.select(a.accounts).getSingle()).name, 'New');
   });
@@ -139,7 +154,7 @@ void main() {
     final stamp = (file['accounts'] as List).single['lastModified'] as String;
     expect(stamp, endsWith('Z'));
 
-    await sync(a, b);
+    await SyncEngine(b).restoreFromJson(jsonEncode(file));
     expect((await b.select(b.accounts).getSingle()).lastModified, when);
   });
 
@@ -215,10 +230,10 @@ void main() {
       await seed(b);
       await RecurringEngine(a).processRecurring();
       // B gets the transaction but not (yet) the advanced due date.
-      final file = jsonDecode(await SyncEngine(a).exportToJson())
-          as Map<String, dynamic>;
-      file.remove('recurringTransactions');
-      await SyncEngine(b).mergeFromJson(jsonEncode(file));
+      await LogSync(b).apply([
+        for (final op in await loadOps(a))
+          if (op.table != 'recurring_transactions') op,
+      ]);
 
       await RecurringEngine(b).processRecurring();
       await expectOnePosting(b);
@@ -273,20 +288,19 @@ void main() {
     });
   });
 
-  test('a file without time zones (older app) still merges', () async {
+  test('a snapshot without time zones (older app) still restores', () async {
     await addAccount(a, name: 'Old', modified: DateTime(2026, 1, 1));
-    final file = jsonDecode(await SyncEngine(b).exportToJson())
+    final file = jsonDecode(await SyncEngine(a).exportToJson())
         as Map<String, dynamic>;
     file['accounts'] = [
       {
-        ...(jsonDecode(await SyncEngine(a).exportToJson())
-            as Map<String, dynamic>)['accounts'][0] as Map<String, dynamic>,
+        ...(file['accounts'] as List)[0] as Map<String, dynamic>,
         'name': 'Renamed',
         'lastModified': '2026-02-01T10:00:00.000',
       }
     ];
-    expect(await SyncEngine(a).mergeFromJson(jsonEncode(file)), 1);
-    final acc = await a.select(a.accounts).getSingle();
+    await SyncEngine(b).restoreFromJson(jsonEncode(file));
+    final acc = await b.select(b.accounts).getSingle();
     expect(acc.name, 'Renamed');
     expect(acc.lastModified, DateTime(2026, 2, 1, 10));
   });
@@ -298,7 +312,7 @@ void main() {
       await expectLater(SyncEncryption.decrypt(file, password: 'wrong'),
           throwsA(isA<SyncPasswordException>()));
       await SyncEncryption.clearPassword();
-      await expectLater(SyncEngine(a).mergeFromJson(file),
+      await expectLater(SyncEngine(a).restoreFromJson(file),
           throwsA(isA<SyncPasswordException>()
               .having((e) => e.missing, 'missing', isTrue)));
     });

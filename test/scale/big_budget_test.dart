@@ -30,6 +30,8 @@ import 'package:budgetseal/core/providers/household_provider.dart';
 import 'package:budgetseal/core/providers/report_stats_provider.dart';
 import 'package:budgetseal/core/providers/transactions_provider.dart';
 import 'package:budgetseal/core/services/autofill_service.dart';
+import 'package:budgetseal/core/services/household_members.dart';
+import 'package:budgetseal/core/sync/log_sync.dart';
 import 'package:budgetseal/core/sync/op_log.dart';
 import 'package:budgetseal/core/sync/sync_engine.dart';
 import 'package:budgetseal/features/accounts/account_detail_screen.dart';
@@ -66,6 +68,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shelf/shelf.dart';
 
 import 'big_budget.dart';
+import '../core/sync/log_sync_test.dart' show MemoryStore;
 
 
 final _refProvider = Provider<Ref>((ref) => ref);
@@ -319,13 +322,51 @@ void main() {
     });
   });
 
-  test('sync file: export, merge our own, restore to a new phone', () async {
+  test('log sync: first upload, a phone joining with and without the '
+      'snapshot', () async {
+    final store = MemoryStore();
+    await timed('log sync: first upload', () => LogSync(db).sync(store),
+        note: (_) {
+          String mb(Iterable<String> f) =>
+              (f.fold(0, (n, x) => n + x.length) / 1024 / 1024)
+                  .toStringAsFixed(1);
+          final snap = store.files.entries.where((e) => e.key.contains('snapshot'));
+          return '${store.files.length - 1} log files ${mb(store.files.entries.where((e) => !e.key.contains('snapshot')).map((e) => e.value))} MB'
+              ' + snapshot ${mb(snap.map((e) => e.value))} MB';
+        },
+        limitMs: 60000);
+    expect(store.files.keys.where((n) => n.contains('snapshot')), hasLength(1));
+    final a = await BalanceCalculator(db).allAccountBalances(hh);
+    for (final withSnapshot in [true, false]) {
+      final files = Map.of(store.files);
+      final versions = Map.of(store.versions);
+      if (!withSnapshot) {
+        files.removeWhere((n, _) => n.contains('snapshot'));
+        versions.removeWhere((n, _) => n.contains('snapshot'));
+      }
+      final from = MemoryStore()
+        ..files.addAll(files)
+        ..versions.addAll(versions);
+      DeviceIdentity.debugSet('scale-joiner');
+      final joiner = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(joiner.close);
+      await timed(
+          'log sync: join ${withSnapshot ? 'from the snapshot' : 'from every log file'}',
+          () => LogSync(joiner).replaceFrom(from),
+          note: (_) => '${from.reads.length} files read',
+          limitMs: 120000);
+      DeviceIdentity.debugSet('local');
+      final b = await BalanceCalculator(joiner).allAccountBalances(hh);
+      for (final id in BigBudget.accounts.keys) {
+        expect(b[id], closeTo(a[id]!, 0.01), reason: 'joined $id');
+      }
+    }
+  });
+
+  test('sync file: export, restore to a new phone', () async {
     final sync = SyncEngine(db);
     final json = await timed('sync: export', () => sync.exportToJson(),
         note: (s) => '${(s.length / 1024 / 1024).toStringAsFixed(1)} MB');
-    expect(await timed('sync: merge our own file', () => sync.mergeFromJson(json),
-            limitMs: 30000),
-        0);
     final copy = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(copy.close);
     await timed('sync: restore into an empty app',

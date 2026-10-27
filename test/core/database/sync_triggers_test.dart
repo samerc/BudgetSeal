@@ -1,9 +1,12 @@
 import 'package:budgetseal/core/database/app_database.dart';
-import 'package:budgetseal/core/sync/sync_engine.dart';
+import 'package:budgetseal/core/services/household_members.dart';
+import 'package:budgetseal/core/sync/log_sync.dart';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../sync/log_sync_test.dart' show MemoryStore;
 
 /// Every update to a synced row must move its `last_modified`, or the merge
 /// (newer row wins) never sends it to the other device.
@@ -87,13 +90,18 @@ void main() {
   });
 
   test('pausing a subscription reaches the other device', () async {
+    final store = MemoryStore();
+    await LogSync(db).sync(store);
+    DeviceIdentity.debugSet('other-phone');
     final other = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(other.close);
-    await seed(other, old);
+    await LogSync(other).replaceFrom(store);
+    DeviceIdentity.debugSet('local');
 
     await db.customStatement(
         "UPDATE recurring_transactions SET enabled = 0 WHERE id = 'sub'");
-    await SyncEngine(other).mergeFromJson(await SyncEngine(db).exportToJson());
+    await LogSync(db).sync(store);
+    await LogSync(other).sync(store);
 
     expect((await other.select(other.recurringTransactions).getSingle()).enabled,
         isFalse);

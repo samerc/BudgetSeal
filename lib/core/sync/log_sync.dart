@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 
 import '../../shared/utils/format_number.dart' show isRealRate;
 import '../database/app_database.dart';
@@ -49,17 +50,28 @@ class LogSync {
   final AppDatabase db;
   final int chunkSize;
 
-  LogSync(this.db, {this.chunkSize = 1000});
+  /// Write a new snapshot once the log has grown by this many entries.
+  final int snapshotEvery;
+
+  LogSync(this.db, {this.chunkSize = 1000, this.snapshotEvery = 10000});
 
   static final _name = RegExp(r'^log-(.+)-(\d{5})\.json$');
   static String fileName(String device, int chunk) =>
       'log-$device-${chunk.toString().padLeft(5, '0')}.json';
 
+  /// A phone's snapshot: the whole log it holds, compacted ([compactOps]).
+  /// Named `log-…` so stores list it with the logs; the log-file pattern
+  /// doesn't match it.
+  static final _snapName = RegExp(r'^log-snapshot-(.+)\.json$');
+  static String snapshotName(String device) => 'log-snapshot-$device.json';
+
   /// One round: apply the other phones' new entries, then write this
-  /// phone's. Returns how many entries were applied.
+  /// phone's (and a snapshot when the log has grown enough). Returns how
+  /// many entries were applied.
   Future<int> sync(LogStore store) async {
     final applied = await pull(store);
     await push(store);
+    await _snapshotIfDue(store);
     return applied;
   }
 
@@ -129,7 +141,8 @@ class LogSync {
   }
 
   /// Replaces this phone's data with what the store's logs hold (joining
-  /// a household, or connecting to another budget's folder).
+  /// a household, or connecting to another budget's folder): the most
+  /// complete snapshot, then only the log files past it.
   Future<int> replaceFrom(LogStore store) async {
     await db.transaction(() async {
       await db.customStatement('UPDATE sync_clock SET applying = 1 WHERE id = 1');
@@ -141,7 +154,73 @@ class LogSync {
       await db.customStatement("DELETE FROM sync_meta");
       await db.customStatement('UPDATE sync_clock SET applying = 0 WHERE id = 1');
     });
-    return pull(store);
+    final files = await store.list();
+    ({Map<String, int> covers, List<SyncOp> ops})? best;
+    for (final name in files.keys) {
+      if (_snapName.firstMatch(name) == null) continue;
+      final raw = await store.read(name);
+      if (raw == null) continue;
+      try {
+        final snap = _decodeSnapshot(await SyncEncryption.decrypt(raw));
+        int sum(Map<String, int> m) => m.values.fold(0, (a, b) => a + b);
+        if (best == null || sum(snap.covers) > sum(best.covers)) best = snap;
+      } on FormatException catch (e) {
+        debugPrint('[LogSync] Skipping snapshot $name: $e');
+      }
+    }
+    var applied = 0;
+    if (best != null) {
+      applied = await apply(best.ops);
+      // Full files it covers needn't be read (a full file never changes).
+      await db.batch((b) {
+        for (final MapEntry(key: name, value: version) in files.entries) {
+          final m = _name.firstMatch(name);
+          if (m == null) continue;
+          final held = best!.covers[m.group(1)!] ?? 0;
+          if ((int.parse(m.group(2)!) + 1) * chunkSize <= held) {
+            b.customStatement(
+                'INSERT OR REPLACE INTO sync_files (name, version) VALUES (?, ?)',
+                [name, version]);
+          }
+        }
+      });
+    }
+    return applied + await pull(store);
+  }
+
+  /// Writes this phone's snapshot when the log has grown by
+  /// [snapshotEvery] entries since the last one.
+  Future<void> _snapshotIfDue(LogStore store) async {
+    final total = (await db
+            .customSelect('SELECT COUNT(*) AS n FROM sync_ops')
+            .getSingle())
+        .read<int>('n');
+    final last = int.tryParse(await _meta('snapshot_entries') ?? '') ?? 0;
+    if (total - last < snapshotEvery) return;
+    await writeSnapshot(store);
+  }
+
+  /// Writes this phone's snapshot: every entry it holds, compacted, and
+  /// how many of each phone's entries that is (they're a prefix of that
+  /// phone's files, so a joining phone knows which files it still needs).
+  Future<void> writeSnapshot(LogStore store) async {
+    final me = await _me();
+    final ops = await loadOps(db);
+    final covers = <String, int>{};
+    for (final op in ops) {
+      covers[op.device] = (covers[op.device] ?? 0) + 1;
+    }
+    await store.write(
+        snapshotName(me),
+        await SyncEncryption.encrypt(jsonEncode({
+          'format': 'budgetseal-snapshot',
+          'version': 1,
+          'device': me,
+          'covers': covers,
+          // An entry's device is the end of its stamp.
+          'entries': [for (final o in compactOps(ops)) _entry(o)],
+        })));
+    await _setMeta('snapshot_entries', '${ops.length}');
   }
 
   /// Stores [ops] that are new here and merges the rows they touch.
@@ -281,24 +360,34 @@ class LogSync {
 
   // ── Files ──────────────────────────────────────────────────────
 
+  static Map<String, Object?> _entry(SyncOp o) => {
+        'hlc': o.hlc,
+        'seq': o.seq,
+        'table': o.table,
+        'row': o.rowId,
+        'kind': o.kind,
+        if (o.data != null) 'data': o.data,
+        if (o.old != null) 'old': o.old,
+      };
+
+  static SyncOp _op(Map<String, dynamic> e, String device) => SyncOp(
+        hlc: e['hlc'] as String,
+        device: device,
+        seq: e['seq'] as int,
+        table: e['table'] as String,
+        rowId: e['row'] as String,
+        kind: e['kind'] as String,
+        data: (e['data'] as Map<String, dynamic>?)?.cast<String, Object?>(),
+        old: (e['old'] as Map<String, dynamic>?)?.cast<String, Object?>(),
+      );
+
   static String _encode(String device, int chunk, List<SyncOp> ops) =>
       jsonEncode({
         'format': 'budgetseal-log',
         'version': 1,
         'device': device,
         'chunk': chunk,
-        'entries': [
-          for (final o in ops)
-            {
-              'hlc': o.hlc,
-              'seq': o.seq,
-              'table': o.table,
-              'row': o.rowId,
-              'kind': o.kind,
-              if (o.data != null) 'data': o.data,
-              if (o.old != null) 'old': o.old,
-            },
-        ],
+        'entries': [for (final o in ops) _entry(o)],
       });
 
   static List<SyncOp> _decode(String json) {
@@ -309,17 +398,23 @@ class LogSync {
     final device = m['device'] as String;
     return [
       for (final e in (m['entries'] as List).cast<Map<String, dynamic>>())
-        SyncOp(
-          hlc: e['hlc'] as String,
-          device: device,
-          seq: e['seq'] as int,
-          table: e['table'] as String,
-          rowId: e['row'] as String,
-          kind: e['kind'] as String,
-          data: (e['data'] as Map<String, dynamic>?)?.cast<String, Object?>(),
-          old: (e['old'] as Map<String, dynamic>?)?.cast<String, Object?>(),
-        ),
+        _op(e, device),
     ];
+  }
+
+  static ({Map<String, int> covers, List<SyncOp> ops}) _decodeSnapshot(
+      String json) {
+    final m = jsonDecode(json) as Map<String, dynamic>;
+    if (m['format'] != 'budgetseal-snapshot') {
+      throw const FormatException('Not a BudgetSeal snapshot');
+    }
+    return (
+      covers: (m['covers'] as Map<String, dynamic>).cast<String, int>(),
+      ops: [
+        for (final e in (m['entries'] as List).cast<Map<String, dynamic>>())
+          _op(e, (e['hlc'] as String).substring(23)),
+      ],
+    );
   }
 
   // ── Bookkeeping ────────────────────────────────────────────────
@@ -484,18 +579,61 @@ Future<int> convertToCurrentBase(AppDatabase db) async {
   return converted;
 }
 
+/// [ops] reduced to the entries that still decide something, each cut
+/// down to what it decides: per row, the newest insert/delete, and for
+/// each column the newest entry that set it (with only the columns it
+/// wins; `old` dropped). [mergeRow] gives the same rows from them, now and
+/// with any entries still to come — a field only ever takes its newest
+/// value, a row its newest insert/delete.
+List<SyncOp> compactOps(List<SyncOp> ops) {
+  final byRow = <(String, String), List<SyncOp>>{};
+  for (final op in ops) {
+    (byRow[(op.table, op.rowId)] ??= []).add(op);
+  }
+  final out = <SyncOp>[];
+  for (final rowOps in byRow.values) {
+    rowOps.sort(_stampOrder);
+    SyncOp? life;
+    final winner = <String, SyncOp>{};
+    for (final op in rowOps) {
+      if (op.kind != 'update') life = op;
+      if (op.kind == 'delete') continue;
+      for (final k in (op.data ?? const <String, Object?>{}).keys) {
+        winner[k] = op;
+      }
+    }
+    for (final op in rowOps) {
+      final wins = {
+        for (final e in winner.entries)
+          if (identical(e.value, op)) e.key: op.data![e.key],
+      };
+      if (!identical(op, life) && wins.isEmpty) continue;
+      out.add(SyncOp(
+        hlc: op.hlc,
+        device: op.device,
+        seq: op.seq,
+        table: op.table,
+        rowId: op.rowId,
+        kind: op.kind,
+        data: op.kind == 'delete' ? null : wins,
+      ));
+    }
+  }
+  return out;
+}
+
+int _stampOrder(SyncOp a, SyncOp b) {
+  final c = a.hlc.compareTo(b.hlc);
+  if (c != 0) return c;
+  final d = a.device.compareTo(b.device);
+  return d != 0 ? d : a.seq.compareTo(b.seq);
+}
+
 /// The row [ops] (all entries for one row) add up to, or null when it
 /// doesn't exist: each column from the newest entry that set it; gone when
 /// the newest insert/delete is a delete. Order-independent.
 Map<String, Object?>? mergeRow(List<SyncOp> ops) {
-  int cmp(SyncOp a, SyncOp b) {
-    final c = a.hlc.compareTo(b.hlc);
-    if (c != 0) return c;
-    final d = a.device.compareTo(b.device);
-    return d != 0 ? d : a.seq.compareTo(b.seq);
-  }
-
-  final sorted = [...ops]..sort(cmp);
+  final sorted = [...ops]..sort(_stampOrder);
   SyncOp? lastLife;
   for (final op in sorted) {
     if (op.kind != 'update') lastLife = op;
