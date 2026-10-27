@@ -35,8 +35,9 @@ class PlannedEngine {
   /// posting the same plan before they sync write one transaction, not two.
   static String postedId(String planId) => 'planned:$planId';
 
-  /// Creates a plan, or replaces [replaceId] (soft-deleted, its lines
-  /// removed) — all in one db transaction. Returns the new plan's id.
+  /// Creates a plan, or rewrites [replaceId] in place (same id, its lines
+  /// replaced under a new revision — see `Transactions.revision`) — all in
+  /// one db transaction. Returns the plan's id.
   /// [parts] (expenses only) gives one line per currency; the header then
   /// takes the first part.
   Future<String> save({
@@ -63,9 +64,13 @@ class PlannedEngine {
         PlanPart(amount: amount, currency: currency, accountId: accountId)
       ];
     }
-    final id = _uuid.v4();
+    final id = replaceId ?? _uuid.v4();
     final now = DateTime.now();
     final isTransfer = type == 'transfer';
+    // An edit's lines carry its revision, so two phones editing one plan
+    // keep one set of lines.
+    final revision = replaceId == null ? null : _uuid.v4().substring(0, 8);
+    var lineNo = 0;
     await _db.transaction(() async {
       if (replaceId != null) {
         await (_db.delete(_db.transactionLines)
@@ -74,30 +79,45 @@ class PlannedEngine {
         await (_db.update(_db.transactions)
               ..where((t) => t.id.equals(replaceId)))
             .write(TransactionsCompanion(
-                deleted: const Value(true), lastModified: Value(now)));
+          type: Value(type),
+          accountId: Value(accountId),
+          destinationAccountId:
+              Value(isTransfer ? destinationAccountId : null),
+          amount: Value(amount),
+          currency: Value(currency),
+          categoryId: Value(isTransfer ? null : categoryId),
+          deviceId: Value(DeviceIdentity.stamp(deviceId)),
+          note: Value(note),
+          createdAt: Value(date),
+          lastModified: Value(now),
+          revision: Value(revision),
+        ));
+      } else {
+        await _db.into(_db.transactions).insert(TransactionsCompanion.insert(
+              id: id,
+              householdId: householdId,
+              type: type,
+              accountId: accountId,
+              destinationAccountId:
+                  Value(isTransfer ? destinationAccountId : null),
+              amount: amount,
+              currency: currency,
+              exchangeRateToBase: const Value(1.0),
+              categoryId: Value(isTransfer ? null : categoryId),
+              createdBy: createdBy,
+              deviceId: DeviceIdentity.stamp(deviceId),
+              note: Value(note),
+              createdAt: Value(date),
+              status: const Value('planned'),
+              lastModified: Value(now),
+            ));
       }
-      await _db.into(_db.transactions).insert(TransactionsCompanion.insert(
-            id: id,
-            householdId: householdId,
-            type: type,
-            accountId: accountId,
-            destinationAccountId:
-                Value(isTransfer ? destinationAccountId : null),
-            amount: amount,
-            currency: currency,
-            exchangeRateToBase: const Value(1.0),
-            categoryId: Value(isTransfer ? null : categoryId),
-            createdBy: createdBy,
-            deviceId: DeviceIdentity.stamp(deviceId),
-            note: Value(note),
-            createdAt: Value(date),
-            status: const Value('planned'),
-            lastModified: Value(now),
-          ));
       for (final part in parts) {
         await _db.into(_db.transactionLines).insert(
               TransactionLinesCompanion.insert(
-                id: _uuid.v4(),
+                id: revision == null
+                    ? _uuid.v4()
+                    : '$id:$revision:line${lineNo++}',
                 transactionId: id,
                 amount: part.amount,
                 currency: part.currency,

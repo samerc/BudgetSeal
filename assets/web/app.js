@@ -2331,7 +2331,8 @@ function importRows() {
 
 // ── Change history ────────────────────────────────────────────────────────────
 // The app's Settings › Change history (GET /api/change-log): what was added,
-// edited or deleted and when, grouped by the day of the change.
+// edited, deleted or restored, when, by whom and what an edit changed,
+// grouped by the day of the change.
 
 async function renderHistory(quiet) {
   const head = `<a class="back-link" href="#/transactions">${IC.back}${esc(t('nav_transactions'))}</a>${pageHead(t('web_history_title'), '')}`;
@@ -2346,6 +2347,20 @@ async function renderHistory(quiet) {
     added: [IC.plusCircle, 'var(--healthy)', 'web_history_added'],
     edited: [IC.edit, 'var(--accent)', 'web_history_edited'],
     deleted: [IC.trash, 'var(--overspent)', 'web_history_deleted'],
+    restored: [IC.history, 'var(--healthy)', 'web_history_restored'],
+  };
+  const FIELD = { amount: 'web_form_amount', category: 'web_form_category', account: 'web_form_account', date: 'web_form_date', note: 'web_form_note', type: 'web_form_type' };
+  // "Category: Food → Home" for one thing an edit changed.
+  const change = (c, txType) => {
+    const show = v => {
+      if (c.field === 'amount') return (v || []).map(a => fmt(a.amount, a.currency)).join(' + ') || '—';
+      if (c.field === 'category') return (v || []).map(n => n ?? t('common_uncategorized')).join(', ') || '—';
+      if (c.field === 'account') return (v || []).map(n => n ?? '—').join(txType === 'transfer' ? ' › ' : ', ') || '—';
+      if (c.field === 'date') return v ? fmtDate(v) : '—';
+      if (c.field === 'type') return t(`type_${v}`);
+      return v ? `“${v}”` : '—';
+    };
+    return t('web_history_change', { field: t(FIELD[c.field] || 'web_form_note'), from: show(c.from), to: show(c.to) });
   };
   const row = e => {
     const [icon, color, verb] = KIND[e.kind] || KIND.added;
@@ -2362,7 +2377,9 @@ async function renderHistory(quiet) {
     return `<div class="row${gone ? ' dim' : ' clickable'}"${gone ? '' : ` data-action="edit-tx" data-id="${esc(e.txId)}" tabindex="0"`}>
       <span class="chip-icon" style="background:color-mix(in srgb, ${color} 16%, transparent);color:${color}">${icon}</span>
       <div class="row-main"><div class="row-title"${gone ? ' style="text-decoration:line-through"' : ''}>${esc(e.note || e.categoryName || t(`type_${e.type}`))}</div>
-        <div class="row-sub">${esc(sub)}</div></div>
+        <div class="row-sub">${esc(sub)}</div>
+        ${(e.changes || []).map(c => `<div class="row-sub">${esc(change(c, e.type))}</div>`).join('')}
+        ${e.replaced ? `<div class="row-sub" style="font-weight:600">${esc(e.replacedBy ? t('web_history_replaced_by', { name: e.replacedBy }) : t('web_history_replaced'))}</div>` : ''}</div>
       <div class="row-end"><div class="row-amount num">${esc(amount)}</div></div>
     </div>`;
   };

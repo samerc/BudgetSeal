@@ -3305,6 +3305,12 @@ class $TransactionsTable extends Transactions
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("deleted" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _revisionMeta =
+      const VerificationMeta('revision');
+  @override
+  late final GeneratedColumn<String> revision = GeneratedColumn<String>(
+      'revision', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -3324,7 +3330,8 @@ class $TransactionsTable extends Transactions
         createdAt,
         lastModified,
         status,
-        deleted
+        deleted,
+        revision
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3437,6 +3444,10 @@ class $TransactionsTable extends Transactions
       context.handle(_deletedMeta,
           deleted.isAcceptableOrUnknown(data['deleted']!, _deletedMeta));
     }
+    if (data.containsKey('revision')) {
+      context.handle(_revisionMeta,
+          revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta));
+    }
     return context;
   }
 
@@ -3483,6 +3494,8 @@ class $TransactionsTable extends Transactions
           .read(DriftSqlType.string, data['${effectivePrefix}status']),
       deleted: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}deleted'])!,
+      revision: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}revision']),
     );
   }
 
@@ -3531,6 +3544,12 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   /// Soft-delete flag. Deleted transactions are excluded from all balance
   /// calculations and queries but retained for sync conflict resolution.
   final bool deleted;
+
+  /// Set by an edit that rewrote the lines (v24): that edit's lines and
+  /// envelope debits have ids starting `<id>:<revision>:`. When two phones
+  /// rewrite the same transaction, sync keeps the newer revision's lines
+  /// and debits whole (`settleTransactions()` in log_sync.dart).
+  final String? revision;
   const Transaction(
       {required this.id,
       required this.householdId,
@@ -3549,7 +3568,8 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       required this.createdAt,
       required this.lastModified,
       this.status,
-      required this.deleted});
+      required this.deleted,
+      this.revision});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -3581,6 +3601,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       map['status'] = Variable<String>(status);
     }
     map['deleted'] = Variable<bool>(deleted);
+    if (!nullToAbsent || revision != null) {
+      map['revision'] = Variable<String>(revision);
+    }
     return map;
   }
 
@@ -3613,6 +3636,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       status:
           status == null && nullToAbsent ? const Value.absent() : Value(status),
       deleted: Value(deleted),
+      revision: revision == null && nullToAbsent
+          ? const Value.absent()
+          : Value(revision),
     );
   }
 
@@ -3641,6 +3667,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       lastModified: serializer.fromJson<DateTime>(json['lastModified']),
       status: serializer.fromJson<String?>(json['status']),
       deleted: serializer.fromJson<bool>(json['deleted']),
+      revision: serializer.fromJson<String?>(json['revision']),
     );
   }
   @override
@@ -3665,6 +3692,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       'lastModified': serializer.toJson<DateTime>(lastModified),
       'status': serializer.toJson<String?>(status),
       'deleted': serializer.toJson<bool>(deleted),
+      'revision': serializer.toJson<String?>(revision),
     };
   }
 
@@ -3686,7 +3714,8 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           DateTime? createdAt,
           DateTime? lastModified,
           Value<String?> status = const Value.absent(),
-          bool? deleted}) =>
+          bool? deleted,
+          Value<String?> revision = const Value.absent()}) =>
       Transaction(
         id: id ?? this.id,
         householdId: householdId ?? this.householdId,
@@ -3710,6 +3739,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
         lastModified: lastModified ?? this.lastModified,
         status: status.present ? status.value : this.status,
         deleted: deleted ?? this.deleted,
+        revision: revision.present ? revision.value : this.revision,
       );
   Transaction copyWithCompanion(TransactionsCompanion data) {
     return Transaction(
@@ -3742,6 +3772,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           : this.lastModified,
       status: data.status.present ? data.status.value : this.status,
       deleted: data.deleted.present ? data.deleted.value : this.deleted,
+      revision: data.revision.present ? data.revision.value : this.revision,
     );
   }
 
@@ -3765,7 +3796,8 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           ..write('createdAt: $createdAt, ')
           ..write('lastModified: $lastModified, ')
           ..write('status: $status, ')
-          ..write('deleted: $deleted')
+          ..write('deleted: $deleted, ')
+          ..write('revision: $revision')
           ..write(')'))
         .toString();
   }
@@ -3789,7 +3821,8 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       createdAt,
       lastModified,
       status,
-      deleted);
+      deleted,
+      revision);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3811,7 +3844,8 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           other.createdAt == this.createdAt &&
           other.lastModified == this.lastModified &&
           other.status == this.status &&
-          other.deleted == this.deleted);
+          other.deleted == this.deleted &&
+          other.revision == this.revision);
 }
 
 class TransactionsCompanion extends UpdateCompanion<Transaction> {
@@ -3833,6 +3867,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   final Value<DateTime> lastModified;
   final Value<String?> status;
   final Value<bool> deleted;
+  final Value<String?> revision;
   final Value<int> rowid;
   const TransactionsCompanion({
     this.id = const Value.absent(),
@@ -3853,6 +3888,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     this.lastModified = const Value.absent(),
     this.status = const Value.absent(),
     this.deleted = const Value.absent(),
+    this.revision = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TransactionsCompanion.insert({
@@ -3874,6 +3910,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     this.lastModified = const Value.absent(),
     this.status = const Value.absent(),
     this.deleted = const Value.absent(),
+    this.revision = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         householdId = Value(householdId),
@@ -3902,6 +3939,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     Expression<DateTime>? lastModified,
     Expression<String>? status,
     Expression<bool>? deleted,
+    Expression<String>? revision,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3925,6 +3963,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       if (lastModified != null) 'last_modified': lastModified,
       if (status != null) 'status': status,
       if (deleted != null) 'deleted': deleted,
+      if (revision != null) 'revision': revision,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3948,6 +3987,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       Value<DateTime>? lastModified,
       Value<String?>? status,
       Value<bool>? deleted,
+      Value<String?>? revision,
       Value<int>? rowid}) {
     return TransactionsCompanion(
       id: id ?? this.id,
@@ -3968,6 +4008,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       lastModified: lastModified ?? this.lastModified,
       status: status ?? this.status,
       deleted: deleted ?? this.deleted,
+      revision: revision ?? this.revision,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -4030,6 +4071,9 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     if (deleted.present) {
       map['deleted'] = Variable<bool>(deleted.value);
     }
+    if (revision.present) {
+      map['revision'] = Variable<String>(revision.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -4057,6 +4101,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
           ..write('lastModified: $lastModified, ')
           ..write('status: $status, ')
           ..write('deleted: $deleted, ')
+          ..write('revision: $revision, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -12115,6 +12160,7 @@ typedef $$TransactionsTableCreateCompanionBuilder = TransactionsCompanion
   Value<DateTime> lastModified,
   Value<String?> status,
   Value<bool> deleted,
+  Value<String?> revision,
   Value<int> rowid,
 });
 typedef $$TransactionsTableUpdateCompanionBuilder = TransactionsCompanion
@@ -12137,6 +12183,7 @@ typedef $$TransactionsTableUpdateCompanionBuilder = TransactionsCompanion
   Value<DateTime> lastModified,
   Value<String?> status,
   Value<bool> deleted,
+  Value<String?> revision,
   Value<int> rowid,
 });
 
@@ -12289,6 +12336,9 @@ class $$TransactionsTableFilterComposer
 
   ColumnFilters<bool> get deleted => $composableBuilder(
       column: $table.deleted, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get revision => $composableBuilder(
+      column: $table.revision, builder: (column) => ColumnFilters(column));
 
   $$HouseholdsTableFilterComposer get householdId {
     final $$HouseholdsTableFilterComposer composer = $composerBuilder(
@@ -12467,6 +12517,9 @@ class $$TransactionsTableOrderingComposer
   ColumnOrderings<bool> get deleted => $composableBuilder(
       column: $table.deleted, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get revision => $composableBuilder(
+      column: $table.revision, builder: (column) => ColumnOrderings(column));
+
   $$HouseholdsTableOrderingComposer get householdId {
     final $$HouseholdsTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -12598,6 +12651,9 @@ class $$TransactionsTableAnnotationComposer
 
   GeneratedColumn<bool> get deleted =>
       $composableBuilder(column: $table.deleted, builder: (column) => column);
+
+  GeneratedColumn<String> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
 
   $$HouseholdsTableAnnotationComposer get householdId {
     final $$HouseholdsTableAnnotationComposer composer = $composerBuilder(
@@ -12769,6 +12825,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             Value<DateTime> lastModified = const Value.absent(),
             Value<String?> status = const Value.absent(),
             Value<bool> deleted = const Value.absent(),
+            Value<String?> revision = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               TransactionsCompanion(
@@ -12790,6 +12847,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             lastModified: lastModified,
             status: status,
             deleted: deleted,
+            revision: revision,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -12811,6 +12869,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             Value<DateTime> lastModified = const Value.absent(),
             Value<String?> status = const Value.absent(),
             Value<bool> deleted = const Value.absent(),
+            Value<String?> revision = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               TransactionsCompanion.insert(
@@ -12832,6 +12891,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             lastModified: lastModified,
             status: status,
             deleted: deleted,
+            revision: revision,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0

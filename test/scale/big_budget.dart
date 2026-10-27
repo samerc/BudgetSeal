@@ -396,13 +396,12 @@ class BigBudget {
     final lines = await (db.select(db.transactionLines)
           ..where((l) => l.transactionId.equals(id)))
         .get();
-    final newId = await engine.rewriteTransaction(id, categoryId: category);
+    await engine.rewriteTransaction(id, categoryId: category);
     _apply(_live.remove(id)!, -1);
     final e = _expenseEffect(
         [for (final l in lines) (l.accountId!, category, l.amount)]);
     _apply(e);
-    _live[newId] = e;
-    _expenseIds[i] = newId;
+    _live[id] = e;
     _count('edited');
   }
 

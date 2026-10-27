@@ -535,6 +535,10 @@
   "web_history_for_date": "for {date}",
   "web_history_from_web": "from the Web Companion",
   "web_history_from_bill": "recurring bill",
+  "web_history_restored": "Restored",
+  "web_history_change": "{field}: {from} → {to}",
+  "web_history_replaced": "Replaced by a later edit on another phone",
+  "web_history_replaced_by": "Replaced by {name}'s later edit",
   "web_fund_usually": "Usually spends {amount}",
   "web_history_by": "by {name}"
 }

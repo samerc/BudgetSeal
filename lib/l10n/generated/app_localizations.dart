@@ -16122,6 +16122,36 @@ abstract class S {
   /// **'recurring bill'**
   String get changeLogFromBill;
 
+  /// Change history
+  ///
+  /// In en, this message translates to:
+  /// **'Restored'**
+  String get changeLogRestored;
+
+  /// Change history
+  ///
+  /// In en, this message translates to:
+  /// **'{field}: {from} → {to}'**
+  String changeLogChange(String field, String from, String to);
+
+  /// Change history
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get changeLogFieldType;
+
+  /// Change history
+  ///
+  /// In en, this message translates to:
+  /// **'Replaced by a later edit on another phone'**
+  String get changeLogReplaced;
+
+  /// Change history
+  ///
+  /// In en, this message translates to:
+  /// **'Replaced by {name}\'s later edit'**
+  String changeLogReplacedBy(String name);
+
   /// Onboarding backup restore, home widgets
   ///
   /// In en, this message translates to:
@@ -16211,6 +16241,30 @@ abstract class S {
   /// In en, this message translates to:
   /// **'recurring bill'**
   String get webHistoryFromBill;
+
+  /// Web Companion: change history, usual spending
+  ///
+  /// In en, this message translates to:
+  /// **'Restored'**
+  String get webHistoryRestored;
+
+  /// Web Companion: change history, usual spending
+  ///
+  /// In en, this message translates to:
+  /// **'{field}: {from} → {to}'**
+  String webHistoryChange(String field, String from, String to);
+
+  /// Web Companion: change history, usual spending
+  ///
+  /// In en, this message translates to:
+  /// **'Replaced by a later edit on another phone'**
+  String get webHistoryReplaced;
+
+  /// Web Companion: change history, usual spending
+  ///
+  /// In en, this message translates to:
+  /// **'Replaced by {name}\'s later edit'**
+  String webHistoryReplacedBy(String name);
 
   /// Web Companion: change history, usual spending
   ///

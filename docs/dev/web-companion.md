@@ -84,7 +84,7 @@ GET  /api/changes?since=N              → { version, tables } — long-poll (�
 POST /api/import                       → { accountId, dryRun?, rows[≤1000] } → { imported, ready, categorized, duplicates, skipped }
 POST /api/transactions/bulk            → { items: [create payload…] } ≤100 rows, all validated, then written in one db transaction → { ids, count } | 400 { error, row }
 GET  /api/transactions/:id             → single + lines
-PUT  /api/transactions/:id             → update (type can change; returns the new id)
+PUT  /api/transactions/:id             → update in place (type can change; returns the same id)
 DELETE /api/transactions/:id           → soft delete
 
 GET  /api/categories                   → all non-archived (with iconFile)
@@ -101,7 +101,7 @@ POST /api/accounts/:id/reconcile       → { balance } → { adjusted, reconcile
 
 GET  /api/envelopes                    → { items, unallocated, period, baseCurrency }
 GET  /api/envelopes/average-spending  → { items: { envelopeId: { currency: amount } } } (last 3 budget periods)
-GET  /api/change-log                   → { limit, items: [{ kind added|edited|deleted, at, txId, type, date, note, categoryName, amounts: [{currency, amount}], by (member name or null), source bill|web|null }] }
+GET  /api/change-log                   → { limit, items: [{ kind added|edited|deleted|restored, at, txId, type, date, note, categoryName, amounts: [{currency, amount}], by (member name or null), source bill|web|null, changes: [{ field type|amount|category|account|date|note, from, to }] (amount: [{currency, amount}]; category/account: names, null = uncategorized; date ISO), replaced (bool), replacedBy (member name or null) }] } — from the operation log (see data.md Change history)
 POST /api/envelopes/:id/fund           → add funding
 POST /api/envelopes/move               → { fromId?, toId?, amount, currency } (null side = Ready to assign; AllocationEngine.moveMoney; 400 if the source envelope lacks it)
 
@@ -140,7 +140,7 @@ Tests: `test/features/web_companion_api_test.dart` calls the handlers with an in
 ```
 #/                Home (getting started, Ready to assign / All sealed, overspent + Cover, bills this week, envelopes, recent, accounts)
 #/transactions    Month budget card, day cards, budget-impact rows, search, type + month filters, CSV export
-#/history         Change history (from the Transactions page; rows open the edit dialog, deleted ones crossed out)
+#/history         Change history (from the Transactions page; rows open the edit dialog, deleted ones crossed out; an edit lists what it changed, a replaced edit says so)
 #/bulk            Add several: grid entry + spreadsheet paste
 #/import          CSV import: file → column mapper → preview → check & import
 #/accounts/<id>   One account: running balance per row, reconcile, edit, archive

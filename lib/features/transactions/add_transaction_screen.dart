@@ -894,7 +894,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   ? title
                   : note;
 
-      // Create the new transaction FIRST (if this fails, old data is intact)
+      // An edit rewrites the transaction in place (same id).
       late final String txId;
       if (_type == _TxType.transfer) {
         txId = await engine.recordTransfer(
@@ -908,6 +908,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           deviceId: 'local',
           note: effectiveNote,
           date: _effectiveDateTime,
+          editing: widget.editTransactionId,
         );
       } else {
         final txLines = _lines
@@ -931,6 +932,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           baseCurrency: _baseCurrency,
           note: effectiveNote,
           date: _effectiveDateTime,
+          editing: widget.editTransactionId,
         );
       }
 
@@ -938,11 +940,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         LastUsedService.rememberTransfer(_fromAccountId!, _destAccountId!);
       } else if (_lines.first.accountId != null) {
         LastUsedService.rememberAccount(_lines.first.accountId!);
-      }
-
-      // Only delete the old transaction AFTER successful creation
-      if (widget.editTransactionId != null) {
-        await engine.deleteTransaction(widget.editTransactionId!);
       }
 
       // Save receipt filenames if attached.

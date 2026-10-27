@@ -9384,6 +9384,25 @@ class SAr extends S {
   String get changeLogFromBill => 'فاتورة متكررة';
 
   @override
+  String get changeLogRestored => 'أُعيدت';
+
+  @override
+  String changeLogChange(String field, String from, String to) {
+    return '$field: $from ← $to';
+  }
+
+  @override
+  String get changeLogFieldType => 'النوع';
+
+  @override
+  String get changeLogReplaced => 'استُبدل بتعديل لاحق على هاتف آخر';
+
+  @override
+  String changeLogReplacedBy(String name) {
+    return 'استُبدل بتعديل لاحق من $name';
+  }
+
+  @override
   String get onboardRestoreBackupFile => 'استعادة ملف نسخة احتياطية';
 
   @override
@@ -9432,6 +9451,22 @@ class SAr extends S {
 
   @override
   String get webHistoryFromBill => 'فاتورة متكررة';
+
+  @override
+  String get webHistoryRestored => 'أُعيدت';
+
+  @override
+  String webHistoryChange(String field, String from, String to) {
+    return '$field: $from ← $to';
+  }
+
+  @override
+  String get webHistoryReplaced => 'استُبدل بتعديل لاحق على هاتف آخر';
+
+  @override
+  String webHistoryReplacedBy(String name) {
+    return 'استُبدل بتعديل لاحق من $name';
+  }
 
   @override
   String webFundUsually(String amount) {

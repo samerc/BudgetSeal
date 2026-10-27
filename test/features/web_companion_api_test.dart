@@ -812,7 +812,7 @@ void main() {
     expect(second['hasMore'], isFalse);
   });
 
-  test('change log: added, edited (one entry) and deleted', () async {
+  test('change log: each change, with what an edit changed', () async {
     final a = await call(createTransactionHandler(ref), 'POST', body: {
       'type': 'expense',
       'accountId': 'usd',
@@ -837,7 +837,7 @@ void main() {
     expect(log['status'], 200);
     final items = (log['items'] as List).cast<Map<String, dynamic>>();
     final kinds = items.map((i) => i['kind']).toList()..sort();
-    expect(kinds, ['deleted', 'edited']);
+    expect(kinds, ['added', 'added', 'deleted', 'edited']);
     final deleted = items.firstWhere((i) => i['kind'] == 'deleted');
     expect(deleted['categoryName'], 'Salary');
     expect(deleted['amounts'], [
@@ -846,6 +846,15 @@ void main() {
     final edited = items.firstWhere((i) => i['kind'] == 'edited');
     expect(edited['note'], 'Lunch');
     expect(edited['source'], 'web');
+    expect(edited['txId'], a['id'], reason: 'edited in place');
+    expect(edited['changes'], [
+      {
+        'field': 'amount',
+        'from': [{'currency': 'USD', 'amount': 10}],
+        'to': [{'currency': 'USD', 'amount': 12}],
+      }
+    ]);
+    expect(edited['replaced'], isFalse);
   });
 
   test('average spending answers with a map per envelope', () async {

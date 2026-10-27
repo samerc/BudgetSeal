@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:drift/drift.dart';
@@ -289,6 +290,8 @@ class AllocationEngine {
   /// [amount] leaves [fromAccountId] in its currency; [exchangeRateToBase]
   /// is the source→destination rate (the name is historical), so
   /// `amount × rate` arrives and is stored as `destinationAmount`.
+  ///
+  /// [editing]: rewrite that transaction in place (same id) instead.
   Future<String> recordTransfer({
     required String householdId,
     required String fromAccountId,
@@ -301,7 +304,40 @@ class AllocationEngine {
     String note = '',
     DateTime? date,
     String? id,
+    String? editing,
   }) async {
+    if (editing != null) {
+      await _db.transaction(() async {
+        final old = await _liveTx(editing);
+        // An income/expense turned into a transfer: its lines and debits
+        // go, under a new revision so another phone's rewrite of them goes
+        // too (see [Transactions.revision]).
+        final hadLines = old.type != 'transfer' ||
+            (await (_db.select(_db.transactionLines)
+                      ..where((l) => l.transactionId.equals(editing)))
+                    .get())
+                .isNotEmpty;
+        await (_db.update(_db.transactions)..where((t) => t.id.equals(editing)))
+            .write(TransactionsCompanion(
+          type: const Value('transfer'),
+          accountId: Value(fromAccountId),
+          destinationAccountId: Value(toAccountId),
+          categoryId: const Value(null),
+          amount: Value(amount),
+          currency: Value(currency),
+          exchangeRateToBase: Value(exchangeRateToBase),
+          destinationAmount: Value(amount * exchangeRateToBase),
+          note: Value(note),
+          createdAt: Value(date ?? old.createdAt),
+          status: const Value(null),
+          deviceId: Value(DeviceIdentity.stamp(deviceId)),
+          lastModified: Value(DateTime.now()),
+          revision: hadLines ? Value(_newRevision()) : const Value.absent(),
+        ));
+        if (hadLines) await _dropLines(editing);
+      });
+      return editing;
+    }
     if (id != null && await _txExists(id)) return id;
     final txId = id ?? _uuid.v4();
     await _db.into(_db.transactions).insert(TransactionsCompanion.insert(
@@ -392,6 +428,11 @@ class AllocationEngine {
   ///
   /// For expense transactions, creates allocation ledger consumption entries
   /// for each line that has a category with an associated allocation.
+  ///
+  /// [editing]: rewrite that transaction in place (same id), so an edit
+  /// made on two phones offline stays one transaction. Its lines and debits
+  /// are rewritten only when the lines changed, under a new
+  /// [Transactions.revision]; a note or date edit leaves them alone.
   Future<String> recordTransaction({
     required String householdId,
     required String accountId,
@@ -403,6 +444,7 @@ class AllocationEngine {
     String deviceId = 'local',
     DateTime? date,
     String? id,
+    String? editing,
   }) async {
     if (type != 'transfer' && lines.isEmpty) {
       throw ArgumentError('income/expense must have at least one line');
@@ -418,10 +460,12 @@ class AllocationEngine {
     }
     lines = await _toAccountCurrencies(lines, accountId, baseCurrency);
 
-    if (id != null && await _txExists(id)) return id;
-    final txId = id ?? _uuid.v4();
+    if (editing == null && id != null && await _txExists(id)) return id;
+    final txId = editing ?? id ?? _uuid.v4();
     // With a fixed id, lines and ledger rows get fixed ids too, so the same
-    // occurrence posted on two devices merges into one.
+    // occurrence posted on two devices merges into one; an edit's carry its
+    // revision.
+    String? prefix = id != null ? '$id:' : null;
     var lineNo = 0;
     var debitNo = 0;
 
@@ -437,6 +481,32 @@ class AllocationEngine {
         lines.length == 1 ? lines.first.categoryId : null;
     final effectiveDate = date ?? DateTime.now();
 
+    if (editing != null) {
+      final old = await _liveTx(editing);
+      final keepLines =
+          old.type == type && await _sameLines(editing, lines, accountId);
+      final revision = keepLines ? null : _newRevision();
+      await (_db.update(_db.transactions)..where((t) => t.id.equals(editing)))
+          .write(TransactionsCompanion(
+        type: Value(type),
+        accountId: Value(accountId),
+        destinationAccountId: Value(destinationAccountId),
+        amount: Value(totalBaseAmount),
+        currency: Value(baseCurrency),
+        categoryId: Value(singleCategoryId),
+        exchangeRateToBase: const Value(1.0),
+        destinationAmount: const Value(null),
+        note: Value(note),
+        createdAt: Value(date ?? old.createdAt),
+        status: const Value(null),
+        deviceId: Value(DeviceIdentity.stamp(deviceId)),
+        lastModified: Value(DateTime.now()),
+        revision: revision == null ? const Value.absent() : Value(revision),
+      ));
+      if (keepLines) return;
+      await _dropLines(editing);
+      prefix = '$editing:$revision:';
+    } else {
     await _db.into(_db.transactions).insert(TransactionsCompanion.insert(
           id: txId,
           householdId: householdId,
@@ -451,11 +521,12 @@ class AllocationEngine {
           deviceId: DeviceIdentity.stamp(deviceId),
           createdAt: Value(effectiveDate),
         ));
+    }
 
     for (final line in lines) {
       await _db.into(_db.transactionLines).insert(
             TransactionLinesCompanion.insert(
-              id: id != null ? '$id:line${lineNo++}' : _uuid.v4(),
+              id: prefix != null ? '${prefix}line${lineNo++}' : _uuid.v4(),
               transactionId: txId,
               categoryId: Value(line.categoryId),
               accountId: Value(line.accountId ?? accountId),
@@ -553,7 +624,7 @@ class AllocationEngine {
 
             final lineAccountId = line.accountId ?? accountId;
             await _ledgerDao.appendEntry(AllocationLedgerCompanion.insert(
-              id: id != null ? '$id:debit${debitNo++}' : _uuid.v4(),
+              id: prefix != null ? '${prefix}debit${debitNo++}' : _uuid.v4(),
               allocationId: allocationId,
               sourceTransactionId: Value(txId),
               sourceAccountId: Value(lineAccountId),
@@ -581,6 +652,43 @@ class AllocationEngine {
       await (_db.select(_db.transactions)..where((t) => t.id.equals(id)))
           .getSingleOrNull() !=
       null;
+
+  Future<Transaction> _liveTx(String id) => (_db.select(_db.transactions)
+        ..where((t) => t.id.equals(id) & t.deleted.equals(false)))
+      .getSingle();
+
+  String _newRevision() => _uuid.v4().substring(0, 8);
+
+  /// Removes a transaction's lines and envelope debits (an edit rewrites
+  /// them).
+  Future<void> _dropLines(String txId) async {
+    await _ledgerDao.deleteByTransactionId(txId);
+    await (_db.delete(_db.transactionLines)
+          ..where((l) => l.transactionId.equals(txId)))
+        .go();
+  }
+
+  /// Whether [lines] are what [txId] already has, in any order.
+  Future<bool> _sameLines(
+      String txId, List<TxLine> lines, String accountId) async {
+    final have = await (_db.select(_db.transactionLines)
+          ..where((l) => l.transactionId.equals(txId)))
+        .get();
+    String key(double amount, String currency, String? category,
+            String? account, double rate, String note) =>
+        jsonEncode([amount, currency, category, account, rate, note]);
+    final a = [
+      for (final l in have)
+        key(l.amount, l.currency, l.categoryId, l.accountId,
+            l.exchangeRateToBase, l.note),
+    ]..sort();
+    final b = [
+      for (final l in lines)
+        key(l.amount, l.currency, l.categoryId, l.accountId ?? accountId,
+            l.exchangeRateToBase, l.note),
+    ]..sort();
+    return a.join('\n') == b.join('\n');
+  }
 
   /// Soft-delete a transaction and reverse its allocation ledger entries.
   ///
@@ -724,33 +832,32 @@ class AllocationEngine {
   }
 
   /// Bulk edit: re-save an income/expense transaction with a new category
-  /// (every line), account (every line) and/or date, through
-  /// [recordTransaction] so envelope debits and currency conversion follow;
-  /// the old row is then soft-deleted (receipts carry over). Transfers only
-  /// take a new date. Returns the new id (the same id for date-only
-  /// changes and transfers).
-  Future<String> rewriteTransaction(
+  /// (every line), account (every line) and/or date, in place through
+  /// [recordTransaction] so envelope debits and currency conversion follow.
+  /// Transfers only take a new date.
+  Future<void> rewriteTransaction(
     String txId, {
     String? categoryId,
     String? accountId,
     DateTime? date,
   }) async {
-    return _db.transaction(() async {
-      final tx = await (_db.select(_db.transactions)
-            ..where((t) => t.id.equals(txId) & t.deleted.equals(false)))
-          .getSingle();
+    await _db.transaction(() async {
+      final tx = await _liveTx(txId);
+      // Keep the time of day.
+      final old = tx.createdAt.toLocal();
+      final newDate = date == null
+          ? null
+          : DateTime(date.year, date.month, date.day, old.hour, old.minute,
+              old.second);
       if (tx.type == 'transfer' || (categoryId == null && accountId == null)) {
-        if (date != null) {
-          // Keep the time of day.
-          final old = tx.createdAt.toLocal();
+        if (newDate != null) {
           await (_db.update(_db.transactions)..where((t) => t.id.equals(txId)))
               .write(TransactionsCompanion(
-            createdAt: Value(DateTime(date.year, date.month, date.day,
-                old.hour, old.minute, old.second)),
+            createdAt: Value(newDate),
             lastModified: Value(DateTime.now()),
           ));
         }
-        return txId;
+        return;
       }
       final household = await (_db.select(_db.households)
             ..where((h) => h.id.equals(tx.householdId)))
@@ -758,17 +865,14 @@ class AllocationEngine {
       final lines = await (_db.select(_db.transactionLines)
             ..where((l) => l.transactionId.equals(txId)))
           .get();
-      final old = tx.createdAt.toLocal();
-      final newId = await recordTransaction(
+      await recordTransaction(
+        editing: txId,
         householdId: tx.householdId,
         accountId: accountId ?? tx.accountId,
         type: tx.type,
         baseCurrency: household.baseCurrency,
         note: tx.note,
-        date: date != null
-            ? DateTime(date.year, date.month, date.day, old.hour, old.minute,
-                old.second)
-            : tx.createdAt,
+        date: newDate ?? tx.createdAt,
         lines: [
           for (final l in lines)
             TxLine(
@@ -781,12 +885,6 @@ class AllocationEngine {
             ),
         ],
       );
-      if (tx.receiptPath != null) {
-        await (_db.update(_db.transactions)..where((t) => t.id.equals(newId)))
-            .write(TransactionsCompanion(receiptPath: Value(tx.receiptPath)));
-      }
-      await deleteTransaction(txId);
-      return newId;
     });
   }
 }

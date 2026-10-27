@@ -1180,7 +1180,7 @@
 <!-- ══════════════════════════════════════════ -->
 <h2 id="change-history">Change history</h2>
 
-<p><strong>More</strong> → <strong>Settings</strong> → <strong>Change history</strong> lists the last 300 changes to your transactions, newest first, by day: what was <strong>added</strong>, <strong>edited</strong> or <strong>deleted</strong>, at what time, and — when it's for another day — which day it's dated. Bills posted by a recurring item and entries made in the Web Companion say so. Tap an entry to open it; deleted ones are crossed out and can't be opened. In a shared budget each entry says who saved it (<em>Added 14:02 · by Sara</em>) — see <a href="#cloud-sync">Sharing a household</a>. The Web Companion's <strong>History</strong> shows the same list. Purging deleted transactions in Health check also clears them from the history.</p>
+<p><strong>More</strong> → <strong>Settings</strong> → <strong>Change history</strong> lists the last 300 changes to your transactions, newest first, by day: what was <strong>added</strong>, <strong>edited</strong>, <strong>deleted</strong> or <strong>restored</strong> (Undo), at what time, and — when it's for another day — which day it's dated. An edit lists what it changed (<em>Amount: $10.00 → $12.00</em>, <em>Category: Food → Home</em>, the account, date or note). Bills posted by a recurring item and entries made in the Web Companion say so. Tap an entry to open it; deleted ones are crossed out and can't be opened. In a shared budget each entry says who made the change (<em>Edited 14:02 · by Sara</em>) — see <a href="#cloud-sync">Sharing a household</a>. If two phones changed the same thing before syncing, the later change is the one kept and both stay in the history; the earlier one says <em>Replaced by Sara's later edit</em>. The Web Companion's <strong>History</strong> shows the same list. Purging deleted transactions in Health check also clears them from the history.</p>
 
 <h2 id="crash-reports">Crash reports</h2>
 
@@ -1250,7 +1250,7 @@
   <li>Enter their email and tap <strong>Generate invite code</strong>: this shares your BudgetSeal folder on Drive with them</li>
   <li>Tap <strong>Share code</strong> to send it. They choose <strong>Join a household</strong> during setup and enter it</li>
 </ol>
-<p><strong>Who added what.</strong> Once a budget is shared, each phone asks once for a name (<em>Who's using this phone?</em>) — choose <strong>Just me</strong> if it's only you. After that, <a href="#change-history">Change history</a> says who added or edited each entry (<em>Added 14:02 · by Sara</em>), and a transaction's page shows <em>Saved by Sara</em>. Change your name in <strong>Settings</strong> → <strong>Your name</strong> (under Data; it shows once your budget syncs). Entries from before names, bills that post by themselves and entries made in the Web Companion don't name anyone. A budget used by one person never shows names.</p>
+<p><strong>Who added what.</strong> Once a budget is shared, each phone asks once for a name (<em>Who's using this phone?</em>) — choose <strong>Just me</strong> if it's only you. After that, <a href="#change-history">Change history</a> says who added, edited or deleted each entry (<em>Added 14:02 · by Sara</em>), and a transaction's page shows <em>Saved by Sara</em>. Change your name in <strong>Settings</strong> → <strong>Your name</strong> (under Data; it shows once your budget syncs). Entries from before names, bills that post by themselves and entries made in the Web Companion don't name anyone. A budget used by one person never shows names.</p>
 
 <!-- ══════════════════════════════════════════ -->
 <h2 id="backup">Backup &amp; restore</h2>
@@ -1440,7 +1440,7 @@
 <p>Deleted transactions are soft-deleted — they're hidden but not permanently removed. Any envelope deductions are reversed. You can permanently purge them from Health Check.</p>
 
 <h3>Can two people share a budget?</h3>
-<p>Yes. Connect Cloud sync with Google Drive, tap <strong>Share household</strong> and send the invite code; your partner chooses <strong>Join a household</strong> during setup. Both phones sync the same file and changes merge — the newer edit wins. Each phone gets a name, so Change history shows who saved what (see <a href="#cloud-sync">Sharing a household</a>).</p>
+<p>Yes. Connect Cloud sync with Google Drive, tap <strong>Share household</strong> and send the invite code; your partner chooses <strong>Join a household</strong> during setup. Both phones sync through the same folder and their changes merge — edits to different things are both kept; when you both change the same thing, the later change wins and Change history shows both. Each phone gets a name, so Change history shows who saved what (see <a href="#cloud-sync">Sharing a household</a>).</p>
 
 <h3>What if I overspend an envelope?</h3>
 <p>The envelope goes negative and shows a red indicator. Your transaction still saves — BudgetSeal never blocks spending. It's a signal to either fund the envelope more or spend less.</p>

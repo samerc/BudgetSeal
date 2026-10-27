@@ -1043,6 +1043,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
           deviceId: 'local',
           note: note,
           date: _saveDate,
+          editing: widget.editTransactionId,
         );
         LastUsedService.rememberTransfer(_accountId!, _destId!);
       } else {
@@ -1065,12 +1066,9 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
           baseCurrency: _baseCurrency,
           note: note,
           date: _saveDate,
+          editing: widget.editTransactionId,
         );
         LastUsedService.rememberAccount(_accountId!);
-      }
-      // Only drop the old one once the new one is saved.
-      if (_editing) {
-        await engine.deleteTransaction(widget.editTransactionId!);
       }
       if (_receipts.isNotEmpty) {
         try {

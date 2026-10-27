@@ -535,6 +535,10 @@
   "web_history_for_date": "pour le {date}",
   "web_history_from_web": "depuis le Compagnon Web",
   "web_history_from_bill": "facture récurrente",
+  "web_history_restored": "Restaurée",
+  "web_history_change": "{field} : {from} → {to}",
+  "web_history_replaced": "Remplacée par une modification ultérieure sur un autre téléphone",
+  "web_history_replaced_by": "Remplacée par une modification ultérieure de {name}",
   "web_fund_usually": "Dépense d'habitude {amount}",
   "web_history_by": "par {name}"
 }

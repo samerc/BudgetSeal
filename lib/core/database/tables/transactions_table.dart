@@ -46,6 +46,11 @@ class Transactions extends Table {
   /// Soft-delete flag. Deleted transactions are excluded from all balance
   /// calculations and queries but retained for sync conflict resolution.
   BoolColumn get deleted => boolean().withDefault(const Constant(false))();
+  /// Set by an edit that rewrote the lines (v24): that edit's lines and
+  /// envelope debits have ids starting `<id>:<revision>:`. When two phones
+  /// rewrite the same transaction, sync keeps the newer revision's lines
+  /// and debits whole (`settleTransactions()` in log_sync.dart).
+  TextColumn get revision => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

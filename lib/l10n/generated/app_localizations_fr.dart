@@ -9465,6 +9465,26 @@ class SFr extends S {
   String get changeLogFromBill => 'facture récurrente';
 
   @override
+  String get changeLogRestored => 'Restaurée';
+
+  @override
+  String changeLogChange(String field, String from, String to) {
+    return '$field : $from → $to';
+  }
+
+  @override
+  String get changeLogFieldType => 'Type';
+
+  @override
+  String get changeLogReplaced =>
+      'Remplacée par une modification ultérieure sur un autre téléphone';
+
+  @override
+  String changeLogReplacedBy(String name) {
+    return 'Remplacée par une modification ultérieure de $name';
+  }
+
+  @override
   String get onboardRestoreBackupFile => 'Restaurer un fichier de sauvegarde';
 
   @override
@@ -9513,6 +9533,23 @@ class SFr extends S {
 
   @override
   String get webHistoryFromBill => 'facture récurrente';
+
+  @override
+  String get webHistoryRestored => 'Restaurée';
+
+  @override
+  String webHistoryChange(String field, String from, String to) {
+    return '$field : $from → $to';
+  }
+
+  @override
+  String get webHistoryReplaced =>
+      'Remplacée par une modification ultérieure sur un autre téléphone';
+
+  @override
+  String webHistoryReplacedBy(String name) {
+    return 'Remplacée par une modification ultérieure de $name';
+  }
 
   @override
   String webFundUsually(String amount) {

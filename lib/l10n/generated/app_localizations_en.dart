@@ -9361,6 +9361,25 @@ class SEn extends S {
   String get changeLogFromBill => 'recurring bill';
 
   @override
+  String get changeLogRestored => 'Restored';
+
+  @override
+  String changeLogChange(String field, String from, String to) {
+    return '$field: $from → $to';
+  }
+
+  @override
+  String get changeLogFieldType => 'Type';
+
+  @override
+  String get changeLogReplaced => 'Replaced by a later edit on another phone';
+
+  @override
+  String changeLogReplacedBy(String name) {
+    return 'Replaced by $name\'s later edit';
+  }
+
+  @override
   String get onboardRestoreBackupFile => 'Restore a backup file';
 
   @override
@@ -9409,6 +9428,22 @@ class SEn extends S {
 
   @override
   String get webHistoryFromBill => 'recurring bill';
+
+  @override
+  String get webHistoryRestored => 'Restored';
+
+  @override
+  String webHistoryChange(String field, String from, String to) {
+    return '$field: $from → $to';
+  }
+
+  @override
+  String get webHistoryReplaced => 'Replaced by a later edit on another phone';
+
+  @override
+  String webHistoryReplacedBy(String name) {
+    return 'Replaced by $name\'s later edit';
+  }
 
   @override
   String webFundUsually(String amount) {

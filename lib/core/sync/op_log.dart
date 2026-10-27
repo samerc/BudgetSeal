@@ -117,6 +117,9 @@ Future<void> ensureOpLog(AppDatabase db) async {
       'CREATE UNIQUE INDEX IF NOT EXISTS idx_sync_ops_id ON sync_ops (device, seq)');
   await db.customStatement(
       'CREATE INDEX IF NOT EXISTS idx_sync_ops_row ON sync_ops (tbl, row_id)');
+  // Change history: a table's newest entries.
+  await db.customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_sync_ops_tbl_hlc ON sync_ops (tbl, hlc)');
   await db.customStatement(
       'INSERT OR IGNORE INTO sync_clock (id, device, ms, counter, seq) '
       'VALUES (1, ?, 0, 0, 0)',

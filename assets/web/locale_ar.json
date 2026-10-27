@@ -535,6 +535,10 @@
   "web_history_for_date": "بتاريخ {date}",
   "web_history_from_web": "من المرافق الإلكتروني",
   "web_history_from_bill": "فاتورة متكررة",
+  "web_history_restored": "أُعيدت",
+  "web_history_change": "{field}: {from} ← {to}",
+  "web_history_replaced": "استُبدل بتعديل لاحق على هاتف آخر",
+  "web_history_replaced_by": "استُبدل بتعديل لاحق من {name}",
   "web_fund_usually": "ينفق عادةً {amount}",
   "web_history_by": "بواسطة {name}"
 }

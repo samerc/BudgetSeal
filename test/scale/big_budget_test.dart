@@ -269,8 +269,8 @@ void main() {
     }, limitMs: 500);
 
     final log = await timed('change log (300 newest)',
-        () => loadChangeLog(db, hh), note: (r) => '${r.events.length} events');
-    expect(log.events, isNotEmpty);
+        () => loadChangeLog(db, hh), note: (r) => '${r.length} events');
+    expect(log, isNotEmpty);
   });
 
   test('budget and report figures', () async {

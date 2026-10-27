@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/database/app_database.dart';
 import '../../core/engine/change_log.dart';
+import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/date_format_provider.dart';
@@ -22,7 +23,8 @@ import '../../shared/widgets/large_title_header.dart';
 import '../../shared/widgets/skeleton_loader.dart';
 import '../../shared/widgets/tappable.dart';
 
-/// Settings › Change history: what was added, edited or deleted, and when.
+/// Settings › Change history: what was added, edited or deleted, when, by
+/// whom, and what an edit changed (from the operation log, every phone's).
 class ChangeLogScreen extends ConsumerStatefulWidget {
   const ChangeLogScreen({super.key});
 
@@ -33,7 +35,6 @@ class ChangeLogScreen extends ConsumerStatefulWidget {
 class _ChangeLogScreenState extends ConsumerState<ChangeLogScreen> {
   static const _limit = 300;
   List<ChangeEvent> _events = const [];
-  Map<String, List<TransactionLine>> _lines = const {};
   bool _loading = true;
   Object? _error;
 
@@ -51,11 +52,10 @@ class _ChangeLogScreenState extends ConsumerState<ChangeLogScreen> {
         if (mounted) setState(() => _loading = false);
         return;
       }
-      final log = await loadChangeLog(db, householdId, limit: _limit);
+      final events = await loadChangeLog(db, householdId, limit: _limit);
       if (mounted) {
         setState(() {
-          _events = log.events;
-          _lines = log.lines;
+          _events = events;
           _loading = false;
           _error = null;
         });
@@ -129,7 +129,6 @@ class _ChangeLogScreenState extends ConsumerState<ChangeLogScreen> {
                   itemBuilder: (_, i) => _DayGroup(
                     day: groups[i].day,
                     events: groups[i].events,
-                    lines: _lines,
                   ),
                 ),
               ),
@@ -144,9 +143,7 @@ class _ChangeLogScreenState extends ConsumerState<ChangeLogScreen> {
 class _DayGroup extends ConsumerWidget {
   final DateTime day;
   final List<ChangeEvent> events;
-  final Map<String, List<TransactionLine>> lines;
-  const _DayGroup(
-      {required this.day, required this.events, required this.lines});
+  const _DayGroup({required this.day, required this.events});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -160,6 +157,10 @@ class _DayGroup extends ConsumerWidget {
     final cats = {
       for (final c in ref.watch(categoriesProvider).value ?? const <Category>[])
         c.id: c
+    };
+    final accounts = {
+      for (final a in ref.watch(accountsProvider).value ?? const <Account>[])
+        a.id: a.name
     };
     final names = ref.watch(memberNamesProvider).value ?? const {};
     return Padding(
@@ -182,10 +183,7 @@ class _DayGroup extends ConsumerWidget {
             ),
             for (final e in events)
               _EventRow(
-                  event: e,
-                  lines: lines[e.tx.id] ?? const [],
-                  cats: cats,
-                  names: names),
+                  event: e, cats: cats, accounts: accounts, names: names),
           ],
         ),
       ),
@@ -195,14 +193,53 @@ class _DayGroup extends ConsumerWidget {
 
 class _EventRow extends StatelessWidget {
   final ChangeEvent event;
-  final List<TransactionLine> lines;
   final Map<String, Category> cats;
+  final Map<String, String> accounts;
   final Map<String, String> names;
   const _EventRow(
       {required this.event,
-      required this.lines,
       required this.cats,
+      required this.accounts,
       required this.names});
+
+  /// "Category: Food → Home", one per thing an edit changed.
+  String _change(S tr, FieldChange c) {
+    String names(Object? ids, String Function(String) name, String sep) =>
+        (ids as List?)
+            ?.map((id) =>
+                id == null ? tr.commonUncategorized : name(id as String))
+            .join(sep) ??
+        '—';
+    String show(Object? v) => switch (c.field) {
+          'amount' => (v as Map<String, double>?)
+                  ?.entries
+                  .map((e) => formatAmount(e.value, currency: e.key))
+                  .join(' + ') ??
+              '—',
+          'category' => names(v, (id) => cats[id]?.name ?? '—', ', '),
+          // A transfer's: from, to.
+          'account' => names(v, (id) => accounts[id] ?? '—',
+              event.tx.type == 'transfer' ? ' › ' : ', '),
+          'date' => v == null ? '—' : formatDate(v as DateTime),
+          'type' => switch (v) {
+              'income' => tr.typeIncome,
+              'transfer' => tr.typeTransfer,
+              _ => tr.typeExpense,
+            },
+          _ => (v as String?)?.isNotEmpty == true
+              ? '“${visibleNote(v!)}”'
+              : '—',
+        };
+    final field = switch (c.field) {
+      'amount' => tr.commonAmount,
+      'category' => tr.commonCategory,
+      'account' => tr.commonAccount,
+      'date' => tr.txDetailDate,
+      'type' => tr.changeLogFieldType,
+      _ => tr.txDetailNote,
+    };
+    return tr.changeLogChange(field, show(c.from), show(c.to));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -212,9 +249,10 @@ class _EventRow extends StatelessWidget {
       ChangeKind.added => (AppIcons.plusCircle, AppColors.healthy, tr.changeLogAdded),
       ChangeKind.edited => (AppIcons.pencilSimple, AppColors.accent, tr.changeLogEdited),
       ChangeKind.deleted => (AppIcons.trash, AppColors.overspent, tr.changeLogDeleted),
+      ChangeKind.restored => (AppIcons.clockCounterClockwise, AppColors.healthy, tr.changeLogRestored),
     };
     final note = visibleNote(tx.note).split(' — ').first.trim();
-    final catId = tx.categoryId ?? lines.firstOrNull?.categoryId;
+    final catId = tx.categoryId;
     final title = note.isNotEmpty
         ? note
         : cats[catId]?.name ??
@@ -224,34 +262,25 @@ class _EventRow extends StatelessWidget {
               _ => tr.typeExpense,
             };
     // Amounts in the lines' own currencies (never summed across them, never
-    // the base total); a transfer has no lines and keeps its sent amount.
-    final perCurrency = <String, double>{};
-    if (tx.type == 'transfer' || lines.isEmpty) {
-      perCurrency[tx.currency] = tx.amount;
-    } else {
-      for (final l in lines) {
-        perCurrency[l.currency] = (perCurrency[l.currency] ?? 0) + l.amount;
-      }
-    }
-    final amountText = perCurrency.entries
+    // the base total); a transfer keeps its sent amount.
+    final amountText = event.amounts.entries
         .map((e) =>
             formatSignedAmount(e.value, currency: e.key, type: tx.type))
         .join(' + ');
     final time = TimeOfDay.fromDateTime(event.at.toLocal()).format(context);
-    final source = tx.id.startsWith('rec:')
-        ? tr.changeLogFromBill
-        : tx.deviceId == 'web'
-            ? tr.changeLogFromWeb
-            : null;
+    final source = switch (event.source) {
+      'bill' => tr.changeLogFromBill,
+      'web' => tr.changeLogFromWeb,
+      _ => null,
+    };
     final txDay = tx.createdAt.toLocal();
     final atDay = event.at.toLocal();
     final otherDay = calendarDaysBetween(atDay, txDay) != 0;
-    // Shared budgets: whose device saved it (a delete is the old row's,
-    // so it names who saved it, not who deleted it — left out).
-    // A bill posted by itself names no one.
-    final by = event.kind == ChangeKind.deleted || tx.id.startsWith('rec:')
+    // Shared budgets: whose device made the change.
+    final by = event.by == null ? null : memberNameFor(names, event.by!);
+    final replacedBy = event.replacedBy == null
         ? null
-        : memberNameFor(names, tx.deviceId);
+        : memberNameFor(names, event.replacedBy!);
     final sub = [
       '$verb $time',
       if (by != null) tr.changeLogBy(by),
@@ -323,6 +352,21 @@ class _EventRow extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                           fontSize: 12.5, color: AppColors.ts(context))),
+                  for (final c in event.changes)
+                    Text(_change(tr, c),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontSize: 12.5, color: AppColors.ts(context))),
+                  if (event.replacedBy != null)
+                    Text(
+                        replacedBy == null
+                            ? tr.changeLogReplaced
+                            : tr.changeLogReplacedBy(replacedBy),
+                        style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.ts(context))),
                 ],
               ),
             ),

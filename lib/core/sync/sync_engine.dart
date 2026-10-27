@@ -448,6 +448,7 @@ class SyncEngine {
         'createdAt': t.createdAt.toUtc().toIso8601String(),
         'lastModified': t.lastModified.toUtc().toIso8601String(),
         'deleted': t.deleted,
+        'revision': t.revision,
       };
 
   Map<String, dynamic> _txLineToMap(TransactionLine l) => {
@@ -631,6 +632,7 @@ class SyncEngine {
         createdAt: Value(_parseDate(m['createdAt']) ?? DateTime.now()),
         lastModified: Value(_parseDate(m['lastModified']) ?? DateTime.now()),
         deleted: Value(m['deleted'] as bool? ?? false),
+        revision: Value(m['revision'] as String?),
       );
 
   TransactionLinesCompanion _txLineFromMap(Map<String, dynamic> m) =>

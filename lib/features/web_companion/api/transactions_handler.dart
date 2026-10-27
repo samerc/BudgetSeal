@@ -525,44 +525,37 @@ Handler updateTransactionHandler(Ref ref) {
         }
       }
 
-      final newId = await db.transaction(() async {
-        final String newId;
-        if (transfer != null) {
-          newId = await engine.recordTransfer(
-            householdId: householdId,
-            fromAccountId: transfer.from!,
-            toAccountId: transfer.to!,
-            amount: transfer.amount!,
-            currency: transfer.currency!,
-            exchangeRateToBase: transfer.rate!,
-            createdBy: 'web',
-            deviceId: 'web',
-            note: note,
-            date: date,
-          );
-        } else {
-          newId = await engine.recordTransaction(
-            householdId: householdId,
-            accountId: accountId,
-            type: type,
-            lines: lines!,
-            baseCurrency: baseCurrency,
-            note: note,
-            deviceId: 'web',
-            date: date,
-          );
-        }
-        // Receipts stay with the edited transaction.
-        if (existing.receiptPath != null) {
-          await (db.update(db.transactions)..where((t) => t.id.equals(newId)))
-              .write(TransactionsCompanion(
-                  receiptPath: Value(existing.receiptPath)));
-        }
-        await engine.deleteTransaction(id);
-        return newId;
-      });
+      // In place: the same id, so an edit made here and one made on
+      // another phone stay one transaction.
+      if (transfer != null) {
+        await engine.recordTransfer(
+          householdId: householdId,
+          fromAccountId: transfer.from!,
+          toAccountId: transfer.to!,
+          amount: transfer.amount!,
+          currency: transfer.currency!,
+          exchangeRateToBase: transfer.rate!,
+          createdBy: 'web',
+          deviceId: 'web',
+          note: note,
+          date: date,
+          editing: id,
+        );
+      } else {
+        await engine.recordTransaction(
+          householdId: householdId,
+          accountId: accountId,
+          type: type,
+          lines: lines!,
+          baseCurrency: baseCurrency,
+          note: note,
+          deviceId: 'web',
+          date: date,
+          editing: id,
+        );
+      }
 
-      return ok({'id': newId});
+      return ok({'id': id});
     } on CurrencyConversionException catch (e) {
       return badRequest('No exchange rate from ${e.from} to ${e.to}');
     } catch (e) {

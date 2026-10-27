@@ -135,6 +135,7 @@ One income, expense or transfer. Its amounts per account and category are in `tr
 | `createdBy`, `deviceId` | |
 | `createdAt` | When it happened (the date the user picked). |
 | `lastModified`, `deleted` | |
+| `revision` | Null until the transaction's lines are edited. Then the lines and envelope ledger rows of the current version have ids starting `<id>:<revision>:`; any others for this transaction are leftovers of an older version — skip them. |
 
 Files written by app version 0.11 or earlier have no `destinationAmount`; for them it is `amount × exchangeRateToBase`. Those files may also have an income or expense with **no lines**: its `amount` is then in `currency`, which is its account's currency.
 
@@ -316,6 +317,6 @@ The app syncs from the change logs, not from `BudgetSeal_Sync.json`, so editing 
 
 - every income or expense has at least one line;
 - a transfer has `destinationAmount`;
-- lines and envelope ledger rows are never edited — to change a transaction, add a new one and mark the old one deleted.
+- to change a transaction's lines, delete all its lines and envelope ledger rows, add the new ones with ids `<transaction id>:<new revision>:line0`, `…:line1`, … (`…:debit0`, … for the ledger), and set the transaction's `revision` and total in the same go. Header fields like the note or date can be updated on their own.
 
 Back up first.

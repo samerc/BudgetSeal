@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 
+import '../../shared/utils/format_number.dart' show isRealRate;
 import '../database/app_database.dart';
 import 'cloud_provider.dart';
 import 'op_log.dart';
@@ -183,6 +184,7 @@ class LogSync {
         for (final MapEntry(key: table, value: ids) in touched.entries) {
           await _merge(table, ids);
         }
+        await settleTransactions(db, await _transactionsOf(ops, touched));
       } finally {
         await db.customStatement(
             'UPDATE sync_clock SET applying = 0 WHERE id = 1');
@@ -232,6 +234,44 @@ class LogSync {
             values.values.toList());
       }
     }
+  }
+
+  /// The transactions whose header, lines or envelope debits [ops] touched.
+  Future<Set<String>> _transactionsOf(
+      List<SyncOp> ops, Map<String, Set<String>> touched) async {
+    final out = {...?touched['transactions']};
+    for (final (table, column) in [
+      ('transaction_lines', 'transaction_id'),
+      ('allocation_ledger', 'source_transaction_id'),
+    ]) {
+      final ids = touched[table];
+      if (ids == null) continue;
+      // An insert or delete carries the whole row; an update may not.
+      final lookUp = <String>{};
+      for (final op in ops) {
+        if (op.table != table || !ids.contains(op.rowId)) continue;
+        final tx = (op.data ?? const {})[column] ?? (op.old ?? const {})[column];
+        if (tx is String) {
+          out.add(tx);
+        } else if (op.kind == 'update') {
+          lookUp.add(op.rowId);
+        }
+      }
+      final list = lookUp.toList();
+      for (var i = 0; i < list.length; i += 500) {
+        final chunk = list.sublist(i, i + 500 > list.length ? list.length : i + 500);
+        final rows = await db.customSelect(
+          'SELECT $column AS tx FROM $table WHERE id IN '
+          '(${chunk.map((_) => '?').join(', ')})',
+          variables: [for (final id in chunk) Variable.withString(id)],
+        ).get();
+        for (final r in rows) {
+          final tx = r.read<String?>('tx');
+          if (tx != null) out.add(tx);
+        }
+      }
+    }
+    return out;
   }
 
   // ── Files ──────────────────────────────────────────────────────
@@ -300,6 +340,78 @@ class LogSync {
   Future<void> _setMeta(String key, String value) => db.customStatement(
       'INSERT OR REPLACE INTO sync_meta (key, value) VALUES (?, ?)',
       [key, value]);
+}
+
+/// After a merge: makes each of [ids] (transactions) whole again. An edit
+/// rewrites a transaction's lines and envelope debits under a new
+/// `revision` (AllocationEngine `editing:`); when two phones did that,
+/// the field merge leaves the newer revision on the header but both
+/// phones' lines. Only the current revision's lines and debits are kept,
+/// and the header fields that follow from the lines (total, category,
+/// account) are recomputed from them — the same on every phone, since
+/// they all hold the same rows. Runs while the log is muted, so nothing
+/// here is logged.
+Future<void> settleTransactions(AppDatabase db, Iterable<String> ids) async {
+  for (final id in ids) {
+    final tx = await db
+        .customSelect(
+            'SELECT type, currency, status, revision FROM transactions '
+            'WHERE id = ?',
+            variables: [Variable.withString(id)])
+        .getSingleOrNull();
+    final revision = tx?.read<String?>('revision');
+    if (tx == null || revision == null) continue;
+    final prefix = '$id:$revision:';
+    for (final (table, column) in [
+      ('transaction_lines', 'transaction_id'),
+      ('allocation_ledger', 'source_transaction_id'),
+    ]) {
+      await db.customStatement(
+          'DELETE FROM $table WHERE $column = ? AND substr(id, 1, ?) <> ?',
+          [id, prefix.length, prefix]);
+    }
+    // A plan's header is its first part, not a total — left as merged.
+    if (tx.read<String>('type') == 'transfer' ||
+        tx.read<String?>('status') != null) {
+      continue;
+    }
+    final lines = (await db
+            .customSelect(
+                'SELECT id, amount, currency, exchange_rate_to_base AS rate, '
+                'category_id, account_id FROM transaction_lines '
+                'WHERE transaction_id = ?',
+                variables: [Variable.withString(id)])
+            .get())
+        .map((r) => (
+              n: int.tryParse(r.read<String>('id').substring(prefix.length +
+                      'line'.length)) ??
+                  0,
+              amount: r.read<double>('amount'),
+              currency: r.read<String>('currency'),
+              rate: r.read<double>('rate'),
+              category: r.read<String?>('category_id'),
+              account: r.read<String?>('account_id'),
+            ))
+        .toList()
+      ..sort((a, b) => a.n.compareTo(b.n));
+    if (lines.isEmpty) continue;
+    // As AllocationEngine.recordTransaction totals them, in line order.
+    final base = tx.read<String>('currency');
+    final total = lines.fold(0.0, (sum, l) {
+      if (l.currency == base) return sum + l.amount;
+      if (!isRealRate(l.currency, base, l.rate)) return sum;
+      return sum + l.amount * l.rate;
+    });
+    await db.customStatement(
+        'UPDATE transactions SET amount = ?, category_id = ?, account_id = '
+        'COALESCE(?, account_id) WHERE id = ?',
+        [
+          total,
+          lines.length == 1 ? lines.first.category : null,
+          lines.first.account,
+          id,
+        ]);
+  }
 }
 
 /// The row [ops] (all entries for one row) add up to, or null when it

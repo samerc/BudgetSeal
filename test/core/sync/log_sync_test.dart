@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:budgetseal/core/database/app_database.dart';
 import 'package:budgetseal/core/engine/allocation_engine.dart';
 import 'package:budgetseal/core/engine/balance_calculator.dart';
+import 'package:budgetseal/core/engine/planned_engine.dart';
 import 'package:budgetseal/core/services/household_members.dart';
 import 'package:budgetseal/core/sync/log_sync.dart';
 import 'package:budgetseal/core/sync/op_log.dart';
@@ -226,6 +227,142 @@ void main() {
     }
     // Nothing new: a sync applies nothing.
     expect(await LogSync(a).sync(store), 0);
+  });
+
+  group('one transaction edited on two phones offline', () {
+    late MemoryStore store;
+    late AppDatabase a, b;
+    late String id;
+
+    setUp(() async {
+      store = MemoryStore();
+      a = await phone('phone-a');
+      await household(a);
+      await a.into(a.categories).insert(CategoriesCompanion.insert(
+          id: 'home', householdId: 'h', name: 'Home'));
+      id = await AllocationEngine(a).recordTransaction(
+        householdId: 'h', accountId: 'bank', type: 'expense',
+        lines: const [TxLine(amount: 50, currency: 'USD', categoryId: 'food')],
+        baseCurrency: 'USD', note: 'Groceries');
+      await LogSync(a).sync(store);
+      b = await phone('phone-b');
+      await LogSync(b).replaceFrom(store);
+    });
+
+    Future<void> syncAll() async {
+      await LogSync(a).sync(store);
+      await LogSync(b).sync(store);
+      await LogSync(a).sync(store);
+    }
+
+    Future<List<TransactionLine>> linesOf(AppDatabase db) =>
+        (db.select(db.transactionLines)
+              ..where((l) => l.transactionId.equals(id))
+              ..orderBy([(l) => OrderingTerm(expression: l.id)]))
+            .get();
+
+    test('stays one transaction; the later rewrite of the lines wins whole',
+        () async {
+      // A splits it; B, later, changes the amount.
+      await AllocationEngine(a).recordTransaction(
+        editing: id, householdId: 'h', accountId: 'bank', type: 'expense',
+        lines: const [
+          TxLine(amount: 30, currency: 'USD', categoryId: 'food'),
+          TxLine(amount: 20, currency: 'USD', categoryId: 'home'),
+        ],
+        baseCurrency: 'USD', note: 'Groceries');
+      await later();
+      await AllocationEngine(b).recordTransaction(
+        editing: id, householdId: 'h', accountId: 'cash', type: 'expense',
+        lines: const [TxLine(amount: 60, currency: 'USD', categoryId: 'food')],
+        baseCurrency: 'USD', note: 'Groceries');
+      await syncAll();
+
+      for (final db in [a, b]) {
+        final txs = await db.select(db.transactions).get();
+        expect(txs, hasLength(1));
+        expect(txs.single.amount, 60);
+        expect(txs.single.accountId, 'cash');
+        expect(txs.single.categoryId, 'food');
+        final lines = await linesOf(db);
+        expect([for (final l in lines) (l.amount, l.accountId)],
+            [(60.0, 'cash')]);
+        final balances = await BalanceCalculator(db).allAccountBalances('h');
+        expect(balances['bank'], 1000);
+        expect(balances['cash'], 940);
+      }
+      expect(await dump(b), await dump(a));
+    });
+
+    test('a note edit on one phone and a new category on the other both '
+        'stick', () async {
+      await AllocationEngine(a).recordTransaction(
+        editing: id, householdId: 'h', accountId: 'bank', type: 'expense',
+        lines: const [TxLine(amount: 50, currency: 'USD', categoryId: 'food')],
+        baseCurrency: 'USD', note: 'Weekly groceries');
+      await later();
+      await AllocationEngine(b).rewriteTransaction(id, categoryId: 'home');
+      await later();
+      // A's note edit is the newest change, and still doesn't undo B's.
+      await (a.update(a.transactions)..where((t) => t.id.equals(id)))
+          .write(const TransactionsCompanion(note: Value('Weekly shop')));
+      await syncAll();
+
+      for (final db in [a, b]) {
+        final tx = (await db.select(db.transactions).get()).single;
+        expect(tx.note, 'Weekly shop');
+        expect(tx.categoryId, 'home');
+        expect([for (final l in await linesOf(db)) l.categoryId], ['home']);
+      }
+      expect(await dump(b), await dump(a));
+    });
+
+    test('an edit on one phone and a delete on the other: it stays deleted',
+        () async {
+      await AllocationEngine(a).recordTransaction(
+        editing: id, householdId: 'h', accountId: 'bank', type: 'expense',
+        lines: const [TxLine(amount: 70, currency: 'USD', categoryId: 'food')],
+        baseCurrency: 'USD');
+      await AllocationEngine(b).deleteTransaction(id);
+      await syncAll();
+      for (final db in [a, b]) {
+        expect((await db.select(db.transactions).get()).single.deleted,
+            isTrue);
+        expect((await BalanceCalculator(db).allAccountBalances('h'))['bank'],
+            1000);
+      }
+      expect(await dump(b), await dump(a));
+    });
+  });
+
+  test('a planned payment edited on two phones stays one plan', () async {
+    final store = MemoryStore();
+    final a = await phone('phone-a');
+    await household(a);
+    Future<String> plan(AppDatabase db, double amount, {String? replace}) =>
+        PlannedEngine(db).save(
+          replaceId: replace, householdId: 'h', type: 'expense',
+          accountId: 'bank', amount: amount, currency: 'USD',
+          categoryId: 'food', date: DateTime(2026, 11, 5),
+          createdBy: 'u', deviceId: 'local');
+    final id = await plan(a, 40);
+    await LogSync(a).sync(store);
+    final b = await phone('phone-b');
+    await LogSync(b).replaceFrom(store);
+
+    expect(await plan(a, 45, replace: id), id);
+    await later();
+    await plan(b, 50, replace: id);
+    await LogSync(a).sync(store);
+    await LogSync(b).sync(store);
+    await LogSync(a).sync(store);
+    for (final db in [a, b]) {
+      final tx = (await db.select(db.transactions).get()).single;
+      expect((tx.id, tx.amount, tx.status), (id, 50.0, 'planned'));
+      expect([for (final l in await db.select(db.transactionLines).get()) l.amount],
+          [50.0]);
+    }
+    expect(await dump(b), await dump(a));
   });
 
   test('only files with new entries are written; files are encrypted with '

@@ -11,9 +11,10 @@ import '_validation.dart';
 
 // ── GET /api/change-log ───────────────────────────────────────────────────────
 
-/// The app's Settings › Change history: what was added, edited or deleted
-/// and when, newest first. Amounts are per line currency (never summed
-/// across currencies); a transfer keeps its sent amount.
+/// The app's Settings › Change history: what was added, edited, deleted or
+/// restored, when, by whom, and what an edit changed, newest first. Amounts
+/// are per line currency (never summed across currencies); a transfer
+/// keeps its sent amount.
 Handler changeLogHandler(Ref ref) {
   return (Request request) async {
     final db = ref.read(databaseProvider);
@@ -22,51 +23,70 @@ Handler changeLogHandler(Ref ref) {
 
     try {
       const limit = 300;
-      final log = await loadChangeLog(db, householdId, limit: limit);
+      final events = await loadChangeLog(db, householdId, limit: limit);
       final categories = await (db.select(db.categories)
             ..where((c) => c.householdId.equals(householdId)))
           .get();
       final catNames = {for (final c in categories) c.id: c.name};
+      final accounts = await (db.select(db.accounts)
+            ..where((a) => a.householdId.equals(householdId)))
+          .get();
+      final accountNames = {for (final a in accounts) a.id: a.name};
       final members = await HouseholdMembers.names(db, householdId);
+
+      // A change's values for the page to show: names for ids (null = no
+      // category), dates as ISO, amounts per currency.
+      Object? value(String field, Object? v) => switch (field) {
+            'amount' => [
+                for (final e in (v as Map<String, double>? ?? const {}).entries)
+                  {'currency': e.key, 'amount': e.value}
+              ],
+            'category' => [
+                for (final id in v as List? ?? const [])
+                  id == null ? null : catNames[id]
+              ],
+            'account' => [
+                for (final id in v as List? ?? const [])
+                  id == null ? null : accountNames[id]
+              ],
+            'date' => (v as DateTime?)?.toUtc().toIso8601String(),
+            'note' => v == null ? null : visibleNote(v as String),
+            _ => v,
+          };
+
       return ok({
         'limit': limit,
         'items': [
-          for (final e in log.events)
-            () {
-              final tx = e.tx;
-              final lines = log.lines[tx.id] ?? const [];
-              final amounts = <String, double>{};
-              if (tx.type == 'transfer' || lines.isEmpty) {
-                amounts[tx.currency] = tx.amount;
-              } else {
-                for (final l in lines) {
-                  amounts[l.currency] = (amounts[l.currency] ?? 0) + l.amount;
-                }
-              }
-              final catId = tx.categoryId ?? lines.firstOrNull?.categoryId;
-              return {
-                'kind': e.kind.name,
-                'at': e.at.toUtc().toIso8601String(),
-                'txId': tx.id,
-                'type': tx.type,
-                'date': tx.createdAt.toUtc().toIso8601String(),
-                'note': visibleNote(tx.note).split(' — ').first.trim(),
-                'categoryName': catNames[catId],
-                'amounts': [
-                  for (final a in amounts.entries)
-                    {'currency': a.key, 'amount': a.value}
-                ],
-                // Shared budgets: whose device saved it (not for deletes).
-                'by': e.kind == ChangeKind.deleted || tx.id.startsWith('rec:')
-                    ? null
-                    : memberNameFor(members, tx.deviceId),
-                'source': tx.id.startsWith('rec:')
-                    ? 'bill'
-                    : tx.deviceId == 'web'
-                        ? 'web'
-                        : null,
-              };
-            }(),
+          for (final e in events)
+            {
+              'kind': e.kind.name,
+              'at': e.at.toUtc().toIso8601String(),
+              'txId': e.tx.id,
+              'type': e.tx.type,
+              'date': e.tx.createdAt.toUtc().toIso8601String(),
+              'note': visibleNote(e.tx.note).split(' — ').first.trim(),
+              'categoryName': catNames[e.tx.categoryId],
+              'amounts': [
+                for (final a in e.amounts.entries)
+                  {'currency': a.key, 'amount': a.value}
+              ],
+              // Shared budgets: whose device made the change.
+              'by': e.by == null ? null : memberNameFor(members, e.by!),
+              'source': e.source,
+              'changes': [
+                for (final c in e.changes)
+                  {
+                    'field': c.field,
+                    'from': value(c.field, c.from),
+                    'to': value(c.field, c.to),
+                  }
+              ],
+              // Another phone's later edit replaced this one.
+              'replaced': e.replacedBy != null,
+              'replacedBy': e.replacedBy == null
+                  ? null
+                  : memberNameFor(members, e.replacedBy!),
+            },
         ],
       });
     } catch (e) {

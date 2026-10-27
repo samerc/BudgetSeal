@@ -192,7 +192,7 @@ Future<void> _run(int seed, int steps) async {
 
   // ── Random operations ───────────────────────────────────────────
   for (var step = 0; step < steps; step++) {
-    final op = rnd.nextInt(10);
+    final op = rnd.nextInt(11);
     String what;
     switch (op) {
       case 0: // income
@@ -311,13 +311,39 @@ Future<void> _run(int seed, int steps) async {
         final lines = await (db.select(db.transactionLines)
               ..where((l) => l.transactionId.equals(id)))
             .get();
-        final newId = await engine.rewriteTransaction(id, categoryId: c);
+        await engine.rewriteTransaction(id, categoryId: c);
         apply(txs.remove(id)!.effect, -1);
         final e = expenseEffect(
             [for (final l in lines) (l.accountId!, c, l.amount)]);
         apply(e);
-        txs[newId] = _Tx('expense', e);
+        txs[id] = _Tx('expense', e);
         what = 'recategorise $id → $c';
+      case 9: // edit an expense in the form: new lines, maybe a split
+        final ids = txs.entries
+            .where((e) => e.value.type == 'expense')
+            .map((e) => e.key)
+            .toList();
+        if (ids.isEmpty) continue;
+        final id = pick(ids);
+        final parts = [
+          for (var i = 0; i < 1 + rnd.nextInt(2); i++)
+            (pick(_accounts.keys.toList()), pick(_spendCats.keys.toList())),
+        ];
+        final built = [for (final (a, c) in parts) (a, c, line(a, c))];
+        await engine.recordTransaction(
+          editing: id,
+          householdId: hh,
+          accountId: parts.first.$1,
+          type: 'expense',
+          lines: [for (final b in built) b.$3.line],
+          baseCurrency: _base,
+        );
+        apply(txs.remove(id)!.effect, -1);
+        final e = expenseEffect(
+            [for (final (a, c, l) in built) (a, c, l.amount)]);
+        apply(e);
+        txs[id] = _Tx('expense', e);
+        what = 'edit $id → ${built.length} line(s)';
       default: // move an expense to another account, maybe another currency
         final ids = txs.entries
             .where((e) => e.value.type == 'expense')
@@ -329,7 +355,7 @@ Future<void> _run(int seed, int steps) async {
         final lines = await (db.select(db.transactionLines)
               ..where((l) => l.transactionId.equals(id)))
             .get();
-        final newId = await engine.rewriteTransaction(id, accountId: a);
+        await engine.rewriteTransaction(id, accountId: a);
         apply(txs.remove(id)!.effect, -1);
         final e = expenseEffect([
           for (final l in lines)
@@ -343,7 +369,7 @@ Future<void> _run(int seed, int steps) async {
             ),
         ]);
         apply(e);
-        txs[newId] = _Tx('expense', e);
+        txs[id] = _Tx('expense', e);
         what = 'move expense $id → $a';
     }
     log.add('${step.toString().padLeft(2)}: $what');
