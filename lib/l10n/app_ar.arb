@@ -5954,6 +5954,5 @@
   "baseChangeNoRate": "لا يوجد سعر بعد. أدخل سعرًا للمتابعة.",
   "baseChangeEditRate": "تغيير السعر",
   "baseChangeRateSheet": "1 {from} بـ{to}",
-  "baseChangeSharedTitle": "ليس في ميزانية مشتركة",
-  "baseChangeSharedBody": "على كل هاتف في الميزانية المشتركة أن يحوّل سجلّه في الوقت نفسه، لذا لا يمكن تغيير العملة الأساسية في ميزانية مشتركة حاليًا."
+  "baseChangeSharedNote": "تتغيّر لكل من يشارك هذه الميزانية."
 }

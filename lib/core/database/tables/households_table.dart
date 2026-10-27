@@ -9,6 +9,11 @@ class Households extends Table {
   BoolColumn get allowSkipPeriod => boolean().withDefault(const Constant(true))();
   TextColumn get createdByDeviceId => text()();
   TextColumn get settingsJson => text().withDefault(const Constant('{}'))();
+  /// Every base-currency change, oldest first, as a JSON list of
+  /// `{"from", "to", "rate"}` (1 from = rate to), so a transaction another
+  /// phone recorded against an earlier base is converted when it arrives
+  /// (`settleTransactions()`, log_sync.dart). Null until the first change.
+  TextColumn get baseHistory => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get lastModified => dateTime().withDefault(currentDateAndTime)();
 

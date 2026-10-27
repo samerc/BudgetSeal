@@ -24,7 +24,7 @@ Developer notes moved out of CLAUDE.md (Oct 2026). Read before changing this are
 
 ## Database
 
-### Schema Version: 24
+### Schema Version: 25
 12 tables: households, users, accounts, categories, allocations, transactions, transaction_lines, allocation_ledger, recurring_transactions, transaction_templates, fx_rates, objectives.
 
 v9→v10 added `isSubscription` and `priceHistory` columns to `recurring_transactions` for subscription tracking.
@@ -45,6 +45,8 @@ v21→v22 added `askFirst` (BOOL, default false) and `remindDays` (nullable INT;
 v22→v23 added `transactions.destinationAmount` (nullable REAL, synced as `destinationAmount`): what a transfer delivered, in the destination's currency. **One meaning per column** from v23: a posted income/expense always has lines (account currency, own rate) and its header holds the base total; a transfer holds sent (`amount`, source currency) and received (`destinationAmount`). Older rows are converted by `normalizeTransactions()` (`core/database/normalize_transactions.dart`) — on every open (`beforeOpen`, so upgrades and restored `.db` backups), and inside `mergeFromJson`/`restoreFromJson` (files from phones still on 0.11): a posted transfer without it gets `amount × exchangeRateToBase`; a posted income/expense with no line gets one, id `<txId>:acct` (the header amount on the header account in its currency), and the header becomes the base total (0 without a rate) with rate 1. Deterministic ids and values, so two phones converting the same row agree; the updates move `last_modified` (trigger) and sync out. **0.11 compatibility:** the transfer's `exchangeRateToBase` is still written (0.11 reads it); 0.11 ignores the new key (its `_transactionFromMap` reads known keys only) and reads a converted row through its line. A 0.11 edit of a transfer arrives without `destinationAmount` → null → refilled from the rate. Tested: `migration_test.dart` (v22 file), `money_model_test.dart` (merging and restoring a 0.11-style file must keep every balance).
 
 v23→v24 added `transactions.revision` (nullable TEXT, synced as `revision`): set by an edit that rewrote the lines; that edit's lines and debits have ids starting `<id>:<revision>:` (see Cloud Sync "Edits in place").
+
+v24→v25 added `households.baseHistory` (nullable TEXT, synced as `baseHistory`): every base-currency change `[{from, to, rate}]`, so a transaction recorded against an old base on another phone is converted when it arrives (see budget.md "Changing the base currency").
 v18→v19 added `anchorDay` (nullable INT) to `recurring_transactions`: the day of month a series was set up on. `advanceRecurringDate()` (recurring_engine.dart) clamps monthly/yearly dates to short months and returns to the anchor (Jan 31 → Feb 28 → Mar 31); legacy rows get the anchor filled from their due day the next time they post.
 
 ### Migrations
@@ -141,7 +143,7 @@ Roadmap #1 replaces row-merge sync with an exchange of change logs (decisions: e
 - `replayOps()` applies entries in stamp order with `applying = 1` (no new entries, no `last_modified` bump): insert = INSERT OR REPLACE, update = set the changed fields, delete. Replaying the whole log into an empty database rebuilds it exactly (`test/core/sync/op_log_test.dart`; the 3-year scale test: 36,600 entries, 10.9 MB of JSON, replay 1.4 s on a PC). Writes are ~10–15 % slower.
 - The `bump_last_modified_*` triggers now skip updates that change nothing and the replay.
 - **Never `DROP COLUMN` on a shared table without dropping its triggers first** (SQLite refuses a column a trigger names; `migration_test.dart` drops all triggers before rewinding a schema). Reset everything also deletes `sync_ops` (it holds a copy of every row).
-- Step 3: transaction edits in place and Change history from the log — done (see Cloud Sync "Edits in place", [Change history](#change-history-oct-24-2026)); next the shared base-currency change. Step 4 — compaction and removing the row merge.
+- Step 3: transaction edits in place and Change history from the log — done (see Cloud Sync "Edits in place", [Change history](#change-history-oct-24-2026)); shared base-currency change done (budget.md). Step 4 — compaction and removing the row merge.
 
 ## Crash reports (Oct 27 2026)
 

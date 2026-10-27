@@ -5954,6 +5954,5 @@
   "baseChangeNoRate": "Aucun taux connu pour l’instant. Saisissez-en un pour continuer.",
   "baseChangeEditRate": "Changer le taux",
   "baseChangeRateSheet": "1 {from} en {to}",
-  "baseChangeSharedTitle": "Pas sur un budget partagé",
-  "baseChangeSharedBody": "Chaque téléphone d’un budget partagé devrait convertir son historique au même moment : la devise de base ne peut donc pas encore être changée sur un budget partagé."
+  "baseChangeSharedNote": "Elle change pour tous ceux qui partagent ce budget."
 }

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:budgetseal/core/database/app_database.dart';
 import 'package:budgetseal/core/engine/allocation_engine.dart';
 import 'package:budgetseal/core/engine/balance_calculator.dart';
+import 'package:budgetseal/core/engine/base_currency_change.dart';
 import 'package:budgetseal/core/engine/planned_engine.dart';
 import 'package:budgetseal/core/services/household_members.dart';
 import 'package:budgetseal/core/sync/log_sync.dart';
@@ -363,6 +364,63 @@ void main() {
           [50.0]);
     }
     expect(await dump(b), await dump(a));
+  });
+
+  test('base currency changed on one phone while another records offline',
+      () async {
+    final store = MemoryStore();
+    final a = await phone('phone-a');
+    await household(a);
+    await (a.update(a.households)..where((h) => h.id.equals('h')))
+        .write(const HouseholdsCompanion(baseCurrency: Value('USD')));
+    final before = await AllocationEngine(a).recordTransaction(
+      householdId: 'h', accountId: 'bank', type: 'expense',
+      lines: const [TxLine(amount: 20, currency: 'USD', categoryId: 'food')],
+      baseCurrency: 'USD');
+    await LogSync(a).sync(store);
+    final b = await phone('phone-b');
+    await LogSync(b).replaceFrom(store);
+
+    // A: USD → EUR at 0.9. B, not knowing, records $10 against USD.
+    await changeBaseCurrency(a, 'h', 'USD', 'EUR', 0.9);
+    final offline = await AllocationEngine(b).recordTransaction(
+      householdId: 'h', accountId: 'cash', type: 'expense',
+      lines: const [TxLine(amount: 10, currency: 'USD', categoryId: 'food')],
+      baseCurrency: 'USD');
+    await LogSync(a).sync(store);
+    await LogSync(b).sync(store);
+    await LogSync(a).sync(store);
+
+    Future<void> check() async {
+      for (final db in [a, b]) {
+        expect((await (db.select(db.households)).getSingle()).baseCurrency,
+            'EUR');
+        for (final (id, total) in [(before, 18.0), (offline, 9.0)]) {
+          final tx = await (db.select(db.transactions)
+                ..where((t) => t.id.equals(id)))
+              .getSingle();
+          expect(tx.currency, 'EUR', reason: id);
+          expect(tx.amount, closeTo(total, 1e-9), reason: id);
+          final line = await (db.select(db.transactionLines)
+                ..where((l) => l.transactionId.equals(id)))
+              .getSingle();
+          expect(line.exchangeRateToBase, closeTo(0.9, 1e-9), reason: id);
+        }
+        final balances = await BalanceCalculator(db).allAccountBalances('h');
+        expect((balances['bank'], balances['cash']), (980.0, 990.0));
+      }
+      expect(await dump(b), await dump(a));
+    }
+
+    await check();
+    // A later change to B's line, merged again from the log, keeps the
+    // converted rate (the conversion is in the log too).
+    await (a.update(a.transactionLines)
+          ..where((l) => l.transactionId.equals(offline)))
+        .write(const TransactionLinesCompanion(note: Value('coffee')));
+    await LogSync(a).sync(store);
+    await LogSync(b).sync(store);
+    await check();
   });
 
   test('only files with new entries are written; files are encrypted with '

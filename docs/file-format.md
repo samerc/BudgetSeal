@@ -56,6 +56,7 @@ One budget. A file normally holds one household.
 | `id`, `name` | |
 | `baseCurrency` | The currency totals and reports are shown in. |
 | `periodStartDay` | Day of the month a budget period starts (1–28). |
+| `baseHistory` | Null, or every change of `baseCurrency` as a JSON list in a string: `[{"from": "USD", "to": "EUR", "rate": 0.9}]` (1 `from` = `rate` `to`). An income or expense whose `currency` is an earlier base was recorded before a change; convert it with these rates. |
 | `createdByDeviceId`, `createdAt`, `lastModified` | |
 
 ### users

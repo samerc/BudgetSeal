@@ -9558,9 +9558,6 @@ class SEn extends S {
   }
 
   @override
-  String get baseChangeSharedTitle => 'Not on a shared budget';
-
-  @override
-  String get baseChangeSharedBody =>
-      'Every phone on a shared budget would have to convert its history at the same time, so the base currency can\'t be changed on a shared budget for now.';
+  String get baseChangeSharedNote =>
+      'It changes for everyone who shares this budget.';
 }

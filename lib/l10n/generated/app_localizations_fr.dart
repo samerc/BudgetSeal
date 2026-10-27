@@ -9666,9 +9666,6 @@ class SFr extends S {
   }
 
   @override
-  String get baseChangeSharedTitle => 'Pas sur un budget partagé';
-
-  @override
-  String get baseChangeSharedBody =>
-      'Chaque téléphone d’un budget partagé devrait convertir son historique au même moment : la devise de base ne peut donc pas encore être changée sur un budget partagé.';
+  String get baseChangeSharedNote =>
+      'Elle change pour tous ceux qui partagent ce budget.';
 }

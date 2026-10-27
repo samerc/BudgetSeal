@@ -9581,9 +9581,5 @@ class SAr extends S {
   }
 
   @override
-  String get baseChangeSharedTitle => 'ليس في ميزانية مشتركة';
-
-  @override
-  String get baseChangeSharedBody =>
-      'على كل هاتف في الميزانية المشتركة أن يحوّل سجلّه في الوقت نفسه، لذا لا يمكن تغيير العملة الأساسية في ميزانية مشتركة حاليًا.';
+  String get baseChangeSharedNote => 'تتغيّر لكل من يشارك هذه الميزانية.';
 }

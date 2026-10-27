@@ -361,6 +361,7 @@ class SyncEngine {
         'name': h.name,
         'baseCurrency': h.baseCurrency,
         'periodStartDay': h.periodStartDay,
+        'baseHistory': h.baseHistory,
         'createdByDeviceId': h.createdByDeviceId,
         'createdAt': h.createdAt.toUtc().toIso8601String(),
         'lastModified': h.lastModified.toUtc().toIso8601String(),
@@ -536,6 +537,7 @@ class SyncEngine {
         createdByDeviceId: m['createdByDeviceId'] as String? ?? 'sync',
         baseCurrency: Value(m['baseCurrency'] as String? ?? 'USD'),
         periodStartDay: Value(m['periodStartDay'] as int? ?? 1),
+        baseHistory: Value(m['baseHistory'] as String?),
         createdAt: Value(_parseDate(m['createdAt']) ?? DateTime.now()),
         lastModified: Value(_parseDate(m['lastModified']) ?? DateTime.now()),
       );

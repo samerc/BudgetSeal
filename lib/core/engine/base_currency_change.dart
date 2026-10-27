@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 
 import '../database/app_database.dart';
@@ -35,13 +37,22 @@ double convertedRateToBase(
 /// - Transfers are left alone: their rate is source → destination, not to
 ///   base, and balances depend on it.
 ///
-/// Only for a budget used on one phone: lines and ledger rows sync
-/// insert-only, so another device would keep the old rates.
+/// On a shared budget every update here syncs like any other change, and
+/// the change is added to `households.baseHistory`: a transaction another
+/// phone recorded against [from] before it heard of this is converted with
+/// [rate] when it arrives (`settleTransactions()`).
 Future<void> changeBaseCurrency(AppDatabase db, String householdId,
     String from, String to, double rate) async {
   assert(rate > 0 && from != to);
   final now = DateTime.now();
   await db.transaction(() async {
+    final household = await (db.select(db.households)
+          ..where((h) => h.id.equals(householdId)))
+        .getSingle();
+    final history = [
+      ...baseChanges(household.baseHistory),
+      (from: from, to: to, rate: rate),
+    ];
     final txs = await (db.select(db.transactions)
           ..where((t) => t.householdId.equals(householdId)))
         .get();
@@ -112,8 +123,47 @@ Future<void> changeBaseCurrency(AppDatabase db, String householdId,
       b.update(
           db.households,
           HouseholdsCompanion(
-              baseCurrency: Value(to), lastModified: Value(now)),
+            baseCurrency: Value(to),
+            baseHistory: Value(jsonEncode([
+              for (final c in history)
+                {'from': c.from, 'to': c.to, 'rate': c.rate},
+            ])),
+            lastModified: Value(now),
+          ),
           where: (x) => x.id.equals(householdId));
     });
   });
+}
+
+/// `households.baseHistory`, oldest first.
+List<({String from, String to, double rate})> baseChanges(String? json) {
+  if (json == null || json.isEmpty) return const [];
+  try {
+    return [
+      for (final m in (jsonDecode(json) as List).cast<Map<String, dynamic>>())
+        (
+          from: m['from'] as String,
+          to: m['to'] as String,
+          rate: (m['rate'] as num).toDouble(),
+        ),
+    ];
+  } catch (_) {
+    return const [];
+  }
+}
+
+/// The steps that take a transaction recorded against base [from] to
+/// [to] by [history]: the changes from the last one that left [from]
+/// onwards, or null when [history] doesn't lead from one to the other.
+List<({String from, String to, double rate})>? basePath(
+    List<({String from, String to, double rate})> history,
+    String from,
+    String to) {
+  final start = history.lastIndexWhere((c) => c.from == from);
+  if (start < 0) return null;
+  final steps = history.sublist(start);
+  for (var i = 1; i < steps.length; i++) {
+    if (steps[i].from != steps[i - 1].to) return null;
+  }
+  return steps.last.to == to ? steps : null;
 }

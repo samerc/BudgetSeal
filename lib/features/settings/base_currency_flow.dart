@@ -16,8 +16,8 @@ import '../../shared/widgets/calculator_amount_field.dart';
 
 /// Settings › Base currency, after a new currency [to] was picked. With
 /// nothing recorded yet it just switches; otherwise it asks for the rate
-/// that converts the history ([changeBaseCurrency]) — never on a shared
-/// budget, where the other phones would keep the old rates.
+/// that converts the history ([changeBaseCurrency]). On a shared budget the
+/// change syncs to the other phones like any edit.
 Future<void> changeBaseCurrencyFlow(
     BuildContext context, WidgetRef ref, Household household, String to) async {
   final tr = S.of(context);
@@ -33,25 +33,7 @@ Future<void> changeBaseCurrencyFlow(
           ..where(db.transactions.householdId.equals(household.id))
           ..limit(1))
         .getSingleOrNull();
-    if (anyTx != null && await HouseholdMembers.hasOthers(db, household.id)) {
-      if (!context.mounted) return;
-      await showDialog<void>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          icon: Icon(AppIcons.users, size: 40, color: AppColors.accent),
-          title: Text(tr.baseChangeSharedTitle),
-          content: Text(tr.baseChangeSharedBody),
-          actions: [
-            FilledButton(
-              style: DialogButtons.filled,
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(tr.commonOk),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
+    final shared = await HouseholdMembers.hasOthers(db, household.id);
 
     double? rate; // 1 [from] = rate [to]
     if (anyTx != null) {
@@ -80,6 +62,12 @@ Future<void> changeBaseCurrencyFlow(
               children: [
                 Text(tr.baseChangeBody(to),
                     style: TextStyle(fontSize: 14, color: AppColors.ts(ctx))),
+                if (shared) ...[
+                  const SizedBox(height: 8),
+                  Text(tr.baseChangeSharedNote,
+                      style:
+                          TextStyle(fontSize: 14, color: AppColors.ts(ctx))),
+                ],
                 const SizedBox(height: 12),
                 if (shown != null)
                   Text(

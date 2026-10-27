@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 
 import '../../shared/utils/format_number.dart' show isRealRate;
 import '../database/app_database.dart';
+import '../engine/base_currency_change.dart';
 import 'cloud_provider.dart';
 import 'op_log.dart';
 import 'sync_encryption.dart';
@@ -189,6 +190,10 @@ class LogSync {
         await db.customStatement(
             'UPDATE sync_clock SET applying = 0 WHERE id = 1');
       }
+      if (touched.containsKey('households') ||
+          touched.containsKey('transactions')) {
+        await convertToCurrentBase(db);
+      }
     });
     return added;
   }
@@ -350,7 +355,7 @@ class LogSync {
 /// and the header fields that follow from the lines (total, category,
 /// account) are recomputed from them — the same on every phone, since
 /// they all hold the same rows. Runs while the log is muted, so nothing
-/// here is logged.
+/// here is logged (it runs again whenever the rows are merged again).
 Future<void> settleTransactions(AppDatabase db, Iterable<String> ids) async {
   for (final id in ids) {
     final tx = await db
@@ -395,23 +400,88 @@ Future<void> settleTransactions(AppDatabase db, Iterable<String> ids) async {
         .toList()
       ..sort((a, b) => a.n.compareTo(b.n));
     if (lines.isEmpty) continue;
-    // As AllocationEngine.recordTransaction totals them, in line order.
     final base = tx.read<String>('currency');
-    final total = lines.fold(0.0, (sum, l) {
-      if (l.currency == base) return sum + l.amount;
-      if (!isRealRate(l.currency, base, l.rate)) return sum;
-      return sum + l.amount * l.rate;
-    });
     await db.customStatement(
         'UPDATE transactions SET amount = ?, category_id = ?, account_id = '
         'COALESCE(?, account_id) WHERE id = ?',
         [
-          total,
+          _baseTotal([for (final l in lines) (l.currency, l.amount, l.rate)],
+              base),
           lines.length == 1 ? lines.first.category : null,
           lines.first.account,
           id,
         ]);
   }
+}
+
+/// As AllocationEngine.recordTransaction totals lines, in their order:
+/// lines in another currency without a rate are left out.
+double _baseTotal(List<(String, double, double)> lines, String base) =>
+    lines.fold(0.0, (sum, l) {
+      final (currency, amount, rate) = l;
+      if (currency == base) return sum + amount;
+      if (!isRealRate(currency, base, rate)) return sum;
+      return sum + amount * rate;
+    });
+
+/// After a merge: a posted income/expense whose total is still in an
+/// earlier base currency — another phone recorded it before hearing of a
+/// base change — is converted as `changeBaseCurrency()` would have, with
+/// the rates in `households.baseHistory`. Logged like any change (the log
+/// must hold the converted rates, or merging the rows again would bring
+/// the old ones back); every phone that does it writes the same values.
+/// Returns how many were converted.
+Future<int> convertToCurrentBase(AppDatabase db) async {
+  final rows = await db.customSelect(
+    'SELECT t.id, t.currency, h.base_currency AS base, '
+    'h.base_history AS history FROM transactions t '
+    'JOIN households h ON h.id = t.household_id '
+    "WHERE t.type <> 'transfer' AND t.status IS NULL "
+    'AND t.currency <> h.base_currency ORDER BY t.id',
+  ).get();
+  var converted = 0;
+  for (final r in rows) {
+    final id = r.read<String>('id');
+    final base = r.read<String>('base');
+    final steps = basePath(baseChanges(r.read<String?>('history')),
+        r.read<String>('currency'), base);
+    if (steps == null) continue; // no known way from there to here
+    double convert(String currency, double rate) {
+      for (final c in steps) {
+        rate = convertedRateToBase(currency, rate, c.from, c.to, c.rate);
+      }
+      return rate;
+    }
+
+    final lines = await db.customSelect(
+        'SELECT id, amount, currency, exchange_rate_to_base AS rate '
+        'FROM transaction_lines WHERE transaction_id = ? ORDER BY id',
+        variables: [Variable.withString(id)]).get();
+    final total = <(String, double, double)>[];
+    for (final l in lines) {
+      final rate = convert(l.read<String>('currency'), l.read<double>('rate'));
+      total.add((l.read<String>('currency'), l.read<double>('amount'), rate));
+      await db.customStatement(
+          'UPDATE transaction_lines SET exchange_rate_to_base = ? WHERE id = ?',
+          [rate, l.read<String>('id')]);
+    }
+    for (final e in await db.customSelect(
+        'SELECT id, currency, exchange_rate_to_base AS rate '
+        'FROM allocation_ledger WHERE source_transaction_id = ?',
+        variables: [Variable.withString(id)]).get()) {
+      await db.customStatement(
+          'UPDATE allocation_ledger SET exchange_rate_to_base = ? WHERE id = ?',
+          [
+            convert(e.read<String>('currency'), e.read<double>('rate')),
+            e.read<String>('id'),
+          ]);
+    }
+    await db.customStatement(
+        'UPDATE transactions SET amount = ?, currency = ? WHERE id = ?',
+        [_baseTotal(total, base), base, id]);
+    converted++;
+  }
+  return converted;
 }
 
 /// The row [ops] (all entries for one row) add up to, or null when it

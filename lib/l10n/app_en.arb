@@ -7073,8 +7073,6 @@
   "@baseChangeEditRate": {"description": "Settings: change base currency"},
   "baseChangeRateSheet": "1 {from} in {to}",
   "@baseChangeRateSheet": {"description": "Settings: change base currency", "placeholders": {"from": {"type": "String"}, "to": {"type": "String"}}},
-  "baseChangeSharedTitle": "Not on a shared budget",
-  "@baseChangeSharedTitle": {"description": "Settings: change base currency"},
-  "baseChangeSharedBody": "Every phone on a shared budget would have to convert its history at the same time, so the base currency can't be changed on a shared budget for now.",
-  "@baseChangeSharedBody": {"description": "Settings: change base currency"}
+  "baseChangeSharedNote": "It changes for everyone who shares this budget.",
+  "@baseChangeSharedNote": {"description": "Settings: change base currency"}
 }

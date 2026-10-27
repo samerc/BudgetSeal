@@ -69,6 +69,12 @@ class $HouseholdsTable extends Households
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('{}'));
+  static const VerificationMeta _baseHistoryMeta =
+      const VerificationMeta('baseHistory');
+  @override
+  late final GeneratedColumn<String> baseHistory = GeneratedColumn<String>(
+      'base_history', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -95,6 +101,7 @@ class $HouseholdsTable extends Households
         allowSkipPeriod,
         createdByDeviceId,
         settingsJson,
+        baseHistory,
         createdAt,
         lastModified
       ];
@@ -157,6 +164,12 @@ class $HouseholdsTable extends Households
           settingsJson.isAcceptableOrUnknown(
               data['settings_json']!, _settingsJsonMeta));
     }
+    if (data.containsKey('base_history')) {
+      context.handle(
+          _baseHistoryMeta,
+          baseHistory.isAcceptableOrUnknown(
+              data['base_history']!, _baseHistoryMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -192,6 +205,8 @@ class $HouseholdsTable extends Households
           DriftSqlType.string, data['${effectivePrefix}created_by_device_id'])!,
       settingsJson: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}settings_json'])!,
+      baseHistory: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}base_history']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       lastModified: attachedDatabase.typeMapping.read(
@@ -214,6 +229,12 @@ class Household extends DataClass implements Insertable<Household> {
   final bool allowSkipPeriod;
   final String createdByDeviceId;
   final String settingsJson;
+
+  /// Every base-currency change, oldest first, as a JSON list of
+  /// `{"from", "to", "rate"}` (1 from = rate to), so a transaction another
+  /// phone recorded against an earlier base is converted when it arrives
+  /// (`settleTransactions()`, log_sync.dart). Null until the first change.
+  final String? baseHistory;
   final DateTime createdAt;
   final DateTime lastModified;
   const Household(
@@ -225,6 +246,7 @@ class Household extends DataClass implements Insertable<Household> {
       required this.allowSkipPeriod,
       required this.createdByDeviceId,
       required this.settingsJson,
+      this.baseHistory,
       required this.createdAt,
       required this.lastModified});
   @override
@@ -238,6 +260,9 @@ class Household extends DataClass implements Insertable<Household> {
     map['allow_skip_period'] = Variable<bool>(allowSkipPeriod);
     map['created_by_device_id'] = Variable<String>(createdByDeviceId);
     map['settings_json'] = Variable<String>(settingsJson);
+    if (!nullToAbsent || baseHistory != null) {
+      map['base_history'] = Variable<String>(baseHistory);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['last_modified'] = Variable<DateTime>(lastModified);
     return map;
@@ -253,6 +278,9 @@ class Household extends DataClass implements Insertable<Household> {
       allowSkipPeriod: Value(allowSkipPeriod),
       createdByDeviceId: Value(createdByDeviceId),
       settingsJson: Value(settingsJson),
+      baseHistory: baseHistory == null && nullToAbsent
+          ? const Value.absent()
+          : Value(baseHistory),
       createdAt: Value(createdAt),
       lastModified: Value(lastModified),
     );
@@ -270,6 +298,7 @@ class Household extends DataClass implements Insertable<Household> {
       allowSkipPeriod: serializer.fromJson<bool>(json['allowSkipPeriod']),
       createdByDeviceId: serializer.fromJson<String>(json['createdByDeviceId']),
       settingsJson: serializer.fromJson<String>(json['settingsJson']),
+      baseHistory: serializer.fromJson<String?>(json['baseHistory']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       lastModified: serializer.fromJson<DateTime>(json['lastModified']),
     );
@@ -286,6 +315,7 @@ class Household extends DataClass implements Insertable<Household> {
       'allowSkipPeriod': serializer.toJson<bool>(allowSkipPeriod),
       'createdByDeviceId': serializer.toJson<String>(createdByDeviceId),
       'settingsJson': serializer.toJson<String>(settingsJson),
+      'baseHistory': serializer.toJson<String?>(baseHistory),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'lastModified': serializer.toJson<DateTime>(lastModified),
     };
@@ -300,6 +330,7 @@ class Household extends DataClass implements Insertable<Household> {
           bool? allowSkipPeriod,
           String? createdByDeviceId,
           String? settingsJson,
+          Value<String?> baseHistory = const Value.absent(),
           DateTime? createdAt,
           DateTime? lastModified}) =>
       Household(
@@ -311,6 +342,7 @@ class Household extends DataClass implements Insertable<Household> {
         allowSkipPeriod: allowSkipPeriod ?? this.allowSkipPeriod,
         createdByDeviceId: createdByDeviceId ?? this.createdByDeviceId,
         settingsJson: settingsJson ?? this.settingsJson,
+        baseHistory: baseHistory.present ? baseHistory.value : this.baseHistory,
         createdAt: createdAt ?? this.createdAt,
         lastModified: lastModified ?? this.lastModified,
       );
@@ -336,6 +368,8 @@ class Household extends DataClass implements Insertable<Household> {
       settingsJson: data.settingsJson.present
           ? data.settingsJson.value
           : this.settingsJson,
+      baseHistory:
+          data.baseHistory.present ? data.baseHistory.value : this.baseHistory,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       lastModified: data.lastModified.present
           ? data.lastModified.value
@@ -354,6 +388,7 @@ class Household extends DataClass implements Insertable<Household> {
           ..write('allowSkipPeriod: $allowSkipPeriod, ')
           ..write('createdByDeviceId: $createdByDeviceId, ')
           ..write('settingsJson: $settingsJson, ')
+          ..write('baseHistory: $baseHistory, ')
           ..write('createdAt: $createdAt, ')
           ..write('lastModified: $lastModified')
           ..write(')'))
@@ -370,6 +405,7 @@ class Household extends DataClass implements Insertable<Household> {
       allowSkipPeriod,
       createdByDeviceId,
       settingsJson,
+      baseHistory,
       createdAt,
       lastModified);
   @override
@@ -384,6 +420,7 @@ class Household extends DataClass implements Insertable<Household> {
           other.allowSkipPeriod == this.allowSkipPeriod &&
           other.createdByDeviceId == this.createdByDeviceId &&
           other.settingsJson == this.settingsJson &&
+          other.baseHistory == this.baseHistory &&
           other.createdAt == this.createdAt &&
           other.lastModified == this.lastModified);
 }
@@ -397,6 +434,7 @@ class HouseholdsCompanion extends UpdateCompanion<Household> {
   final Value<bool> allowSkipPeriod;
   final Value<String> createdByDeviceId;
   final Value<String> settingsJson;
+  final Value<String?> baseHistory;
   final Value<DateTime> createdAt;
   final Value<DateTime> lastModified;
   final Value<int> rowid;
@@ -409,6 +447,7 @@ class HouseholdsCompanion extends UpdateCompanion<Household> {
     this.allowSkipPeriod = const Value.absent(),
     this.createdByDeviceId = const Value.absent(),
     this.settingsJson = const Value.absent(),
+    this.baseHistory = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.lastModified = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -422,6 +461,7 @@ class HouseholdsCompanion extends UpdateCompanion<Household> {
     this.allowSkipPeriod = const Value.absent(),
     required String createdByDeviceId,
     this.settingsJson = const Value.absent(),
+    this.baseHistory = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.lastModified = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -437,6 +477,7 @@ class HouseholdsCompanion extends UpdateCompanion<Household> {
     Expression<bool>? allowSkipPeriod,
     Expression<String>? createdByDeviceId,
     Expression<String>? settingsJson,
+    Expression<String>? baseHistory,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? lastModified,
     Expression<int>? rowid,
@@ -450,6 +491,7 @@ class HouseholdsCompanion extends UpdateCompanion<Household> {
       if (allowSkipPeriod != null) 'allow_skip_period': allowSkipPeriod,
       if (createdByDeviceId != null) 'created_by_device_id': createdByDeviceId,
       if (settingsJson != null) 'settings_json': settingsJson,
+      if (baseHistory != null) 'base_history': baseHistory,
       if (createdAt != null) 'created_at': createdAt,
       if (lastModified != null) 'last_modified': lastModified,
       if (rowid != null) 'rowid': rowid,
@@ -465,6 +507,7 @@ class HouseholdsCompanion extends UpdateCompanion<Household> {
       Value<bool>? allowSkipPeriod,
       Value<String>? createdByDeviceId,
       Value<String>? settingsJson,
+      Value<String?>? baseHistory,
       Value<DateTime>? createdAt,
       Value<DateTime>? lastModified,
       Value<int>? rowid}) {
@@ -477,6 +520,7 @@ class HouseholdsCompanion extends UpdateCompanion<Household> {
       allowSkipPeriod: allowSkipPeriod ?? this.allowSkipPeriod,
       createdByDeviceId: createdByDeviceId ?? this.createdByDeviceId,
       settingsJson: settingsJson ?? this.settingsJson,
+      baseHistory: baseHistory ?? this.baseHistory,
       createdAt: createdAt ?? this.createdAt,
       lastModified: lastModified ?? this.lastModified,
       rowid: rowid ?? this.rowid,
@@ -510,6 +554,9 @@ class HouseholdsCompanion extends UpdateCompanion<Household> {
     if (settingsJson.present) {
       map['settings_json'] = Variable<String>(settingsJson.value);
     }
+    if (baseHistory.present) {
+      map['base_history'] = Variable<String>(baseHistory.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -533,6 +580,7 @@ class HouseholdsCompanion extends UpdateCompanion<Household> {
           ..write('allowSkipPeriod: $allowSkipPeriod, ')
           ..write('createdByDeviceId: $createdByDeviceId, ')
           ..write('settingsJson: $settingsJson, ')
+          ..write('baseHistory: $baseHistory, ')
           ..write('createdAt: $createdAt, ')
           ..write('lastModified: $lastModified, ')
           ..write('rowid: $rowid')
@@ -8383,6 +8431,7 @@ typedef $$HouseholdsTableCreateCompanionBuilder = HouseholdsCompanion Function({
   Value<bool> allowSkipPeriod,
   required String createdByDeviceId,
   Value<String> settingsJson,
+  Value<String?> baseHistory,
   Value<DateTime> createdAt,
   Value<DateTime> lastModified,
   Value<int> rowid,
@@ -8396,6 +8445,7 @@ typedef $$HouseholdsTableUpdateCompanionBuilder = HouseholdsCompanion Function({
   Value<bool> allowSkipPeriod,
   Value<String> createdByDeviceId,
   Value<String> settingsJson,
+  Value<String?> baseHistory,
   Value<DateTime> createdAt,
   Value<DateTime> lastModified,
   Value<int> rowid,
@@ -8562,6 +8612,9 @@ class $$HouseholdsTableFilterComposer
 
   ColumnFilters<String> get settingsJson => $composableBuilder(
       column: $table.settingsJson, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get baseHistory => $composableBuilder(
+      column: $table.baseHistory, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -8780,6 +8833,9 @@ class $$HouseholdsTableOrderingComposer
       column: $table.settingsJson,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get baseHistory => $composableBuilder(
+      column: $table.baseHistory, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -8820,6 +8876,9 @@ class $$HouseholdsTableAnnotationComposer
 
   GeneratedColumn<String> get settingsJson => $composableBuilder(
       column: $table.settingsJson, builder: (column) => column);
+
+  GeneratedColumn<String> get baseHistory => $composableBuilder(
+      column: $table.baseHistory, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -9039,6 +9098,7 @@ class $$HouseholdsTableTableManager extends RootTableManager<
             Value<bool> allowSkipPeriod = const Value.absent(),
             Value<String> createdByDeviceId = const Value.absent(),
             Value<String> settingsJson = const Value.absent(),
+            Value<String?> baseHistory = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -9052,6 +9112,7 @@ class $$HouseholdsTableTableManager extends RootTableManager<
             allowSkipPeriod: allowSkipPeriod,
             createdByDeviceId: createdByDeviceId,
             settingsJson: settingsJson,
+            baseHistory: baseHistory,
             createdAt: createdAt,
             lastModified: lastModified,
             rowid: rowid,
@@ -9065,6 +9126,7 @@ class $$HouseholdsTableTableManager extends RootTableManager<
             Value<bool> allowSkipPeriod = const Value.absent(),
             required String createdByDeviceId,
             Value<String> settingsJson = const Value.absent(),
+            Value<String?> baseHistory = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -9078,6 +9140,7 @@ class $$HouseholdsTableTableManager extends RootTableManager<
             allowSkipPeriod: allowSkipPeriod,
             createdByDeviceId: createdByDeviceId,
             settingsJson: settingsJson,
+            baseHistory: baseHistory,
             createdAt: createdAt,
             lastModified: lastModified,
             rowid: rowid,

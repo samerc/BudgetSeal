@@ -16443,14 +16443,8 @@ abstract class S {
   /// Settings: change base currency
   ///
   /// In en, this message translates to:
-  /// **'Not on a shared budget'**
-  String get baseChangeSharedTitle;
-
-  /// Settings: change base currency
-  ///
-  /// In en, this message translates to:
-  /// **'Every phone on a shared budget would have to convert its history at the same time, so the base currency can\'t be changed on a shared budget for now.'**
-  String get baseChangeSharedBody;
+  /// **'It changes for everyone who shares this budget.'**
+  String get baseChangeSharedNote;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

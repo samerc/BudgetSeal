@@ -3062,5 +3062,4 @@ base_change_body,Settings: change base currency,Amounts you've recorded stay as 
 base_change_no_rate,Settings: change base currency,No rate known yet. Enter one to continue.,لا يوجد سعر بعد. أدخل سعرًا للمتابعة.,Aucun taux connu pour l’instant. Saisissez-en un pour continuer.
 base_change_edit_rate,Settings: change base currency,Change rate,تغيير السعر,Changer le taux
 base_change_rate_sheet,Settings: change base currency,1 {from} in {to},1 {from} بـ{to},1 {from} en {to}
-base_change_shared_title,Settings: change base currency,Not on a shared budget,ليس في ميزانية مشتركة,Pas sur un budget partagé
-base_change_shared_body,Settings: change base currency,"Every phone on a shared budget would have to convert its history at the same time, so the base currency can't be changed on a shared budget for now.",على كل هاتف في الميزانية المشتركة أن يحوّل سجلّه في الوقت نفسه، لذا لا يمكن تغيير العملة الأساسية في ميزانية مشتركة حاليًا.,Chaque téléphone d’un budget partagé devrait convertir son historique au même moment : la devise de base ne peut donc pas encore être changée sur un budget partagé.
+base_change_shared_note,Settings: change base currency,It changes for everyone who shares this budget.,تتغيّر لكل من يشارك هذه الميزانية.,Elle change pour tous ceux qui partagent ce budget.

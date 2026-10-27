@@ -55,7 +55,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 24;
+  int get schemaVersion => 25;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -214,6 +214,10 @@ class AppDatabase extends _$AppDatabase {
           if (from < 24) {
             // In-place edits: which rewrite of the lines is current.
             await _addColumnIfMissing(m, transactions, transactions.revision);
+          }
+          if (from < 25) {
+            // Base-currency changes on a shared budget.
+            await _addColumnIfMissing(m, households, households.baseHistory);
           }
         },
         beforeOpen: (_) async {
