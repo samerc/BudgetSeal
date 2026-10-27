@@ -196,15 +196,18 @@ class _ReadyToAssignBannerState extends State<ReadyToAssignBanner>
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
-                                  _expanded
-                                      ? l.allocHideOtherCurrencies
-                                      : l.allocOtherCurrencies(
-                                          widget.unallocated.length - 1),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: ink,
+                                Flexible(
+                                  child: Text(
+                                    _expanded
+                                        ? l.allocHideOtherCurrencies
+                                        : l.allocOtherCurrencies(
+                                            widget.unallocated.length - 1),
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: ink,
+                                    ),
                                   ),
                                 ),
                                 AnimatedRotation(

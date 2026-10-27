@@ -20,22 +20,6 @@ const _types = ['income', 'expense', 'transfer'];
 
 // ── GET /api/transactions ─────────────────────────────────────────────────────
 
-/// Lines per transaction, read in chunks (SQLite caps bound variables).
-Future<Map<String, List<TransactionLine>>> _linesByTx(
-    AppDatabase db, List<String> ids) async {
-  final out = <String, List<TransactionLine>>{};
-  for (var i = 0; i < ids.length; i += 500) {
-    final chunk = ids.sublist(i, i + 500 > ids.length ? ids.length : i + 500);
-    final lines = await (db.select(db.transactionLines)
-          ..where((l) => l.transactionId.isIn(chunk)))
-        .get();
-    for (final l in lines) {
-      out.putIfAbsent(l.transactionId, () => []).add(l);
-    }
-  }
-  return out;
-}
-
 /// The Activity screen's match: the same text and own-currency amount.
 bool _matchesSearch(SearchQuery q, Transaction t, List<TransactionLine> lines,
     Map<String, Category> cats, Map<String, Account> accounts) {
@@ -135,7 +119,7 @@ Handler listTransactionsHandler(Ref ref) {
       var rows = await query.get();
       var linesByTx = <String, List<TransactionLine>>{};
       if (!search.isEmpty) {
-        linesByTx = await _linesByTx(db, rows.map((t) => t.id).toList());
+        linesByTx = await db.transactionsDao.linesByTransaction(rows.map((t) => t.id));
         rows = rows
             .where((t) => _matchesSearch(
                 search, t, linesByTx[t.id] ?? const [], catMap, acctMap))
@@ -146,7 +130,7 @@ Handler listTransactionsHandler(Ref ref) {
       final hasMore = rows.length > limit;
       final txs = hasMore ? rows.sublist(0, limit) : rows;
       if (search.isEmpty) {
-        linesByTx = await _linesByTx(db, txs.map((t) => t.id).toList());
+        linesByTx = await db.transactionsDao.linesByTransaction(txs.map((t) => t.id));
       }
 
       // First line per transaction: native currency/amount and category

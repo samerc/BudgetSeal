@@ -14,6 +14,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../core/database/app_database.dart';
 import '../../core/database/daos/ledger_dao.dart';
+import '../../core/database/daos/transactions_dao.dart' show chunked;
 import '../../shared/utils/receipt_helper.dart';
 import '../../core/engine/balance_calculator.dart';
 import '../../core/providers/database_provider.dart';
@@ -77,7 +78,6 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
 
   Future<_HealthReport> _diagnose(AppDatabase db, String householdId) async {
     final calc = BalanceCalculator(db);
-    final ledgerDao = LedgerDao(db);
 
     // 1. Account balances per currency
     final accounts = await (db.select(db.accounts)
@@ -139,29 +139,21 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
       );
     }
 
-    // 4. Orphan ledger entries (linked to non-existent transactions)
-    final allocIds = allocs.map((a) => a.id).toList();
-    List<AllocationLedgerData> allEntries = [];
-    if (allocIds.isNotEmpty) {
-      allEntries = await ledgerDao.getAllForHousehold(allocIds);
-    }
-    int orphanCount = 0;
-    if (allEntries.isNotEmpty) {
-      final txIdsInLedger = allEntries
-          .where((e) => e.sourceTransactionId != null)
-          .map((e) => e.sourceTransactionId!)
-          .toSet();
-      if (txIdsInLedger.isNotEmpty) {
-        final existingTxs = await (db.select(db.transactions)
-              ..where((t) => t.id.isIn(txIdsInLedger.toList())))
-            .get();
-        final existingIds = existingTxs
-            .where((t) => !t.deleted)
-            .map((t) => t.id)
-            .toSet();
-        orphanCount = txIdsInLedger.difference(existingIds).length;
-      }
-    }
+    // 4. Orphan ledger entries (linked to non-existent transactions),
+    // counted in SQL: a long history has tens of thousands of rows.
+    final ledgerRow = await db.customSelect(
+      '''SELECT COUNT(*) AS entries,
+                COUNT(DISTINCT CASE WHEN l.source_transaction_id IS NOT NULL
+                  AND NOT EXISTS (SELECT 1 FROM transactions t
+                                   WHERE t.id = l.source_transaction_id
+                                     AND t.deleted = 0)
+                  THEN l.source_transaction_id END) AS orphans
+           FROM allocation_ledger l
+           JOIN allocations a ON a.id = l.allocation_id
+          WHERE a.household_id = ? AND a.archived = 0 AND a.deleted = 0''',
+      variables: [Variable.withString(householdId)],
+    ).getSingle();
+    final orphanCount = ledgerRow.read<int>('orphans');
 
     // 5. Soft-deleted transaction count
     final deletedCount = await db.customSelect(
@@ -179,7 +171,7 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
     ).getSingle().then((r) => r.read<int>('c'));
 
     // 8. Total ledger entries count
-    final ledgerCount = allEntries.length;
+    final ledgerCount = ledgerRow.read<int>('entries');
 
     return _HealthReport(
       checks: checks,
@@ -385,13 +377,16 @@ class _HealthCheckScreenState extends ConsumerState<HealthCheckScreen> {
       // Ledger rows first: once the transaction row is gone their
       // source_transaction_id is nulled (FK SET NULL) and they would count
       // as manual adjustments, changing envelope balances.
-      await (db.delete(db.allocationLedger)
-            ..where((l) => l.sourceTransactionId.isIn(ids)))
-          .go();
-      await (db.delete(db.transactionLines)
-            ..where((l) => l.transactionId.isIn(ids)))
-          .go();
-      await (db.delete(db.transactions)..where((t) => t.id.isIn(ids))).go();
+      for (final chunk in chunked(ids)) {
+        await (db.delete(db.allocationLedger)
+              ..where((l) => l.sourceTransactionId.isIn(chunk)))
+            .go();
+        await (db.delete(db.transactionLines)
+              ..where((l) => l.transactionId.isIn(chunk)))
+            .go();
+        await (db.delete(db.transactions)..where((t) => t.id.isIn(chunk)))
+            .go();
+      }
     });
 
     if (mounted) {

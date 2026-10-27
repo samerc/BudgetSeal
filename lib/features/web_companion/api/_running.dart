@@ -29,15 +29,8 @@ Future<Map<String, ({double effect, double balance})>> accountRunning(
           (t) => OrderingTerm.asc(t.id),
         ]))
       .get();
-  final lines = txs.isEmpty
-      ? <TransactionLine>[]
-      : await (db.select(db.transactionLines)
-            ..where((l) => l.transactionId.isIn(txs.map((t) => t.id))))
-          .get();
-  final byTx = <String, List<TransactionLine>>{};
-  for (final l in lines) {
-    (byTx[l.transactionId] ??= []).add(l);
-  }
+  final byTx =
+      await db.transactionsDao.linesByTransaction(txs.map((t) => t.id));
 
   var balance = account.initialBalance;
   final out = <String, ({double effect, double balance})>{};

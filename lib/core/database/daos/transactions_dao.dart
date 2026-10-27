@@ -5,6 +5,15 @@ import '../tables/transactions_table.dart';
 
 part 'transactions_dao.g.dart';
 
+/// [ids] in lists of [size], for `isIn` over lists that grow with the
+/// history (SQLite binds at most 32,766 values per query).
+Iterable<List<String>> chunked(Iterable<String> ids, [int size = 500]) sync* {
+  final list = ids.toList();
+  for (var i = 0; i < list.length; i += size) {
+    yield list.sublist(i, i + size > list.length ? list.length : i + size);
+  }
+}
+
 @DriftAccessor(tables: [Transactions])
 class TransactionsDao extends DatabaseAccessor<AppDatabase>
     with _$TransactionsDaoMixin {
@@ -20,6 +29,23 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase>
   Future<Transaction?> getById(String id) => (select(transactions)
         ..where((t) => t.id.equals(id) & t.deleted.equals(false)))
       .getSingleOrNull();
+
+  /// Lines of the transactions [ids], grouped by transaction. Read in
+  /// chunks: one query can bind at most 32,766 values, and a long history
+  /// has more transactions than that.
+  Future<Map<String, List<TransactionLine>>> linesByTransaction(
+      Iterable<String> ids) async {
+    final out = <String, List<TransactionLine>>{};
+    for (final chunk in chunked(ids)) {
+      final lines = await (select(attachedDatabase.transactionLines)
+            ..where((l) => l.transactionId.isIn(chunk)))
+          .get();
+      for (final l in lines) {
+        (out[l.transactionId] ??= []).add(l);
+      }
+    }
+    return out;
+  }
 
   Future<String> insert(TransactionsCompanion entry) async {
     await into(transactions).insert(entry);

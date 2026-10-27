@@ -34,7 +34,7 @@ dart run flutter_launcher_icons      # artwork: assets/icon/source/app_icon.svg
 
 Manual checklists: `test/manual_test_script.md`, `test/web_companion_test_script.md`.
 
-CI: `.github/workflows/ci.yml` runs on every push to `main` (gen-l10n is current, `dart analyze lib/`, `flutter test`) — keep it green. `test/core/engine/money_model_test.dart` checks every engine change against its own model of the balances; add new money operations to it. Details: [docs/dev/data.md](docs/dev/data.md#testing-the-money).
+CI: `.github/workflows/ci.yml` runs on every push to `main` (gen-l10n is current, `dart analyze lib/`, `flutter test`) — keep it green. `test/core/engine/money_model_test.dart` checks every engine change against its own model of the balances; add new money operations to it. `test/scale/big_budget_test.dart` runs the app on three years of data (~10,700 transactions) and times the screens — keep it passing when touching queries. Details: [docs/dev/data.md](docs/dev/data.md#testing-the-money).
 
 ## Layout
 
@@ -47,6 +47,7 @@ CI: `.github/workflows/ci.yml` runs on every push to `main` (gen-l10n is current
 - **Never mix currencies**: no summing `targetAmount` or account balances across currencies; group by currency or filter to the base. Base-currency totals skip lines with no real rate (`isRealRate()`).
 - `tx.amount`/`tx.currency` are in the household's base currency — for display use the line's amount and `lines.first.currency`.
 - Transaction queries filter `deleted = false` (including `getById()`), and balance/report queries filter `status IS NULL` (planned/upcoming/skipped aren't posted).
+- Never `isIn(ids)` over a list that grows with the history (SQLite binds at most 32,766 values): `TransactionsDao.linesByTransaction()`, `chunked()`, or SQL. New indexes go in `AppDatabase._indexes` (made on every open), not a migration.
 - Deletes go through `deleteTransactionsWithUndo()`; every update must move `last_modified` (sync merges by it).
 
 ## Code rules

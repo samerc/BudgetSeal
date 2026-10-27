@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../core/database/app_database.dart';
 import '../../core/database/daos/accounts_dao.dart';
+import '../../core/database/daos/transactions_dao.dart' show chunked;
 import '../../core/engine/allocation_engine.dart';
 import '../../core/engine/balance_calculator.dart';
 import '../../core/providers/date_format_provider.dart';
@@ -1056,23 +1057,19 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     // action == 'delete' → detect transactions shared with OTHER accounts
     // (transfers or cross-account splits), since deleting those also changes
     // the other accounts' balances.
-    final allLines = await (db.select(db.transactionLines)
-          ..where((l) => l.transactionId.isIn(refTxIds.toList())))
-        .get();
-    final linesByTx = <String, List<TransactionLine>>{};
-    for (final l in allLines) {
-      linesByTx.putIfAbsent(l.transactionId, () => []).add(l);
-    }
+    final linesByTx = await db.transactionsDao.linesByTransaction(refTxIds);
     final txById = <String, Transaction>{
       for (final t in [...headerTxs, ...destTxs]) t.id: t,
     };
     final missingIds =
         refTxIds.where((id) => !txById.containsKey(id)).toList();
     if (missingIds.isNotEmpty) {
-      for (final t in await (db.select(db.transactions)
-            ..where((t) => t.id.isIn(missingIds)))
-          .get()) {
-        txById[t.id] = t;
+      for (final chunk in chunked(missingIds)) {
+        for (final t in await (db.select(db.transactions)
+              ..where((t) => t.id.isIn(chunk)))
+            .get()) {
+          txById[t.id] = t;
+        }
       }
     }
 

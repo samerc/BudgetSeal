@@ -1,0 +1,4 @@
+tags:
+  # test/scale/: the app with years of data (slow; about a minute).
+  scale:
+    timeout: 10x

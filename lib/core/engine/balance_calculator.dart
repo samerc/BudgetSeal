@@ -17,109 +17,66 @@ class BalanceCalculator {
       : _accountsDao = AccountsDao(_db),
         _ledgerDao = LedgerDao(_db);
 
-  // ─── Batch: all account balances in ~7 queries total ───────────────────────
+  // ─── Batch: all account balances in two queries ────────────────────────────
 
   /// Compute balances for ALL non-archived accounts in one pass.
   /// Returns `Map<accountId, balance>`.
   Future<Map<String, double>> allAccountBalances(String householdId) async {
-    // 1. All non-archived, non-deleted accounts
     final accounts = await (_db.select(_db.accounts)
           ..where((t) =>
               t.householdId.equals(householdId) &
               t.archived.equals(false) &
               t.deleted.equals(false)))
         .get();
-
-    final balances = <String, double>{
-      for (final a in accounts) a.id: a.initialBalance,
+    final moved = await _movements(householdId);
+    return {
+      for (final a in accounts) a.id: a.initialBalance + (moved[a.id] ?? 0),
     };
-    final accountIds = balances.keys.toList();
-    if (accountIds.isEmpty) return balances;
+  }
 
-    // 2. All transaction_lines with per-line accountId referencing these accounts
-    final allLines = await (_db.select(_db.transactionLines)
-          ..where((l) => l.accountId.isIn(accountIds)))
-        .get();
-
-    // 3. Parent transactions for those lines (to get type)
-    final lineTxIds = allLines.map((l) => l.transactionId).toSet();
-    List<Transaction> lineTxList = [];
-    if (lineTxIds.isNotEmpty) {
-      lineTxList = await (_db.select(_db.transactions)
-            ..where((t) => t.id.isIn(lineTxIds) & t.deleted.equals(false) & t.status.isNull()))
-          .get();
-    }
-    final txMap = {for (final t in lineTxList) t.id: t};
-
-    for (final line in allLines) {
-      final tx = txMap[line.transactionId];
-      if (tx == null || line.accountId == null) continue;
-      final acctId = line.accountId!;
-      if (!balances.containsKey(acctId)) continue;
-      if (tx.type == 'income') {
-        balances[acctId] = balances[acctId]! + line.amount;
-      } else if (tx.type == 'expense') {
-        balances[acctId] = balances[acctId]! - line.amount;
-      }
-    }
-
-    // 4. All header-level income/expense transactions for these accounts
-    final headerTxs = await (_db.select(_db.transactions)
-          ..where((t) =>
-              t.accountId.isIn(accountIds) &
-              t.deleted.equals(false) &
-              t.status.isNull() &
-              t.type.isIn(['income', 'expense'])))
-        .get();
-
-    // 5. All transaction_lines for those header txs (to check which have per-line accounts)
-    final headerTxIds = headerTxs.map((t) => t.id).toSet();
-    List<TransactionLine> headerLines = [];
-    if (headerTxIds.isNotEmpty) {
-      headerLines = await (_db.select(_db.transactionLines)
-            ..where((l) => l.transactionId.isIn(headerTxIds)))
-          .get();
-    }
-    final txsWithPerLineAccounts = <String>{};
-    for (final l in headerLines) {
-      if (l.accountId != null) txsWithPerLineAccounts.add(l.transactionId);
-    }
-
-    for (final tx in headerTxs) {
-      if (txsWithPerLineAccounts.contains(tx.id)) continue; // already counted via lines
-      if (!balances.containsKey(tx.accountId)) continue;
-      if (tx.type == 'income') {
-        balances[tx.accountId] = balances[tx.accountId]! + tx.amount;
-      } else if (tx.type == 'expense') {
-        balances[tx.accountId] = balances[tx.accountId]! - tx.amount;
-      }
-    }
-
-    // 6. All outgoing transfers
-    final transfersFrom = await (_db.select(_db.transactions)
-          ..where(
-              (t) => t.accountId.isIn(accountIds) & t.deleted.equals(false) & t.status.isNull() & t.type.equals('transfer')))
-        .get();
-    for (final tx in transfersFrom) {
-      if (!balances.containsKey(tx.accountId)) continue;
-      balances[tx.accountId] = balances[tx.accountId]! - tx.amount;
-    }
-
-    // 7. All incoming transfers
-    final transfersTo = await (_db.select(_db.transactions)
-          ..where((t) =>
-              t.destinationAccountId.isIn(accountIds) &
-              t.deleted.equals(false) &
-              t.status.isNull() &
-              t.type.equals('transfer')))
-        .get();
-    for (final tx in transfersTo) {
-      final dest = tx.destinationAccountId;
-      if (dest == null || !balances.containsKey(dest)) continue;
-      balances[dest] = balances[dest]! + tx.amount * tx.exchangeRateToBase;
-    }
-
-    return balances;
+  /// What posted transactions moved in and out of each account, summed in
+  /// SQL (a long history is tens of thousands of rows):
+  /// - income/expense lines on their own account;
+  /// - income/expense with no per-line account on the header account;
+  /// - a transfer takes `amount` from the source and adds
+  ///   `amount × exchangeRateToBase` (the source→destination rate) to the
+  ///   destination.
+  Future<Map<String, double>> _movements(String householdId) async {
+    final rows = await _db.customSelect(
+      '''SELECT id, SUM(v) AS total FROM (
+           SELECT tl.account_id AS id,
+                  CASE WHEN t.type = 'income' THEN tl.amount ELSE -tl.amount END AS v
+             FROM transaction_lines tl
+             JOIN transactions t ON t.id = tl.transaction_id
+            WHERE t.household_id = ?1 AND t.deleted = 0 AND t.status IS NULL
+              AND t.type IN ('income', 'expense') AND tl.account_id IS NOT NULL
+           UNION ALL
+           SELECT t.account_id,
+                  CASE WHEN t.type = 'income' THEN t.amount ELSE -t.amount END
+             FROM transactions t
+            WHERE t.household_id = ?1 AND t.deleted = 0 AND t.status IS NULL
+              AND t.type IN ('income', 'expense')
+              AND NOT EXISTS (SELECT 1 FROM transaction_lines tl
+                               WHERE tl.transaction_id = t.id
+                                 AND tl.account_id IS NOT NULL)
+           UNION ALL
+           SELECT t.account_id, -t.amount
+             FROM transactions t
+            WHERE t.household_id = ?1 AND t.deleted = 0 AND t.status IS NULL
+              AND t.type = 'transfer'
+           UNION ALL
+           SELECT t.destination_account_id, t.amount * t.exchange_rate_to_base
+             FROM transactions t
+            WHERE t.household_id = ?1 AND t.deleted = 0 AND t.status IS NULL
+              AND t.type = 'transfer' AND t.destination_account_id IS NOT NULL
+         ) GROUP BY id''',
+      variables: [Variable.withString(householdId)],
+      readsFrom: {_db.transactions, _db.transactionLines},
+    ).get();
+    return {
+      for (final r in rows)
+        r.read<String>('id'): r.read<double?>('total') ?? 0,
+    };
   }
 
   // ─── Batch: all allocation balances in 1 query ─────────────────────────────
@@ -142,88 +99,13 @@ class BalanceCalculator {
 
   // ─── Single-account (kept for detail screens) ──────────────────────────────
 
-  /// Compute balance for a single account (used by account detail screen).
+  /// Compute balance for a single account (used by account detail screen;
+  /// archived accounts too).
   Future<double> accountBalance(String accountId) async {
     final account = await _accountsDao.getById(accountId);
     if (account == null) return 0.0;
-
-    double balance = account.initialBalance;
-
-    // 1. Per-line accounts
-    final lines = await (_db.select(_db.transactionLines)
-          ..where((l) => l.accountId.equals(accountId)))
-        .get();
-
-    if (lines.isNotEmpty) {
-      final txIds = lines.map((l) => l.transactionId).toSet();
-      final txs = await (_db.select(_db.transactions)
-            ..where((t) => t.id.isIn(txIds) & t.deleted.equals(false) & t.status.isNull()))
-          .get();
-      final txMap2 = {for (final t in txs) t.id: t};
-
-      for (final line in lines) {
-        final tx = txMap2[line.transactionId];
-        if (tx == null) continue;
-        if (tx.type == 'income') {
-          balance += line.amount;
-        } else if (tx.type == 'expense') {
-          balance -= line.amount;
-        }
-      }
-    }
-
-    // 2. Legacy header-level income/expense
-    final headerTxs = await (_db.select(_db.transactions)
-          ..where((t) =>
-              t.accountId.equals(accountId) &
-              t.deleted.equals(false) &
-              t.status.isNull() &
-              t.type.isIn(['income', 'expense'])))
-        .get();
-
-    // Batch-check which have per-line accounts
-    final headerIds = headerTxs.map((t) => t.id).toSet();
-    List<TransactionLine> hLines = [];
-    if (headerIds.isNotEmpty) {
-      hLines = await (_db.select(_db.transactionLines)
-            ..where((l) => l.transactionId.isIn(headerIds)))
-          .get();
-    }
-    final perLineSet = <String>{};
-    for (final l in hLines) {
-      if (l.accountId != null) perLineSet.add(l.transactionId);
-    }
-
-    for (final tx in headerTxs) {
-      if (perLineSet.contains(tx.id)) continue;
-      if (tx.type == 'income') {
-        balance += tx.amount;
-      } else if (tx.type == 'expense') {
-        balance -= tx.amount;
-      }
-    }
-
-    // 3. Transfers
-    final transfersFrom = await (_db.select(_db.transactions)
-          ..where((t) =>
-              t.accountId.equals(accountId) & t.deleted.equals(false) & t.status.isNull() & t.type.equals('transfer')))
-        .get();
-    for (final tx in transfersFrom) {
-      balance -= tx.amount;
-    }
-
-    final transfersTo = await (_db.select(_db.transactions)
-          ..where((t) =>
-              t.destinationAccountId.equals(accountId) &
-              t.deleted.equals(false) &
-              t.status.isNull() &
-              t.type.equals('transfer')))
-        .get();
-    for (final tx in transfersTo) {
-      balance += tx.amount * tx.exchangeRateToBase;
-    }
-
-    return balance;
+    final moved = await _movements(account.householdId);
+    return account.initialBalance + (moved[accountId] ?? 0);
   }
 
   // ─── Unallocated (now uses batch methods) ──────────────────────────────────

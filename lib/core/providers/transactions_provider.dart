@@ -139,15 +139,8 @@ Future<({Map<String, Account> accountMap, Map<String, List<TransactionLine>> lin
       .get();
   final accountMap = {for (final a in accounts) a.id: a};
 
-  final allLines = txList.isEmpty
-      ? <TransactionLine>[]
-      : await (db.select(db.transactionLines)
-            ..where((l) => l.transactionId.isIn(txList.map((t) => t.id))))
-          .get();
-  final linesByTx = <String, List<TransactionLine>>{};
-  for (final line in allLines) {
-    linesByTx.putIfAbsent(line.transactionId, () => []).add(line);
-  }
+  final linesByTx =
+      await db.transactionsDao.linesByTransaction(txList.map((t) => t.id));
 
   return (accountMap: accountMap, linesByTx: linesByTx);
 }

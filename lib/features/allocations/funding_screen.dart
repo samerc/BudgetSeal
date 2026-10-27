@@ -1171,15 +1171,22 @@ class _FundingAllocationTile extends StatelessWidget {
                   ),
                   if (hasSuggestion) ...[
                     const SizedBox(width: 8),
-                    FilledButton.tonal(
-                      onPressed: () => onAmountChanged(suggestedAmount!),
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 10),
-                        minimumSize: const Size(0, 44),
-                      ),
-                      child: Text(
-                        S.of(context).fundFill(formatAmount(suggestedAmount!, currency: currency)),
+                    // At most half the row: a large amount ("Fill
+                    // LBP 20,000,000") shrinks instead of overflowing.
+                    Flexible(
+                      child: FilledButton.tonal(
+                        onPressed: () => onAmountChanged(suggestedAmount!),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 10),
+                          minimumSize: const Size(0, 44),
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            S.of(context).fundFill(formatAmount(suggestedAmount!, currency: currency)),
+                          ),
+                        ),
                       ),
                     ),
                   ],

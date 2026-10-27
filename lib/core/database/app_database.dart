@@ -204,7 +204,10 @@ class AppDatabase extends _$AppDatabase {
                 m, recurringTransactions, recurringTransactions.remindDays);
           }
         },
-        beforeOpen: (_) => _ensureSyncTriggers(),
+        beforeOpen: (_) async {
+          await _ensureIndexes();
+          await _ensureSyncTriggers();
+        },
       );
 
   /// Tables that sync merges by `last_modified` (newer row wins).
@@ -226,6 +229,30 @@ class AppDatabase extends _$AppDatabase {
   /// updates with the current time. An update that sets a new stamp (every
   /// sync merge, explicit writes) is left alone. Idempotent; created on every
   /// open, so no schema version is needed. Dates are stored as Unix seconds.
+  /// Indexes for the hot queries. Created on every open (IF NOT EXISTS):
+  /// `createAll()` makes none, so until Oct 2026 an install made at schema
+  /// 16 or later had no indexes at all — every "lines of this transaction"
+  /// lookup scanned the whole table.
+  static const _indexes = {
+    'idx_transactions_household_date': 'transactions (household_id, created_at)',
+    'idx_transactions_household_deleted': 'transactions (household_id, deleted)',
+    'idx_transactions_account': 'transactions (account_id)',
+    'idx_transactions_destination': 'transactions (destination_account_id)',
+    'idx_transaction_lines_tx': 'transaction_lines (transaction_id)',
+    'idx_transaction_lines_account': 'transaction_lines (account_id)',
+    'idx_ledger_allocation': 'allocation_ledger (allocation_id)',
+    'idx_ledger_source_tx': 'allocation_ledger (source_transaction_id)',
+    'idx_allocations_household': 'allocations (household_id)',
+    'idx_categories_household': 'categories (household_id)',
+    'idx_categories_allocation': 'categories (allocation_id)',
+  };
+
+  Future<void> _ensureIndexes() async {
+    for (final MapEntry(key: name, value: on) in _indexes.entries) {
+      await customStatement('CREATE INDEX IF NOT EXISTS $name ON $on');
+    }
+  }
+
   Future<void> _ensureSyncTriggers() async {
     for (final t in syncedTables) {
       await customStatement('''

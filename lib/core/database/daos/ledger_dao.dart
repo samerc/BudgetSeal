@@ -220,15 +220,6 @@ class LedgerDao extends DatabaseAccessor<AppDatabase> with _$LedgerDaoMixin {
     };
   }
 
-  /// Get all ledger entries for a household across all allocations.
-  /// Use getAllBalances() instead when you only need sums.
-  Future<List<AllocationLedgerData>> getAllForHousehold(
-      List<String> allocationIds) async {
-    return (select(allocationLedger)
-          ..where((t) => t.allocationId.isIn(allocationIds)))
-        .get();
-  }
-
   /// Delete ledger entries whose source transaction is soft-deleted (balances
   /// already ignore them; this keeps the ledger and orphan counts clean).
   Future<int> deleteForDeletedTransactions() => customUpdate(
