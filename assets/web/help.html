@@ -1422,6 +1422,9 @@
 <h3>Is my data sent anywhere?</h3>
 <p>No. Everything stays on your device. Cloud sync is optional: it uses your own Google Drive, or a file you pick with your phone's file picker — BudgetSeal never sees your data. The only thing the app downloads is exchange rates. There are no BudgetSeal servers, no accounts, and no tracking.</p>
 
+<h3>Can I read my data without BudgetSeal?</h3>
+<p>Yes. The sync file (<code>BudgetSeal_Sync.json</code> on your Google Drive or wherever you saved it) is plain JSON, and its format is published: every field, how balances are worked out, and how to open a file protected by a sync password. You'll find it at <strong>github.com/samerc/BudgetSeal</strong>, in <code>docs/file-format.md</code>. Your data never depends on the app to stay readable.</p>
+
 <h3>What happens if I delete a transaction?</h3>
 <p>Deleted transactions are soft-deleted — they're hidden but not permanently removed. Any envelope deductions are reversed. You can permanently purge them from Health Check.</p>
 

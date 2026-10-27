@@ -25,6 +25,7 @@ BudgetSeal helps you take control of your money using the **envelope budgeting**
 - **CSV Import/Export** -- Import transactions from other apps or export for spreadsheets.
 - **Daily Reminders** -- Configurable push notification to remind you to log transactions.
 - **Auto Backup** -- Scheduled local database backups with restore support.
+- **Open File Format** -- The sync file is plain (optionally encrypted) JSON, documented field by field in [docs/file-format.md](docs/file-format.md), so your data stays readable without the app.
 
 ## Screenshots
 

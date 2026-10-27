@@ -15,6 +15,7 @@ Toolchain: Flutter 3.47.5 / Dart 3.13, iOS target 15.5 (ML Kit), Android minSdk 
 | Bill splitter + receipt OCR | [docs/dev/bill-splitter.md](docs/dev/bill-splitter.md) |
 | Design conventions, theme, accent, icons, shared widgets, dashboard, More tab, onboarding | [docs/dev/ui.md](docs/dev/ui.md) |
 | Database & migrations, cloud sync, backup/restore, soft delete, health check, security, performance | [docs/dev/data.md](docs/dev/data.md) |
+| The sync file's public format (for users and other tools; update with any sync field change) | [docs/file-format.md](docs/file-format.md) |
 | Web Companion (server, security, SPA, REST API) | [docs/dev/web-companion.md](docs/dev/web-companion.md) |
 | i18n, number & date formatting | [docs/dev/i18n.md](docs/dev/i18n.md) |
 | Android/iOS config, home widget, notifications, daily reminder, resume work | [docs/dev/platform.md](docs/dev/platform.md) |
