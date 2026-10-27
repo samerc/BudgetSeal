@@ -27,6 +27,7 @@ import 'period_reset_provider.dart';
 import 'receipt_sync_provider.dart';
 import '../../l10n/s_lookup.dart';
 import '../services/household_members.dart';
+import 'transactions_provider.dart';
 
 const _prefActiveProvider = 'sync_active_provider';
 const _prefLastSync = 'sync_last_sync';
@@ -255,6 +256,8 @@ class SyncNotifier extends Notifier<SyncState> {
   /// Most screens read Drift streams and redraw by themselves after a
   /// merge; these providers load once and need a nudge.
   void _refreshAfterMerge() {
+    // Its lines cache can't see lines changed without their row.
+    ref.invalidate(transactionEntriesProvider);
     ref.invalidate(objectivesProvider);
     ref.invalidate(dailySpendingProvider);
     ref.invalidate(ageOfMoneyProvider);

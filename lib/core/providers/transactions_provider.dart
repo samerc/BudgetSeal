@@ -172,6 +172,16 @@ Future<({Map<String, Account> accountMap, Map<String, List<TransactionLine>> lin
 /// each annotated with the running account balance at that point in time.
 ///
 /// Keep this for screens that need the full dataset (reports, category trends).
+///
+/// Incremental: it watches a cheap signal (how many rows, the newest
+/// `last_modified`) and on a change reads only the rows modified since —
+/// every write moves `last_modified` (the bump triggers), so edits,
+/// deletes and planned payments being posted all come through — with their
+/// lines, merged into the rows it already has. Fewer rows than before (a
+/// purge) reads everything again; so does a sync merge, which can change
+/// rows without moving the stamp (the sync invalidates this provider).
+/// Running balances are replayed each time (cheap arithmetic). Saving one
+/// expense with three years of history: ~0.5 s → see data.md.
 final transactionEntriesProvider =
     StreamProvider<List<TransactionEntry>>((ref) async* {
   final db = ref.watch(databaseProvider);
@@ -183,24 +193,71 @@ final transactionEntriesProvider =
     return;
   }
 
-  final txStream = (db.select(db.transactions)
-        ..where((t) => t.householdId.equals(householdId) & t.deleted.equals(false) & t.status.isNull())
-        ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
-      .watch();
+  final signal = db.customSelect(
+    'SELECT COUNT(*) AS n, MAX(last_modified) AS m FROM transactions '
+    'WHERE household_id = ?',
+    variables: [Variable.withString(householdId)],
+    readsFrom: {db.transactions},
+  ).watch();
 
-  await for (final txList in txStream) {
-    final related = await _fetchRelated(db, householdId, txList);
+  // Posted, live rows by id, with their lines.
+  Map<String, (Transaction, List<TransactionLine>)>? rows;
+  var count = 0;
+  int? since; // seconds: the newest last_modified seen
 
+  await for (final s in signal) {
+    final n = s.first.read<int>('n');
+    final m = s.first.read<int?>('m');
+    if (rows == null || n < count || since == null) {
+      final all = await (db.select(db.transactions)
+            ..where((t) =>
+                t.householdId.equals(householdId) &
+                t.deleted.equals(false) &
+                t.status.isNull()))
+          .get();
+      final lines =
+          await db.transactionsDao.linesByTransaction(all.map((t) => t.id));
+      rows = {for (final t in all) t.id: (t, lines[t.id] ?? const [])};
+    } else if (m != null && m >= since) {
+      // Same second included: stamps are whole seconds.
+      final changed = await (db.select(db.transactions)
+            ..where((t) =>
+                t.householdId.equals(householdId) &
+                t.lastModified.isBiggerOrEqualValue(
+                    DateTime.fromMillisecondsSinceEpoch(since! * 1000))))
+          .get();
+      final live = [
+        for (final t in changed)
+          if (!t.deleted && t.status == null) t,
+      ];
+      for (final t in changed) {
+        if (t.deleted || t.status != null) rows.remove(t.id);
+      }
+      final lines =
+          await db.transactionsDao.linesByTransaction(live.map((t) => t.id));
+      for (final t in live) {
+        rows[t.id] = (t, lines[t.id] ?? const []);
+      }
+    }
+    count = n;
+    since = m;
+
+    final accounts = await (db.select(db.accounts)
+          ..where((a) => a.householdId.equals(householdId)))
+        .get();
+    final accountMap = {for (final a in accounts) a.id: a};
+    final ordered = rows.values.toList()
+      ..sort((a, b) {
+        final c = a.$1.createdAt.compareTo(b.$1.createdAt);
+        return c != 0 ? c : a.$1.id.compareTo(b.$1.id);
+      });
     final running = <String, double>{
-      for (final a in related.accountMap.values) a.id: a.initialBalance,
+      for (final a in accountMap.values) a.id: a.initialBalance,
     };
-
     final result = <TransactionEntry>[];
-    for (final tx in txList) {
-      final txLines = related.linesByTx[tx.id] ?? [];
+    for (final (tx, txLines) in ordered) {
       _applyTxToRunning(tx, txLines, running);
-      result.add(
-          _buildEntry(tx, txLines, related.accountMap, running, hidden));
+      result.add(_buildEntry(tx, txLines, accountMap, running, hidden));
     }
 
     yield result.reversed.toList();
