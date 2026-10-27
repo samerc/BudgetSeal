@@ -579,13 +579,19 @@
   "allocEntryRevaluation": "Réévaluation",
   "allocEntryMoved": "Déplacé",
   "fxSetRateTitle": "Taux pour {currency}",
-  "fxSetRateHint": "Votre taux sert aux nouvelles transactions et aux rapports jusqu'au retour au taux en direct.",
-  "fxUseLiveRate": "Taux en direct",
   "fxBaseLabel": "Devise de base : {currency}",
   "fxNoCurrencies": "Votre budget n'utilise qu'une devise. Ajoutez un compte dans une autre devise pour voir son taux ici.",
   "fxNoRateFor": "Pas encore de taux pour {currency} — touchez pour en définir un",
   "fxManualTag": "Votre taux",
   "fxLiveTag": "En direct",
+  "fxSourceLive": "Taux en direct",
+  "fxSourceGot": "Dernier taux obtenu",
+  "fxSourceGotNone": "Aucun pour l’instant. Il est enregistré quand vous changez de l’argent entre vos comptes ou payez avec une monnaie rendue dans une autre devise.",
+  "fxSourceFixed": "Votre taux fixe",
+  "fxSourceFixedNone": "Définir votre propre taux",
+  "fxGotTag": "Taux obtenu",
+  "fxRateSheet": "1 {from} en {to}",
+  "fxSourceHint": "Les nouvelles transactions et les rapports utilisent le taux choisi. Sur un budget partagé, tout le monde utilise le même.",
   "tileExchangeRatesSub": "Taux en direct, ou les vôtres",
   "allocArchivedTitle": "Enveloppes archivées",
   "allocNoArchived": "Aucune enveloppe archivée",
@@ -3223,7 +3229,7 @@
   "@fxRefreshTooltip": {
     "description": "Tooltip"
   },
-  "fxCacheInfo": "Les taux en direct sont mis en cache une heure et remplis lors de l'ajout d'une transaction. Touchez une devise pour définir votre propre taux — il remplace le taux en direct jusqu'à ce que vous y reveniez.",
+  "fxCacheInfo": "Les taux en direct sont mis en cache une heure et remplis lors de l'ajout d'une transaction. Touchez une devise pour choisir son taux : en direct, le dernier taux obtenu (change ou monnaie rendue) ou votre taux fixe.",
   "@fxCacheInfo": {
     "description": "Info text"
   },

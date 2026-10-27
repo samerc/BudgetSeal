@@ -2000,13 +2000,6 @@ class SAr extends S {
   }
 
   @override
-  String get fxSetRateHint =>
-      'يُستخدم سعرك للمعاملات الجديدة والتقارير حتى تعود إلى السعر المباشر.';
-
-  @override
-  String get fxUseLiveRate => 'استخدام السعر المباشر';
-
-  @override
   String fxBaseLabel(String currency) {
     return 'العملة الأساسية: $currency';
   }
@@ -2025,6 +2018,34 @@ class SAr extends S {
 
   @override
   String get fxLiveTag => 'مباشر';
+
+  @override
+  String get fxSourceLive => 'السعر المباشر';
+
+  @override
+  String get fxSourceGot => 'آخر سعر حصلت عليه';
+
+  @override
+  String get fxSourceGotNone =>
+      'لا يوجد بعد. يُحفظ عندما تصرف المال بين حساباتك أو تدفع وتأخذ الباقي بعملة أخرى.';
+
+  @override
+  String get fxSourceFixed => 'سعرك الثابت';
+
+  @override
+  String get fxSourceFixedNone => 'حدّد سعرك الخاص';
+
+  @override
+  String get fxGotTag => 'السعر الذي حصلت عليه';
+
+  @override
+  String fxRateSheet(String from, String to) {
+    return '1 $from بـ$to';
+  }
+
+  @override
+  String get fxSourceHint =>
+      'تستخدم المعاملات الجديدة والتقارير السعر الذي تختاره. في الميزانية المشتركة يستخدم الجميع السعر نفسه.';
 
   @override
   String get tileExchangeRatesSub => 'أسعار مباشرة، أو حدّد سعرك';
@@ -4819,7 +4840,7 @@ class SAr extends S {
 
   @override
   String get fxCacheInfo =>
-      'تُخزَّن الأسعار المباشرة لمدة ساعة وتُملأ عند إضافة معاملة. اضغط على عملة لتحديد سعرك الخاص — يُستخدم بدل السعر المباشر حتى تعود إليه.';
+      'تُخزَّن الأسعار المباشرة لمدة ساعة وتُملأ عند إضافة معاملة. اضغط على عملة لاختيار سعرها: المباشر، أو آخر سعر حصلت عليه (من صرف أو باقٍ)، أو سعرك الثابت.';
 
   @override
   String get aboutTitle => 'حول';

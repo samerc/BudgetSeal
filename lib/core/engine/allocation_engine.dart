@@ -10,7 +10,7 @@ import '../../shared/utils/format_number.dart'
 import '../database/app_database.dart';
 import '../database/daos/ledger_dao.dart';
 import '../services/household_members.dart' show DeviceIdentity;
-import '../fx/fx_service.dart' show latestCachedRate;
+import '../fx/fx_service.dart' show latestCachedRate, noteRateGot;
 import 'balance_calculator.dart';
 
 /// A line is in a different currency from its account and no exchange rate
@@ -292,6 +292,9 @@ class AllocationEngine {
   /// `amount × rate` arrives and is stored as `destinationAmount`.
   ///
   /// [editing]: rewrite that transaction in place (same id) instead.
+  /// [rateGot]: the user entered or confirmed this rate (a transfer saved
+  /// from a form) — between two currencies it becomes the pair's "last
+  /// rate I got" (`noteRateGot`).
   Future<String> recordTransfer({
     required String householdId,
     required String fromAccountId,
@@ -305,7 +308,16 @@ class AllocationEngine {
     DateTime? date,
     String? id,
     String? editing,
+    bool rateGot = false,
   }) async {
+    if (rateGot) {
+      final dest = await (_db.select(_db.accounts)
+            ..where((a) => a.id.equals(toAccountId)))
+          .getSingleOrNull();
+      if (dest != null && dest.currency != currency) {
+        await noteRateGot(_db, currency, dest.currency, exchangeRateToBase);
+      }
+    }
     if (editing != null) {
       await _db.transaction(() async {
         final old = await _liveTx(editing);

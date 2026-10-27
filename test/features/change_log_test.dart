@@ -82,7 +82,8 @@ Future<void> _household(AppDatabase db) async {
   }
 }
 
-Future<void> _later() => Future<void>.delayed(const Duration(milliseconds: 3));
+// Longer than one tick of the system clock (about 15 ms on Windows).
+Future<void> _later() => Future<void>.delayed(const Duration(milliseconds: 20));
 
 void opLogTests() {
   setUp(() => FlutterSecureStorage.setMockInitialValues({}));

@@ -122,7 +122,7 @@ void main() {
 
   test('the same row added on both: the later one wins on both', () async {
     await addAccount(a, name: 'Old');
-    await Future<void>.delayed(const Duration(milliseconds: 3));
+    await Future<void>.delayed(const Duration(milliseconds: 20));
     await addAccount(b, name: 'New');
 
     await sync(a, b);

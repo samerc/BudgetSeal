@@ -3579,18 +3579,6 @@ abstract class S {
   /// **'Rate for {currency}'**
   String fxSetRateTitle(String currency);
 
-  /// No description provided for @fxSetRateHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Your rate is used for new transactions and reports until you switch back to the live rate.'**
-  String get fxSetRateHint;
-
-  /// No description provided for @fxUseLiveRate.
-  ///
-  /// In en, this message translates to:
-  /// **'Use live rate'**
-  String get fxUseLiveRate;
-
   /// No description provided for @fxBaseLabel.
   ///
   /// In en, this message translates to:
@@ -3620,6 +3608,54 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Live'**
   String get fxLiveTag;
+
+  /// Exchange rates: rate source per currency
+  ///
+  /// In en, this message translates to:
+  /// **'Live rate'**
+  String get fxSourceLive;
+
+  /// Exchange rates: rate source per currency
+  ///
+  /// In en, this message translates to:
+  /// **'Last rate you got'**
+  String get fxSourceGot;
+
+  /// Exchange rates: rate source per currency
+  ///
+  /// In en, this message translates to:
+  /// **'None yet. It’s saved when you exchange money between accounts or pay with change in another currency.'**
+  String get fxSourceGotNone;
+
+  /// Exchange rates: rate source per currency
+  ///
+  /// In en, this message translates to:
+  /// **'Your fixed rate'**
+  String get fxSourceFixed;
+
+  /// Exchange rates: rate source per currency
+  ///
+  /// In en, this message translates to:
+  /// **'Set your own rate'**
+  String get fxSourceFixedNone;
+
+  /// Exchange rates: rate source per currency
+  ///
+  /// In en, this message translates to:
+  /// **'Rate you got'**
+  String get fxGotTag;
+
+  /// Exchange rates: rate source per currency
+  ///
+  /// In en, this message translates to:
+  /// **'1 {from} in {to}'**
+  String fxRateSheet(String from, String to);
+
+  /// Exchange rates: rate source per currency
+  ///
+  /// In en, this message translates to:
+  /// **'New transactions and reports use the rate you choose. On a shared budget everyone uses the same one.'**
+  String get fxSourceHint;
 
   /// No description provided for @tileExchangeRatesSub.
   ///
@@ -8479,7 +8515,7 @@ abstract class S {
   /// Info text
   ///
   /// In en, this message translates to:
-  /// **'Live rates are cached for an hour and filled in when you add a transaction. Tap a currency to set your own rate — it is used instead of the live one until you switch back.'**
+  /// **'Live rates are cached for an hour and filled in when you add a transaction. Tap a currency to choose its rate: live, the last rate you got (from an exchange or change), or your own fixed rate.'**
   String get fxCacheInfo;
 
   /// AppBar title

@@ -908,6 +908,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           deviceId: 'local',
           note: effectiveNote,
           date: _effectiveDateTime,
+          rateGot: true,
           editing: widget.editTransactionId,
         );
       } else {

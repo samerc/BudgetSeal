@@ -731,7 +731,7 @@ notif_bills_desc,Description,"You'll receive a notification when recurring trans
 # ──────────────────────────────────────────────,,,,
 fx_title,AppBar title,Exchange rates,أسعار الصرف,Taux de change
 fx_refresh_tooltip,Tooltip,Refresh rates,تحديث الأسعار,Actualiser les taux
-fx_cache_info,Info text,Live rates are cached for an hour and filled in when you add a transaction. Tap a currency to set your own rate — it is used instead of the live one until you switch back.,تُخزَّن الأسعار المباشرة لمدة ساعة وتُملأ عند إضافة معاملة. اضغط على عملة لتحديد سعرك الخاص — يُستخدم بدل السعر المباشر حتى تعود إليه.,Les taux en direct sont mis en cache une heure et remplis lors de l'ajout d'une transaction. Touchez une devise pour définir votre propre taux — il remplace le taux en direct jusqu'à ce que vous y reveniez.
+fx_cache_info,Info text,"Live rates are cached for an hour and filled in when you add a transaction. Tap a currency to choose its rate: live, the last rate you got (from an exchange or change), or your own fixed rate.","تُخزَّن الأسعار المباشرة لمدة ساعة وتُملأ عند إضافة معاملة. اضغط على عملة لاختيار سعرها: المباشر، أو آخر سعر حصلت عليه (من صرف أو باقٍ)، أو سعرك الثابت.","Les taux en direct sont mis en cache une heure et remplis lors de l'ajout d'une transaction. Touchez une devise pour choisir son taux : en direct, le dernier taux obtenu (change ou monnaie rendue) ou votre taux fixe."
 # ──────────────────────────────────────────────,,,,
 # ABOUT,,,,
 # ──────────────────────────────────────────────,,,,
@@ -1762,13 +1762,19 @@ alloc_entry_withdrawn,,Withdrawn,مسحوب,Retiré
 alloc_entry_revaluation,,Revaluation,إعادة تقييم,Réévaluation
 alloc_entry_moved,,Moved,منقول,Déplacé
 fx_set_rate_title,,Rate for {currency},سعر {currency},Taux pour {currency}
-fx_set_rate_hint,,Your rate is used for new transactions and reports until you switch back to the live rate.,يُستخدم سعرك للمعاملات الجديدة والتقارير حتى تعود إلى السعر المباشر.,Votre taux sert aux nouvelles transactions et aux rapports jusqu'au retour au taux en direct.
-fx_use_live_rate,,Use live rate,استخدام السعر المباشر,Taux en direct
 fx_base_label,,Base currency: {currency},العملة الأساسية: {currency},Devise de base : {currency}
 fx_no_currencies,,Your budget uses only one currency. Add an account in another currency to see its rate here.,ميزانيتك تستخدم عملة واحدة فقط. أضف حساباً بعملة أخرى لترى سعرها هنا.,Votre budget n'utilise qu'une devise. Ajoutez un compte dans une autre devise pour voir son taux ici.
 fx_no_rate_for,,No rate for {currency} yet — tap to set one,لا يوجد سعر لـ {currency} بعد — اضغط لتحديده,Pas encore de taux pour {currency} — touchez pour en définir un
 fx_manual_tag,,Your rate,سعرك,Votre taux
 fx_live_tag,,Live,مباشر,En direct
+fx_source_live,Exchange rates: rate source per currency,Live rate,السعر المباشر,Taux en direct
+fx_source_got,Exchange rates: rate source per currency,Last rate you got,آخر سعر حصلت عليه,Dernier taux obtenu
+fx_source_got_none,Exchange rates: rate source per currency,None yet. It’s saved when you exchange money between accounts or pay with change in another currency.,لا يوجد بعد. يُحفظ عندما تصرف المال بين حساباتك أو تدفع وتأخذ الباقي بعملة أخرى.,Aucun pour l’instant. Il est enregistré quand vous changez de l’argent entre vos comptes ou payez avec une monnaie rendue dans une autre devise.
+fx_source_fixed,Exchange rates: rate source per currency,Your fixed rate,سعرك الثابت,Votre taux fixe
+fx_source_fixed_none,Exchange rates: rate source per currency,Set your own rate,حدّد سعرك الخاص,Définir votre propre taux
+fx_got_tag,Exchange rates: rate source per currency,Rate you got,السعر الذي حصلت عليه,Taux obtenu
+fx_rate_sheet,Exchange rates: rate source per currency,1 {from} in {to},1 {from} بـ{to},1 {from} en {to}
+fx_source_hint,Exchange rates: rate source per currency,New transactions and reports use the rate you choose. On a shared budget everyone uses the same one.,تستخدم المعاملات الجديدة والتقارير السعر الذي تختاره. في الميزانية المشتركة يستخدم الجميع السعر نفسه.,"Les nouvelles transactions et les rapports utilisent le taux choisi. Sur un budget partagé, tout le monde utilise le même."
 tile_exchange_rates_sub,,"Live rates, or set your own",أسعار مباشرة، أو حدّد سعرك,"Taux en direct, ou les vôtres"
 alloc_archived_title,,Archived envelopes,الأظرف المؤرشفة,Enveloppes archivées
 alloc_no_archived,,No archived envelopes,لا توجد أظرف مؤرشفة,Aucune enveloppe archivée

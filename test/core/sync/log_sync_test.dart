@@ -72,7 +72,8 @@ Future<void> household(AppDatabase db) async {
 Future<Account> account(AppDatabase db, String id) =>
     (db.select(db.accounts)..where((a) => a.id.equals(id))).getSingle();
 
-Future<void> later() => Future<void>.delayed(const Duration(milliseconds: 3));
+// Longer than one tick of the system clock (about 15 ms on Windows).
+Future<void> later() => Future<void>.delayed(const Duration(milliseconds: 20));
 
 void main() {
   setUp(() => FlutterSecureStorage.setMockInitialValues({}));
@@ -146,7 +147,9 @@ void main() {
     // Both edits are in the log (Change history will show them).
     final edits = await a.customSelect(
         "SELECT COUNT(*) AS n FROM sync_ops WHERE tbl = 'accounts' "
-        "AND row_id = 'bank' AND kind = 'update'").getSingle();
+        "AND row_id = 'bank' AND kind = 'update' "
+        // Not the last_modified bumps (logged only when the second changed).
+        r"AND json_extract(data, '$.name') IS NOT NULL").getSingle();
     expect(edits.read<int>('n'), 2);
   });
 

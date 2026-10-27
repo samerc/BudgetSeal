@@ -2008,13 +2008,6 @@ class SFr extends S {
   }
 
   @override
-  String get fxSetRateHint =>
-      'Votre taux sert aux nouvelles transactions et aux rapports jusqu\'au retour au taux en direct.';
-
-  @override
-  String get fxUseLiveRate => 'Taux en direct';
-
-  @override
   String fxBaseLabel(String currency) {
     return 'Devise de base : $currency';
   }
@@ -2033,6 +2026,34 @@ class SFr extends S {
 
   @override
   String get fxLiveTag => 'En direct';
+
+  @override
+  String get fxSourceLive => 'Taux en direct';
+
+  @override
+  String get fxSourceGot => 'Dernier taux obtenu';
+
+  @override
+  String get fxSourceGotNone =>
+      'Aucun pour l’instant. Il est enregistré quand vous changez de l’argent entre vos comptes ou payez avec une monnaie rendue dans une autre devise.';
+
+  @override
+  String get fxSourceFixed => 'Votre taux fixe';
+
+  @override
+  String get fxSourceFixedNone => 'Définir votre propre taux';
+
+  @override
+  String get fxGotTag => 'Taux obtenu';
+
+  @override
+  String fxRateSheet(String from, String to) {
+    return '1 $from en $to';
+  }
+
+  @override
+  String get fxSourceHint =>
+      'Les nouvelles transactions et les rapports utilisent le taux choisi. Sur un budget partagé, tout le monde utilise le même.';
 
   @override
   String get tileExchangeRatesSub => 'Taux en direct, ou les vôtres';
@@ -4849,7 +4870,7 @@ class SFr extends S {
 
   @override
   String get fxCacheInfo =>
-      'Les taux en direct sont mis en cache une heure et remplis lors de l\'ajout d\'une transaction. Touchez une devise pour définir votre propre taux — il remplace le taux en direct jusqu\'à ce que vous y reveniez.';
+      'Les taux en direct sont mis en cache une heure et remplis lors de l\'ajout d\'une transaction. Touchez une devise pour choisir son taux : en direct, le dernier taux obtenu (change ou monnaie rendue) ou votre taux fixe.';
 
   @override
   String get aboutTitle => 'À propos';

@@ -388,6 +388,7 @@ Future<({String? error, Future<String> Function()? write})> _prepareCreate(
             deviceId: 'web',
             note: note,
             date: date,
+            rateGot: true,
           ),
     );
   }
@@ -540,6 +541,7 @@ Handler updateTransactionHandler(Ref ref) {
           note: note,
           date: date,
           editing: id,
+          rateGot: true,
         );
       } else {
         await engine.recordTransaction(

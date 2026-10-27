@@ -1349,6 +1349,7 @@ class _AssistedTransactionScreenState
           deviceId: 'local',
           note: _title,
           date: saveDate,
+          rateGot: true,
         );
         LastUsedService.rememberTransfer(_accountId!, _destinationAccountId!);
       } else {

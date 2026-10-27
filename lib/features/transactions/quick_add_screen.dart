@@ -1043,6 +1043,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
           deviceId: 'local',
           note: note,
           date: _saveDate,
+          rateGot: true,
           editing: widget.editTransactionId,
         );
         LastUsedService.rememberTransfer(_accountId!, _destId!);

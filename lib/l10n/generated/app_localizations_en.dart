@@ -1994,13 +1994,6 @@ class SEn extends S {
   }
 
   @override
-  String get fxSetRateHint =>
-      'Your rate is used for new transactions and reports until you switch back to the live rate.';
-
-  @override
-  String get fxUseLiveRate => 'Use live rate';
-
-  @override
   String fxBaseLabel(String currency) {
     return 'Base currency: $currency';
   }
@@ -2019,6 +2012,34 @@ class SEn extends S {
 
   @override
   String get fxLiveTag => 'Live';
+
+  @override
+  String get fxSourceLive => 'Live rate';
+
+  @override
+  String get fxSourceGot => 'Last rate you got';
+
+  @override
+  String get fxSourceGotNone =>
+      'None yet. It’s saved when you exchange money between accounts or pay with change in another currency.';
+
+  @override
+  String get fxSourceFixed => 'Your fixed rate';
+
+  @override
+  String get fxSourceFixedNone => 'Set your own rate';
+
+  @override
+  String get fxGotTag => 'Rate you got';
+
+  @override
+  String fxRateSheet(String from, String to) {
+    return '1 $from in $to';
+  }
+
+  @override
+  String get fxSourceHint =>
+      'New transactions and reports use the rate you choose. On a shared budget everyone uses the same one.';
 
   @override
   String get tileExchangeRatesSub => 'Live rates, or set your own';
@@ -4798,7 +4819,7 @@ class SEn extends S {
 
   @override
   String get fxCacheInfo =>
-      'Live rates are cached for an hour and filled in when you add a transaction. Tap a currency to set your own rate — it is used instead of the live one until you switch back.';
+      'Live rates are cached for an hour and filled in when you add a transaction. Tap a currency to choose its rate: live, the last rate you got (from an exchange or change), or your own fixed rate.';
 
   @override
   String get aboutTitle => 'About';

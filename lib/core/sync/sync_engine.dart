@@ -346,6 +346,7 @@ class SyncEngine {
         'baseCurrency': f.fromCurrency,
         'targetCurrency': f.toCurrency,
         'rate': f.rate,
+        'source': f.source,
         'fetchedAt': f.fetchedAt.toUtc().toIso8601String(),
       };
 
@@ -538,6 +539,7 @@ class SyncEngine {
         fromCurrency: m['baseCurrency'] as String,
         toCurrency: m['targetCurrency'] as String,
         rate: (m['rate'] as num).toDouble(),
+        source: Value(m['source'] as String? ?? 'api'),
         fetchedAt: Value(_parseDate(m['fetchedAt']) ?? DateTime.now()),
       );
 

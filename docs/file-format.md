@@ -190,7 +190,7 @@ Saved transactions for one-tap entry: `id`, `householdId`, `title`, `type`, `amo
 
 ### fxRates
 
-Exchange rates the app has fetched or that were typed in: `id`, `baseCurrency`, `targetCurrency`, `rate` (1 `baseCurrency` = `rate` `targetCurrency`), `fetchedAt`.
+Exchange rates: `id`, `baseCurrency`, `targetCurrency`, `rate` (1 `baseCurrency` = `rate` `targetCurrency`), `fetchedAt`, and `source`: `api` (fetched), `manual` (the user's fixed rate for the pair, in either direction), or `got` (the rate the user last actually got for the pair, from an exchange or a payment with change). Which one a pair uses is in the household's `settingsJson` → `rateSources` (`{"LBP/USD": "got"}`, currencies in alphabetical order); a `manual` rate always wins.
 
 ### objectives (goals and loans)
 
