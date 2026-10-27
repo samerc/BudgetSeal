@@ -2103,6 +2103,29 @@ class SFr extends S {
       'Ajoutez un compte dans une autre devise pour y garder la monnaie.';
 
   @override
+  String get cashCountTitle => 'Compter l’argent liquide';
+
+  @override
+  String get cashCountIntro =>
+      'Combien de billets de chaque valeur avez-vous ? Les pièces et le reste vont dans Autre.';
+
+  @override
+  String get cashCountOther => 'Autre (pièces…)';
+
+  @override
+  String cashCountTotal(String amount) {
+    return 'Compté $amount';
+  }
+
+  @override
+  String get cashCountUse => 'Utiliser ce comptage';
+
+  @override
+  String cashCountHowMany(String note) {
+    return 'Combien de $note ?';
+  }
+
+  @override
   String get tileExchangeRatesSub => 'Taux en direct, ou les vôtres';
 
   @override

@@ -2092,6 +2092,29 @@ class SAr extends S {
   String get payChangeNeedOther => 'أضف حسابًا بعملة أخرى لتحفظ الباقي فيه.';
 
   @override
+  String get cashCountTitle => 'عدّ النقود';
+
+  @override
+  String get cashCountIntro =>
+      'كم ورقة لديك من كل فئة؟ ضع القطع النقدية وغيرها في «أخرى».';
+
+  @override
+  String get cashCountOther => 'أخرى (قطع نقدية…)';
+
+  @override
+  String cashCountTotal(String amount) {
+    return 'المعدود $amount';
+  }
+
+  @override
+  String get cashCountUse => 'اعتمد هذا العدّ';
+
+  @override
+  String cashCountHowMany(String note) {
+    return 'كم ورقة من فئة $note؟';
+  }
+
+  @override
   String get tileExchangeRatesSub => 'أسعار مباشرة، أو حدّد سعرك';
 
   @override

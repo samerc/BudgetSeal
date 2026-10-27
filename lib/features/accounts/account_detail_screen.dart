@@ -183,6 +183,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               onSelected: (v) {
                 if (v == 'adjust') {
                   _showAdjustBalanceSheet();
+                } else if (v == 'count') {
+                  _countCash();
                 } else if (v == 'convert_back') {
                   _convertBack();
                 } else if (v == 'archive') {
@@ -192,6 +194,17 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                 }
               },
               itemBuilder: (_) => [
+                if (_type == 'cash')
+                  PopupMenuItem(
+                    value: 'count',
+                    child: Row(
+                      children: [
+                        const Icon(AppIcons.coins, size: 18),
+                        const SizedBox(width: 10),
+                        Text(l.cashCountTitle),
+                      ],
+                    ),
+                  ),
                 PopupMenuItem(
                   value: 'adjust',
                   child: Row(
@@ -583,6 +596,16 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
   // Adjust balance
   // ---------------------------------------------------------------------------
 
+  /// Count cash by notes (roadmap #3): the count comes back as the real
+  /// balance.
+  Future<void> _countCash() async {
+    final total = await context.push<double>('/count-cash', extra: {
+      'currency': _currencyController.text.trim().toUpperCase(),
+      'balance': _currentBalance,
+    });
+    if (total != null && mounted) await _applyRealBalance(total);
+  }
+
   Future<void> _showAdjustBalanceSheet() async {
     final adjustCtrl = TextEditingController();
     final currency = _currencyController.text.trim().toUpperCase();
@@ -667,8 +690,15 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       }),
     );
     disposeAfterRouteAnimation(adjustCtrl);
+    if (result != null) await _applyRealBalance(result);
+  }
 
-    if (result != null && _currentBalance != null && mounted) {
+  /// Brings the balance to [result], what's really in the account: an
+  /// adjustment for the difference (none when it matches), and the
+  /// account is marked reconciled. Shared by Adjust balance and Count cash.
+  Future<void> _applyRealBalance(double result) async {
+    final tr = S.of(context);
+    if (_currentBalance != null && mounted) {
       final diff = result - _currentBalance!;
       if (diff.abs() < 0.005) {
         // Already matches the bank: just record the reconciliation.

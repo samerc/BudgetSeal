@@ -80,6 +80,7 @@ import 'features/planned/fund_payment_screen.dart';
 import 'features/planned/plan_payment_screen.dart';
 import 'features/transactions/add_transaction_screen.dart';
 import 'features/transactions/assisted_transaction_screen.dart';
+import 'features/accounts/cash_count_screen.dart';
 import 'features/transactions/pay_with_change_screen.dart';
 import 'features/transactions/quick_add_screen.dart';
 import 'features/transactions/transaction_detail_screen.dart';
@@ -172,6 +173,19 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
             final extra = state.extra as Map<String, dynamic>?;
             return slideUpPage(
               child: _EntryModeRouter(extra: extra),
+              state: state,
+            );
+          },
+        ),
+        GoRoute(
+          path: '/count-cash',
+          pageBuilder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>? ?? const {};
+            return slideUpPage(
+              child: CashCountScreen(
+                currency: extra['currency'] as String? ?? 'USD',
+                balance: extra['balance'] as double?,
+              ),
               state: state,
             );
           },

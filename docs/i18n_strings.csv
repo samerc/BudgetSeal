@@ -1788,6 +1788,12 @@ pay_change_spent,"Pay with change (cash in one currency, change in another)",Spe
 pay_change_into,"Pay with change (cash in one currency, change in another)",{amount} change into {account},الباقي {amount} إلى {account},{amount} de monnaie vers {account}
 pay_change_too_much,"Pay with change (cash in one currency, change in another)","The change is worth all you handed over, or more.",قيمة الباقي تساوي ما دفعته أو أكثر.,"La monnaie vaut tout ce que vous avez donné, ou plus."
 pay_change_need_other,"Pay with change (cash in one currency, change in another)",Add an account in another currency to keep change in it.,أضف حسابًا بعملة أخرى لتحفظ الباقي فيه.,Ajoutez un compte dans une autre devise pour y garder la monnaie.
+cash_count_title,Count cash by notes (cash account menu),Count cash,عدّ النقود,Compter l’argent liquide
+cash_count_intro,Count cash by notes (cash account menu),How many of each note do you have? Coins and anything else go in Other.,كم ورقة لديك من كل فئة؟ ضع القطع النقدية وغيرها في «أخرى».,Combien de billets de chaque valeur avez-vous ? Les pièces et le reste vont dans Autre.
+cash_count_other,Count cash by notes (cash account menu),Other (coins…),أخرى (قطع نقدية…),Autre (pièces…)
+cash_count_total,Count cash by notes (cash account menu),Counted {amount},المعدود {amount},Compté {amount}
+cash_count_use,Count cash by notes (cash account menu),Use this count,اعتمد هذا العدّ,Utiliser ce comptage
+cash_count_how_many,Count cash by notes (cash account menu),How many {note}?,كم ورقة من فئة {note}؟,Combien de {note} ?
 tile_exchange_rates_sub,,"Live rates, or set your own",أسعار مباشرة، أو حدّد سعرك,"Taux en direct, ou les vôtres"
 alloc_archived_title,,Archived envelopes,الأظرف المؤرشفة,Enveloppes archivées
 alloc_no_archived,,No archived envelopes,لا توجد أظرف مؤرشفة,Aucune enveloppe archivée

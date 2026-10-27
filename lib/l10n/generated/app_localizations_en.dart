@@ -2089,6 +2089,29 @@ class SEn extends S {
       'Add an account in another currency to keep change in it.';
 
   @override
+  String get cashCountTitle => 'Count cash';
+
+  @override
+  String get cashCountIntro =>
+      'How many of each note do you have? Coins and anything else go in Other.';
+
+  @override
+  String get cashCountOther => 'Other (coins…)';
+
+  @override
+  String cashCountTotal(String amount) {
+    return 'Counted $amount';
+  }
+
+  @override
+  String get cashCountUse => 'Use this count';
+
+  @override
+  String cashCountHowMany(String note) {
+    return 'How many $note?';
+  }
+
+  @override
   String get tileExchangeRatesSub => 'Live rates, or set your own';
 
   @override

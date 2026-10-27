@@ -3735,6 +3735,42 @@ abstract class S {
   /// **'Add an account in another currency to keep change in it.'**
   String get payChangeNeedOther;
 
+  /// Count cash by notes (cash account menu)
+  ///
+  /// In en, this message translates to:
+  /// **'Count cash'**
+  String get cashCountTitle;
+
+  /// Count cash by notes (cash account menu)
+  ///
+  /// In en, this message translates to:
+  /// **'How many of each note do you have? Coins and anything else go in Other.'**
+  String get cashCountIntro;
+
+  /// Count cash by notes (cash account menu)
+  ///
+  /// In en, this message translates to:
+  /// **'Other (coins…)'**
+  String get cashCountOther;
+
+  /// Count cash by notes (cash account menu)
+  ///
+  /// In en, this message translates to:
+  /// **'Counted {amount}'**
+  String cashCountTotal(String amount);
+
+  /// Count cash by notes (cash account menu)
+  ///
+  /// In en, this message translates to:
+  /// **'Use this count'**
+  String get cashCountUse;
+
+  /// Count cash by notes (cash account menu)
+  ///
+  /// In en, this message translates to:
+  /// **'How many {note}?'**
+  String cashCountHowMany(String note);
+
   /// No description provided for @tileExchangeRatesSub.
   ///
   /// In en, this message translates to:
