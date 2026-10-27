@@ -55,6 +55,13 @@ android {
             applicationIdSuffix = ".debug"
             manifestPlaceholders["appLabel"] = "BudgetSeal Dev"
         }
+        // Flutter creates "profile" from debug before the suffix above is
+        // set, so it would build as the Play Store app's id. Profile builds
+        // (speed checks) replace the dev app instead.
+        maybeCreate("profile").apply {
+            applicationIdSuffix = ".debug"
+            manifestPlaceholders["appLabel"] = "BudgetSeal Dev"
+        }
         release {
             signingConfig = if (keystorePropertiesFile.exists())
                 signingConfigs.getByName("release")
