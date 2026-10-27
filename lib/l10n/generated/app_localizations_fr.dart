@@ -2262,6 +2262,34 @@ class SFr extends S {
   }
 
   @override
+  String get shotCheck => 'Vérifier une capture d’écran';
+
+  @override
+  String get shotTitle => 'Comparer à la banque';
+
+  @override
+  String shotIntro(String account) {
+    return 'Montants lus sur votre capture, comparés avec ce qui est enregistré sur $account ces 90 derniers jours. La capture reste sur votre téléphone.';
+  }
+
+  @override
+  String get shotReading => 'Lecture de la capture…';
+
+  @override
+  String get shotMissing => 'Pas encore enregistrées';
+
+  @override
+  String get shotMatched => 'Déjà enregistrées';
+
+  @override
+  String get shotAllMatched =>
+      'Tout ce qui figure sur la capture est enregistré.';
+
+  @override
+  String get shotNone =>
+      'Aucun montant trouvé. Essayez une capture de la liste des opérations de votre banque.';
+
+  @override
   String get allocArchivedTitle => 'Enveloppes archivées';
 
   @override

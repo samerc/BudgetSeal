@@ -2246,6 +2246,33 @@ class SEn extends S {
   }
 
   @override
+  String get shotCheck => 'Check a screenshot';
+
+  @override
+  String get shotTitle => 'Compare with bank';
+
+  @override
+  String shotIntro(String account) {
+    return 'Amounts read from your screenshot, matched with what’s recorded on $account in the last 90 days. The screenshot stays on your phone.';
+  }
+
+  @override
+  String get shotReading => 'Reading the screenshot…';
+
+  @override
+  String get shotMissing => 'Not recorded yet';
+
+  @override
+  String get shotMatched => 'Already recorded';
+
+  @override
+  String get shotAllMatched => 'Everything on the screenshot is recorded.';
+
+  @override
+  String get shotNone =>
+      'No amounts found. Try a screenshot of your bank’s transaction list.';
+
+  @override
   String get allocArchivedTitle => 'Archived envelopes';
 
   @override

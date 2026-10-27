@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:image_picker/image_picker.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -185,6 +186,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   _showAdjustBalanceSheet();
                 } else if (v == 'count') {
                   _countCash();
+                } else if (v == 'shot') {
+                  _checkScreenshot();
                 } else if (v == 'convert_back') {
                   _convertBack();
                 } else if (v == 'archive') {
@@ -205,6 +208,16 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                       ],
                     ),
                   ),
+                PopupMenuItem(
+                  value: 'shot',
+                  child: Row(
+                    children: [
+                      const Icon(AppIcons.image, size: 18),
+                      const SizedBox(width: 10),
+                      Text(l.shotCheck),
+                    ],
+                  ),
+                ),
                 PopupMenuItem(
                   value: 'adjust',
                   child: Row(
@@ -595,6 +608,26 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
   // ---------------------------------------------------------------------------
   // Adjust balance
   // ---------------------------------------------------------------------------
+
+  /// Check the account against a screenshot of the bank's list (roadmap
+  /// #2): pick it from the gallery; read and matched on the phone.
+  Future<void> _checkScreenshot() async {
+    try {
+      final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (picked == null || !mounted) return;
+      await context.push('/check-screenshot',
+          extra: {'accountId': widget.accountId, 'path': picked.path});
+      await _loadAccount();
+    } catch (e) {
+      debugPrint('[AccountDetail] Screenshot check failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(S.of(context).receiptPickFailed),
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
+    }
+  }
 
   /// Count cash by notes (roadmap #3): the count comes back as the real
   /// balance.

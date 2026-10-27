@@ -85,6 +85,7 @@ import 'features/transactions/assisted_transaction_screen.dart';
 import 'features/accounts/cash_count_screen.dart';
 import 'features/capture/bank_alerts_screen.dart';
 import 'features/capture/review_screen.dart';
+import 'features/capture/statement_check_screen.dart';
 import 'features/settings/rules_screen.dart';
 import 'features/transactions/pay_with_change_screen.dart';
 import 'features/transactions/quick_add_screen.dart';
@@ -189,6 +190,19 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
           path: '/bank-alerts',
           pageBuilder: (_, state) =>
               slideUpPage(child: const BankAlertsScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/check-screenshot',
+          pageBuilder: (_, state) {
+            final extra = state.extra as Map<String, dynamic>;
+            return slideUpPage(
+              child: StatementCheckScreen(
+                accountId: extra['accountId'] as String,
+                imagePath: extra['path'] as String,
+              ),
+              state: state,
+            );
+          },
         ),
         GoRoute(
           path: '/review',

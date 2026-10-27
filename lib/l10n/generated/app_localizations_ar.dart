@@ -2248,6 +2248,32 @@ class SAr extends S {
   }
 
   @override
+  String get shotCheck => 'تحقّق من لقطة شاشة';
+
+  @override
+  String get shotTitle => 'مطابقة مع البنك';
+
+  @override
+  String shotIntro(String account) {
+    return 'مبالغ مقروءة من لقطة الشاشة، مطابَقة مع ما سُجّل على $account خلال آخر 90 يومًا. تبقى اللقطة على هاتفك.';
+  }
+
+  @override
+  String get shotReading => 'جارٍ قراءة اللقطة…';
+
+  @override
+  String get shotMissing => 'غير مسجّلة بعد';
+
+  @override
+  String get shotMatched => 'مسجّلة';
+
+  @override
+  String get shotAllMatched => 'كل ما في اللقطة مسجّل.';
+
+  @override
+  String get shotNone => 'لم يُعثر على مبالغ. جرّب لقطة لقائمة معاملات البنك.';
+
+  @override
   String get allocArchivedTitle => 'الأظرف المؤرشفة';
 
   @override

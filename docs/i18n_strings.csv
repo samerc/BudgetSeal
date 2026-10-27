@@ -1831,6 +1831,14 @@ review_dismiss,Bank alerts (notifications from bank apps) and To review,Dismiss,
 review_dismissed,Bank alerts (notifications from bank apps) and To review,Dismissed,تم التجاهل,Ignorée
 review_no_amount,Bank alerts (notifications from bank apps) and To review,No amount found,لم يُعثر على مبلغ,Aucun montant trouvé
 review_card,Bank alerts (notifications from bank apps) and To review,"{n, plural, =1{1 payment to review} other{{n} payments to review}}","{n, plural, =1{دفعة واحدة للمراجعة} other{{n} دفعات للمراجعة}}","{n, plural, =1{1 paiement à vérifier} other{{n} paiements à vérifier}}"
+shot_check,Check an account against a screenshot of the bank list,Check a screenshot,تحقّق من لقطة شاشة,Vérifier une capture d’écran
+shot_title,Check an account against a screenshot of the bank list,Compare with bank,مطابقة مع البنك,Comparer à la banque
+shot_intro,Check an account against a screenshot of the bank list,"Amounts read from your screenshot, matched with what’s recorded on {account} in the last 90 days. The screenshot stays on your phone.",مبالغ مقروءة من لقطة الشاشة، مطابَقة مع ما سُجّل على {account} خلال آخر 90 يومًا. تبقى اللقطة على هاتفك.,"Montants lus sur votre capture, comparés avec ce qui est enregistré sur {account} ces 90 derniers jours. La capture reste sur votre téléphone."
+shot_reading,Check an account against a screenshot of the bank list,Reading the screenshot…,جارٍ قراءة اللقطة…,Lecture de la capture…
+shot_missing,Check an account against a screenshot of the bank list,Not recorded yet,غير مسجّلة بعد,Pas encore enregistrées
+shot_matched,Check an account against a screenshot of the bank list,Already recorded,مسجّلة,Déjà enregistrées
+shot_all_matched,Check an account against a screenshot of the bank list,Everything on the screenshot is recorded.,كل ما في اللقطة مسجّل.,Tout ce qui figure sur la capture est enregistré.
+shot_none,Check an account against a screenshot of the bank list,No amounts found. Try a screenshot of your bank’s transaction list.,لم يُعثر على مبالغ. جرّب لقطة لقائمة معاملات البنك.,Aucun montant trouvé. Essayez une capture de la liste des opérations de votre banque.
 alloc_archived_title,,Archived envelopes,الأظرف المؤرشفة,Enveloppes archivées
 alloc_no_archived,,No archived envelopes,لا توجد أظرف مؤرشفة,Aucune enveloppe archivée
 alloc_unarchived,,{name} unarchived,تم إلغاء أرشفة {name},{name} désarchivée

@@ -3993,6 +3993,54 @@ abstract class S {
   /// **'{n, plural, =1{1 payment to review} other{{n} payments to review}}'**
   String reviewCard(int n);
 
+  /// Check an account against a screenshot of the bank list
+  ///
+  /// In en, this message translates to:
+  /// **'Check a screenshot'**
+  String get shotCheck;
+
+  /// Check an account against a screenshot of the bank list
+  ///
+  /// In en, this message translates to:
+  /// **'Compare with bank'**
+  String get shotTitle;
+
+  /// Check an account against a screenshot of the bank list
+  ///
+  /// In en, this message translates to:
+  /// **'Amounts read from your screenshot, matched with what’s recorded on {account} in the last 90 days. The screenshot stays on your phone.'**
+  String shotIntro(String account);
+
+  /// Check an account against a screenshot of the bank list
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the screenshot…'**
+  String get shotReading;
+
+  /// Check an account against a screenshot of the bank list
+  ///
+  /// In en, this message translates to:
+  /// **'Not recorded yet'**
+  String get shotMissing;
+
+  /// Check an account against a screenshot of the bank list
+  ///
+  /// In en, this message translates to:
+  /// **'Already recorded'**
+  String get shotMatched;
+
+  /// Check an account against a screenshot of the bank list
+  ///
+  /// In en, this message translates to:
+  /// **'Everything on the screenshot is recorded.'**
+  String get shotAllMatched;
+
+  /// Check an account against a screenshot of the bank list
+  ///
+  /// In en, this message translates to:
+  /// **'No amounts found. Try a screenshot of your bank’s transaction list.'**
+  String get shotNone;
+
   /// No description provided for @allocArchivedTitle.
   ///
   /// In en, this message translates to:
