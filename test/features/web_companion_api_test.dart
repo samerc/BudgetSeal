@@ -646,6 +646,8 @@ void main() {
     final a = await auth.submitPin('1234');
     await auth.submitPin('1234');
     expect(auth.connectedCount(), 2);
+    // Let the clock move past the sign-ins (it can read the same instant).
+    await Future<void>.delayed(const Duration(milliseconds: 20));
     expect(auth.connectedCount(within: Duration.zero), 0);
 
     final feed = ChangeFeed(db);
