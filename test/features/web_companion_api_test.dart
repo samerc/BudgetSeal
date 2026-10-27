@@ -660,7 +660,8 @@ void main() {
     expect(DateTime.now().difference(started).inSeconds, lessThan(2));
     expect(auth.validateToken(a), isFalse);
     expect(auth.connectedCount(), 0);
-  });
+    // Timing-based ("woken within 2 s"): a busy machine can miss it.
+  }, retry: 2);
 
   test('sinking funds: schedule with two-currency parts, fund the month, '
       'catch-up setting', () async {

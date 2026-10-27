@@ -34,6 +34,8 @@ dart run flutter_launcher_icons      # artwork: assets/icon/source/app_icon.svg
 
 Manual checklists: `test/manual_test_script.md`, `test/web_companion_test_script.md`.
 
+CI: `.github/workflows/ci.yml` runs on every push to `main` (gen-l10n is current, `dart analyze lib/`, `flutter test`) — keep it green. `test/core/engine/money_model_test.dart` checks every engine change against its own model of the balances; add new money operations to it. Details: [docs/dev/data.md](docs/dev/data.md#testing-the-money).
+
 ## Layout
 
 `lib/app.dart` (routes, lifecycle, auto-sync) · `lib/main.dart` · `lib/core/` (database + DAOs, engines, providers, sync, fx, services) · `lib/features/<feature>/` (screens) · `lib/shared/` (theme, utils, widgets) · `lib/l10n/` (ARBs + generated `S`) · `assets/web/` (Web Companion SPA + `help.html`) · `docs/i18n_strings.csv` (master strings) · `tool/` (i18n + icon scripts).

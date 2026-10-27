@@ -55,6 +55,12 @@ Notable additions:
 - `accounts.isTravel` — BOOLEAN, marks temporary travel wallets (auto-archive at zero)
 - `transactions.status` — nullable TEXT ('upcoming', 'skipped', or null for posted)
 
+## Testing the money
+
+`Sum(accounts) = Unallocated + Sum(envelopes)` holds by construction (`unallocatedByCurrency` is the difference), so `checkInvariant()` can't catch a wrong balance — it only flags a negative Ready to assign. The real check is **`test/core/engine/money_model_test.dart`**: a model-based test that keeps its own plain map of every account and envelope balance, runs random operations through `AllocationEngine` (income; expenses incl. subcategory → parent envelope, an archived envelope, unlinked categories and lines typed in another currency; splits over accounts; cross-currency transfers; fund; `moveMoney` incl. refused moves; delete; recategorise and move-to-account via `rewriteTransaction`) and compares after every step. Each run ends with merging its own sync file (must change 0 rows), restoring it into a fresh DB (same balances) and `changeBaseCurrency` (no balance moves). 25 seeds × 60 steps, ~8 s. A failure prints the seed and the step log; rerun with `--plain-name "seed N"`. When adding a money operation, add it to the test's switch with its expected effect. Proven to catch a broken cross-currency transfer (Oct 27 2026).
+
+CI (`.github/workflows/ci.yml`, ubuntu, Flutter 3.47.5): gen-l10n leaves `lib/l10n/generated` unchanged, `dart analyze lib/`, `flutter test`. The repo is public, so Actions minutes are free. The timing-based Web Companion "sign out all" test has `retry: 2`.
+
 ## Security
 
 ### Google Drive Queries
