@@ -9,6 +9,7 @@ import '../../core/database/daos/allocations_dao.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
+import '../../core/providers/family_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
@@ -26,7 +27,7 @@ Future<void> showCategoryEnvelopeSheet(
   final tr = S.of(context);
   final router = GoRouter.of(context);
   final messenger = ScaffoldMessenger.of(context);
-  final allocations = container.read(allocationsProvider).value ?? const [];
+  final allocations = container.read(visibleAllocationsProvider).value ?? const [];
 
   // '' = unlink, '+' = create, else an allocation id.
   final picked = await showModalBottomSheet<String>(

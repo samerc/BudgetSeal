@@ -87,6 +87,7 @@ import 'features/capture/bank_alerts_screen.dart';
 import 'features/capture/review_screen.dart';
 import 'features/capture/statement_check_screen.dart';
 import 'features/forecast/forecast_screen.dart';
+import 'features/settings/members_screen.dart';
 import 'features/settings/rules_screen.dart';
 import 'features/transactions/pay_with_change_screen.dart';
 import 'features/transactions/quick_add_screen.dart';
@@ -214,6 +215,11 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
           path: '/review',
           pageBuilder: (_, state) =>
               slideUpPage(child: const ReviewScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/members',
+          pageBuilder: (_, state) =>
+              slideUpPage(child: const MembersScreen(), state: state),
         ),
         GoRoute(
           path: '/rules',

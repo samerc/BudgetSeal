@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/engine_provider.dart';
+import '../../core/providers/family_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
@@ -31,7 +32,7 @@ Future<bool> showMoveMoneySheet(
   // Capture before the sheet (S.of inside StatefulBuilder crashes).
   final tr = S.of(context);
   final messenger = ScaffoldMessenger.of(context);
-  final allocations = ref.read(allocationsProvider).value ?? const [];
+  final allocations = ref.read(visibleAllocationsProvider).value ?? const [];
   final unallocated = ref.read(unallocatedProvider).value ?? const {};
   final cur = currency ??
       ref.read(householdProvider).value?.baseCurrency ??

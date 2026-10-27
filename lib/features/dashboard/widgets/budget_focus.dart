@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/database/app_database.dart' show Category;
 import '../../../core/providers/allocations_provider.dart';
 import '../../../core/providers/categories_provider.dart';
+import '../../../core/providers/family_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/design_tokens.dart';
@@ -26,7 +27,7 @@ class BudgetFocus extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final allocations = ref.watch(allocationsProvider).value ?? const [];
+    final allocations = ref.watch(visibleAllocationsProvider).value ?? const [];
     final unallocated = ref.watch(unallocatedProvider).value ?? const {};
     final categories = ref.watch(categoriesProvider).value ?? const [];
 

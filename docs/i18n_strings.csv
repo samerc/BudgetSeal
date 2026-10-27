@@ -1854,6 +1854,20 @@ forecast_upcoming,Forecast: the next 90 days and safe to spend today,Coming up,�
 forecast_estimate,Forecast: the next 90 days and safe to spend today,Usual income (estimate),الدخل المعتاد (تقدير),Revenu habituel (estimation)
 forecast_empty,Forecast: the next 90 days and safe to spend today,"Add a recurring bill or income, or a planned payment, to see what’s coming.",أضف فاتورة أو دخلًا متكررًا، أو دفعة مخطَّطة، لترى ما هو قادم.,"Ajoutez une facture ou un revenu récurrent, ou un paiement prévu, pour voir ce qui arrive."
 forecast_per_day,Forecast: the next 90 days and safe to spend today,{amount} a day,{amount} في اليوم,{amount} par jour
+family_private,"Family: members, roles, private envelopes",Private,خاص,Privé
+family_private_line,"Family: members, roles, private envelopes",Private envelopes,مغلّفات خاصة,Enveloppes privées
+family_private_switch,"Family: members, roles, private envelopes",Private,خاص,Privée
+family_private_sub,"Family: members, roles, private envelopes",Only its owner sees this envelope and what’s spent from it. The others see “Private” and the amount. It still syncs to their phones.,لا يرى هذا المغلّف وما يُنفق منه إلا صاحبه. يرى الآخرون «خاص» والمبلغ. ويبقى متزامنًا مع هواتفهم.,Seul son propriétaire voit cette enveloppe et ce qui en est dépensé. Les autres voient « Privé » et le montant. Elle reste synchronisée sur leurs téléphones.
+family_owner,"Family: members, roles, private envelopes",Belongs to,تعود إلى,Appartient à
+family_owner_everyone,"Family: members, roles, private envelopes",Everyone,الجميع,Tout le monde
+tile_members,"Family: members, roles, private envelopes",Members,الأعضاء,Membres
+tile_members_sub,"Family: members, roles, private envelopes",Grown-ups and kids on this budget,الكبار والصغار في هذه الميزانية,Adultes et enfants de ce budget
+members_intro,"Family: members, roles, private envelopes",Kids see only their own envelopes and ask a grown-up for money; grown-ups see everything except others’ private envelopes and approve requests.,لا يرى الصغار إلا مغلّفاتهم ويطلبون المال من أحد الكبار؛ ويرى الكبار كل شيء عدا المغلّفات الخاصة بالآخرين ويوافقون على الطلبات.,Les enfants ne voient que leurs enveloppes et demandent de l’argent à un adulte ; les adultes voient tout sauf les enveloppes privées des autres et approuvent les demandes.
+members_kid,"Family: members, roles, private envelopes",Kid,صغير,Enfant
+members_grownup,"Family: members, roles, private envelopes",Grown-up,كبير,Adulte
+members_you,"Family: members, roles, private envelopes",{name} (you),{name} (أنت),{name} (vous)
+members_only_grownups,"Family: members, roles, private envelopes",Only a grown-up can change this.,وحده أحد الكبار يمكنه تغيير ذلك.,Seul un adulte peut modifier cela.
+members_none,"Family: members, roles, private envelopes",Members appear here once they’ve joined this budget and named themselves.,يظهر الأعضاء هنا بعد انضمامهم إلى هذه الميزانية وتسمية أنفسهم.,Les membres apparaissent ici une fois qu’ils ont rejoint ce budget et indiqué leur nom.
 alloc_archived_title,,Archived envelopes,الأظرف المؤرشفة,Enveloppes archivées
 alloc_no_archived,,No archived envelopes,لا توجد أظرف مؤرشفة,Aucune enveloppe archivée
 alloc_unarchived,,{name} unarchived,تم إلغاء أرشفة {name},{name} désarchivée

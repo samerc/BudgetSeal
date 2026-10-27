@@ -57,7 +57,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 27;
+  int get schemaVersion => 28;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -231,6 +231,11 @@ class AppDatabase extends _$AppDatabase {
           if (from < 27) {
             // Rules for captured payments (shop → category/account).
             await _createTableIfMissing(m, captureRules);
+          }
+          if (from < 28) {
+            // Family: an envelope's owner, and private envelopes.
+            await _addColumnIfMissing(m, allocations, allocations.ownerDeviceId);
+            await _addColumnIfMissing(m, allocations, allocations.isPrivate);
           }
         },
         beforeOpen: (_) async {

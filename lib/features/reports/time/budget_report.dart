@@ -6,6 +6,7 @@ import '../../../core/database/daos/ledger_dao.dart';
 import '../../../core/engine/budget_history.dart';
 import '../../../core/providers/allocations_provider.dart';
 import '../../../core/providers/database_provider.dart';
+import '../../../core/providers/family_provider.dart';
 import '../../../core/providers/household_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/theme/app_colors.dart';
@@ -23,7 +24,7 @@ final envelopeHistoryProvider =
   final period = ref.watch(reportPeriodProvider);
   final household = ref.watch(householdProvider).value;
   // Recomputed when balances move.
-  ref.watch(allocationsProvider);
+  ref.watch(visibleAllocationsProvider);
   if (household == null) return const {};
   final dao = LedgerDao(ref.read(databaseProvider));
   return {
@@ -56,7 +57,7 @@ class _BudgetReportState extends ConsumerState<BudgetReport> {
     final period = ref.watch(reportPeriodProvider);
     final history = ref.watch(envelopeHistoryProvider);
     final names = {
-      for (final a in ref.watch(allocationsProvider).value ??
+      for (final a in ref.watch(visibleAllocationsProvider).value ??
           const <AllocationWithBalance>[])
         a.data.allocation.id: a.data.allocation.name,
     };

@@ -14,6 +14,7 @@ import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/date_format_provider.dart';
+import '../../core/providers/family_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/report_stats_provider.dart';
 import '../../core/providers/transactions_provider.dart';
@@ -1390,7 +1391,7 @@ class _InsightsTabState extends ConsumerState<_InsightsTab> {
         ref.watch(householdProvider).value?.baseCurrency ?? 'USD';
     final categories = ref.watch(categoriesProvider).value ?? [];
     final categoryMap = {for (final c in categories) c.id: c};
-    final allocationsAsync = ref.watch(allocationsProvider);
+    final allocationsAsync = ref.watch(visibleAllocationsProvider);
     final ageAsync = ref.watch(ageOfMoneyProvider);
 
     return txAsync.when(

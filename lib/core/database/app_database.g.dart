@@ -1762,6 +1762,22 @@ class $AllocationsTable extends Allocations
   late final GeneratedColumn<String> secondTargetCurrency =
       GeneratedColumn<String>('second_target_currency', aliasedName, true,
           type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _ownerDeviceIdMeta =
+      const VerificationMeta('ownerDeviceId');
+  @override
+  late final GeneratedColumn<String> ownerDeviceId = GeneratedColumn<String>(
+      'owner_device_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _isPrivateMeta =
+      const VerificationMeta('isPrivate');
+  @override
+  late final GeneratedColumn<bool> isPrivate = GeneratedColumn<bool>(
+      'is_private', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_private" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _iconMeta = const VerificationMeta('icon');
   @override
   late final GeneratedColumn<String> icon = GeneratedColumn<String>(
@@ -1844,6 +1860,8 @@ class $AllocationsTable extends Allocations
         targetCurrency,
         secondTargetAmount,
         secondTargetCurrency,
+        ownerDeviceId,
+        isPrivate,
         icon,
         autoReset,
         archived,
@@ -1929,6 +1947,16 @@ class $AllocationsTable extends Allocations
           secondTargetCurrency.isAcceptableOrUnknown(
               data['second_target_currency']!, _secondTargetCurrencyMeta));
     }
+    if (data.containsKey('owner_device_id')) {
+      context.handle(
+          _ownerDeviceIdMeta,
+          ownerDeviceId.isAcceptableOrUnknown(
+              data['owner_device_id']!, _ownerDeviceIdMeta));
+    }
+    if (data.containsKey('is_private')) {
+      context.handle(_isPrivateMeta,
+          isPrivate.isAcceptableOrUnknown(data['is_private']!, _isPrivateMeta));
+    }
     if (data.containsKey('icon')) {
       context.handle(
           _iconMeta, icon.isAcceptableOrUnknown(data['icon']!, _iconMeta));
@@ -2003,6 +2031,10 @@ class $AllocationsTable extends Allocations
       secondTargetCurrency: attachedDatabase.typeMapping.read(
           DriftSqlType.string,
           data['${effectivePrefix}second_target_currency']),
+      ownerDeviceId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}owner_device_id']),
+      isPrivate: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_private'])!,
       icon: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}icon']),
       autoReset: attachedDatabase.typeMapping
@@ -2047,6 +2079,13 @@ class Allocation extends DataClass implements Insertable<Allocation> {
   final double? secondTargetAmount;
   final String? secondTargetCurrency;
 
+  /// Family (v28, roadmap #5): whose envelope it is (a member's device id;
+  /// a kid's envelopes are theirs), and whether it's private — then the
+  /// other members' phones hide it, and its transactions show as "Private".
+  /// The data still syncs to them.
+  final String? ownerDeviceId;
+  final bool isPrivate;
+
   /// Emoji icon for this envelope (e.g. '⛽', '🛒'). Null = use linked category icon.
   final String? icon;
 
@@ -2081,6 +2120,8 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       this.targetCurrency,
       this.secondTargetAmount,
       this.secondTargetCurrency,
+      this.ownerDeviceId,
+      required this.isPrivate,
       this.icon,
       required this.autoReset,
       required this.archived,
@@ -2112,6 +2153,10 @@ class Allocation extends DataClass implements Insertable<Allocation> {
     if (!nullToAbsent || secondTargetCurrency != null) {
       map['second_target_currency'] = Variable<String>(secondTargetCurrency);
     }
+    if (!nullToAbsent || ownerDeviceId != null) {
+      map['owner_device_id'] = Variable<String>(ownerDeviceId);
+    }
+    map['is_private'] = Variable<bool>(isPrivate);
     if (!nullToAbsent || icon != null) {
       map['icon'] = Variable<String>(icon);
     }
@@ -2151,6 +2196,10 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       secondTargetCurrency: secondTargetCurrency == null && nullToAbsent
           ? const Value.absent()
           : Value(secondTargetCurrency),
+      ownerDeviceId: ownerDeviceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ownerDeviceId),
+      isPrivate: Value(isPrivate),
       icon: icon == null && nullToAbsent ? const Value.absent() : Value(icon),
       autoReset: Value(autoReset),
       archived: Value(archived),
@@ -2184,6 +2233,8 @@ class Allocation extends DataClass implements Insertable<Allocation> {
           serializer.fromJson<double?>(json['secondTargetAmount']),
       secondTargetCurrency:
           serializer.fromJson<String?>(json['secondTargetCurrency']),
+      ownerDeviceId: serializer.fromJson<String?>(json['ownerDeviceId']),
+      isPrivate: serializer.fromJson<bool>(json['isPrivate']),
       icon: serializer.fromJson<String?>(json['icon']),
       autoReset: serializer.fromJson<bool>(json['autoReset']),
       archived: serializer.fromJson<bool>(json['archived']),
@@ -2210,6 +2261,8 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       'targetCurrency': serializer.toJson<String?>(targetCurrency),
       'secondTargetAmount': serializer.toJson<double?>(secondTargetAmount),
       'secondTargetCurrency': serializer.toJson<String?>(secondTargetCurrency),
+      'ownerDeviceId': serializer.toJson<String?>(ownerDeviceId),
+      'isPrivate': serializer.toJson<bool>(isPrivate),
       'icon': serializer.toJson<String?>(icon),
       'autoReset': serializer.toJson<bool>(autoReset),
       'archived': serializer.toJson<bool>(archived),
@@ -2234,6 +2287,8 @@ class Allocation extends DataClass implements Insertable<Allocation> {
           Value<String?> targetCurrency = const Value.absent(),
           Value<double?> secondTargetAmount = const Value.absent(),
           Value<String?> secondTargetCurrency = const Value.absent(),
+          Value<String?> ownerDeviceId = const Value.absent(),
+          bool? isPrivate,
           Value<String?> icon = const Value.absent(),
           bool? autoReset,
           bool? archived,
@@ -2261,6 +2316,9 @@ class Allocation extends DataClass implements Insertable<Allocation> {
         secondTargetCurrency: secondTargetCurrency.present
             ? secondTargetCurrency.value
             : this.secondTargetCurrency,
+        ownerDeviceId:
+            ownerDeviceId.present ? ownerDeviceId.value : this.ownerDeviceId,
+        isPrivate: isPrivate ?? this.isPrivate,
         icon: icon.present ? icon.value : this.icon,
         autoReset: autoReset ?? this.autoReset,
         archived: archived ?? this.archived,
@@ -2295,6 +2353,10 @@ class Allocation extends DataClass implements Insertable<Allocation> {
       secondTargetCurrency: data.secondTargetCurrency.present
           ? data.secondTargetCurrency.value
           : this.secondTargetCurrency,
+      ownerDeviceId: data.ownerDeviceId.present
+          ? data.ownerDeviceId.value
+          : this.ownerDeviceId,
+      isPrivate: data.isPrivate.present ? data.isPrivate.value : this.isPrivate,
       icon: data.icon.present ? data.icon.value : this.icon,
       autoReset: data.autoReset.present ? data.autoReset.value : this.autoReset,
       archived: data.archived.present ? data.archived.value : this.archived,
@@ -2324,6 +2386,8 @@ class Allocation extends DataClass implements Insertable<Allocation> {
           ..write('targetCurrency: $targetCurrency, ')
           ..write('secondTargetAmount: $secondTargetAmount, ')
           ..write('secondTargetCurrency: $secondTargetCurrency, ')
+          ..write('ownerDeviceId: $ownerDeviceId, ')
+          ..write('isPrivate: $isPrivate, ')
           ..write('icon: $icon, ')
           ..write('autoReset: $autoReset, ')
           ..write('archived: $archived, ')
@@ -2338,27 +2402,30 @@ class Allocation extends DataClass implements Insertable<Allocation> {
   }
 
   @override
-  int get hashCode => Object.hash(
-      id,
-      householdId,
-      name,
-      categoryId,
-      type,
-      periodicity,
-      rollover,
-      targetAmount,
-      targetCurrency,
-      secondTargetAmount,
-      secondTargetCurrency,
-      icon,
-      autoReset,
-      archived,
-      sortOrder,
-      behindMode,
-      deviceId,
-      createdAt,
-      lastModified,
-      deleted);
+  int get hashCode => Object.hashAll([
+        id,
+        householdId,
+        name,
+        categoryId,
+        type,
+        periodicity,
+        rollover,
+        targetAmount,
+        targetCurrency,
+        secondTargetAmount,
+        secondTargetCurrency,
+        ownerDeviceId,
+        isPrivate,
+        icon,
+        autoReset,
+        archived,
+        sortOrder,
+        behindMode,
+        deviceId,
+        createdAt,
+        lastModified,
+        deleted
+      ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2374,6 +2441,8 @@ class Allocation extends DataClass implements Insertable<Allocation> {
           other.targetCurrency == this.targetCurrency &&
           other.secondTargetAmount == this.secondTargetAmount &&
           other.secondTargetCurrency == this.secondTargetCurrency &&
+          other.ownerDeviceId == this.ownerDeviceId &&
+          other.isPrivate == this.isPrivate &&
           other.icon == this.icon &&
           other.autoReset == this.autoReset &&
           other.archived == this.archived &&
@@ -2397,6 +2466,8 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
   final Value<String?> targetCurrency;
   final Value<double?> secondTargetAmount;
   final Value<String?> secondTargetCurrency;
+  final Value<String?> ownerDeviceId;
+  final Value<bool> isPrivate;
   final Value<String?> icon;
   final Value<bool> autoReset;
   final Value<bool> archived;
@@ -2419,6 +2490,8 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
     this.targetCurrency = const Value.absent(),
     this.secondTargetAmount = const Value.absent(),
     this.secondTargetCurrency = const Value.absent(),
+    this.ownerDeviceId = const Value.absent(),
+    this.isPrivate = const Value.absent(),
     this.icon = const Value.absent(),
     this.autoReset = const Value.absent(),
     this.archived = const Value.absent(),
@@ -2442,6 +2515,8 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
     this.targetCurrency = const Value.absent(),
     this.secondTargetAmount = const Value.absent(),
     this.secondTargetCurrency = const Value.absent(),
+    this.ownerDeviceId = const Value.absent(),
+    this.isPrivate = const Value.absent(),
     this.icon = const Value.absent(),
     this.autoReset = const Value.absent(),
     this.archived = const Value.absent(),
@@ -2469,6 +2544,8 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
     Expression<String>? targetCurrency,
     Expression<double>? secondTargetAmount,
     Expression<String>? secondTargetCurrency,
+    Expression<String>? ownerDeviceId,
+    Expression<bool>? isPrivate,
     Expression<String>? icon,
     Expression<bool>? autoReset,
     Expression<bool>? archived,
@@ -2494,6 +2571,8 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
         'second_target_amount': secondTargetAmount,
       if (secondTargetCurrency != null)
         'second_target_currency': secondTargetCurrency,
+      if (ownerDeviceId != null) 'owner_device_id': ownerDeviceId,
+      if (isPrivate != null) 'is_private': isPrivate,
       if (icon != null) 'icon': icon,
       if (autoReset != null) 'auto_reset': autoReset,
       if (archived != null) 'archived': archived,
@@ -2519,6 +2598,8 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
       Value<String?>? targetCurrency,
       Value<double?>? secondTargetAmount,
       Value<String?>? secondTargetCurrency,
+      Value<String?>? ownerDeviceId,
+      Value<bool>? isPrivate,
       Value<String?>? icon,
       Value<bool>? autoReset,
       Value<bool>? archived,
@@ -2541,6 +2622,8 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
       targetCurrency: targetCurrency ?? this.targetCurrency,
       secondTargetAmount: secondTargetAmount ?? this.secondTargetAmount,
       secondTargetCurrency: secondTargetCurrency ?? this.secondTargetCurrency,
+      ownerDeviceId: ownerDeviceId ?? this.ownerDeviceId,
+      isPrivate: isPrivate ?? this.isPrivate,
       icon: icon ?? this.icon,
       autoReset: autoReset ?? this.autoReset,
       archived: archived ?? this.archived,
@@ -2591,6 +2674,12 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
       map['second_target_currency'] =
           Variable<String>(secondTargetCurrency.value);
     }
+    if (ownerDeviceId.present) {
+      map['owner_device_id'] = Variable<String>(ownerDeviceId.value);
+    }
+    if (isPrivate.present) {
+      map['is_private'] = Variable<bool>(isPrivate.value);
+    }
     if (icon.present) {
       map['icon'] = Variable<String>(icon.value);
     }
@@ -2638,6 +2727,8 @@ class AllocationsCompanion extends UpdateCompanion<Allocation> {
           ..write('targetCurrency: $targetCurrency, ')
           ..write('secondTargetAmount: $secondTargetAmount, ')
           ..write('secondTargetCurrency: $secondTargetCurrency, ')
+          ..write('ownerDeviceId: $ownerDeviceId, ')
+          ..write('isPrivate: $isPrivate, ')
           ..write('icon: $icon, ')
           ..write('autoReset: $autoReset, ')
           ..write('archived: $archived, ')
@@ -11466,6 +11557,8 @@ typedef $$AllocationsTableCreateCompanionBuilder = AllocationsCompanion
   Value<String?> targetCurrency,
   Value<double?> secondTargetAmount,
   Value<String?> secondTargetCurrency,
+  Value<String?> ownerDeviceId,
+  Value<bool> isPrivate,
   Value<String?> icon,
   Value<bool> autoReset,
   Value<bool> archived,
@@ -11490,6 +11583,8 @@ typedef $$AllocationsTableUpdateCompanionBuilder = AllocationsCompanion
   Value<String?> targetCurrency,
   Value<double?> secondTargetAmount,
   Value<String?> secondTargetCurrency,
+  Value<String?> ownerDeviceId,
+  Value<bool> isPrivate,
   Value<String?> icon,
   Value<bool> autoReset,
   Value<bool> archived,
@@ -11593,6 +11688,12 @@ class $$AllocationsTableFilterComposer
   ColumnFilters<String> get secondTargetCurrency => $composableBuilder(
       column: $table.secondTargetCurrency,
       builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get ownerDeviceId => $composableBuilder(
+      column: $table.ownerDeviceId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isPrivate => $composableBuilder(
+      column: $table.isPrivate, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get icon => $composableBuilder(
       column: $table.icon, builder: (column) => ColumnFilters(column));
@@ -11727,6 +11828,13 @@ class $$AllocationsTableOrderingComposer
       column: $table.secondTargetCurrency,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get ownerDeviceId => $composableBuilder(
+      column: $table.ownerDeviceId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isPrivate => $composableBuilder(
+      column: $table.isPrivate, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get icon => $composableBuilder(
       column: $table.icon, builder: (column) => ColumnOrderings(column));
 
@@ -11814,6 +11922,12 @@ class $$AllocationsTableAnnotationComposer
 
   GeneratedColumn<String> get secondTargetCurrency => $composableBuilder(
       column: $table.secondTargetCurrency, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerDeviceId => $composableBuilder(
+      column: $table.ownerDeviceId, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPrivate =>
+      $composableBuilder(column: $table.isPrivate, builder: (column) => column);
 
   GeneratedColumn<String> get icon =>
       $composableBuilder(column: $table.icon, builder: (column) => column);
@@ -11942,6 +12056,8 @@ class $$AllocationsTableTableManager extends RootTableManager<
             Value<String?> targetCurrency = const Value.absent(),
             Value<double?> secondTargetAmount = const Value.absent(),
             Value<String?> secondTargetCurrency = const Value.absent(),
+            Value<String?> ownerDeviceId = const Value.absent(),
+            Value<bool> isPrivate = const Value.absent(),
             Value<String?> icon = const Value.absent(),
             Value<bool> autoReset = const Value.absent(),
             Value<bool> archived = const Value.absent(),
@@ -11965,6 +12081,8 @@ class $$AllocationsTableTableManager extends RootTableManager<
             targetCurrency: targetCurrency,
             secondTargetAmount: secondTargetAmount,
             secondTargetCurrency: secondTargetCurrency,
+            ownerDeviceId: ownerDeviceId,
+            isPrivate: isPrivate,
             icon: icon,
             autoReset: autoReset,
             archived: archived,
@@ -11988,6 +12106,8 @@ class $$AllocationsTableTableManager extends RootTableManager<
             Value<String?> targetCurrency = const Value.absent(),
             Value<double?> secondTargetAmount = const Value.absent(),
             Value<String?> secondTargetCurrency = const Value.absent(),
+            Value<String?> ownerDeviceId = const Value.absent(),
+            Value<bool> isPrivate = const Value.absent(),
             Value<String?> icon = const Value.absent(),
             Value<bool> autoReset = const Value.absent(),
             Value<bool> archived = const Value.absent(),
@@ -12011,6 +12131,8 @@ class $$AllocationsTableTableManager extends RootTableManager<
             targetCurrency: targetCurrency,
             secondTargetAmount: secondTargetAmount,
             secondTargetCurrency: secondTargetCurrency,
+            ownerDeviceId: ownerDeviceId,
+            isPrivate: isPrivate,
             icon: icon,
             autoReset: autoReset,
             archived: archived,

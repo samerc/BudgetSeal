@@ -114,6 +114,7 @@ What money is spent on or earned from.
 | `autoReset` | Whether it is reset automatically at the start of a period. |
 | `sortOrder` | Position on the Budget tab (null: after the others, by name). |
 | `behindMode` | For a sinking fund that is behind: `spread`, `topup`, or null (ask each time). |
+| `ownerDeviceId`, `isPrivate` | Whose envelope it is (a member's device id, see `users`), and whether it's private: the app hides it on the other members' phones. |
 | `secondTargetAmount`, `secondTargetCurrency` | An optional second target in another currency, kept apart from the first (never added to it). |
 | `archived`, `deviceId`, `createdAt`, `lastModified`, `deleted` | |
 

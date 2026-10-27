@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../database/app_database.dart';
 import 'database_provider.dart';
+import 'family_provider.dart';
 import 'household_provider.dart';
 import '../database/transfer_amounts.dart';
 
@@ -30,6 +31,10 @@ class TransactionEntry {
   /// Per-line account names (for multi-account display).
   final Map<String, String> lineAccountNames;
 
+  /// Spent from another member's private envelope (roadmap #5): shown as
+  /// "Private" with the amount only — its note and categories are blanked.
+  final bool isPrivate;
+
   const TransactionEntry({
     required this.tx,
     required this.lines,
@@ -40,6 +45,7 @@ class TransactionEntry {
     this.destinationAccountCurrency,
     this.destinationAccountBalanceAfter,
     this.lineAccountNames = const {},
+    this.isPrivate = false,
   });
 
   /// Unique account names involved in this transaction's lines.
@@ -94,8 +100,21 @@ TransactionEntry _buildEntry(
   Transaction tx,
   List<TransactionLine> txLines,
   Map<String, Account> accountMap,
-  Map<String, double> running,
-) {
+  Map<String, double> running, [
+  Set<String> hiddenCategories = const {},
+]) {
+  // Every line in a hidden category: show it as "Private", amount only.
+  final private = hiddenCategories.isNotEmpty &&
+      tx.type != 'transfer' &&
+      txLines.isNotEmpty &&
+      txLines.every((l) => hiddenCategories.contains(l.categoryId));
+  if (private) {
+    tx = tx.copyWith(note: '', categoryId: const Value(null));
+    txLines = [
+      for (final l in txLines)
+        l.copyWith(note: '', categoryId: const Value(null)),
+    ];
+  }
   final lineAcctNames = <String, String>{};
   for (final line in txLines) {
     final id = line.accountId ?? tx.accountId;
@@ -127,6 +146,7 @@ TransactionEntry _buildEntry(
         ? running[tx.destinationAccountId] ?? 0
         : null,
     lineAccountNames: lineAcctNames,
+    isPrivate: private,
   );
 }
 
@@ -156,6 +176,8 @@ final transactionEntriesProvider =
     StreamProvider<List<TransactionEntry>>((ref) async* {
   final db = ref.watch(databaseProvider);
   final householdId = ref.watch(currentHouseholdIdProvider);
+  // Other members' private envelopes: their spending shows as "Private".
+  final hidden = hiddenCategoriesFromKey(ref.watch(hiddenCategoryKeyProvider));
   if (householdId == null) {
     yield [];
     return;
@@ -177,7 +199,8 @@ final transactionEntriesProvider =
     for (final tx in txList) {
       final txLines = related.linesByTx[tx.id] ?? [];
       _applyTxToRunning(tx, txLines, running);
-      result.add(_buildEntry(tx, txLines, related.accountMap, running));
+      result.add(
+          _buildEntry(tx, txLines, related.accountMap, running, hidden));
     }
 
     yield result.reversed.toList();
@@ -194,6 +217,8 @@ final monthlyTransactionsProvider = StreamProvider.family<
     List<TransactionEntry>, ({int year, int month})>((ref, param) async* {
   final db = ref.watch(databaseProvider);
   final householdId = ref.watch(currentHouseholdIdProvider);
+  // Other members' private envelopes: their spending shows as "Private".
+  final hidden = hiddenCategoriesFromKey(ref.watch(hiddenCategoryKeyProvider));
   if (householdId == null) {
     yield [];
     return;
@@ -216,7 +241,8 @@ final monthlyTransactionsProvider = StreamProvider.family<
     for (final tx in monthTxList) {
       final txLines = related.linesByTx[tx.id] ?? [];
       _applyTxToRunning(tx, txLines, running);
-      result.add(_buildEntry(tx, txLines, related.accountMap, running));
+      result.add(
+          _buildEntry(tx, txLines, related.accountMap, running, hidden));
     }
 
     yield result.reversed.toList();
@@ -229,6 +255,8 @@ final transactionByIdProvider =
     StreamProvider.family<TransactionEntry?, String>((ref, id) async* {
   final db = ref.watch(databaseProvider);
   final householdId = ref.watch(currentHouseholdIdProvider);
+  // Other members' private envelopes: their spending shows as "Private".
+  final hidden = hiddenCategoriesFromKey(ref.watch(hiddenCategoryKeyProvider));
   if (householdId == null) {
     yield null;
     return;
@@ -242,8 +270,8 @@ final transactionByIdProvider =
       continue;
     }
     final related = await _fetchRelated(db, householdId, [tx]);
-    yield _buildEntry(
-        tx, related.linesByTx[tx.id] ?? [], related.accountMap, const {});
+    yield _buildEntry(tx, related.linesByTx[tx.id] ?? [], related.accountMap,
+        const {}, hidden);
   }
 });
 
@@ -263,6 +291,8 @@ final recentTransactionsProvider =
     StreamProvider<List<TransactionEntry>>((ref) async* {
   final db = ref.watch(databaseProvider);
   final householdId = ref.watch(currentHouseholdIdProvider);
+  // Other members' private envelopes: their spending shows as "Private".
+  final hidden = hiddenCategoriesFromKey(ref.watch(hiddenCategoryKeyProvider));
   if (householdId == null) {
     yield [];
     return;
@@ -278,30 +308,11 @@ final recentTransactionsProvider =
     // Full balance computation would require loading ALL prior transactions,
     // defeating the purpose. Use 0.0 as a placeholder; the dashboard UI
     // doesn't display accountBalanceAfter for the recent list.
-    final result = <TransactionEntry>[];
-    for (final tx in txList) {
-      final txLines = related.linesByTx[tx.id] ?? [];
-      final lineAcctNames = <String, String>{};
-      for (final line in txLines) {
-        final id = line.accountId ?? tx.accountId;
-        if (!lineAcctNames.containsKey(id)) {
-          lineAcctNames[id] = related.accountMap[id]?.name ?? '';
-        }
-      }
-      final destAcct2 = tx.destinationAccountId != null
-          ? related.accountMap[tx.destinationAccountId]
-          : null;
-      result.add(TransactionEntry(
-        tx: tx,
-        lines: txLines,
-        accountBalanceAfter: 0,
-        accountName: related.accountMap[tx.accountId]?.name ?? '',
-        accountCurrency: related.accountMap[tx.accountId]?.currency ?? tx.currency,
-        destinationAccountName: destAcct2?.name,
-        destinationAccountCurrency: destAcct2?.currency,
-        lineAccountNames: lineAcctNames,
-      ));
-    }
+    final result = [
+      for (final tx in txList)
+        _buildEntry(tx, related.linesByTx[tx.id] ?? [], related.accountMap,
+            const {}, hidden),
+    ];
 
     yield result;
   }

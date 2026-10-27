@@ -4131,6 +4131,90 @@ abstract class S {
   /// **'{amount} a day'**
   String forecastPerDay(String amount);
 
+  /// Family: members, roles, private envelopes
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get familyPrivate;
+
+  /// Family: members, roles, private envelopes
+  ///
+  /// In en, this message translates to:
+  /// **'Private envelopes'**
+  String get familyPrivateLine;
+
+  /// Family: members, roles, private envelopes
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get familyPrivateSwitch;
+
+  /// Family: members, roles, private envelopes
+  ///
+  /// In en, this message translates to:
+  /// **'Only its owner sees this envelope and what’s spent from it. The others see “Private” and the amount. It still syncs to their phones.'**
+  String get familyPrivateSub;
+
+  /// Family: members, roles, private envelopes
+  ///
+  /// In en, this message translates to:
+  /// **'Belongs to'**
+  String get familyOwner;
+
+  /// Family: members, roles, private envelopes
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone'**
+  String get familyOwnerEveryone;
+
+  /// Family: members, roles, private envelopes
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get tileMembers;
+
+  /// Family: members, roles, private envelopes
+  ///
+  /// In en, this message translates to:
+  /// **'Grown-ups and kids on this budget'**
+  String get tileMembersSub;
+
+  /// Family: members, roles, private envelopes
+  ///
+  /// In en, this message translates to:
+  /// **'Kids see only their own envelopes and ask a grown-up for money; grown-ups see everything except others’ private envelopes and approve requests.'**
+  String get membersIntro;
+
+  /// Family: members, roles, private envelopes
+  ///
+  /// In en, this message translates to:
+  /// **'Kid'**
+  String get membersKid;
+
+  /// Family: members, roles, private envelopes
+  ///
+  /// In en, this message translates to:
+  /// **'Grown-up'**
+  String get membersGrownup;
+
+  /// Family: members, roles, private envelopes
+  ///
+  /// In en, this message translates to:
+  /// **'{name} (you)'**
+  String membersYou(String name);
+
+  /// Family: members, roles, private envelopes
+  ///
+  /// In en, this message translates to:
+  /// **'Only a grown-up can change this.'**
+  String get membersOnlyGrownups;
+
+  /// Family: members, roles, private envelopes
+  ///
+  /// In en, this message translates to:
+  /// **'Members appear here once they’ve joined this budget and named themselves.'**
+  String get membersNone;
+
   /// No description provided for @allocArchivedTitle.
   ///
   /// In en, this message translates to:

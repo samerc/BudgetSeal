@@ -2330,6 +2330,53 @@ class SEn extends S {
   }
 
   @override
+  String get familyPrivate => 'Private';
+
+  @override
+  String get familyPrivateLine => 'Private envelopes';
+
+  @override
+  String get familyPrivateSwitch => 'Private';
+
+  @override
+  String get familyPrivateSub =>
+      'Only its owner sees this envelope and what’s spent from it. The others see “Private” and the amount. It still syncs to their phones.';
+
+  @override
+  String get familyOwner => 'Belongs to';
+
+  @override
+  String get familyOwnerEveryone => 'Everyone';
+
+  @override
+  String get tileMembers => 'Members';
+
+  @override
+  String get tileMembersSub => 'Grown-ups and kids on this budget';
+
+  @override
+  String get membersIntro =>
+      'Kids see only their own envelopes and ask a grown-up for money; grown-ups see everything except others’ private envelopes and approve requests.';
+
+  @override
+  String get membersKid => 'Kid';
+
+  @override
+  String get membersGrownup => 'Grown-up';
+
+  @override
+  String membersYou(String name) {
+    return '$name (you)';
+  }
+
+  @override
+  String get membersOnlyGrownups => 'Only a grown-up can change this.';
+
+  @override
+  String get membersNone =>
+      'Members appear here once they’ve joined this budget and named themselves.';
+
+  @override
   String get allocArchivedTitle => 'Archived envelopes';
 
   @override

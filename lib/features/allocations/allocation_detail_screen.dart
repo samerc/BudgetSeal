@@ -9,6 +9,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/date_format_provider.dart';
+import '../../core/providers/family_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import 'move_money_sheet.dart';
 
@@ -70,6 +71,9 @@ class _AllocationDetailScreenState
   String _periodicity = 'periodic';
   bool _rollover = false;
   bool _autoReset = true;
+  // Family (roadmap #5): whose envelope it is, and whether it's private.
+  String? _owner;
+  bool _private = false;
   String? _icon; // emoji icon for this envelope
   bool _loading = false;
   bool _showSettings = false;
@@ -110,6 +114,8 @@ class _AllocationDetailScreenState
         _periodicity = alloc.periodicity;
         _rollover = alloc.rollover;
         _autoReset = alloc.autoReset;
+        _owner = alloc.ownerDeviceId;
+        _private = alloc.isPrivate;
         _icon = alloc.icon;
         if (alloc.targetAmount != null) {
           _targetAmount = alloc.targetAmount!;
@@ -667,6 +673,56 @@ class _AllocationDetailScreenState
                         onChanged: (v) =>
                             setState(() => _target2Currency = v),
                       ),
+                    ),
+                  ]),
+                ],
+              ]),
+              const SizedBox(height: 16),
+            ],
+
+            // Family: who it belongs to, and private (shared budgets only).
+            if ((ref.watch(membersProvider).value ?? const <User>[])
+                    case final members when members.length > 1) ...[
+              _sectionContainer(children: [
+                _sectionHeader(l.familyOwner),
+                Wrap(spacing: 8, runSpacing: 8, children: [
+                  ChoiceChip(
+                    label: Text(l.familyOwnerEveryone),
+                    selected: _owner == null,
+                    onSelected: (_) => setState(() {
+                      _owner = null;
+                      _private = false;
+                    }),
+                  ),
+                  for (final m in members)
+                    ChoiceChip(
+                      label: Text(m.name.trim().isEmpty ? m.deviceId : m.name),
+                      selected: _owner == m.deviceId,
+                      onSelected: (_) => setState(() => _owner = m.deviceId),
+                    ),
+                ]),
+                if (_owner != null) ...[
+                  const SizedBox(height: 12),
+                  Row(children: [
+                    Expanded(
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(l.familyPrivateSwitch,
+                                style: TextStyle(
+                                    color: AppColors.tp(context),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500)),
+                            Text(l.familyPrivateSub,
+                                style: TextStyle(
+                                    color: AppColors.ts(context),
+                                    fontSize: 12)),
+                          ]),
+                    ),
+                    Switch.adaptive(
+                      value: _private,
+                      onChanged: (v) => setState(() => _private = v),
+                      activeTrackColor: AppColors.accent,
                     ),
                   ]),
                 ],
@@ -1567,7 +1623,7 @@ class _AllocationDetailScreenState
   double _targetBalance() {
     final currency = _targetCurrencyController.text;
     if (currency.isEmpty) return 0;
-    final all = ref.read(allocationsProvider).value ?? const [];
+    final all = ref.read(visibleAllocationsProvider).value ?? const [];
     final me = all
         .where((a) => a.data.allocation.id == widget.allocationId)
         .firstOrNull;
@@ -2170,6 +2226,8 @@ class _AllocationDetailScreenState
         targetCurrency: Value(targetCurrency.isEmpty ? null : targetCurrency),
         secondTargetAmount: Value(hasTarget2 ? _target2 : null),
         secondTargetCurrency: Value(hasTarget2 ? _target2Currency : null),
+        ownerDeviceId: Value(_owner),
+        isPrivate: Value(_owner != null && _private),
         deviceId: 'local',
       ));
       // Persist the categories the user linked during creation, now that the

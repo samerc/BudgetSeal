@@ -25,6 +25,12 @@ class Allocations extends Table {
   /// never added to the first.
   RealColumn get secondTargetAmount => real().nullable()();
   TextColumn get secondTargetCurrency => text().nullable()();
+  /// Family (v28, roadmap #5): whose envelope it is (a member's device id;
+  /// a kid's envelopes are theirs), and whether it's private — then the
+  /// other members' phones hide it, and its transactions show as "Private".
+  /// The data still syncs to them.
+  TextColumn get ownerDeviceId => text().nullable()();
+  BoolColumn get isPrivate => boolean().withDefault(const Constant(false))();
   /// Emoji icon for this envelope (e.g. '⛽', '🛒'). Null = use linked category icon.
   TextColumn get icon => text().nullable()();
   /// Whether this periodic envelope resets automatically at period start.

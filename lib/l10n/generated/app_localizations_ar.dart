@@ -2331,6 +2331,53 @@ class SAr extends S {
   }
 
   @override
+  String get familyPrivate => 'خاص';
+
+  @override
+  String get familyPrivateLine => 'مغلّفات خاصة';
+
+  @override
+  String get familyPrivateSwitch => 'خاص';
+
+  @override
+  String get familyPrivateSub =>
+      'لا يرى هذا المغلّف وما يُنفق منه إلا صاحبه. يرى الآخرون «خاص» والمبلغ. ويبقى متزامنًا مع هواتفهم.';
+
+  @override
+  String get familyOwner => 'تعود إلى';
+
+  @override
+  String get familyOwnerEveryone => 'الجميع';
+
+  @override
+  String get tileMembers => 'الأعضاء';
+
+  @override
+  String get tileMembersSub => 'الكبار والصغار في هذه الميزانية';
+
+  @override
+  String get membersIntro =>
+      'لا يرى الصغار إلا مغلّفاتهم ويطلبون المال من أحد الكبار؛ ويرى الكبار كل شيء عدا المغلّفات الخاصة بالآخرين ويوافقون على الطلبات.';
+
+  @override
+  String get membersKid => 'صغير';
+
+  @override
+  String get membersGrownup => 'كبير';
+
+  @override
+  String membersYou(String name) {
+    return '$name (أنت)';
+  }
+
+  @override
+  String get membersOnlyGrownups => 'وحده أحد الكبار يمكنه تغيير ذلك.';
+
+  @override
+  String get membersNone =>
+      'يظهر الأعضاء هنا بعد انضمامهم إلى هذه الميزانية وتسمية أنفسهم.';
+
+  @override
   String get allocArchivedTitle => 'الأظرف المؤرشفة';
 
   @override

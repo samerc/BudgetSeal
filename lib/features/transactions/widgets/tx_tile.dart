@@ -71,7 +71,8 @@ class TxTile extends ConsumerWidget {
     final listSettings = ref.watch(txListSettingsProvider);
     final isTransfer = tx.type == 'transfer';
     final isIncome = tx.type == 'income';
-    final impact = tx.type == 'expense'
+    // Another member's private envelope: no envelope line either.
+    final impact = tx.type == 'expense' && !entry.isPrivate
         ? ref.watch(txEnvelopeImpactProvider.select((m) => m.value?[tx.id]))
         : null;
 
@@ -520,6 +521,7 @@ class TxTile extends ConsumerWidget {
   /// The payee/note when there is one ("Carrefour"), else the category,
   /// else the split's categories, else the type.
   String _title(S s, String? catName) {
+    if (entry.isPrivate) return s.familyPrivate;
     final tx = entry.tx;
     final lines = entry.lines;
     final note = visibleNote(tx.note).trim();

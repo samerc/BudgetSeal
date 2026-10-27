@@ -9,6 +9,7 @@ import '../../core/engine/spending_average.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/database_provider.dart';
 import '../../core/providers/engine_provider.dart';
+import '../../core/providers/family_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/sinking_fund_provider.dart';
 import '../../core/providers/date_format_provider.dart';
@@ -331,7 +332,7 @@ class _FundingScreenState extends ConsumerState<FundingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final allocationsAsync = ref.watch(allocationsProvider);
+    final allocationsAsync = ref.watch(visibleAllocationsProvider);
     final unallocatedAsync = ref.watch(unallocatedProvider);
     final household = ref.watch(householdProvider).value;
     final baseCurrency = household?.baseCurrency ?? 'USD';

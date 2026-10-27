@@ -249,6 +249,8 @@ class SyncEngine {
         'targetCurrency': a.targetCurrency,
         'secondTargetAmount': a.secondTargetAmount,
         'secondTargetCurrency': a.secondTargetCurrency,
+        'ownerDeviceId': a.ownerDeviceId,
+        'isPrivate': a.isPrivate,
         'icon': a.icon,
         'autoReset': a.autoReset,
         'archived': a.archived,
@@ -433,6 +435,8 @@ class SyncEngine {
         secondTargetAmount:
             Value((m['secondTargetAmount'] as num?)?.toDouble()),
         secondTargetCurrency: Value(m['secondTargetCurrency'] as String?),
+        ownerDeviceId: Value(m['ownerDeviceId'] as String?),
+        isPrivate: Value(m['isPrivate'] as bool? ?? false),
         icon: Value(m['icon'] as String?),
         autoReset: Value(m['autoReset'] as bool? ?? true),
         archived: Value(m['archived'] as bool? ?? false),

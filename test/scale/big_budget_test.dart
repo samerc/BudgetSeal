@@ -558,6 +558,8 @@ void main() {
             () => Future<void>.delayed(const Duration(milliseconds: 50)));
         await tester.pump(const Duration(milliseconds: 10));
       }
+      // The last stream's close timer (fake time).
+      await tester.pump(const Duration(seconds: 1));
     });
   }
 }

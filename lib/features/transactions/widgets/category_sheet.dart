@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/providers/family_provider.dart';
 import '../../../core/providers/transactions_provider.dart';
 import '../../../core/providers/tx_colors_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
@@ -119,9 +120,11 @@ class _CategorySheetState extends ConsumerState<CategorySheet>
 
   @override
   Widget build(BuildContext context) {
-    // Filter by type
+    // Filter by type; not the categories of envelopes this phone doesn't
+    // show (other members' private ones; on a kid's phone, all but theirs).
+    final hidden = ref.watch(hiddenCategoryIdsProvider);
     var filtered = widget.categories
-        .where((c) => c.transactionType == _typeFilter)
+        .where((c) => c.transactionType == _typeFilter && !hidden.contains(c.id))
         .toList();
 
     // Build parent/sub structure

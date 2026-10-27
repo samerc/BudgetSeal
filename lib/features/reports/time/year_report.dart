@@ -10,10 +10,10 @@ import 'package:share_plus/share_plus.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/database/daos/ledger_dao.dart';
 import '../../../core/engine/budget_history.dart';
-import '../../../core/providers/allocations_provider.dart';
 import '../../../core/providers/categories_provider.dart';
 import '../../../core/providers/database_provider.dart';
 import '../../../core/providers/date_format_provider.dart';
+import '../../../core/providers/family_provider.dart';
 import '../../../core/providers/household_provider.dart';
 import '../../../core/providers/report_stats_provider.dart';
 import '../../../core/providers/transactions_provider.dart';
@@ -34,7 +34,7 @@ final _yearProvider = FutureProvider<
     })?>((ref) async {
   final household = ref.watch(householdProvider).value;
   final entries = await ref.watch(transactionEntriesProvider.future);
-  ref.watch(allocationsProvider);
+  ref.watch(visibleAllocationsProvider);
   if (household == null) return null;
   final startDay = ref.watch(reportsStartDayProvider);
   final now = reportBucketFor(DateTime.now(), startDay);
@@ -166,7 +166,7 @@ class _YearReportState extends ConsumerState<YearReport> {
         c.id: c,
     };
     final names = {
-      for (final a in ref.watch(allocationsProvider).value ?? const [])
+      for (final a in ref.watch(visibleAllocationsProvider).value ?? const [])
         a.data.allocation.id: a.data.allocation.name,
     };
 

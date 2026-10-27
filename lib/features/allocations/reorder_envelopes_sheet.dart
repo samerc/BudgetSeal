@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/database/daos/allocations_dao.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/database_provider.dart';
+import '../../core/providers/family_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
@@ -17,7 +18,7 @@ Future<void> showReorderEnvelopesSheet(
     BuildContext context, WidgetRef ref) async {
   final tr = S.of(context);
   final messenger = ScaffoldMessenger.of(context);
-  final allocations = ref.read(allocationsProvider).value ?? const [];
+  final allocations = ref.read(visibleAllocationsProvider).value ?? const [];
   if (allocations.isEmpty) return;
   final items = [
     for (final a in allocations)

@@ -22,7 +22,8 @@ Allocation _groceries({String type = 'spending'}) => Allocation(
       targetAmount: 100, targetCurrency: 'USD',
       secondTargetAmount: 2000000, secondTargetCurrency: 'LBP',
       autoReset: true, archived: false, deviceId: 't',
-      createdAt: DateTime(2026), lastModified: DateTime(2026), deleted: false);
+      createdAt: DateTime(2026), lastModified: DateTime(2026), deleted: false,
+      isPrivate: false);
 
 void main() {
   test('sealed only when both targets are met', () {

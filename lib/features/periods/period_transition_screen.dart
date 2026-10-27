@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/engine/period_engine.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/engine_provider.dart';
+import '../../core/providers/family_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/period_reset_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
@@ -74,7 +75,7 @@ class _PeriodTransitionScreenState
         return;
       }
       if (!mounted) return;
-      final allocationsAsync = ref.read(allocationsProvider);
+      final allocationsAsync = ref.read(visibleAllocationsProvider);
       allocationsAsync.whenData((allocations) {
         final items = <_AllocationResolution>[];
         for (final a in allocations) {
@@ -145,7 +146,7 @@ class _PeriodTransitionScreenState
   @override
   Widget build(BuildContext context) {
     final householdAsync = ref.watch(householdProvider);
-    final allocationsAsync = ref.watch(allocationsProvider);
+    final allocationsAsync = ref.watch(visibleAllocationsProvider);
     final textTheme = Theme.of(context).textTheme;
     final now = DateTime.now();
 
@@ -236,8 +237,7 @@ class _PeriodTransitionScreenState
                       itemCount: _resolutions.length,
                       itemBuilder: (context, i) => _ResolutionCard(
                         resolution: _resolutions[i],
-                        allAllocations: ref
-                                .read(allocationsProvider)
+                        allAllocations: ref.read(visibleAllocationsProvider)
                                 .value
                                 ?.where((a) =>
                                     a.data.allocation.id !=

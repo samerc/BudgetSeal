@@ -9,6 +9,7 @@ import '../../core/database/app_database.dart' show Category;
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
+import '../../core/providers/family_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/objectives_provider.dart';
 import '../../core/providers/period_reset_provider.dart';
@@ -253,7 +254,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
   Widget build(BuildContext context) {
     super.build(context);
     final l = S.of(context);
-    final allocationsAsync = ref.watch(allocationsProvider);
+    final allocationsAsync = ref.watch(visibleAllocationsProvider);
     final unallocatedAsync = ref.watch(unallocatedProvider);
     final household = ref.watch(householdProvider).value;
     final baseCurrency = household?.baseCurrency ?? 'USD';
@@ -561,6 +562,39 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
             ),
           ),
 
+          // Other members' private envelopes: one line, so the money on
+          // this tab still adds up.
+          if (ref.watch(privateBalancesProvider)
+                  case final private when private.isNotEmpty &&
+                      _searchQuery.isEmpty)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: AppColors.card(context),
+                  child: Row(children: [
+                    Icon(AppIcons.lock, size: 20, color: AppColors.ts(context)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(l.familyPrivateLine,
+                          style: const TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w700)),
+                    ),
+                    Text(
+                      private.entries
+                          .where((e) => e.value.abs() > 0.005)
+                          .map((e) => formatAmount(e.value, currency: e.key))
+                          .join(' · '),
+                      style: const TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.w700),
+                    ),
+                  ]),
+                ),
+              ),
+            ),
+
           // Bottom padding so FAB doesn't cover last card.
           const SliverPadding(padding: EdgeInsets.only(bottom: 88)),
         ],
@@ -574,7 +608,7 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
         heroTag: 'fab_allocations',
         tooltip: l.allocCreateTooltip,
         onPressed: () {
-          final allocs = ref.read(allocationsProvider).value ?? [];
+          final allocs = ref.read(visibleAllocationsProvider).value ?? [];
           if (!checkFreeLimit(context, ref, allocs.length, FreeLimits.maxEnvelopes, 'envelopes')) return;
           context.push('/allocations/new');
         },

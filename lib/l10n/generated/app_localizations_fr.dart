@@ -2348,6 +2348,53 @@ class SFr extends S {
   }
 
   @override
+  String get familyPrivate => 'Privé';
+
+  @override
+  String get familyPrivateLine => 'Enveloppes privées';
+
+  @override
+  String get familyPrivateSwitch => 'Privée';
+
+  @override
+  String get familyPrivateSub =>
+      'Seul son propriétaire voit cette enveloppe et ce qui en est dépensé. Les autres voient « Privé » et le montant. Elle reste synchronisée sur leurs téléphones.';
+
+  @override
+  String get familyOwner => 'Appartient à';
+
+  @override
+  String get familyOwnerEveryone => 'Tout le monde';
+
+  @override
+  String get tileMembers => 'Membres';
+
+  @override
+  String get tileMembersSub => 'Adultes et enfants de ce budget';
+
+  @override
+  String get membersIntro =>
+      'Les enfants ne voient que leurs enveloppes et demandent de l’argent à un adulte ; les adultes voient tout sauf les enveloppes privées des autres et approuvent les demandes.';
+
+  @override
+  String get membersKid => 'Enfant';
+
+  @override
+  String get membersGrownup => 'Adulte';
+
+  @override
+  String membersYou(String name) {
+    return '$name (vous)';
+  }
+
+  @override
+  String get membersOnlyGrownups => 'Seul un adulte peut modifier cela.';
+
+  @override
+  String get membersNone =>
+      'Les membres apparaissent ici une fois qu’ils ont rejoint ce budget et indiqué leur nom.';
+
+  @override
   String get allocArchivedTitle => 'Enveloppes archivées';
 
   @override

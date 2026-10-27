@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/engine/period_engine.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/engine_provider.dart';
+import '../../core/providers/family_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
@@ -114,7 +115,7 @@ class _LeftoverResolutionScreenState
 
   @override
   Widget build(BuildContext context) {
-    final allocationsAsync = ref.watch(allocationsProvider);
+    final allocationsAsync = ref.watch(visibleAllocationsProvider);
     final textTheme = Theme.of(context).textTheme;
 
     if (_args == null) {

@@ -1243,6 +1243,19 @@ class _SettingsDetailScreenState extends ConsumerState<SettingsDetailScreen> {
                     initial: mine ?? ''),
               );
             })),
+          // Family: grown-ups and kids, once more than one member is named.
+          _Find(keys: (t) => [t.tileMembers, t.tileMembersSub],
+              child: Builder(builder: (context) {
+              final names = ref.watch(memberNamesProvider).value ?? const {};
+              if (names.length < 2) return const SizedBox.shrink();
+              return _SettingsTile(
+                icon: AppIcons.users,
+                title: l.tileMembers,
+                subtitle: l.tileMembersSub,
+                iconColor: SettingsRowStyle.hue(262),
+                onTap: () => context.push('/members'),
+              );
+            })),
           _Find(keys: (t) => [t.tileBackupRestore, t.tileBackupRestoreSub],
               child: _SettingsTile(icon: AppIcons.cloudArrowUp, title: l.tileBackupRestore,
                 subtitle: l.tileBackupRestoreSub, iconColor: SettingsRowStyle.hue(207),
