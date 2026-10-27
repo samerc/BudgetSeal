@@ -591,7 +591,7 @@ function txRow(tx, base, opts = {}) {
   const im = tx.impact;
   if (isTransfer) {
     let s = `${tx.accountName || ''} ${arrow} ${tx.destinationAccountName || ''}`;
-    if (tx.destinationCurrency && tx.destinationCurrency !== tx.currency) s += ` · ${fmt(tx.amount * tx.exchangeRateToBase, tx.destinationCurrency)}`;
+    if (tx.destinationCurrency && tx.destinationCurrency !== tx.currency) s += ` · ${fmt(tx.destinationAmount ?? tx.amount * tx.exchangeRateToBase, tx.destinationCurrency)}`;
     impact = `<span class="ellip">${esc(s)}</span>`;
   } else if (tx.type === 'income') {
     impact = `<span class="tag accent">${IC.arrowRight}${esc(t('web_rta'))}</span>`;
@@ -1815,7 +1815,7 @@ async function openTxForm(pre = null, mode = 'add') {
   const amount = pre ? (pre.type === 'transfer' || split ? pre.amount : (pre.lineAmount ?? pre.amount)) : '';
   const cur = pre ? (pre.type === 'transfer' ? pre.currency : (pre.lineCurrency || pre.currency)) : null;
   const rate = pre && pre.type !== 'transfer' ? (pre.lineExchangeRate ?? pre.exchangeRateToBase) : null;
-  const received = pre?.type === 'transfer' && pre.destinationCurrency && pre.destinationCurrency !== pre.currency ? pre.amount * pre.exchangeRateToBase : '';
+  const received = pre?.type === 'transfer' && pre.destinationCurrency && pre.destinationCurrency !== pre.currency ? (pre.destinationAmount ?? pre.amount * pre.exchangeRateToBase) : '';
   const date = mode === 'dup' || !pre ? dayKey() : dayKey(pre.date);
   const currencies = [...new Set([base, ...accounts.map(a => a.currency)])];
 

@@ -5,6 +5,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:budgetseal/core/database/app_database.dart';
+import 'package:budgetseal/core/engine/balance_calculator.dart';
 
 void main() {
   // Regression: a database that already has the v18 soft-delete columns but is
@@ -28,7 +29,7 @@ void main() {
       db = AppDatabase.forTesting(NativeDatabase(file));
       await db.select(db.accounts).get(); // forces open + migration
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 22);
+      expect(row.data['user_version'], 23);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -72,7 +73,7 @@ void main() {
       await db.select(db.recurringTransactions).get(); // forces migration
       await db.select(db.transactionTemplates).get();
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 22);
+      expect(row.data['user_version'], 23);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -96,7 +97,7 @@ void main() {
           .get();
       expect(cols.any((c) => c.data['name'] == 'anchor_day'), isTrue);
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 22);
+      expect(row.data['user_version'], 23);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -119,7 +120,7 @@ void main() {
           await db.customSelect('PRAGMA table_info(allocations)').get();
       expect(cols.any((c) => c.data['name'] == 'sort_order'), isTrue);
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 22);
+      expect(row.data['user_version'], 23);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -142,7 +143,7 @@ void main() {
           await db.customSelect('PRAGMA table_info(allocations)').get();
       expect(cols.any((c) => c.data['name'] == 'behind_mode'), isTrue);
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 22);
+      expect(row.data['user_version'], 23);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -170,7 +171,77 @@ void main() {
       expect(cols.any((c) => c.data['name'] == 'ask_first'), isTrue);
       expect(cols.any((c) => c.data['name'] == 'remind_days'), isTrue);
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 22);
+      expect(row.data['user_version'], 23);
+      await db.close();
+    } finally {
+      dir.deleteSync(recursive: true);
+    }
+  });
+
+  // v23: transfers store what arrived; an income/expense always has a line.
+  // A v22 database (or a phone on 0.11) has transfers with only the
+  // source→destination rate and header-only incomes in the account's
+  // currency. Opening converts them; no balance moves.
+  test('v23 migration converts old transfers and header-only rows', () async {
+    final dir = Directory.systemTemp.createTempSync('bs_mig_test8');
+    final file = File(p.join(dir.path, 'v22.db'));
+    try {
+      var db = AppDatabase.forTesting(NativeDatabase(file));
+      await db.customStatement(
+          'ALTER TABLE transactions DROP COLUMN destination_amount');
+      for (final s in const [
+        "INSERT INTO households (id, name, base_currency, created_by_device_id) "
+            "VALUES ('h', 'Home', 'USD', 'd')",
+        "INSERT INTO accounts (id, household_id, name, type, currency, device_id) "
+            "VALUES ('usd', 'h', 'Bank', 'bank', 'USD', 'd')",
+        "INSERT INTO accounts (id, household_id, name, type, currency, device_id) "
+            "VALUES ('lbp', 'h', 'Cash', 'cash', 'LBP', 'd')",
+        // 100 USD sent, 8,950,000 LBP received (rate stored on the header).
+        "INSERT INTO transactions (id, household_id, type, account_id, "
+            "destination_account_id, amount, currency, exchange_rate_to_base, "
+            "created_by, device_id) VALUES ('t1', 'h', 'transfer', 'usd', "
+            "'lbp', 100, 'USD', 89500, 'u', 'd')",
+        // A balance adjustment from 0.11: 450,000 LBP, header only.
+        "INSERT INTO transactions (id, household_id, type, account_id, amount, "
+            "currency, exchange_rate_to_base, created_by, device_id) VALUES "
+            "('t2', 'h', 'income', 'lbp', 450000, 'LBP', 0.0000111731843575, "
+            "'u', 'd')",
+      ]) {
+        await db.customStatement(s);
+      }
+      await db.customStatement('PRAGMA user_version = 22');
+      await db.close();
+
+      db = AppDatabase.forTesting(NativeDatabase(file));
+      final t1 = await (db.select(db.transactions)
+            ..where((t) => t.id.equals('t1')))
+          .getSingle();
+      expect(t1.destinationAmount, 8950000);
+      final t2 = await (db.select(db.transactions)
+            ..where((t) => t.id.equals('t2')))
+          .getSingle();
+      expect(t2.currency, 'USD');
+      expect(t2.amount, closeTo(5.03, 0.01));
+      final lines = await (db.select(db.transactionLines)
+            ..where((l) => l.transactionId.equals('t2')))
+          .get();
+      expect(lines.single.id, 't2:acct');
+      expect(lines.single.amount, 450000);
+      expect(lines.single.currency, 'LBP');
+      expect(lines.single.accountId, 'lbp');
+      final balances = await BalanceCalculator(db).allAccountBalances('h');
+      expect(balances['usd'], -100);
+      expect(balances['lbp'], 8950000 + 450000);
+      final row = await db.customSelect('PRAGMA user_version').getSingle();
+      expect(row.data['user_version'], 23);
+      await db.close();
+
+      // Opening again changes nothing.
+      db = AppDatabase.forTesting(NativeDatabase(file));
+      expect(
+          (await db.select(db.transactionLines).get()).length, lines.length);
+      expect((await BalanceCalculator(db).allAccountBalances('h'))['lbp'],
+          8950000 + 450000);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -194,7 +265,7 @@ void main() {
       db = AppDatabase.forTesting(NativeDatabase(file));
       await db.select(db.transactionLines).get(); // forces the full 1->18 run
       final row = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(row.data['user_version'], 22);
+      expect(row.data['user_version'], 23);
       await db.close();
     } finally {
       dir.deleteSync(recursive: true);
@@ -226,9 +297,9 @@ void main() {
       await db.select(db.transactionTemplates).get();
     });
 
-    test('schema version is 22', () {
+    test('schema version is 23', () {
       db = AppDatabase.forTesting(NativeDatabase.memory());
-      expect(db.schemaVersion, 22);
+      expect(db.schemaVersion, 23);
     });
 
     test('tables return empty results on fresh database', () async {

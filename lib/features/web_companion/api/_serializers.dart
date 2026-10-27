@@ -1,6 +1,7 @@
 import '../../../core/database/app_database.dart';
 import '../../../shared/utils/note_text.dart';
 import '../../../shared/widgets/category_icon.dart';
+import '../../../core/database/transfer_amounts.dart';
 
 /// Category display fields shared by every payload that shows a category.
 /// `categoryIconFile` is the PNG the app draws (served at `/icons/<file>`);
@@ -34,6 +35,8 @@ Map<String, dynamic> txToJson(
     'amount': t.amount,
     'currency': t.currency,
     'exchangeRateToBase': t.exchangeRateToBase,
+    // Transfers: what the destination received, in its currency.
+    if (t.type == 'transfer') 'destinationAmount': t.receivedAmount,
     'note': visibleNote(t.note),
     'date': t.createdAt.toIso8601String(),
     'accountId': t.accountId,

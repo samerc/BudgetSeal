@@ -73,6 +73,8 @@ class AllocationEngine {
       : _ledgerDao = LedgerDao(_db),
         _calculator = BalanceCalculator(_db);
 
+  /// [amount] in [currency] (the account's) into [accountId], with no
+  /// category (e.g. a balance adjustment).
   Future<String> recordIncome({
     required String householdId,
     required String accountId,
@@ -84,19 +86,68 @@ class AllocationEngine {
     String note = '',
   }) async {
     final txId = _uuid.v4();
-    await _db.into(_db.transactions).insert(TransactionsCompanion.insert(
-          id: txId,
+    await _db.transaction(() => _insertOneLine(
+          txId: txId,
           householdId: householdId,
           type: 'income',
           accountId: accountId,
           amount: amount,
           currency: currency,
-          exchangeRateToBase: Value(exchangeRateToBase),
+          exchangeRateToBase: exchangeRateToBase,
           createdBy: createdBy,
-          deviceId: DeviceIdentity.stamp(deviceId),
-          note: Value(note),
+          deviceId: deviceId,
+          note: note,
         ));
     return txId;
+  }
+
+  /// A one-line transaction as [recordTransaction] stores it: the line in
+  /// the account's currency, the header the base-currency total (0 when
+  /// [currency] has no rate).
+  Future<void> _insertOneLine({
+    required String txId,
+    required String householdId,
+    required String type,
+    required String accountId,
+    required double amount,
+    required String currency,
+    required double exchangeRateToBase,
+    required String createdBy,
+    required String deviceId,
+    String? categoryId,
+    String note = '',
+  }) async {
+    final base = (await (_db.select(_db.households)
+                  ..where((h) => h.id.equals(householdId)))
+                .getSingleOrNull())
+            ?.baseCurrency ??
+        currency;
+    final baseTotal = currency == base
+        ? amount
+        : isRealRate(currency, base, exchangeRateToBase)
+            ? amount * exchangeRateToBase
+            : 0.0;
+    await _db.into(_db.transactions).insert(TransactionsCompanion.insert(
+          id: txId,
+          householdId: householdId,
+          type: type,
+          accountId: accountId,
+          amount: baseTotal,
+          currency: base,
+          createdBy: createdBy,
+          deviceId: DeviceIdentity.stamp(deviceId),
+          categoryId: Value(categoryId),
+          note: Value(note),
+        ));
+    await _db.into(_db.transactionLines).insert(TransactionLinesCompanion.insert(
+          id: _uuid.v4(),
+          transactionId: txId,
+          categoryId: Value(categoryId),
+          accountId: Value(accountId),
+          amount: amount,
+          currency: currency,
+          exchangeRateToBase: Value(exchangeRateToBase),
+        ));
   }
 
   Future<({String? txId, OverspendInfo? overspend})> recordExpense({
@@ -204,19 +255,19 @@ class AllocationEngine {
   }) async {
     final txId = _uuid.v4();
     await _db.transaction(() async {
-      await _db.into(_db.transactions).insert(TransactionsCompanion.insert(
-            id: txId,
-            householdId: householdId,
-            type: 'expense',
-            accountId: accountId,
-            amount: amount,
-            currency: currency,
-            exchangeRateToBase: Value(exchangeRateToBase),
-            createdBy: createdBy,
-            deviceId: DeviceIdentity.stamp(deviceId),
-            categoryId: Value(categoryId),
-            note: Value(note),
-          ));
+      await _insertOneLine(
+        txId: txId,
+        householdId: householdId,
+        type: 'expense',
+        accountId: accountId,
+        amount: amount,
+        currency: currency,
+        exchangeRateToBase: exchangeRateToBase,
+        createdBy: createdBy,
+        deviceId: deviceId,
+        categoryId: categoryId,
+        note: note,
+      );
 
       await _ledgerDao.appendEntry(AllocationLedgerCompanion.insert(
         id: _uuid.v4(),
@@ -235,6 +286,9 @@ class AllocationEngine {
   }
 
   /// Transfer between accounts. Does NOT affect allocation ledger.
+  /// [amount] leaves [fromAccountId] in its currency; [exchangeRateToBase]
+  /// is the source→destination rate (the name is historical), so
+  /// `amount × rate` arrives and is stored as `destinationAmount`.
   Future<String> recordTransfer({
     required String householdId,
     required String fromAccountId,
@@ -258,7 +312,9 @@ class AllocationEngine {
           destinationAccountId: Value(toAccountId),
           amount: amount,
           currency: currency,
+          // Still written for phones on 0.11, which read the rate.
           exchangeRateToBase: Value(exchangeRateToBase),
+          destinationAmount: Value(amount * exchangeRateToBase),
           createdBy: createdBy,
           deviceId: DeviceIdentity.stamp(deviceId),
           note: Value(note),

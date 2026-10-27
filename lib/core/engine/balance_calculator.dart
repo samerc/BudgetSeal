@@ -65,7 +65,8 @@ class BalanceCalculator {
             WHERE t.household_id = ?1 AND t.deleted = 0 AND t.status IS NULL
               AND t.type = 'transfer'
            UNION ALL
-           SELECT t.destination_account_id, t.amount * t.exchange_rate_to_base
+           SELECT t.destination_account_id,
+                  COALESCE(t.destination_amount, t.amount * t.exchange_rate_to_base)
              FROM transactions t
             WHERE t.household_id = ?1 AND t.deleted = 0 AND t.status IS NULL
               AND t.type = 'transfer' AND t.destination_account_id IS NOT NULL

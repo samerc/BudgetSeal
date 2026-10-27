@@ -20,10 +20,19 @@ class Transactions extends Table {
   // Null for transfers; 1:1 with an allocation
   TextColumn get categoryId =>
       text().nullable().references(Categories, #id, onDelete: KeyAction.setNull)();
+  /// Income/expense: the total in the household's base currency (each
+  /// line holds its own amount in its account's currency). Transfer: the
+  /// amount sent, in the source account's currency.
   RealColumn get amount => real()();
   TextColumn get currency => text()();
-  // Rate from this transaction's currency to household base currency at time of entry
+  /// Income/expense: 1.0 (each line has its own rate). Transfer: the
+  /// source→destination rate — only still written so phones on 0.11 and
+  /// earlier read transfers right; use [destinationAmount].
   RealColumn get exchangeRateToBase => real().withDefault(const Constant(1.0))();
+  /// Transfer: the amount the destination account received, in its
+  /// currency. Null on other types (and on transfers written before v23 or
+  /// by an older phone until `normalizeTransactions()` fills it).
+  RealColumn get destinationAmount => real().nullable()();
   TextColumn get note => text().withDefault(const Constant(''))();
   /// File path to a receipt photo, if attached.
   TextColumn get receiptPath => text().nullable()();

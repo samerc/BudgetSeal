@@ -3243,6 +3243,12 @@ class $TransactionsTable extends Transactions
           type: DriftSqlType.double,
           requiredDuringInsert: false,
           defaultValue: const Constant(1.0));
+  static const VerificationMeta _destinationAmountMeta =
+      const VerificationMeta('destinationAmount');
+  @override
+  late final GeneratedColumn<double> destinationAmount =
+      GeneratedColumn<double>('destination_amount', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
   static const VerificationMeta _noteMeta = const VerificationMeta('note');
   @override
   late final GeneratedColumn<String> note = GeneratedColumn<String>(
@@ -3310,6 +3316,7 @@ class $TransactionsTable extends Transactions
         amount,
         currency,
         exchangeRateToBase,
+        destinationAmount,
         note,
         receiptPath,
         createdBy,
@@ -3384,6 +3391,12 @@ class $TransactionsTable extends Transactions
           exchangeRateToBase.isAcceptableOrUnknown(
               data['exchange_rate_to_base']!, _exchangeRateToBaseMeta));
     }
+    if (data.containsKey('destination_amount')) {
+      context.handle(
+          _destinationAmountMeta,
+          destinationAmount.isAcceptableOrUnknown(
+              data['destination_amount']!, _destinationAmountMeta));
+    }
     if (data.containsKey('note')) {
       context.handle(
           _noteMeta, note.isAcceptableOrUnknown(data['note']!, _noteMeta));
@@ -3452,6 +3465,8 @@ class $TransactionsTable extends Transactions
           .read(DriftSqlType.string, data['${effectivePrefix}currency'])!,
       exchangeRateToBase: attachedDatabase.typeMapping.read(DriftSqlType.double,
           data['${effectivePrefix}exchange_rate_to_base'])!,
+      destinationAmount: attachedDatabase.typeMapping.read(
+          DriftSqlType.double, data['${effectivePrefix}destination_amount']),
       note: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}note'])!,
       receiptPath: attachedDatabase.typeMapping
@@ -3484,9 +3499,22 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   final String accountId;
   final String? destinationAccountId;
   final String? categoryId;
+
+  /// Income/expense: the total in the household's base currency (each
+  /// line holds its own amount in its account's currency). Transfer: the
+  /// amount sent, in the source account's currency.
   final double amount;
   final String currency;
+
+  /// Income/expense: 1.0 (each line has its own rate). Transfer: the
+  /// source→destination rate — only still written so phones on 0.11 and
+  /// earlier read transfers right; use [destinationAmount].
   final double exchangeRateToBase;
+
+  /// Transfer: the amount the destination account received, in its
+  /// currency. Null on other types (and on transfers written before v23 or
+  /// by an older phone until `normalizeTransactions()` fills it).
+  final double? destinationAmount;
   final String note;
 
   /// File path to a receipt photo, if attached.
@@ -3513,6 +3541,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       required this.amount,
       required this.currency,
       required this.exchangeRateToBase,
+      this.destinationAmount,
       required this.note,
       this.receiptPath,
       required this.createdBy,
@@ -3537,6 +3566,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     map['amount'] = Variable<double>(amount);
     map['currency'] = Variable<String>(currency);
     map['exchange_rate_to_base'] = Variable<double>(exchangeRateToBase);
+    if (!nullToAbsent || destinationAmount != null) {
+      map['destination_amount'] = Variable<double>(destinationAmount);
+    }
     map['note'] = Variable<String>(note);
     if (!nullToAbsent || receiptPath != null) {
       map['receipt_path'] = Variable<String>(receiptPath);
@@ -3567,6 +3599,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       amount: Value(amount),
       currency: Value(currency),
       exchangeRateToBase: Value(exchangeRateToBase),
+      destinationAmount: destinationAmount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(destinationAmount),
       note: Value(note),
       receiptPath: receiptPath == null && nullToAbsent
           ? const Value.absent()
@@ -3596,6 +3631,8 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       currency: serializer.fromJson<String>(json['currency']),
       exchangeRateToBase:
           serializer.fromJson<double>(json['exchangeRateToBase']),
+      destinationAmount:
+          serializer.fromJson<double?>(json['destinationAmount']),
       note: serializer.fromJson<String>(json['note']),
       receiptPath: serializer.fromJson<String?>(json['receiptPath']),
       createdBy: serializer.fromJson<String>(json['createdBy']),
@@ -3619,6 +3656,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       'amount': serializer.toJson<double>(amount),
       'currency': serializer.toJson<String>(currency),
       'exchangeRateToBase': serializer.toJson<double>(exchangeRateToBase),
+      'destinationAmount': serializer.toJson<double?>(destinationAmount),
       'note': serializer.toJson<String>(note),
       'receiptPath': serializer.toJson<String?>(receiptPath),
       'createdBy': serializer.toJson<String>(createdBy),
@@ -3640,6 +3678,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           double? amount,
           String? currency,
           double? exchangeRateToBase,
+          Value<double?> destinationAmount = const Value.absent(),
           String? note,
           Value<String?> receiptPath = const Value.absent(),
           String? createdBy,
@@ -3660,6 +3699,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
         amount: amount ?? this.amount,
         currency: currency ?? this.currency,
         exchangeRateToBase: exchangeRateToBase ?? this.exchangeRateToBase,
+        destinationAmount: destinationAmount.present
+            ? destinationAmount.value
+            : this.destinationAmount,
         note: note ?? this.note,
         receiptPath: receiptPath.present ? receiptPath.value : this.receiptPath,
         createdBy: createdBy ?? this.createdBy,
@@ -3686,6 +3728,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       exchangeRateToBase: data.exchangeRateToBase.present
           ? data.exchangeRateToBase.value
           : this.exchangeRateToBase,
+      destinationAmount: data.destinationAmount.present
+          ? data.destinationAmount.value
+          : this.destinationAmount,
       note: data.note.present ? data.note.value : this.note,
       receiptPath:
           data.receiptPath.present ? data.receiptPath.value : this.receiptPath,
@@ -3712,6 +3757,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           ..write('amount: $amount, ')
           ..write('currency: $currency, ')
           ..write('exchangeRateToBase: $exchangeRateToBase, ')
+          ..write('destinationAmount: $destinationAmount, ')
           ..write('note: $note, ')
           ..write('receiptPath: $receiptPath, ')
           ..write('createdBy: $createdBy, ')
@@ -3735,6 +3781,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       amount,
       currency,
       exchangeRateToBase,
+      destinationAmount,
       note,
       receiptPath,
       createdBy,
@@ -3756,6 +3803,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           other.amount == this.amount &&
           other.currency == this.currency &&
           other.exchangeRateToBase == this.exchangeRateToBase &&
+          other.destinationAmount == this.destinationAmount &&
           other.note == this.note &&
           other.receiptPath == this.receiptPath &&
           other.createdBy == this.createdBy &&
@@ -3776,6 +3824,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   final Value<double> amount;
   final Value<String> currency;
   final Value<double> exchangeRateToBase;
+  final Value<double?> destinationAmount;
   final Value<String> note;
   final Value<String?> receiptPath;
   final Value<String> createdBy;
@@ -3795,6 +3844,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     this.amount = const Value.absent(),
     this.currency = const Value.absent(),
     this.exchangeRateToBase = const Value.absent(),
+    this.destinationAmount = const Value.absent(),
     this.note = const Value.absent(),
     this.receiptPath = const Value.absent(),
     this.createdBy = const Value.absent(),
@@ -3815,6 +3865,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     required double amount,
     required String currency,
     this.exchangeRateToBase = const Value.absent(),
+    this.destinationAmount = const Value.absent(),
     this.note = const Value.absent(),
     this.receiptPath = const Value.absent(),
     required String createdBy,
@@ -3842,6 +3893,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     Expression<double>? amount,
     Expression<String>? currency,
     Expression<double>? exchangeRateToBase,
+    Expression<double>? destinationAmount,
     Expression<String>? note,
     Expression<String>? receiptPath,
     Expression<String>? createdBy,
@@ -3864,6 +3916,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       if (currency != null) 'currency': currency,
       if (exchangeRateToBase != null)
         'exchange_rate_to_base': exchangeRateToBase,
+      if (destinationAmount != null) 'destination_amount': destinationAmount,
       if (note != null) 'note': note,
       if (receiptPath != null) 'receipt_path': receiptPath,
       if (createdBy != null) 'created_by': createdBy,
@@ -3886,6 +3939,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       Value<double>? amount,
       Value<String>? currency,
       Value<double>? exchangeRateToBase,
+      Value<double?>? destinationAmount,
       Value<String>? note,
       Value<String?>? receiptPath,
       Value<String>? createdBy,
@@ -3905,6 +3959,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       amount: amount ?? this.amount,
       currency: currency ?? this.currency,
       exchangeRateToBase: exchangeRateToBase ?? this.exchangeRateToBase,
+      destinationAmount: destinationAmount ?? this.destinationAmount,
       note: note ?? this.note,
       receiptPath: receiptPath ?? this.receiptPath,
       createdBy: createdBy ?? this.createdBy,
@@ -3948,6 +4003,9 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     if (exchangeRateToBase.present) {
       map['exchange_rate_to_base'] = Variable<double>(exchangeRateToBase.value);
     }
+    if (destinationAmount.present) {
+      map['destination_amount'] = Variable<double>(destinationAmount.value);
+    }
     if (note.present) {
       map['note'] = Variable<String>(note.value);
     }
@@ -3990,6 +4048,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
           ..write('amount: $amount, ')
           ..write('currency: $currency, ')
           ..write('exchangeRateToBase: $exchangeRateToBase, ')
+          ..write('destinationAmount: $destinationAmount, ')
           ..write('note: $note, ')
           ..write('receiptPath: $receiptPath, ')
           ..write('createdBy: $createdBy, ')
@@ -12047,6 +12106,7 @@ typedef $$TransactionsTableCreateCompanionBuilder = TransactionsCompanion
   required double amount,
   required String currency,
   Value<double> exchangeRateToBase,
+  Value<double?> destinationAmount,
   Value<String> note,
   Value<String?> receiptPath,
   required String createdBy,
@@ -12068,6 +12128,7 @@ typedef $$TransactionsTableUpdateCompanionBuilder = TransactionsCompanion
   Value<double> amount,
   Value<String> currency,
   Value<double> exchangeRateToBase,
+  Value<double?> destinationAmount,
   Value<String> note,
   Value<String?> receiptPath,
   Value<String> createdBy,
@@ -12199,6 +12260,10 @@ class $$TransactionsTableFilterComposer
 
   ColumnFilters<double> get exchangeRateToBase => $composableBuilder(
       column: $table.exchangeRateToBase,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get destinationAmount => $composableBuilder(
+      column: $table.destinationAmount,
       builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get note => $composableBuilder(
@@ -12373,6 +12438,10 @@ class $$TransactionsTableOrderingComposer
       column: $table.exchangeRateToBase,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<double> get destinationAmount => $composableBuilder(
+      column: $table.destinationAmount,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get note => $composableBuilder(
       column: $table.note, builder: (column) => ColumnOrderings(column));
 
@@ -12502,6 +12571,9 @@ class $$TransactionsTableAnnotationComposer
 
   GeneratedColumn<double> get exchangeRateToBase => $composableBuilder(
       column: $table.exchangeRateToBase, builder: (column) => column);
+
+  GeneratedColumn<double> get destinationAmount => $composableBuilder(
+      column: $table.destinationAmount, builder: (column) => column);
 
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
@@ -12688,6 +12760,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             Value<double> amount = const Value.absent(),
             Value<String> currency = const Value.absent(),
             Value<double> exchangeRateToBase = const Value.absent(),
+            Value<double?> destinationAmount = const Value.absent(),
             Value<String> note = const Value.absent(),
             Value<String?> receiptPath = const Value.absent(),
             Value<String> createdBy = const Value.absent(),
@@ -12708,6 +12781,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             amount: amount,
             currency: currency,
             exchangeRateToBase: exchangeRateToBase,
+            destinationAmount: destinationAmount,
             note: note,
             receiptPath: receiptPath,
             createdBy: createdBy,
@@ -12728,6 +12802,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             required double amount,
             required String currency,
             Value<double> exchangeRateToBase = const Value.absent(),
+            Value<double?> destinationAmount = const Value.absent(),
             Value<String> note = const Value.absent(),
             Value<String?> receiptPath = const Value.absent(),
             required String createdBy,
@@ -12748,6 +12823,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             amount: amount,
             currency: currency,
             exchangeRateToBase: exchangeRateToBase,
+            destinationAmount: destinationAmount,
             note: note,
             receiptPath: receiptPath,
             createdBy: createdBy,

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import 'normalize_transactions.dart';
 import 'daos/accounts_dao.dart';
 import 'daos/allocations_dao.dart';
 import 'daos/ledger_dao.dart';
@@ -53,7 +54,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 22;
+  int get schemaVersion => 23;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -203,10 +204,18 @@ class AppDatabase extends _$AppDatabase {
             await _addColumnIfMissing(
                 m, recurringTransactions, recurringTransactions.remindDays);
           }
+          if (from < 23) {
+            // What a transfer delivered, in the destination's currency
+            // (filled for old rows by normalizeTransactions() below).
+            await _addColumnIfMissing(
+                m, transactions, transactions.destinationAmount);
+          }
         },
         beforeOpen: (_) async {
           await _ensureIndexes();
           await _ensureSyncTriggers();
+          // Rows from before v23, or restored from an old .db backup.
+          await normalizeTransactions(this);
         },
       );
 

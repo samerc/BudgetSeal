@@ -24,7 +24,7 @@ Single-file sync approach (`PocketPlan_Sync.json`):
 
 ## Database
 
-### Schema Version: 20
+### Schema Version: 23
 12 tables: households, users, accounts, categories, allocations, transactions, transaction_lines, allocation_ledger, recurring_transactions, transaction_templates, fx_rates, objectives.
 
 v9→v10 added `isSubscription` and `priceHistory` columns to `recurring_transactions` for subscription tracking.
@@ -39,6 +39,8 @@ v17→v18 added `deleted` to accounts/categories/allocations/objectives/recurrin
 v19→v20 added `sortOrder` (nullable INT) to `allocations` for the manual Budget tab order (synced).
 v20→v21 added `behindMode` (nullable TEXT) to `allocations`: how a sinking fund catches up (`spread` / `topup`, null = ask; synced).
 v21→v22 added `askFirst` (BOOL, default false) and `remindDays` (nullable INT; null = default 2 days, -1 = off) to `recurring_transactions` (both synced).
+
+v22→v23 added `transactions.destinationAmount` (nullable REAL, synced as `destinationAmount`): what a transfer delivered, in the destination's currency. **One meaning per column** from v23: a posted income/expense always has lines (account currency, own rate) and its header holds the base total; a transfer holds sent (`amount`, source currency) and received (`destinationAmount`). Older rows are converted by `normalizeTransactions()` (`core/database/normalize_transactions.dart`) — on every open (`beforeOpen`, so upgrades and restored `.db` backups), and inside `mergeFromJson`/`restoreFromJson` (files from phones still on 0.11): a posted transfer without it gets `amount × exchangeRateToBase`; a posted income/expense with no line gets one, id `<txId>:acct` (the header amount on the header account in its currency), and the header becomes the base total (0 without a rate) with rate 1. Deterministic ids and values, so two phones converting the same row agree; the updates move `last_modified` (trigger) and sync out. **0.11 compatibility:** the transfer's `exchangeRateToBase` is still written (0.11 reads it); 0.11 ignores the new key (its `_transactionFromMap` reads known keys only) and reads a converted row through its line. A 0.11 edit of a transfer arrives without `destinationAmount` → null → refilled from the rate. Tested: `migration_test.dart` (v22 file), `money_model_test.dart` (merging and restoring a 0.11-style file must keep every balance).
 v18→v19 added `anchorDay` (nullable INT) to `recurring_transactions`: the day of month a series was set up on. `advanceRecurringDate()` (recurring_engine.dart) clamps monthly/yearly dates to short months and returns to the anchor (Jan 31 → Feb 28 → Mar 31); legacy rows get the anchor filled from their due day the next time they post.
 
 ### Migrations
@@ -83,7 +85,7 @@ Backup restore validates: SQLite magic bytes (`SQLite format 3`), file size < 10
 ## Performance
 
 ### Batch Balance Computation
-`BalanceCalculator.allAccountBalances()` (and `accountBalance()`) sums every account's movements in one SQL `UNION ALL … GROUP BY` (`_movements()`): lines on their own account, header-only income/expense on the header account, transfers out by `amount` and in by `amount × exchangeRateToBase`. Nothing is loaded into Dart; 82 ms for 10,700 transactions on a PC (it used to load every line and transaction, 711 ms). `allAllocationBalancesByCurrency()` uses a single query via `LedgerDao.getAllBalances()`. Providers (`accountsWithBalanceProvider`, `allocationsProvider`) use these batch methods.
+`BalanceCalculator.allAccountBalances()` (and `accountBalance()`) sums every account's movements in one SQL `UNION ALL … GROUP BY` (`_movements()`): lines on their own account, header-only income/expense on the header account, transfers out by `amount` and in by `destinationAmount` (falling back to `amount × exchangeRateToBase` for a not-yet-converted row). Nothing is loaded into Dart; 82 ms for 10,700 transactions on a PC (it used to load every line and transaction, 711 ms). `allAllocationBalancesByCurrency()` uses a single query via `LedgerDao.getAllBalances()`. Providers (`accountsWithBalanceProvider`, `allocationsProvider`) use these batch methods.
 
 ### Report Stats
 `reportStatsProvider` aggregates all transactions into monthly buckets in one O(N) pass. Report tabs look up pre-computed `MonthlyStats` by month key instead of re-scanning the full list. `_typicalMonthlySpend` is a method on `ReportStats`, not an inline loop.

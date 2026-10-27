@@ -44,6 +44,7 @@ import 'widgets/income_expense_summary.dart';
 import 'widgets/month_nav.dart';
 import 'time/reports_home.dart';
 import '../../shared/utils/calendar_days.dart';
+import '../../core/database/transfer_amounts.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper: compute base amount from a transaction entry.
@@ -2811,12 +2812,11 @@ class _BalanceSheetTabState extends ConsumerState<_BalanceSheetTab> {
         if (acctIds.contains(tx.accountId)) {
           result[tx.accountId] = (result[tx.accountId] ?? 0) + tx.amount;
         }
-        // Destination: was credited tx.amount * rate, so subtract it back
+        // Destination: was credited what it received, so subtract it back
         if (tx.destinationAccountId != null &&
             acctIds.contains(tx.destinationAccountId)) {
           result[tx.destinationAccountId!] =
-              (result[tx.destinationAccountId!] ?? 0) -
-                  tx.amount * tx.exchangeRateToBase;
+              (result[tx.destinationAccountId!] ?? 0) - tx.receivedAmount;
         }
         continue;
       }

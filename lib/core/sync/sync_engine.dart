@@ -4,6 +4,7 @@ import 'dart:isolate';
 import 'package:drift/drift.dart';
 
 import '../database/app_database.dart';
+import '../database/normalize_transactions.dart';
 import '../database/daos/ledger_dao.dart';
 import 'sync_encryption.dart';
 
@@ -132,6 +133,7 @@ class SyncEngine {
               onConflict: DoUpdate((_) => _objectiveFromMap(o)));
         }
       });
+      await normalizeTransactions(_db);
     });
   }
 
@@ -252,6 +254,8 @@ class SyncEngine {
       // device that deleted them, but the other device's file still has
       // them: drop them again (balances ignore them anyway).
       await LedgerDao(_db).deleteForDeletedTransactions();
+      // Rows from a phone on an older version.
+      await normalizeTransactions(_db);
     });
 
     return changed;
@@ -435,6 +439,7 @@ class SyncEngine {
         'amount': t.amount,
         'currency': t.currency,
         'exchangeRateToBase': t.exchangeRateToBase,
+        'destinationAmount': t.destinationAmount,
         'note': t.note,
         'receiptPath': t.receiptPath,
         'status': t.status,
@@ -614,6 +619,10 @@ class SyncEngine {
         currency: m['currency'] as String,
         exchangeRateToBase: Value(
             (m['exchangeRateToBase'] as num?)?.toDouble() ?? 1.0),
+        // Missing in files from phones on 0.11: null, then filled from the
+        // rate by normalizeTransactions() (an edit there may have changed it).
+        destinationAmount:
+            Value((m['destinationAmount'] as num?)?.toDouble()),
         note: Value(m['note'] as String? ?? ''),
         receiptPath: Value(m['receiptPath'] as String?),
         status: Value(m['status'] as String?),

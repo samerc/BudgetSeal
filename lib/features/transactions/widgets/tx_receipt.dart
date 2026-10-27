@@ -16,6 +16,7 @@ import '../../../shared/utils/format_number.dart';
 import '../../../shared/utils/note_text.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/widgets/tappable.dart';
+import '../../../core/database/transfer_amounts.dart';
 
 /// Where an expense's envelope stands now (for the stamp and Cover).
 typedef ReceiptEnvelope = ({
@@ -310,15 +311,14 @@ class TxReceipt extends ConsumerWidget {
       final destCur = entry.destinationAccountCurrency;
       final crossCurrency = tx.type == 'transfer' &&
           destCur != null &&
-          destCur != tx.currency &&
-          tx.exchangeRateToBase > 0;
+          destCur != tx.currency;
       return [
         row(
           tx.type == 'transfer' ? tr.typeTransfer : tr.txDetailUncategorized,
           null,
           formatAmount(tx.amount, currency: tx.currency),
           converted: crossCurrency
-              ? '= ${formatAmount(tx.amount * tx.exchangeRateToBase, currency: destCur)}'
+              ? '= ${formatAmount(tx.receivedAmount, currency: destCur)}'
               : null,
         ),
       ];

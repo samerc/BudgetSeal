@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../database/app_database.dart';
 import 'database_provider.dart';
 import 'household_provider.dart';
+import '../database/transfer_amounts.dart';
 
 /// A transaction annotated with running account balance and display metadata.
 class TransactionEntry {
@@ -83,9 +84,7 @@ void _applyTxToRunning(
       running[tx.accountId] = (running[tx.accountId] ?? 0) - tx.amount;
       final dest = tx.destinationAccountId;
       if (dest != null) {
-        // Convert to destination currency using the exchange rate
-        running[dest] =
-            (running[dest] ?? 0) + tx.amount * tx.exchangeRateToBase;
+        running[dest] = (running[dest] ?? 0) + tx.receivedAmount;
       }
   }
 }

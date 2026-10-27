@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/budget_impact_provider.dart';
+import '../../../core/database/transfer_amounts.dart';
 
 /// Per transaction touching [account]: its signed effect on that account (in
 /// the account's currency) and the account balance right after it. Replays
@@ -39,7 +40,7 @@ Future<Map<String, ({double effect, double balance})>> accountRunning(
     if (t.type == 'transfer') {
       if (t.accountId == id) effect -= t.amount;
       if (t.destinationAccountId == id) {
-        effect += t.amount * t.exchangeRateToBase;
+        effect += t.receivedAmount;
       }
     } else {
       final sign = t.type == 'income' ? 1.0 : -1.0;
@@ -102,7 +103,7 @@ Future<Map<String, Map<String, double>>> allAccountsRunning(
 
     if (t.type == 'transfer') {
       add(t.accountId, -t.amount);
-      add(t.destinationAccountId, t.amount * t.exchangeRateToBase);
+      add(t.destinationAccountId, t.receivedAmount);
     } else {
       final sign = t.type == 'income' ? 1.0 : -1.0;
       final txLines = byTx[t.id] ?? const [];

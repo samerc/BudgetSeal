@@ -188,7 +188,8 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase>
 
     // Incoming transfers
     final inResults = await db.customSelect(
-      '''SELECT destination_account_id, SUM(amount * exchange_rate_to_base) as total
+      '''SELECT destination_account_id,
+                SUM(COALESCE(destination_amount, amount * exchange_rate_to_base)) as total
          FROM transactions
          WHERE household_id = ? AND deleted = 0 AND status IS NULL
            AND created_at < ? AND type = 'transfer'

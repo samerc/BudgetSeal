@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:budgetseal/core/database/app_database.dart';
@@ -369,6 +370,46 @@ Future<void> _run(int seed, int steps) async {
   expect(await copyCalc.allAllocationBalancesByCurrency(hh),
       await calc.allAllocationBalancesByCurrency(hh),
       reason: 'seed $seed: envelopes after restoring the sync file');
+
+  // ── A file from a phone still on 0.11 ───────────────────────────
+  // Older phones write no destinationAmount (the transfer's rate is on the
+  // header) and record a balance adjustment as a header-only income in the
+  // account's currency. Their transfers come in as edited (newer), so the
+  // merge takes them; both must land on the same balances.
+  final old = jsonDecode(json) as Map<String, dynamic>;
+  final later = DateTime.now().add(const Duration(days: 1)).toUtc();
+  for (final t in (old['transactions'] as List).cast<Map<String, dynamic>>()) {
+    if (t['type'] != 'transfer') continue;
+    t.remove('destinationAmount');
+    t['lastModified'] = later.toIso8601String();
+  }
+  const adjustment = 450000.0;
+  (old['transactions'] as List).add({
+    'id': 'from-0.11',
+    'householdId': hh,
+    'type': 'income',
+    'accountId': 'lbp',
+    'amount': adjustment,
+    'currency': 'LBP',
+    'exchangeRateToBase': _toBase['LBP'],
+    'createdBy': 'user',
+    'deviceId': 'old-phone',
+    'createdAt': later.toIso8601String(),
+    'lastModified': later.toIso8601String(),
+    'deleted': false,
+  });
+  final oldFile = jsonEncode(old);
+  await sync.mergeFromJson(oldFile);
+  acct['lbp'] = acct['lbp']! + adjustment;
+  await check('merging a file from a phone on 0.11');
+  final fromOld = AppDatabase.forTesting(NativeDatabase.memory());
+  addTearDown(fromOld.close);
+  await SyncEngine(fromOld).restoreFromJson(oldFile);
+  final restoredOld = await BalanceCalculator(fromOld).allAccountBalances(hh);
+  for (final id in _accounts.keys) {
+    expect(restoredOld[id], closeTo(acct[id]!, 0.005),
+        reason: 'seed $seed: account $id after restoring a 0.11 file');
+  }
 
   // ── Changing the base currency moves no balance ─────────────────
   await changeBaseCurrency(db, hh, 'USD', 'EUR', 1 / 1.1);

@@ -17,6 +17,7 @@ import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/utils/note_text.dart';
 import '../../../shared/theme/app_icons.dart';
 import '../../allocations/move_money_sheet.dart';
+import '../../../core/database/transfer_amounts.dart';
 
 // ---------------------------------------------------------------------------
 // Transaction row — BudgetSeal's own: what the transaction did to the budget.
@@ -228,10 +229,8 @@ class TxTile extends ConsumerWidget {
       final to = entry.destinationAccountName ?? '';
       var text = '$from $arrow $to';
       final destCcy = entry.destinationAccountCurrency ?? tx.currency;
-      if (destCcy != _displayAmount().currency &&
-          (tx.exchangeRateToBase - 1.0).abs() > 0.001) {
-        text +=
-            ' · ${formatAmount(tx.amount * tx.exchangeRateToBase, currency: destCcy)}';
+      if (destCcy != _displayAmount().currency) {
+        text += ' · ${formatAmount(tx.receivedAmount, currency: destCcy)}';
       }
       children.add(Flexible(
         child: Text(text,
