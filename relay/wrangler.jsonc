@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "budgetseal-relay",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-01",
+  "durable_objects": {
+    "bindings": [{ "name": "HOUSEHOLD", "class_name": "Household" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Household"] }],
+  "observability": { "enabled": true }
+}

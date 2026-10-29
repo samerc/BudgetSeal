@@ -1,0 +1,13 @@
+{
+  "name": "budgetseal-relay",
+  "private": true,
+  "description": "BudgetSeal household relay: stores end-to-end encrypted sync files",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node test/relay_test.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "4.155.0"
+  }
+}
