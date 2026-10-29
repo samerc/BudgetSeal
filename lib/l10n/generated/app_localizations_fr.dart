@@ -6724,6 +6724,35 @@ class SFr extends S {
       'Code d\'invitation invalide. Il doit commencer par PP-';
 
   @override
+  String get joinScanCode => 'Scanner le code';
+
+  @override
+  String get joinScanTitle => 'Scanner le code d\'invitation';
+
+  @override
+  String get joinScanHint =>
+      'Pointez l\'appareil photo vers le code QR de l\'autre téléphone.';
+
+  @override
+  String get joinScanNoCamera =>
+      'Impossible d\'ouvrir l\'appareil photo. Saisissez plutôt le code.';
+
+  @override
+  String get joinPickerNote =>
+      'Google affiche ensuite le dossier BudgetSeal partagé : touchez-le pour donner l\'accès à BudgetSeal.';
+
+  @override
+  String get syncShareScanHint =>
+      'Ou scannez-le sur l\'autre téléphone : Rejoindre un foyer › Scanner le code.';
+
+  @override
+  String get joinReplaceTitle => 'Rejoindre un foyer ?';
+
+  @override
+  String get joinReplaceBody =>
+      'Le budget partagé remplace celui de ce téléphone ; une sauvegarde est d\'abord enregistrée dans Sauvegarde et restauration.';
+
+  @override
   String get onboardHouseholdNameError => 'Entrez un nom de foyer';
 
   @override

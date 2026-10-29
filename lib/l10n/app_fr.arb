@@ -3907,6 +3907,38 @@
   "@onboardInvalidCodeError": {
     "description": "Validation"
   },
+  "joinScanCode": "Scanner le code",
+  "@joinScanCode": {
+    "description": "Join sheet button"
+  },
+  "joinScanTitle": "Scanner le code d'invitation",
+  "@joinScanTitle": {
+    "description": "Scanner screen title"
+  },
+  "joinScanHint": "Pointez l'appareil photo vers le code QR de l'autre téléphone.",
+  "@joinScanHint": {
+    "description": "Scanner screen hint"
+  },
+  "joinScanNoCamera": "Impossible d'ouvrir l'appareil photo. Saisissez plutôt le code.",
+  "@joinScanNoCamera": {
+    "description": "Scanner: camera unavailable"
+  },
+  "joinPickerNote": "Google affiche ensuite le dossier BudgetSeal partagé : touchez-le pour donner l'accès à BudgetSeal.",
+  "@joinPickerNote": {
+    "description": "Join sheet note"
+  },
+  "syncShareScanHint": "Ou scannez-le sur l'autre téléphone : Rejoindre un foyer › Scanner le code.",
+  "@syncShareScanHint": {
+    "description": "Share sheet, under the QR"
+  },
+  "joinReplaceTitle": "Rejoindre un foyer ?",
+  "@joinReplaceTitle": {
+    "description": "Cloud Sync: confirm join"
+  },
+  "joinReplaceBody": "Le budget partagé remplace celui de ce téléphone ; une sauvegarde est d'abord enregistrée dans Sauvegarde et restauration.",
+  "@joinReplaceBody": {
+    "description": "Cloud Sync: confirm join"
+  },
   "lockSetupReason": "Configurez un verrouillage d'écran pour protéger BudgetSeal",
   "@lockSetupReason": {
     "description": "Biometric reason"

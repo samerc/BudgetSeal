@@ -11860,6 +11860,54 @@ abstract class S {
   /// **'Invalid invite code. It should start with PP-'**
   String get onboardInvalidCodeError;
 
+  /// Join sheet button
+  ///
+  /// In en, this message translates to:
+  /// **'Scan code'**
+  String get joinScanCode;
+
+  /// Scanner screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the invite code'**
+  String get joinScanTitle;
+
+  /// Scanner screen hint
+  ///
+  /// In en, this message translates to:
+  /// **'Point the camera at the QR code on the other phone.'**
+  String get joinScanHint;
+
+  /// Scanner: camera unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the camera. Type the code instead.'**
+  String get joinScanNoCamera;
+
+  /// Join sheet note
+  ///
+  /// In en, this message translates to:
+  /// **'Google then shows the shared BudgetSeal folder: tap it to give BudgetSeal access.'**
+  String get joinPickerNote;
+
+  /// Share sheet, under the QR
+  ///
+  /// In en, this message translates to:
+  /// **'Or scan it on their phone: Join a household › Scan code.'**
+  String get syncShareScanHint;
+
+  /// Cloud Sync: confirm join
+  ///
+  /// In en, this message translates to:
+  /// **'Join a household?'**
+  String get joinReplaceTitle;
+
+  /// Cloud Sync: confirm join
+  ///
+  /// In en, this message translates to:
+  /// **'The shared budget replaces the one on this phone. A backup of it is saved first in Backup & Restore.'**
+  String get joinReplaceBody;
+
   /// Onboarding validation error
   ///
   /// In en, this message translates to:

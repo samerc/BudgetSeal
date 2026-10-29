@@ -14,6 +14,7 @@ import '../../shared/widgets/confirm_dialog.dart';
 import '../../shared/widgets/icon_header_card.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/settings_row.dart';
+import 'join_household_sheet.dart';
 import 'share_household_sheet.dart';
 import '../../shared/utils/dispose_later.dart';
 import '../../core/providers/date_format_provider.dart';
@@ -113,8 +114,16 @@ class SyncScreen extends ConsumerWidget {
                 label: S.of(context).syncShareHousehold,
                 onTap: () => _showShareSheet(context, notifier),
               ),
-            if (syncState.activeProvider is GoogleDriveProvider)
+            if (syncState.activeProvider is GoogleDriveProvider) ...[
               const SizedBox(height: 12),
+              _ActionButton(
+                icon: AppIcons.signIn,
+                label: S.of(context).onboardJoinHousehold,
+                outlined: true,
+                onTap: () => _join(context),
+              ),
+              const SizedBox(height: 12),
+            ],
             _ActionButton(
               icon: AppIcons.linkBreak,
               label: S.of(context).syncDisconnect,
@@ -197,6 +206,14 @@ class SyncScreen extends ConsumerWidget {
                   height: 1.4,
                 ),
               ),
+            ),
+            const SizedBox(height: Spacing.xl),
+            // Someone shared their budget: join it (Google Drive).
+            _ActionButton(
+              icon: AppIcons.users,
+              label: S.of(context).onboardJoinHousehold,
+              outlined: true,
+              onTap: () => _join(context),
             ),
           ],
         ],
@@ -320,6 +337,18 @@ class SyncScreen extends ConsumerWidget {
           await notifier.disconnectProvider();
         }
     }
+  }
+
+  /// Joining replaces this phone's budget (a backup is saved first).
+  Future<void> _join(BuildContext context) async {
+    final tr = S.of(context);
+    final go = await showConfirmDialog(
+      context,
+      title: tr.joinReplaceTitle,
+      message: tr.joinReplaceBody,
+      confirmLabel: tr.onboardJoinButton,
+    );
+    if (go && context.mounted) await showJoinHouseholdSheet(context);
   }
 
   void _showShareSheet(BuildContext context, SyncNotifier notifier) {

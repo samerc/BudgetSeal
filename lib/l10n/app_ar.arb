@@ -3907,6 +3907,38 @@
   "@onboardInvalidCodeError": {
     "description": "Validation"
   },
+  "joinScanCode": "مسح الرمز",
+  "@joinScanCode": {
+    "description": "Join sheet button"
+  },
+  "joinScanTitle": "امسح رمز الدعوة",
+  "@joinScanTitle": {
+    "description": "Scanner screen title"
+  },
+  "joinScanHint": "وجّه الكاميرا نحو رمز QR على الهاتف الآخر.",
+  "@joinScanHint": {
+    "description": "Scanner screen hint"
+  },
+  "joinScanNoCamera": "تعذّر فتح الكاميرا. اكتب الرمز بدلًا من ذلك.",
+  "@joinScanNoCamera": {
+    "description": "Scanner: camera unavailable"
+  },
+  "joinPickerNote": "سيعرض Google بعد ذلك مجلد BudgetSeal المُشارَك: اضغط عليه لمنح BudgetSeal حق الوصول.",
+  "@joinPickerNote": {
+    "description": "Join sheet note"
+  },
+  "syncShareScanHint": "أو امسحه من الهاتف الآخر: الانضمام إلى أسرة › مسح الرمز.",
+  "@syncShareScanHint": {
+    "description": "Share sheet, under the QR"
+  },
+  "joinReplaceTitle": "الانضمام إلى أسرة؟",
+  "@joinReplaceTitle": {
+    "description": "Cloud Sync: confirm join"
+  },
+  "joinReplaceBody": "تحلّ الميزانية المُشارَكة محلّ الميزانية الموجودة على هذا الهاتف، مع حفظ نسخة احتياطية منها أولًا في النسخ الاحتياطي والاستعادة.",
+  "@joinReplaceBody": {
+    "description": "Cloud Sync: confirm join"
+  },
   "lockSetupReason": "أعدّ قفل الشاشة لحماية BudgetSeal",
   "@lockSetupReason": {
     "description": "Biometric reason"

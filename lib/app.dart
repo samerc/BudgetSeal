@@ -46,6 +46,7 @@ import 'features/reports/time/report_view.dart';
 import 'features/categories/categories_screen.dart';
 import 'features/main/main_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
+import 'features/settings/scan_invite_screen.dart';
 import 'features/periods/leftover_resolution_screen.dart';
 import 'features/recurring/recurring_screen.dart';
 import 'features/recurring/upcoming_bills_screen.dart';
@@ -473,6 +474,11 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
           path: '/tx-list-settings',
           pageBuilder: (_, state) => slideUpPage(
               child: const TxListSettingsScreen(), state: state),
+        ),
+        GoRoute(
+          path: '/scan-invite',
+          pageBuilder: (_, state) =>
+              slideUpPage(child: const ScanInviteScreen(), state: state),
         ),
         GoRoute(
           path: '/settings',

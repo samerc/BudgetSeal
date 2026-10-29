@@ -6,12 +6,18 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'cloud_provider.dart';
+import 'drive_picker.dart';
 import '../../l10n/s_lookup.dart';
 
 const _syncFileName = 'BudgetSeal_Sync.json';
 const _folderName = 'BudgetSeal';
+
+/// The household folder this phone joined (another account's): kept, so a
+/// restart doesn't fall back to a folder search that finds or makes its own.
+const _prefJoinedFolder = 'drive_joined_folder_id';
 
 /// Escape single quotes for Google Drive query language to prevent injection.
 String _escGdql(String s) => s.replaceAll("'", "\\'");
@@ -102,6 +108,8 @@ class GoogleDriveProvider implements CloudProvider {
     _logIds.clear();
     _folderId = null;
     _sharedFolder = false;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_prefJoinedFolder);
   }
 
   @override
@@ -347,8 +355,12 @@ class GoogleDriveProvider implements CloudProvider {
     return _getOrCreateFolder(api);
   }
 
-  /// Connect to a specific shared folder by ID (used when joining via invite code).
+  /// Connect to a specific shared folder by ID (used when joining via invite
+  /// code). The drive.file scope can't open a folder another account made,
+  /// so when Drive refuses, Google's picker opens with it selected: one tap
+  /// gives this app access to it.
   Future<bool> connectToSharedFolder(String folderId) async {
+    connectCanceled = false;
     try {
       await _ensureInitialized();
       _account = await GoogleSignIn.instance.authenticate();
@@ -363,10 +375,27 @@ class GoogleDriveProvider implements CloudProvider {
       _folderId = folderId;
       _sharedFolder = true;
 
-      // Verify we can access the folder
-      await _driveApi!.files.get(folderId);
+      try {
+        await _driveApi!.files.get(folderId);
+      } on drive.DetailedApiRequestError catch (e) {
+        if (e.status != 404 && e.status != 403) rethrow;
+        final picked = await DrivePicker.pick(
+            email: _account!.email, fileIds: [folderId]);
+        if (picked == null) {
+          connectCanceled = true;
+          return false;
+        }
+        await _driveApi!.files.get(folderId);
+      }
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_prefJoinedFolder, folderId);
       return true;
     } catch (e) {
+      if (e is GoogleSignInException &&
+          e.code == GoogleSignInExceptionCode.canceled) {
+        connectCanceled = true;
+        return false;
+      }
       debugPrint('connectToSharedFolder failed: $e');
       return false;
     }
@@ -439,6 +468,12 @@ class GoogleDriveProvider implements CloudProvider {
 
   Future<String> _getOrCreateFolder(drive.DriveApi api) async {
     if (_folderId != null) return _folderId!;
+    final joined =
+        (await SharedPreferences.getInstance()).getString(_prefJoinedFolder);
+    if (joined != null) {
+      _sharedFolder = true;
+      return _folderId = joined;
+    }
     final query =
         "name = '${_escGdql(_folderName)}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
     // Oldest first: two folders (made by two devices at once) always

@@ -6652,6 +6652,33 @@ class SAr extends S {
   String get onboardInvalidCodeError => 'رمز دعوة غير صالح. يجب أن يبدأ بـ PP-';
 
   @override
+  String get joinScanCode => 'مسح الرمز';
+
+  @override
+  String get joinScanTitle => 'امسح رمز الدعوة';
+
+  @override
+  String get joinScanHint => 'وجّه الكاميرا نحو رمز QR على الهاتف الآخر.';
+
+  @override
+  String get joinScanNoCamera => 'تعذّر فتح الكاميرا. اكتب الرمز بدلًا من ذلك.';
+
+  @override
+  String get joinPickerNote =>
+      'سيعرض Google بعد ذلك مجلد BudgetSeal المُشارَك: اضغط عليه لمنح BudgetSeal حق الوصول.';
+
+  @override
+  String get syncShareScanHint =>
+      'أو امسحه من الهاتف الآخر: الانضمام إلى أسرة › مسح الرمز.';
+
+  @override
+  String get joinReplaceTitle => 'الانضمام إلى أسرة؟';
+
+  @override
+  String get joinReplaceBody =>
+      'تحلّ الميزانية المُشارَكة محلّ الميزانية الموجودة على هذا الهاتف، مع حفظ نسخة احتياطية منها أولًا في النسخ الاحتياطي والاستعادة.';
+
+  @override
   String get onboardHouseholdNameError => 'أدخل اسم الأسرة';
 
   @override

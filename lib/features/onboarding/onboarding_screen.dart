@@ -18,7 +18,7 @@ import '../../core/providers/sync_provider.dart';
 import '../../core/services/auto_backup_service.dart';
 import '../../core/sync/cloud_provider.dart';
 import '../../core/sync/google_drive_provider.dart';
-import '../../core/sync/invite_code.dart';
+import '../settings/join_household_sheet.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../transactions/widgets/currency_sheet.dart' show kCurrencies;
 import '../../shared/theme/app_colors.dart';
@@ -1168,123 +1168,9 @@ class _JoinHouseholdButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextButton.icon(
-      onPressed: () => showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        builder: (_) => const _JoinHouseholdSheet(),
-      ),
+      onPressed: () => showJoinHouseholdSheet(context),
       icon: const Icon(AppIcons.users, size: 20),
       label: Text(S.of(context).onboardJoinHousehold),
-    );
-  }
-}
-
-class _JoinHouseholdSheet extends ConsumerStatefulWidget {
-  const _JoinHouseholdSheet();
-
-  @override
-  ConsumerState<_JoinHouseholdSheet> createState() =>
-      _JoinHouseholdSheetState();
-}
-
-class _JoinHouseholdSheetState extends ConsumerState<_JoinHouseholdSheet> {
-  final _codeController = TextEditingController();
-  bool _loading = false;
-  String? _error;
-
-  @override
-  void dispose() {
-    _codeController.dispose();
-    super.dispose();
-  }
-
-  void _fail(String message) {
-    if (mounted) {
-      setState(() {
-        _loading = false;
-        _error = message;
-      });
-    }
-  }
-
-  Future<void> _join() async {
-    final s = S.of(context);
-    final code = _codeController.text.trim();
-    if (code.isEmpty) {
-      setState(() => _error = s.onboardEnterCodeError);
-      return;
-    }
-
-    final folderId = decodeInviteCode(code);
-    if (folderId == null) {
-      setState(() => _error = s.onboardInvalidCodeError);
-      return;
-    }
-
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-
-    try {
-      final notifier = ref.read(syncProvider.notifier);
-      final googleDrive = notifier.googleDrive;
-
-      final connected = await googleDrive.connectToSharedFolder(folderId);
-      if (!connected) {
-        _fail(s.onboardDriveJoinFailed);
-        return;
-      }
-
-      await notifier.connectProvider(googleDrive);
-      await notifier.restoreFromProvider(googleDrive);
-
-      final syncState = ref.read(syncProvider);
-      if (syncState.status == SyncStatus.error) {
-        _fail(syncState.lastError ?? s.onboardNoSyncFileShared);
-        return;
-      }
-
-      await ref.read(householdServiceProvider).loadSavedHousehold();
-
-      if (mounted) {
-        Navigator.pop(context);
-        context.go('/');
-      }
-    } catch (e) {
-      _fail(syncErrorText(e));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final s = S.of(context);
-    return _SheetBody(
-      title: s.onboardJoinHousehold,
-      description: s.onboardJoinDesc,
-      error: _error,
-      children: [
-        if (_loading)
-          const _SheetSpinner()
-        else ...[
-          TextField(
-            controller: _codeController,
-            decoration: InputDecoration(
-              labelText: s.onboardInviteCode,
-              hintText: s.onboardInviteHint,
-              prefixIcon: const Icon(AppIcons.key),
-            ),
-            style: const TextStyle(fontFamily: 'monospace', fontSize: 15),
-            onSubmitted: (_) => _join(),
-          ),
-          const SizedBox(height: 16),
-          FilledButton.icon(
-            onPressed: _join,
-            icon: const Icon(AppIcons.signIn, size: 20),
-            label: Text(s.onboardJoinButton),
-          ),
-        ],
-      ],
     );
   }
 }

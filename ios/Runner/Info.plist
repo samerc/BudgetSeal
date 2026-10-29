@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSCameraUsageDescription</key>
+	<string>BudgetSeal uses the camera to photograph receipts and to scan a household invite code.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>BudgetSeal lets you attach receipt photos from your library.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>BudgetSeal needs local network access to serve the Web Companion interface to your browser.</string>
 	<key>NSBonjourServices</key>

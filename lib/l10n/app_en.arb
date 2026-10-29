@@ -5280,6 +5280,38 @@
   "@onboardInvalidCodeError": {
     "description": "Onboarding join validation error"
   },
+  "joinScanCode": "Scan code",
+  "@joinScanCode": {
+    "description": "Join sheet button"
+  },
+  "joinScanTitle": "Scan the invite code",
+  "@joinScanTitle": {
+    "description": "Scanner screen title"
+  },
+  "joinScanHint": "Point the camera at the QR code on the other phone.",
+  "@joinScanHint": {
+    "description": "Scanner screen hint"
+  },
+  "joinScanNoCamera": "Couldn't open the camera. Type the code instead.",
+  "@joinScanNoCamera": {
+    "description": "Scanner: camera unavailable"
+  },
+  "joinPickerNote": "Google then shows the shared BudgetSeal folder: tap it to give BudgetSeal access.",
+  "@joinPickerNote": {
+    "description": "Join sheet note"
+  },
+  "syncShareScanHint": "Or scan it on their phone: Join a household › Scan code.",
+  "@syncShareScanHint": {
+    "description": "Share sheet, under the QR"
+  },
+  "joinReplaceTitle": "Join a household?",
+  "@joinReplaceTitle": {
+    "description": "Cloud Sync: confirm join"
+  },
+  "joinReplaceBody": "The shared budget replaces the one on this phone. A backup of it is saved first in Backup & Restore.",
+  "@joinReplaceBody": {
+    "description": "Cloud Sync: confirm join"
+  },
   "onboardHouseholdNameError": "Enter a household name",
   "@onboardHouseholdNameError": {
     "description": "Onboarding validation error"

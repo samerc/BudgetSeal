@@ -156,13 +156,18 @@ class SyncNotifier extends Notifier<SyncState> {
   Future<bool> connectProvider(CloudProvider provider) async {
     final ok = await provider.connect();
     if (!ok) return false;
+    await useConnectedProvider(provider);
+    return true;
+  }
 
+  /// Make [provider] — already signed in (joining a shared folder) — the
+  /// active one, without signing in again.
+  Future<void> useConnectedProvider(CloudProvider provider) async {
     final key = provider is GoogleDriveProvider ? 'google_drive' : 'file';
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_prefActiveProvider, key);
 
     state = state.copyWith(activeProvider: provider);
-    return true;
   }
 
   /// Disconnect the current provider.

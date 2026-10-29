@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qr_widget/qr_widget.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/sync/google_drive_provider.dart';
@@ -154,6 +155,29 @@ class _ShareHouseholdSheetState extends State<ShareHouseholdSheet> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 16),
+                // White in every theme on purpose: scanners need dark
+                // modules on a light quiet zone.
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(RadiusTokens.md),
+                    ),
+                    child: QrImageView(
+                      data: _inviteCode!,
+                      version: QrVersions.auto,
+                      size: 180,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(tr.syncShareScanHint,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: TypographyTokens.captionSize,
+                        color: AppColors.ts(context))),
                 const SizedBox(height: 16),
                 FilledButton.icon(
                   onPressed: _shareCode,

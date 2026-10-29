@@ -6645,6 +6645,35 @@ class SEn extends S {
       'Invalid invite code. It should start with PP-';
 
   @override
+  String get joinScanCode => 'Scan code';
+
+  @override
+  String get joinScanTitle => 'Scan the invite code';
+
+  @override
+  String get joinScanHint =>
+      'Point the camera at the QR code on the other phone.';
+
+  @override
+  String get joinScanNoCamera =>
+      'Couldn\'t open the camera. Type the code instead.';
+
+  @override
+  String get joinPickerNote =>
+      'Google then shows the shared BudgetSeal folder: tap it to give BudgetSeal access.';
+
+  @override
+  String get syncShareScanHint =>
+      'Or scan it on their phone: Join a household › Scan code.';
+
+  @override
+  String get joinReplaceTitle => 'Join a household?';
+
+  @override
+  String get joinReplaceBody =>
+      'The shared budget replaces the one on this phone. A backup of it is saved first in Backup & Restore.';
+
+  @override
   String get onboardHouseholdNameError => 'Enter a household name';
 
   @override

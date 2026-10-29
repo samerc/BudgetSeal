@@ -814,6 +814,14 @@ onboard_invite_hint,Field hint,PP-...,PP-...,PP-...
 onboard_join_button,Button,Join household,الانضمام للأسرة,Rejoindre le foyer
 onboard_enter_code_error,Validation,Please enter an invite code,الرجاء إدخال رمز الدعوة,Veuillez saisir un code d'invitation
 onboard_invalid_code_error,Validation,Invalid invite code. It should start with PP-,رمز دعوة غير صالح. يجب أن يبدأ بـ PP-,Code d'invitation invalide. Il doit commencer par PP-
+join_scan_code,Join sheet button,Scan code,مسح الرمز,Scanner le code
+join_scan_title,Scanner screen title,Scan the invite code,امسح رمز الدعوة,Scanner le code d'invitation
+join_scan_hint,Scanner screen hint,Point the camera at the QR code on the other phone.,وجّه الكاميرا نحو رمز QR على الهاتف الآخر.,Pointez l'appareil photo vers le code QR de l'autre téléphone.
+join_scan_no_camera,Scanner: camera unavailable,Couldn't open the camera. Type the code instead.,تعذّر فتح الكاميرا. اكتب الرمز بدلًا من ذلك.,Impossible d'ouvrir l'appareil photo. Saisissez plutôt le code.
+join_picker_note,Join sheet note,Google then shows the shared BudgetSeal folder: tap it to give BudgetSeal access.,سيعرض Google بعد ذلك مجلد BudgetSeal المُشارَك: اضغط عليه لمنح BudgetSeal حق الوصول.,Google affiche ensuite le dossier BudgetSeal partagé : touchez-le pour donner l'accès à BudgetSeal.
+sync_share_scan_hint,"Share sheet, under the QR",Or scan it on their phone: Join a household › Scan code.,أو امسحه من الهاتف الآخر: الانضمام إلى أسرة › مسح الرمز.,Ou scannez-le sur l'autre téléphone : Rejoindre un foyer › Scanner le code.
+join_replace_title,Cloud Sync: confirm join,Join a household?,الانضمام إلى أسرة؟,Rejoindre un foyer ?
+join_replace_body,Cloud Sync: confirm join,The shared budget replaces the one on this phone. A backup of it is saved first in Backup & Restore.,تحلّ الميزانية المُشارَكة محلّ الميزانية الموجودة على هذا الهاتف، مع حفظ نسخة احتياطية منها أولًا في النسخ الاحتياطي والاستعادة.,Le budget partagé remplace celui de ce téléphone ; une sauvegarde est d'abord enregistrée dans Sauvegarde et restauration.
 # ──────────────────────────────────────────────,,,,
 # LOCK SCREEN,,,,
 # ──────────────────────────────────────────────,,,,

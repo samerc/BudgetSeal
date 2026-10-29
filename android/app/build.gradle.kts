@@ -81,6 +81,8 @@ kotlin {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    // Drive picker (DrivePicker.kt); same version google_sign_in brings.
+    implementation("com.google.android.gms:play-services-auth:21.6.0")
 }
 
 flutter {

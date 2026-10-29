@@ -25,6 +25,9 @@ class MainActivity : FlutterFragmentActivity() {
 
     private var shareChannel: MethodChannel? = null
 
+    /// Google's Drive picker (registers for an activity result, so made now).
+    private val drivePicker = DrivePicker(this)
+
     /// Something shared into the app that Dart hasn't taken yet:
     /// {"text": String, "files": [paths in the cache]}.
     private var pendingShare: Map<String, Any>? = null
@@ -82,6 +85,7 @@ class MainActivity : FlutterFragmentActivity() {
                     else -> result.notImplemented()
                 }
             }
+        drivePicker.attach(flutterEngine.dartExecutor.binaryMessenger)
         // Share into BudgetSeal (ShareIntake in Dart takes it when ready).
         pendingShare = readShare(intent)
         shareChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "budgetseal/share")
