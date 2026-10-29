@@ -2575,10 +2575,6 @@ class SAr extends S {
   }
 
   @override
-  String get shareHouseholdFailed =>
-      'تعذّر إنشاء الدعوة. تحقق من اتصالك وحاول مرة أخرى.';
-
-  @override
   String a11yPctOfTarget(int pct, String amount) {
     return '$pct٪ من $amount';
   }
@@ -2632,10 +2628,6 @@ class SAr extends S {
 
   @override
   String get onboardNoSyncFile => 'لم يُعثر على ميزانية في هذا المجلد';
-
-  @override
-  String get onboardDriveJoinFailed =>
-      'تعذّر الاتصال بـ Google Drive. تأكد من تسجيل الدخول ومن إمكانية الوصول إلى المجلد المشترك.';
 
   @override
   String get onboardNoSyncFileShared =>
@@ -5004,29 +4996,7 @@ class SAr extends S {
       'ستبقى بياناتك على جهازك، لكن المزامنة التلقائية ستتوقف. يمكنك إعادة الاتصال في أي وقت.';
 
   @override
-  String get syncShareDesc =>
-      'شارك بيانات BudgetSeal مع شخص آخر. سيتمكن من المزامنة مع نفس الملف على Google Drive.';
-
-  @override
-  String get syncTheirEmail => 'عنوان بريدهم الإلكتروني';
-
-  @override
-  String get syncEmailHint => 'partner@gmail.com';
-
-  @override
-  String get syncSharing => 'جارٍ المشاركة...';
-
-  @override
-  String get syncGenerateInvite => 'إنشاء رمز الدعوة';
-
-  @override
-  String get syncInviteCode => 'رمز الدعوة';
-
-  @override
   String get syncShareCode => 'مشاركة الرمز';
-
-  @override
-  String get syncValidEmailError => 'الرجاء إدخال عنوان بريد إلكتروني صالح';
 
   @override
   String get syncEncryptionTitle => 'تشفير المزامنة';
@@ -5358,14 +5328,6 @@ class SAr extends S {
 
   @override
   String get tileShareHouseholdConnected => 'دعوة شخص لمشاركة بياناتك';
-
-  @override
-  String get tileShareHouseholdDisconnected =>
-      'قم بتوصيل المزامنة السحابية أولاً';
-
-  @override
-  String get tileShareHouseholdSnackbar =>
-      'قم بإعداد المزامنة السحابية مع Google Drive أولاً لمشاركة أسرتك.';
 
   @override
   String get tileBackupRestore => 'النسخ الاحتياطي والاستعادة';
@@ -6664,12 +6626,8 @@ class SAr extends S {
   String get joinScanNoCamera => 'تعذّر فتح الكاميرا. اكتب الرمز بدلًا من ذلك.';
 
   @override
-  String get joinPickerNote =>
-      'سيعرض Google بعد ذلك مجلد BudgetSeal المُشارَك: اضغط عليه لمنح BudgetSeal حق الوصول.';
-
-  @override
   String get syncShareScanHint =>
-      'أو امسحه من الهاتف الآخر: الانضمام إلى أسرة › مسح الرمز.';
+      'على الهاتف الآخر: الانضمام إلى أسرة › مسح الرمز.';
 
   @override
   String get joinReplaceTitle => 'الانضمام إلى أسرة؟';
@@ -6677,6 +6635,71 @@ class SAr extends S {
   @override
   String get joinReplaceBody =>
       'تحلّ الميزانية المُشارَكة محلّ الميزانية الموجودة على هذا الهاتف، مع حفظ نسخة احتياطية منها أولًا في النسخ الاحتياطي والاستعادة.';
+
+  @override
+  String get relayName => 'مزامنة الأسرة';
+
+  @override
+  String get relayErrNotFound => 'لا توجد أسرة بهذا الرمز. اطلب رمزًا جديدًا.';
+
+  @override
+  String get relayErrKey => 'لم يعد رمز الأسرة هذا صالحًا. اطلب رمزًا جديدًا.';
+
+  @override
+  String get relayErrFull => 'بلغت هذه الأسرة الحدّ الأقصى للتخزين.';
+
+  @override
+  String get relayErrBusy => 'مزامنة الأسرة مشغولة. حاول مجددًا بعد دقيقة.';
+
+  @override
+  String get relayErrServer =>
+      'تعذّر الوصول إلى مزامنة الأسرة الآن. حاول لاحقًا.';
+
+  @override
+  String get householdSection => 'الأسرة';
+
+  @override
+  String get householdStart => 'إنشاء أسرة';
+
+  @override
+  String get householdStartSub => 'شارك هذه الميزانية مع شريكك أو عائلتك';
+
+  @override
+  String get householdJoinSub => 'استخدم ميزانية شاركها أحدهم معك';
+
+  @override
+  String get householdStartTitle => 'إنشاء أسرة؟';
+
+  @override
+  String get householdStartBody =>
+      'ستتم مزامنة ميزانيتك عبر خادم BudgetSeal. تُشفَّر أولًا على هذا الهاتف: لا يمكن قراءتها إلا على الهواتف التي لديها رمز أسرتك، ولا حتى BudgetSeal. وعلى هذا الهاتف تحلّ محلّ المزامنة عبر Google Drive أو المجلد.';
+
+  @override
+  String get householdInvite => 'دعوة شخص';
+
+  @override
+  String get householdInviteTitle => 'الدعوة إلى أسرتك';
+
+  @override
+  String get householdInviteBody =>
+      'يمكن لأي شخص لديه هذا الرمز رؤية ميزانيتك وتعديلها. شاركه فقط مع من تثق بهم.';
+
+  @override
+  String get householdLeave => 'مغادرة الأسرة';
+
+  @override
+  String get householdLeaveTitle => 'مغادرة هذه الأسرة؟';
+
+  @override
+  String get householdLeaveBody =>
+      'يتوقف هذا الهاتف عن المزامنة مع الأسرة. تبقى الميزانية على هذا الهاتف، ويحتفظ الآخرون بميزانيتهم.';
+
+  @override
+  String get householdLeftSnack => 'غادرت الأسرة';
+
+  @override
+  String get joinOldCode =>
+      'هذا الرمز من إصدار أقدم من BudgetSeal. اطلب تحديث التطبيق على الهاتف الآخر ثم المشاركة مجددًا.';
 
   @override
   String get onboardHouseholdNameError => 'أدخل اسم الأسرة';

@@ -639,14 +639,7 @@ sync_provider_info,Info text,Folder uses your phone's file picker: keep the sync
 sync_connection_failed,Dialog title,Connection failed,فشل الاتصال,Échec de la connexion
 sync_failed_to_connect,Default error,Failed to connect,فشل الاتصال,Échec de la connexion
 sync_disconnect_msg,Dialog content,"Your data will remain on your device, but automatic sync will stop. You can reconnect at any time.",ستبقى بياناتك على جهازك، لكن المزامنة التلقائية ستتوقف. يمكنك إعادة الاتصال في أي وقت.,"Vos données resteront sur votre appareil, mais la synchronisation automatique s'arrêtera. Vous pourrez vous reconnecter à tout moment."
-sync_share_desc,Sheet description,Share your BudgetSeal data with another person. They will be able to sync to the same file on Google Drive.,شارك بيانات BudgetSeal مع شخص آخر. سيتمكن من المزامنة مع نفس الملف على Google Drive.,Partagez vos données BudgetSeal avec une autre personne. Elle pourra synchroniser avec le même fichier Google Drive.
-sync_their_email,Field label,Their email address,عنوان بريدهم الإلكتروني,Leur adresse e-mail
-sync_email_hint,Field hint,partner@gmail.com,partner@gmail.com,partenaire@gmail.com
-sync_sharing,Button,Sharing...,جارٍ المشاركة...,Partage...
-sync_generate_invite,Button,Generate invite code,إنشاء رمز الدعوة,Générer un code d'invitation
-sync_invite_code,Label,Invite code,رمز الدعوة,Code d'invitation
 sync_share_code,Button,Share code,مشاركة الرمز,Partager le code
-sync_valid_email_error,Validation,Please enter a valid email address,الرجاء إدخال عنوان بريد إلكتروني صالح,Veuillez saisir une adresse e-mail valide
 sync_encryption_title,Card title,Sync encryption,تشفير المزامنة,Chiffrement de la synchronisation
 sync_encrypted,Subtitle,Your sync file is encrypted with AES-256,ملف المزامنة مشفر بـ AES-256,Votre fichier de synchronisation est chiffré en AES-256
 sync_not_encrypted,Subtitle,Sync file is not encrypted,ملف المزامنة غير مشفر,Le fichier de synchronisation n'est pas chiffré
@@ -818,10 +811,29 @@ join_scan_code,Join sheet button,Scan code,مسح الرمز,Scanner le code
 join_scan_title,Scanner screen title,Scan the invite code,امسح رمز الدعوة,Scanner le code d'invitation
 join_scan_hint,Scanner screen hint,Point the camera at the QR code on the other phone.,وجّه الكاميرا نحو رمز QR على الهاتف الآخر.,Pointez l'appareil photo vers le code QR de l'autre téléphone.
 join_scan_no_camera,Scanner: camera unavailable,Couldn't open the camera. Type the code instead.,تعذّر فتح الكاميرا. اكتب الرمز بدلًا من ذلك.,Impossible d'ouvrir l'appareil photo. Saisissez plutôt le code.
-join_picker_note,Join sheet note,Google then shows the shared BudgetSeal folder: tap it to give BudgetSeal access.,سيعرض Google بعد ذلك مجلد BudgetSeal المُشارَك: اضغط عليه لمنح BudgetSeal حق الوصول.,Google affiche ensuite le dossier BudgetSeal partagé : touchez-le pour donner l'accès à BudgetSeal.
-sync_share_scan_hint,"Share sheet, under the QR",Or scan it on their phone: Join a household › Scan code.,أو امسحه من الهاتف الآخر: الانضمام إلى أسرة › مسح الرمز.,Ou scannez-le sur l'autre téléphone : Rejoindre un foyer › Scanner le code.
+sync_share_scan_hint,"Share sheet, under the QR",On their phone: Join a household › Scan code.,على الهاتف الآخر: الانضمام إلى أسرة › مسح الرمز.,Sur l'autre téléphone : Rejoindre un foyer › Scanner le code.
 join_replace_title,Cloud Sync: confirm join,Join a household?,الانضمام إلى أسرة؟,Rejoindre un foyer ?
 join_replace_body,Cloud Sync: confirm join,The shared budget replaces the one on this phone. A backup of it is saved first in Backup & Restore.,تحلّ الميزانية المُشارَكة محلّ الميزانية الموجودة على هذا الهاتف، مع حفظ نسخة احتياطية منها أولًا في النسخ الاحتياطي والاستعادة.,Le budget partagé remplace celui de ce téléphone ; une sauvegarde est d'abord enregistrée dans Sauvegarde et restauration.
+relay_name,Sync provider name,Household sync,مزامنة الأسرة,Synchronisation du foyer
+relay_err_not_found,Household sync error,No household found for this code. Ask for a new code.,لا توجد أسرة بهذا الرمز. اطلب رمزًا جديدًا.,Aucun foyer ne correspond à ce code. Demandez un nouveau code.
+relay_err_key,Household sync error,This household code doesn't work any more. Ask for a new code.,لم يعد رمز الأسرة هذا صالحًا. اطلب رمزًا جديدًا.,Ce code de foyer ne fonctionne plus. Demandez un nouveau code.
+relay_err_full,Household sync error,This household has reached its storage limit.,بلغت هذه الأسرة الحدّ الأقصى للتخزين.,Ce foyer a atteint sa limite de stockage.
+relay_err_busy,Household sync error,Household sync is busy. Try again in a minute.,مزامنة الأسرة مشغولة. حاول مجددًا بعد دقيقة.,La synchronisation du foyer est occupée. Réessayez dans une minute.
+relay_err_server,Household sync error,Household sync can't be reached right now. Try again later.,تعذّر الوصول إلى مزامنة الأسرة الآن. حاول لاحقًا.,La synchronisation du foyer est injoignable pour le moment. Réessayez plus tard.
+household_section,Cloud Sync section,Household,الأسرة,Foyer
+household_start,Cloud Sync row / confirm button,Start a household,إنشاء أسرة,Créer un foyer
+household_start_sub,Cloud Sync row / Settings tile subtitle,Share this budget with your partner or family,شارك هذه الميزانية مع شريكك أو عائلتك,Partagez ce budget avec votre conjoint ou votre famille
+household_join_sub,Cloud Sync row subtitle,Use a budget someone shared with you,استخدم ميزانية شاركها أحدهم معك,Utilisez un budget qu'on a partagé avec vous
+household_start_title,Confirm title,Start a household?,إنشاء أسرة؟,Créer un foyer ?
+household_start_body,Confirm message,"Your budget will sync through BudgetSeal's server. It's encrypted on this phone first: only phones with your household's code can read it, not even BudgetSeal. On this phone it replaces Google Drive or folder sync.",ستتم مزامنة ميزانيتك عبر خادم BudgetSeal. تُشفَّر أولًا على هذا الهاتف: لا يمكن قراءتها إلا على الهواتف التي لديها رمز أسرتك، ولا حتى BudgetSeal. وعلى هذا الهاتف تحلّ محلّ المزامنة عبر Google Drive أو المجلد.,"Votre budget sera synchronisé via le serveur de BudgetSeal. Il est d'abord chiffré sur ce téléphone : seuls les téléphones ayant le code de votre foyer peuvent le lire, pas même BudgetSeal. Sur ce téléphone, il remplace la synchronisation Google Drive ou par dossier."
+household_invite,Cloud Sync button,Invite someone,دعوة شخص,Inviter quelqu'un
+household_invite_title,Invite sheet title,Invite to your household,الدعوة إلى أسرتك,Inviter dans votre foyer
+household_invite_body,Invite sheet subtitle,Anyone with this code can see and change your budget. Share it only with people you trust.,يمكن لأي شخص لديه هذا الرمز رؤية ميزانيتك وتعديلها. شاركه فقط مع من تثق بهم.,Toute personne ayant ce code peut voir et modifier votre budget. Ne le partagez qu'avec des personnes de confiance.
+household_leave,Cloud Sync button / confirm,Leave household,مغادرة الأسرة,Quitter le foyer
+household_leave_title,Confirm title,Leave this household?,مغادرة هذه الأسرة؟,Quitter ce foyer ?
+household_leave_body,Confirm message,"This phone stops syncing with the household. The budget stays on this phone, and the others keep theirs.",يتوقف هذا الهاتف عن المزامنة مع الأسرة. تبقى الميزانية على هذا الهاتف، ويحتفظ الآخرون بميزانيتهم.,"Ce téléphone arrête de se synchroniser avec le foyer. Le budget reste sur ce téléphone, et les autres gardent le leur."
+household_left_snack,SnackBar,Left the household,غادرت الأسرة,Vous avez quitté le foyer
+join_old_code,Join validation,"This code is from an older version of BudgetSeal. Ask for the app to be updated on the other phone, then share again.",هذا الرمز من إصدار أقدم من BudgetSeal. اطلب تحديث التطبيق على الهاتف الآخر ثم المشاركة مجددًا.,"Ce code vient d'une ancienne version de BudgetSeal. Demandez de mettre à jour l'application sur l'autre téléphone, puis de partager à nouveau."
 # ──────────────────────────────────────────────,,,,
 # LOCK SCREEN,,,,
 # ──────────────────────────────────────────────,,,,
@@ -1194,7 +1206,6 @@ alloc_revaluation_note,,Revaluation: {amount} at {rate} (was {oldRate}),إعاد
 notif_every_day_at,,Every day at {time},كل يوم الساعة {time},Tous les jours à {time}
 period_starts_each_month,,{date} · starts on day {day} each month,{date} · تبدأ في اليوم {day} من كل شهر,{date} · commence le {day} de chaque mois
 fund_more_than_available,,{amount} more than available in {currency},{amount} أكثر من المتاح بعملة {currency},{amount} de plus que le disponible en {currency}
-share_household_failed,,Couldn't create the invite. Check your connection and try again.,تعذّر إنشاء الدعوة. تحقق من اتصالك وحاول مرة أخرى.,Impossible de créer l'invitation. Vérifiez votre connexion et réessayez.
 a11y_pct_of_target,,{pct}% of {amount},{pct}٪ من {amount},{pct} % de {amount}
 a11y_flexible_envelope,,flexible envelope,مغلف مرن,enveloppe flexible
 a11y_needs_review,,needs review,بحاجة إلى مراجعة,à vérifier
@@ -1211,7 +1222,6 @@ sync_err_network,,Network error. Check your internet connection.,خطأ في ا�
 sync_err_connect_failed,,Couldn't connect. Please try again.,تعذّر الاتصال. حاول مرة أخرى.,Connexion impossible. Veuillez réessayer.
 onboard_connect_failed,,Couldn't connect to {provider},تعذّر الاتصال بـ {provider},Impossible de se connecter à {provider}
 onboard_no_sync_file,,No budget found in this folder,لم يُعثر على ميزانية في هذا المجلد,Aucun budget trouvé dans ce dossier
-onboard_drive_join_failed,,Couldn't connect to Google Drive. Make sure you're signed in and have access to the shared folder.,تعذّر الاتصال بـ Google Drive. تأكد من تسجيل الدخول ومن إمكانية الوصول إلى المجلد المشترك.,Impossible de se connecter à Google Drive. Vérifiez que vous êtes connecté et que vous avez accès au dossier partagé.
 onboard_no_sync_file_shared,,No budget found in the shared folder,لم يُعثر على ميزانية في المجلد المشترك,Aucun budget trouvé dans le dossier partagé
 bill_note_title,,Bill split,تقسيم الفاتورة,Partage de facture
 bill_note_total,,Bill: {total},الفاتورة: {total},Facture : {total}
@@ -1457,8 +1467,6 @@ tile_cloud_sync,,Cloud sync,المزامنة السحابية,Synchronisation cl
 tile_cloud_sync_sub,,Sync across devices,مزامنة عبر الأجهزة,Synchroniser entre les appareils
 tile_share_household,,Share household,مشاركة الأسرة,Partager le foyer
 tile_share_household_connected,,Invite someone to share your data,دعوة شخص لمشاركة بياناتك,Inviter quelqu'un à partager vos données
-tile_share_household_disconnected,,Connect cloud sync first to share,قم بتوصيل المزامنة السحابية أولاً,Connectez d'abord la synchronisation cloud
-tile_share_household_snackbar,,Set up cloud sync with Google Drive first to share your household.,قم بإعداد المزامنة السحابية مع Google Drive أولاً لمشاركة أسرتك.,Configurez d'abord la synchronisation cloud avec Google Drive pour partager votre foyer.
 tile_backup_restore,,Backup & restore,النسخ الاحتياطي والاستعادة,Sauvegarde et restauration
 tile_backup_restore_sub,,Export or restore database,تصدير أو استعادة قاعدة البيانات,Exporter ou restaurer la base de données
 tile_import_export,,Import & export,الاستيراد والتصدير,Importer et exporter

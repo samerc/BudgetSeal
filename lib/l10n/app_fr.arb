@@ -737,7 +737,6 @@
   "notifEveryDayAt": "Tous les jours à {time}",
   "periodStartsEachMonth": "{date} · commence le {day} de chaque mois",
   "fundMoreThanAvailable": "{amount} de plus que le disponible en {currency}",
-  "shareHouseholdFailed": "Impossible de créer l'invitation. Vérifiez votre connexion et réessayez.",
   "a11yPctOfTarget": "{pct} % de {amount}",
   "a11yFlexibleEnvelope": "enveloppe flexible",
   "a11yNeedsReview": "à vérifier",
@@ -754,7 +753,6 @@
   "syncErrConnectFailed": "Connexion impossible. Veuillez réessayer.",
   "onboardConnectFailed": "Impossible de se connecter à {provider}",
   "onboardNoSyncFile": "Aucun budget trouvé dans ce dossier",
-  "onboardDriveJoinFailed": "Impossible de se connecter à Google Drive. Vérifiez que vous êtes connecté et que vous avez accès au dossier partagé.",
   "onboardNoSyncFileShared": "Aucun budget trouvé dans le dossier partagé",
   "billNoteTitle": "Partage de facture",
   "billNoteTotal": "Facture : {total}",
@@ -3028,37 +3026,9 @@
   "@syncDisconnectMsg": {
     "description": "Dialog content"
   },
-  "syncShareDesc": "Partagez vos données BudgetSeal avec une autre personne. Elle pourra synchroniser avec le même fichier Google Drive.",
-  "@syncShareDesc": {
-    "description": "Sheet description"
-  },
-  "syncTheirEmail": "Leur adresse e-mail",
-  "@syncTheirEmail": {
-    "description": "Field label"
-  },
-  "syncEmailHint": "partenaire@gmail.com",
-  "@syncEmailHint": {
-    "description": "Field hint"
-  },
-  "syncSharing": "Partage...",
-  "@syncSharing": {
-    "description": "Button"
-  },
-  "syncGenerateInvite": "Générer un code d'invitation",
-  "@syncGenerateInvite": {
-    "description": "Button"
-  },
-  "syncInviteCode": "Code d'invitation",
-  "@syncInviteCode": {
-    "description": "Label"
-  },
   "syncShareCode": "Partager le code",
   "@syncShareCode": {
     "description": "Button"
-  },
-  "syncValidEmailError": "Veuillez saisir une adresse e-mail valide",
-  "@syncValidEmailError": {
-    "description": "Validation"
   },
   "syncEncryptionTitle": "Chiffrement de la synchronisation",
   "@syncEncryptionTitle": {
@@ -3429,10 +3399,6 @@
   "@tileShareHousehold": { "description": "Tile title" },
   "tileShareHouseholdConnected": "Inviter quelqu'un à partager vos données",
   "@tileShareHouseholdConnected": { "description": "Tile subtitle when connected" },
-  "tileShareHouseholdDisconnected": "Connectez d'abord la synchronisation cloud",
-  "@tileShareHouseholdDisconnected": { "description": "Tile subtitle when not connected" },
-  "tileShareHouseholdSnackbar": "Configurez d'abord la synchronisation cloud avec Google Drive pour partager votre foyer.",
-  "@tileShareHouseholdSnackbar": { "description": "Snackbar message" },
   "tileBackupRestore": "Sauvegarde et restauration",
   "@tileBackupRestore": { "description": "Tile title" },
   "tileBackupRestoreSub": "Exporter ou restaurer la base de données",
@@ -3923,11 +3889,7 @@
   "@joinScanNoCamera": {
     "description": "Scanner: camera unavailable"
   },
-  "joinPickerNote": "Google affiche ensuite le dossier BudgetSeal partagé : touchez-le pour donner l'accès à BudgetSeal.",
-  "@joinPickerNote": {
-    "description": "Join sheet note"
-  },
-  "syncShareScanHint": "Ou scannez-le sur l'autre téléphone : Rejoindre un foyer › Scanner le code.",
+  "syncShareScanHint": "Sur l'autre téléphone : Rejoindre un foyer › Scanner le code.",
   "@syncShareScanHint": {
     "description": "Share sheet, under the QR"
   },
@@ -3938,6 +3900,86 @@
   "joinReplaceBody": "Le budget partagé remplace celui de ce téléphone ; une sauvegarde est d'abord enregistrée dans Sauvegarde et restauration.",
   "@joinReplaceBody": {
     "description": "Cloud Sync: confirm join"
+  },
+  "relayName": "Synchronisation du foyer",
+  "@relayName": {
+    "description": "Sync provider name"
+  },
+  "relayErrNotFound": "Aucun foyer ne correspond à ce code. Demandez un nouveau code.",
+  "@relayErrNotFound": {
+    "description": "Household sync error"
+  },
+  "relayErrKey": "Ce code de foyer ne fonctionne plus. Demandez un nouveau code.",
+  "@relayErrKey": {
+    "description": "Household sync error"
+  },
+  "relayErrFull": "Ce foyer a atteint sa limite de stockage.",
+  "@relayErrFull": {
+    "description": "Household sync error"
+  },
+  "relayErrBusy": "La synchronisation du foyer est occupée. Réessayez dans une minute.",
+  "@relayErrBusy": {
+    "description": "Household sync error"
+  },
+  "relayErrServer": "La synchronisation du foyer est injoignable pour le moment. Réessayez plus tard.",
+  "@relayErrServer": {
+    "description": "Household sync error"
+  },
+  "householdSection": "Foyer",
+  "@householdSection": {
+    "description": "Cloud Sync section"
+  },
+  "householdStart": "Créer un foyer",
+  "@householdStart": {
+    "description": "Cloud Sync row / confirm button"
+  },
+  "householdStartSub": "Partagez ce budget avec votre conjoint ou votre famille",
+  "@householdStartSub": {
+    "description": "Cloud Sync row / Settings tile subtitle"
+  },
+  "householdJoinSub": "Utilisez un budget qu'on a partagé avec vous",
+  "@householdJoinSub": {
+    "description": "Cloud Sync row subtitle"
+  },
+  "householdStartTitle": "Créer un foyer ?",
+  "@householdStartTitle": {
+    "description": "Confirm title"
+  },
+  "householdStartBody": "Votre budget sera synchronisé via le serveur de BudgetSeal. Il est d'abord chiffré sur ce téléphone : seuls les téléphones ayant le code de votre foyer peuvent le lire, pas même BudgetSeal. Sur ce téléphone, il remplace la synchronisation Google Drive ou par dossier.",
+  "@householdStartBody": {
+    "description": "Confirm message"
+  },
+  "householdInvite": "Inviter quelqu'un",
+  "@householdInvite": {
+    "description": "Cloud Sync button"
+  },
+  "householdInviteTitle": "Inviter dans votre foyer",
+  "@householdInviteTitle": {
+    "description": "Invite sheet title"
+  },
+  "householdInviteBody": "Toute personne ayant ce code peut voir et modifier votre budget. Ne le partagez qu'avec des personnes de confiance.",
+  "@householdInviteBody": {
+    "description": "Invite sheet subtitle"
+  },
+  "householdLeave": "Quitter le foyer",
+  "@householdLeave": {
+    "description": "Cloud Sync button / confirm"
+  },
+  "householdLeaveTitle": "Quitter ce foyer ?",
+  "@householdLeaveTitle": {
+    "description": "Confirm title"
+  },
+  "householdLeaveBody": "Ce téléphone arrête de se synchroniser avec le foyer. Le budget reste sur ce téléphone, et les autres gardent le leur.",
+  "@householdLeaveBody": {
+    "description": "Confirm message"
+  },
+  "householdLeftSnack": "Vous avez quitté le foyer",
+  "@householdLeftSnack": {
+    "description": "SnackBar"
+  },
+  "joinOldCode": "Ce code vient d'une ancienne version de BudgetSeal. Demandez de mettre à jour l'application sur l'autre téléphone, puis de partager à nouveau.",
+  "@joinOldCode": {
+    "description": "Join validation"
   },
   "lockSetupReason": "Configurez un verrouillage d'écran pour protéger BudgetSeal",
   "@lockSetupReason": {

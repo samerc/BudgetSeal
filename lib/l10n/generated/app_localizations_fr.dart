@@ -2593,10 +2593,6 @@ class SFr extends S {
   }
 
   @override
-  String get shareHouseholdFailed =>
-      'Impossible de créer l\'invitation. Vérifiez votre connexion et réessayez.';
-
-  @override
   String a11yPctOfTarget(int pct, String amount) {
     return '$pct % de $amount';
   }
@@ -2652,10 +2648,6 @@ class SFr extends S {
 
   @override
   String get onboardNoSyncFile => 'Aucun budget trouvé dans ce dossier';
-
-  @override
-  String get onboardDriveJoinFailed =>
-      'Impossible de se connecter à Google Drive. Vérifiez que vous êtes connecté et que vous avez accès au dossier partagé.';
 
   @override
   String get onboardNoSyncFileShared =>
@@ -5037,29 +5029,7 @@ class SFr extends S {
       'Vos données resteront sur votre appareil, mais la synchronisation automatique s\'arrêtera. Vous pourrez vous reconnecter à tout moment.';
 
   @override
-  String get syncShareDesc =>
-      'Partagez vos données BudgetSeal avec une autre personne. Elle pourra synchroniser avec le même fichier Google Drive.';
-
-  @override
-  String get syncTheirEmail => 'Leur adresse e-mail';
-
-  @override
-  String get syncEmailHint => 'partenaire@gmail.com';
-
-  @override
-  String get syncSharing => 'Partage...';
-
-  @override
-  String get syncGenerateInvite => 'Générer un code d\'invitation';
-
-  @override
-  String get syncInviteCode => 'Code d\'invitation';
-
-  @override
   String get syncShareCode => 'Partager le code';
-
-  @override
-  String get syncValidEmailError => 'Veuillez saisir une adresse e-mail valide';
 
   @override
   String get syncEncryptionTitle => 'Chiffrement de la synchronisation';
@@ -5402,14 +5372,6 @@ class SFr extends S {
   @override
   String get tileShareHouseholdConnected =>
       'Inviter quelqu\'un à partager vos données';
-
-  @override
-  String get tileShareHouseholdDisconnected =>
-      'Connectez d\'abord la synchronisation cloud';
-
-  @override
-  String get tileShareHouseholdSnackbar =>
-      'Configurez d\'abord la synchronisation cloud avec Google Drive pour partager votre foyer.';
 
   @override
   String get tileBackupRestore => 'Sauvegarde et restauration';
@@ -6738,12 +6700,8 @@ class SFr extends S {
       'Impossible d\'ouvrir l\'appareil photo. Saisissez plutôt le code.';
 
   @override
-  String get joinPickerNote =>
-      'Google affiche ensuite le dossier BudgetSeal partagé : touchez-le pour donner l\'accès à BudgetSeal.';
-
-  @override
   String get syncShareScanHint =>
-      'Ou scannez-le sur l\'autre téléphone : Rejoindre un foyer › Scanner le code.';
+      'Sur l\'autre téléphone : Rejoindre un foyer › Scanner le code.';
 
   @override
   String get joinReplaceTitle => 'Rejoindre un foyer ?';
@@ -6751,6 +6709,76 @@ class SFr extends S {
   @override
   String get joinReplaceBody =>
       'Le budget partagé remplace celui de ce téléphone ; une sauvegarde est d\'abord enregistrée dans Sauvegarde et restauration.';
+
+  @override
+  String get relayName => 'Synchronisation du foyer';
+
+  @override
+  String get relayErrNotFound =>
+      'Aucun foyer ne correspond à ce code. Demandez un nouveau code.';
+
+  @override
+  String get relayErrKey =>
+      'Ce code de foyer ne fonctionne plus. Demandez un nouveau code.';
+
+  @override
+  String get relayErrFull => 'Ce foyer a atteint sa limite de stockage.';
+
+  @override
+  String get relayErrBusy =>
+      'La synchronisation du foyer est occupée. Réessayez dans une minute.';
+
+  @override
+  String get relayErrServer =>
+      'La synchronisation du foyer est injoignable pour le moment. Réessayez plus tard.';
+
+  @override
+  String get householdSection => 'Foyer';
+
+  @override
+  String get householdStart => 'Créer un foyer';
+
+  @override
+  String get householdStartSub =>
+      'Partagez ce budget avec votre conjoint ou votre famille';
+
+  @override
+  String get householdJoinSub =>
+      'Utilisez un budget qu\'on a partagé avec vous';
+
+  @override
+  String get householdStartTitle => 'Créer un foyer ?';
+
+  @override
+  String get householdStartBody =>
+      'Votre budget sera synchronisé via le serveur de BudgetSeal. Il est d\'abord chiffré sur ce téléphone : seuls les téléphones ayant le code de votre foyer peuvent le lire, pas même BudgetSeal. Sur ce téléphone, il remplace la synchronisation Google Drive ou par dossier.';
+
+  @override
+  String get householdInvite => 'Inviter quelqu\'un';
+
+  @override
+  String get householdInviteTitle => 'Inviter dans votre foyer';
+
+  @override
+  String get householdInviteBody =>
+      'Toute personne ayant ce code peut voir et modifier votre budget. Ne le partagez qu\'avec des personnes de confiance.';
+
+  @override
+  String get householdLeave => 'Quitter le foyer';
+
+  @override
+  String get householdLeaveTitle => 'Quitter ce foyer ?';
+
+  @override
+  String get householdLeaveBody =>
+      'Ce téléphone arrête de se synchroniser avec le foyer. Le budget reste sur ce téléphone, et les autres gardent le leur.';
+
+  @override
+  String get householdLeftSnack => 'Vous avez quitté le foyer';
+
+  @override
+  String get joinOldCode =>
+      'Ce code vient d\'une ancienne version de BudgetSeal. Demandez de mettre à jour l\'application sur l\'autre téléphone, puis de partager à nouveau.';
 
   @override
   String get onboardHouseholdNameError => 'Entrez un nom de foyer';

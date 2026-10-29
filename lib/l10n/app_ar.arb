@@ -737,7 +737,6 @@
   "notifEveryDayAt": "كل يوم الساعة {time}",
   "periodStartsEachMonth": "{date} · تبدأ في اليوم {day} من كل شهر",
   "fundMoreThanAvailable": "{amount} أكثر من المتاح بعملة {currency}",
-  "shareHouseholdFailed": "تعذّر إنشاء الدعوة. تحقق من اتصالك وحاول مرة أخرى.",
   "a11yPctOfTarget": "{pct}٪ من {amount}",
   "a11yFlexibleEnvelope": "مغلف مرن",
   "a11yNeedsReview": "بحاجة إلى مراجعة",
@@ -754,7 +753,6 @@
   "syncErrConnectFailed": "تعذّر الاتصال. حاول مرة أخرى.",
   "onboardConnectFailed": "تعذّر الاتصال بـ {provider}",
   "onboardNoSyncFile": "لم يُعثر على ميزانية في هذا المجلد",
-  "onboardDriveJoinFailed": "تعذّر الاتصال بـ Google Drive. تأكد من تسجيل الدخول ومن إمكانية الوصول إلى المجلد المشترك.",
   "onboardNoSyncFileShared": "لم يُعثر على ميزانية في المجلد المشترك",
   "billNoteTitle": "تقسيم الفاتورة",
   "billNoteTotal": "الفاتورة: {total}",
@@ -3028,37 +3026,9 @@
   "@syncDisconnectMsg": {
     "description": "Dialog content"
   },
-  "syncShareDesc": "شارك بيانات BudgetSeal مع شخص آخر. سيتمكن من المزامنة مع نفس الملف على Google Drive.",
-  "@syncShareDesc": {
-    "description": "Sheet description"
-  },
-  "syncTheirEmail": "عنوان بريدهم الإلكتروني",
-  "@syncTheirEmail": {
-    "description": "Field label"
-  },
-  "syncEmailHint": "partner@gmail.com",
-  "@syncEmailHint": {
-    "description": "Field hint"
-  },
-  "syncSharing": "جارٍ المشاركة...",
-  "@syncSharing": {
-    "description": "Button"
-  },
-  "syncGenerateInvite": "إنشاء رمز الدعوة",
-  "@syncGenerateInvite": {
-    "description": "Button"
-  },
-  "syncInviteCode": "رمز الدعوة",
-  "@syncInviteCode": {
-    "description": "Label"
-  },
   "syncShareCode": "مشاركة الرمز",
   "@syncShareCode": {
     "description": "Button"
-  },
-  "syncValidEmailError": "الرجاء إدخال عنوان بريد إلكتروني صالح",
-  "@syncValidEmailError": {
-    "description": "Validation"
   },
   "syncEncryptionTitle": "تشفير المزامنة",
   "@syncEncryptionTitle": {
@@ -3429,10 +3399,6 @@
   "@tileShareHousehold": { "description": "Tile title" },
   "tileShareHouseholdConnected": "دعوة شخص لمشاركة بياناتك",
   "@tileShareHouseholdConnected": { "description": "Tile subtitle when connected" },
-  "tileShareHouseholdDisconnected": "قم بتوصيل المزامنة السحابية أولاً",
-  "@tileShareHouseholdDisconnected": { "description": "Tile subtitle when not connected" },
-  "tileShareHouseholdSnackbar": "قم بإعداد المزامنة السحابية مع Google Drive أولاً لمشاركة أسرتك.",
-  "@tileShareHouseholdSnackbar": { "description": "Snackbar message" },
   "tileBackupRestore": "النسخ الاحتياطي والاستعادة",
   "@tileBackupRestore": { "description": "Tile title" },
   "tileBackupRestoreSub": "تصدير أو استعادة قاعدة البيانات",
@@ -3923,11 +3889,7 @@
   "@joinScanNoCamera": {
     "description": "Scanner: camera unavailable"
   },
-  "joinPickerNote": "سيعرض Google بعد ذلك مجلد BudgetSeal المُشارَك: اضغط عليه لمنح BudgetSeal حق الوصول.",
-  "@joinPickerNote": {
-    "description": "Join sheet note"
-  },
-  "syncShareScanHint": "أو امسحه من الهاتف الآخر: الانضمام إلى أسرة › مسح الرمز.",
+  "syncShareScanHint": "على الهاتف الآخر: الانضمام إلى أسرة › مسح الرمز.",
   "@syncShareScanHint": {
     "description": "Share sheet, under the QR"
   },
@@ -3938,6 +3900,86 @@
   "joinReplaceBody": "تحلّ الميزانية المُشارَكة محلّ الميزانية الموجودة على هذا الهاتف، مع حفظ نسخة احتياطية منها أولًا في النسخ الاحتياطي والاستعادة.",
   "@joinReplaceBody": {
     "description": "Cloud Sync: confirm join"
+  },
+  "relayName": "مزامنة الأسرة",
+  "@relayName": {
+    "description": "Sync provider name"
+  },
+  "relayErrNotFound": "لا توجد أسرة بهذا الرمز. اطلب رمزًا جديدًا.",
+  "@relayErrNotFound": {
+    "description": "Household sync error"
+  },
+  "relayErrKey": "لم يعد رمز الأسرة هذا صالحًا. اطلب رمزًا جديدًا.",
+  "@relayErrKey": {
+    "description": "Household sync error"
+  },
+  "relayErrFull": "بلغت هذه الأسرة الحدّ الأقصى للتخزين.",
+  "@relayErrFull": {
+    "description": "Household sync error"
+  },
+  "relayErrBusy": "مزامنة الأسرة مشغولة. حاول مجددًا بعد دقيقة.",
+  "@relayErrBusy": {
+    "description": "Household sync error"
+  },
+  "relayErrServer": "تعذّر الوصول إلى مزامنة الأسرة الآن. حاول لاحقًا.",
+  "@relayErrServer": {
+    "description": "Household sync error"
+  },
+  "householdSection": "الأسرة",
+  "@householdSection": {
+    "description": "Cloud Sync section"
+  },
+  "householdStart": "إنشاء أسرة",
+  "@householdStart": {
+    "description": "Cloud Sync row / confirm button"
+  },
+  "householdStartSub": "شارك هذه الميزانية مع شريكك أو عائلتك",
+  "@householdStartSub": {
+    "description": "Cloud Sync row / Settings tile subtitle"
+  },
+  "householdJoinSub": "استخدم ميزانية شاركها أحدهم معك",
+  "@householdJoinSub": {
+    "description": "Cloud Sync row subtitle"
+  },
+  "householdStartTitle": "إنشاء أسرة؟",
+  "@householdStartTitle": {
+    "description": "Confirm title"
+  },
+  "householdStartBody": "ستتم مزامنة ميزانيتك عبر خادم BudgetSeal. تُشفَّر أولًا على هذا الهاتف: لا يمكن قراءتها إلا على الهواتف التي لديها رمز أسرتك، ولا حتى BudgetSeal. وعلى هذا الهاتف تحلّ محلّ المزامنة عبر Google Drive أو المجلد.",
+  "@householdStartBody": {
+    "description": "Confirm message"
+  },
+  "householdInvite": "دعوة شخص",
+  "@householdInvite": {
+    "description": "Cloud Sync button"
+  },
+  "householdInviteTitle": "الدعوة إلى أسرتك",
+  "@householdInviteTitle": {
+    "description": "Invite sheet title"
+  },
+  "householdInviteBody": "يمكن لأي شخص لديه هذا الرمز رؤية ميزانيتك وتعديلها. شاركه فقط مع من تثق بهم.",
+  "@householdInviteBody": {
+    "description": "Invite sheet subtitle"
+  },
+  "householdLeave": "مغادرة الأسرة",
+  "@householdLeave": {
+    "description": "Cloud Sync button / confirm"
+  },
+  "householdLeaveTitle": "مغادرة هذه الأسرة؟",
+  "@householdLeaveTitle": {
+    "description": "Confirm title"
+  },
+  "householdLeaveBody": "يتوقف هذا الهاتف عن المزامنة مع الأسرة. تبقى الميزانية على هذا الهاتف، ويحتفظ الآخرون بميزانيتهم.",
+  "@householdLeaveBody": {
+    "description": "Confirm message"
+  },
+  "householdLeftSnack": "غادرت الأسرة",
+  "@householdLeftSnack": {
+    "description": "SnackBar"
+  },
+  "joinOldCode": "هذا الرمز من إصدار أقدم من BudgetSeal. اطلب تحديث التطبيق على الهاتف الآخر ثم المشاركة مجددًا.",
+  "@joinOldCode": {
+    "description": "Join validation"
   },
   "lockSetupReason": "أعدّ قفل الشاشة لحماية BudgetSeal",
   "@lockSetupReason": {

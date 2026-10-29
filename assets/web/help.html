@@ -1277,18 +1277,17 @@
 </ol>
 <p>To turn encryption off, tap <strong>Remove</strong> on the same card and confirm <strong>Remove encryption?</strong> Your other devices need to remove their password too.</p>
 
-<div class="tip">If you share a household with someone, both devices must use the same sync password.</div>
+<div class="tip">A household doesn't use a sync password: its key already encrypts everything (see below).</div>
 
 <h3>Sharing a household</h3>
-<p>Share your BudgetSeal data with a partner:</p>
+<p>Share your budget with a partner or family — on Android and iPhone, no Google account needed:</p>
 <ol>
-  <li>Connect Cloud sync with <strong>Google Drive</strong> (sharing needs Drive)</li>
-  <li>Tap <strong>Share household</strong> — on the Cloud sync screen or in Settings</li>
-  <li>Enter their email and tap <strong>Generate invite code</strong>: this shares your BudgetSeal folder on Drive with them</li>
-  <li>Let them scan the QR code that appears, or tap <strong>Share code</strong> to send it</li>
-  <li>On their phone: <strong>Join a household</strong> — on the welcome screen, or on the Cloud sync screen if the app is already set up (it replaces the budget on that phone, after saving a backup). Tap <strong>Scan code</strong> or type the code</li>
-  <li>They sign in with the Google account you shared with. Google then shows your BudgetSeal folder: they tap it to give BudgetSeal access, and your budget downloads</li>
+  <li>Go to <strong>Settings</strong> → <strong>Cloud sync</strong> and tap <strong>Start a household</strong> (or <strong>Share household</strong> in Settings). It replaces Google Drive or folder sync on this phone</li>
+  <li>A QR code appears. On the other phone: <strong>Join a household</strong> — on the welcome screen, or on the Cloud sync screen if the app is already set up (it replaces the budget on that phone, after saving a backup). Tap <strong>Scan code</strong>, or type the code you sent with <strong>Share code</strong></li>
+  <li>The budget downloads and the phones stay in sync. To invite someone else later, tap <strong>Invite someone</strong> on the Cloud sync screen</li>
 </ol>
+<p><strong>Private by design.</strong> A household syncs through BudgetSeal's server, but your phone encrypts everything first with the household's key, which only exists on your phones and in the invite code. The server stores scrambled data that nobody else can read — not even BudgetSeal. Anyone with the code can see and change the budget, so share it only with people you trust.</p>
+<p><strong>Leaving.</strong> <strong>Leave household</strong> on the Cloud sync screen stops this phone syncing; its budget stays on the phone and the others keep theirs.</p>
 <p><strong>Who added what.</strong> Once a budget is shared, each phone asks once for a name (<em>Who's using this phone?</em>) — choose <strong>Just me</strong> if it's only you. After that, <a href="#change-history">Change history</a> says who added, edited or deleted each entry (<em>Added 14:02 · by Sara</em>), and a transaction's page shows <em>Saved by Sara</em>. Change your name in <strong>Settings</strong> → <strong>Your name</strong> (under Data; it shows once your budget syncs). Entries from before names, bills that post by themselves and entries made in the Web Companion don't name anyone. A budget used by one person never shows names.</p>
 
 <!-- ══════════════════════════════════════════ -->
@@ -1479,7 +1478,7 @@
 <p>Deleted transactions are soft-deleted — they're hidden but not permanently removed. Any envelope deductions are reversed. You can permanently purge them from Health Check.</p>
 
 <h3>Can two people share a budget?</h3>
-<p>Yes. Connect Cloud sync with Google Drive, tap <strong>Share household</strong> and let your partner scan the code (or send it); they choose <strong>Join a household</strong> on the welcome screen or on Cloud sync. Both phones sync through the same folder and their changes merge — edits to different things are both kept; when you both change the same thing, the later change wins and Change history shows both. Each phone gets a name, so Change history shows who saved what (see <a href="#cloud-sync">Sharing a household</a>).</p>
+<p>Yes. Connect Cloud sync with Google Drive, tap <strong>Start a household</strong> on the Cloud sync screen and let your partner scan the code (or send it); they choose <strong>Join a household</strong> on the welcome screen or on Cloud sync. No Google account is needed. Both phones sync through the same folder and their changes merge — edits to different things are both kept; when you both change the same thing, the later change wins and Change history shows both. Each phone gets a name, so Change history shows who saved what (see <a href="#cloud-sync">Sharing a household</a>).</p>
 
 <h3>What if I overspend an envelope?</h3>
 <p>The envelope goes negative and shows a red indicator. Your transaction still saves — BudgetSeal never blocks spending. It's a signal to either fund the envelope more or spend less.</p>

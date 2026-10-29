@@ -4528,12 +4528,6 @@ abstract class S {
   /// **'{amount} more than available in {currency}'**
   String fundMoreThanAvailable(String amount, String currency);
 
-  /// No description provided for @shareHouseholdFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t create the invite. Check your connection and try again.'**
-  String get shareHouseholdFailed;
-
   /// No description provided for @a11yPctOfTarget.
   ///
   /// In en, this message translates to:
@@ -4629,12 +4623,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'No budget found in this folder'**
   String get onboardNoSyncFile;
-
-  /// No description provided for @onboardDriveJoinFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t connect to Google Drive. Make sure you\'re signed in and have access to the shared folder.'**
-  String get onboardDriveJoinFailed;
 
   /// No description provided for @onboardNoSyncFileShared.
   ///
@@ -8740,53 +8728,11 @@ abstract class S {
   /// **'Your data will remain on your device, but automatic sync will stop. You can reconnect at any time.'**
   String get syncDisconnectMsg;
 
-  /// Sheet description
-  ///
-  /// In en, this message translates to:
-  /// **'Share your BudgetSeal data with another person. They will be able to sync to the same file on Google Drive.'**
-  String get syncShareDesc;
-
-  /// Field label
-  ///
-  /// In en, this message translates to:
-  /// **'Their email address'**
-  String get syncTheirEmail;
-
-  /// Field hint
-  ///
-  /// In en, this message translates to:
-  /// **'partner@gmail.com'**
-  String get syncEmailHint;
-
-  /// Button
-  ///
-  /// In en, this message translates to:
-  /// **'Sharing...'**
-  String get syncSharing;
-
-  /// Button
-  ///
-  /// In en, this message translates to:
-  /// **'Generate invite code'**
-  String get syncGenerateInvite;
-
-  /// Label
-  ///
-  /// In en, this message translates to:
-  /// **'Invite code'**
-  String get syncInviteCode;
-
   /// Button
   ///
   /// In en, this message translates to:
   /// **'Share code'**
   String get syncShareCode;
-
-  /// Validation
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a valid email address'**
-  String get syncValidEmailError;
 
   /// Card title
   ///
@@ -9417,18 +9363,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Invite someone to share your data'**
   String get tileShareHouseholdConnected;
-
-  /// Tile subtitle when not connected
-  ///
-  /// In en, this message translates to:
-  /// **'Connect cloud sync first to share'**
-  String get tileShareHouseholdDisconnected;
-
-  /// Snackbar message
-  ///
-  /// In en, this message translates to:
-  /// **'Set up cloud sync with Google Drive first to share your household.'**
-  String get tileShareHouseholdSnackbar;
 
   /// Tile title
   ///
@@ -11884,16 +11818,10 @@ abstract class S {
   /// **'Couldn\'t open the camera. Type the code instead.'**
   String get joinScanNoCamera;
 
-  /// Join sheet note
-  ///
-  /// In en, this message translates to:
-  /// **'Google then shows the shared BudgetSeal folder: tap it to give BudgetSeal access.'**
-  String get joinPickerNote;
-
   /// Share sheet, under the QR
   ///
   /// In en, this message translates to:
-  /// **'Or scan it on their phone: Join a household › Scan code.'**
+  /// **'On their phone: Join a household › Scan code.'**
   String get syncShareScanHint;
 
   /// Cloud Sync: confirm join
@@ -11907,6 +11835,126 @@ abstract class S {
   /// In en, this message translates to:
   /// **'The shared budget replaces the one on this phone. A backup of it is saved first in Backup & Restore.'**
   String get joinReplaceBody;
+
+  /// Sync provider name
+  ///
+  /// In en, this message translates to:
+  /// **'Household sync'**
+  String get relayName;
+
+  /// Household sync error
+  ///
+  /// In en, this message translates to:
+  /// **'No household found for this code. Ask for a new code.'**
+  String get relayErrNotFound;
+
+  /// Household sync error
+  ///
+  /// In en, this message translates to:
+  /// **'This household code doesn\'t work any more. Ask for a new code.'**
+  String get relayErrKey;
+
+  /// Household sync error
+  ///
+  /// In en, this message translates to:
+  /// **'This household has reached its storage limit.'**
+  String get relayErrFull;
+
+  /// Household sync error
+  ///
+  /// In en, this message translates to:
+  /// **'Household sync is busy. Try again in a minute.'**
+  String get relayErrBusy;
+
+  /// Household sync error
+  ///
+  /// In en, this message translates to:
+  /// **'Household sync can\'t be reached right now. Try again later.'**
+  String get relayErrServer;
+
+  /// Cloud Sync section
+  ///
+  /// In en, this message translates to:
+  /// **'Household'**
+  String get householdSection;
+
+  /// Cloud Sync row / confirm button
+  ///
+  /// In en, this message translates to:
+  /// **'Start a household'**
+  String get householdStart;
+
+  /// Cloud Sync row / Settings tile subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Share this budget with your partner or family'**
+  String get householdStartSub;
+
+  /// Cloud Sync row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Use a budget someone shared with you'**
+  String get householdJoinSub;
+
+  /// Confirm title
+  ///
+  /// In en, this message translates to:
+  /// **'Start a household?'**
+  String get householdStartTitle;
+
+  /// Confirm message
+  ///
+  /// In en, this message translates to:
+  /// **'Your budget will sync through BudgetSeal\'s server. It\'s encrypted on this phone first: only phones with your household\'s code can read it, not even BudgetSeal. On this phone it replaces Google Drive or folder sync.'**
+  String get householdStartBody;
+
+  /// Cloud Sync button
+  ///
+  /// In en, this message translates to:
+  /// **'Invite someone'**
+  String get householdInvite;
+
+  /// Invite sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Invite to your household'**
+  String get householdInviteTitle;
+
+  /// Invite sheet subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone with this code can see and change your budget. Share it only with people you trust.'**
+  String get householdInviteBody;
+
+  /// Cloud Sync button / confirm
+  ///
+  /// In en, this message translates to:
+  /// **'Leave household'**
+  String get householdLeave;
+
+  /// Confirm title
+  ///
+  /// In en, this message translates to:
+  /// **'Leave this household?'**
+  String get householdLeaveTitle;
+
+  /// Confirm message
+  ///
+  /// In en, this message translates to:
+  /// **'This phone stops syncing with the household. The budget stays on this phone, and the others keep theirs.'**
+  String get householdLeaveBody;
+
+  /// SnackBar
+  ///
+  /// In en, this message translates to:
+  /// **'Left the household'**
+  String get householdLeftSnack;
+
+  /// Join validation
+  ///
+  /// In en, this message translates to:
+  /// **'This code is from an older version of BudgetSeal. Ask for the app to be updated on the other phone, then share again.'**
+  String get joinOldCode;
 
   /// Onboarding validation error
   ///

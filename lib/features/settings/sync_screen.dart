@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/providers/sync_provider.dart';
 import '../../core/sync/cloud_provider.dart';
 import '../../core/sync/google_drive_provider.dart';
+import '../../core/sync/relay_provider.dart';
 import '../../core/sync/sync_encryption.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
@@ -15,7 +16,7 @@ import '../../shared/widgets/icon_header_card.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/settings_row.dart';
 import 'join_household_sheet.dart';
-import 'share_household_sheet.dart';
+import 'household_invite_sheet.dart';
 import '../../shared/utils/dispose_later.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../shared/theme/app_icons.dart';
@@ -28,6 +29,7 @@ class SyncScreen extends ConsumerWidget {
     final syncState = ref.watch(syncProvider);
     final notifier = ref.read(syncProvider.notifier);
     final isConnected = syncState.activeProvider != null;
+    final inHousehold = syncState.activeProvider is RelayProvider;
 
     return Scaffold(
       appBar: AppBar(title: Text(S.of(context).syncTitle)),
@@ -108,13 +110,26 @@ class SyncScreen extends ConsumerWidget {
                   : () => notifier.sync(),
             ),
             const SizedBox(height: 12),
-            if (syncState.activeProvider is GoogleDriveProvider)
+            if (inHousehold) ...[
+              _ActionButton(
+                icon: AppIcons.users,
+                label: S.of(context).householdInvite,
+                onTap: () => _invite(context, notifier),
+              ),
+              const SizedBox(height: 12),
+              _ActionButton(
+                icon: AppIcons.signOut,
+                label: S.of(context).householdLeave,
+                outlined: true,
+                onTap: () => _confirmLeave(context, notifier),
+              ),
+              const SizedBox(height: 24),
+            ] else ...[
               _ActionButton(
                 icon: AppIcons.users,
                 label: S.of(context).syncShareHousehold,
-                onTap: () => _showShareSheet(context, notifier),
+                onTap: () => _startHousehold(context, notifier),
               ),
-            if (syncState.activeProvider is GoogleDriveProvider) ...[
               const SizedBox(height: 12),
               _ActionButton(
                 icon: AppIcons.signIn,
@@ -123,17 +138,17 @@ class SyncScreen extends ConsumerWidget {
                 onTap: () => _join(context),
               ),
               const SizedBox(height: 12),
+              _ActionButton(
+                icon: AppIcons.linkBreak,
+                label: S.of(context).syncDisconnect,
+                outlined: true,
+                onTap: () => _confirmDisconnect(context, notifier),
+              ),
+              const SizedBox(height: 16),
+              // ── Sync Encryption ── (a household's key replaces it)
+              _SyncEncryptionCard(),
+              const SizedBox(height: 24),
             ],
-            _ActionButton(
-              icon: AppIcons.linkBreak,
-              label: S.of(context).syncDisconnect,
-              outlined: true,
-              onTap: () => _confirmDisconnect(context, notifier),
-            ),
-            const SizedBox(height: 16),
-            // ── Sync Encryption ──
-            _SyncEncryptionCard(),
-            const SizedBox(height: 24),
           ],
 
           // ── Was synced to one file before log sync: pick a folder ──
@@ -159,6 +174,27 @@ class SyncScreen extends ConsumerWidget {
                       ),
                     ),
             ),
+
+          // ── Household: share this budget, or join someone's ─────
+          if (!isConnected) ...[
+            SectionHeader(S.of(context).householdSection,
+                padding: const EdgeInsetsDirectional.only(
+                    start: 4, bottom: Spacing.headerToCard)),
+            _ProviderOptionTile(
+              label: S.of(context).householdStart,
+              subtitle: S.of(context).householdStartSub,
+              iconKey: 'household',
+              onTap: () => _startHousehold(context, notifier),
+            ),
+            const SizedBox(height: Spacing.sm),
+            _ProviderOptionTile(
+              label: S.of(context).onboardJoinHousehold,
+              subtitle: S.of(context).householdJoinSub,
+              iconKey: 'join',
+              onTap: () => _join(context),
+            ),
+            const SizedBox(height: Spacing.xl),
+          ],
 
           // ── Provider list ─────────────────────────────────────
           if (!isConnected) ...[
@@ -206,14 +242,6 @@ class SyncScreen extends ConsumerWidget {
                   height: 1.4,
                 ),
               ),
-            ),
-            const SizedBox(height: Spacing.xl),
-            // Someone shared their budget: join it (Google Drive).
-            _ActionButton(
-              icon: AppIcons.users,
-              label: S.of(context).onboardJoinHousehold,
-              outlined: true,
-              onTap: () => _join(context),
             ),
           ],
         ],
@@ -351,8 +379,67 @@ class SyncScreen extends ConsumerWidget {
     if (go && context.mounted) await showJoinHouseholdSheet(context);
   }
 
-  void _showShareSheet(BuildContext context, SyncNotifier notifier) {
-    showShareHouseholdSheet(context, notifier.googleDrive);
+  /// A household on BudgetSeal's relay, from this phone's budget; then the
+  /// invite. Says first that it's a server (encrypted) and replaces Drive.
+  Future<void> _startHousehold(
+      BuildContext context, SyncNotifier notifier) async {
+    final tr = S.of(context);
+    final go = await showConfirmDialog(
+      context,
+      title: tr.householdStartTitle,
+      message: tr.householdStartBody,
+      confirmLabel: tr.householdStart,
+      destructive: false,
+    );
+    if (!go || !context.mounted) return;
+    try {
+      await notifier.startHousehold();
+      if (context.mounted) await _invite(context, notifier);
+    } catch (e) {
+      notifier.reportError(e);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(syncErrorText(e)),
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
+    }
+  }
+
+  Future<void> _invite(BuildContext context, SyncNotifier notifier) async {
+    final key = await notifier.relay.key;
+    if (key != null && context.mounted) {
+      await showHouseholdInviteSheet(context, key);
+    }
+  }
+
+  Future<void> _confirmLeave(
+      BuildContext context, SyncNotifier notifier) async {
+    final tr = S.of(context);
+    final confirmed = await showConfirmDialog(
+      context,
+      title: tr.householdLeaveTitle,
+      message: tr.householdLeaveBody,
+      confirmLabel: tr.householdLeave,
+    );
+    if (!confirmed) return;
+    try {
+      await notifier.disconnectProvider();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(tr.householdLeftSnack),
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
+    } catch (e) {
+      debugPrint('[Sync] Leave household failed: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(tr.commonSomethingWentWrong),
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
+    }
   }
 
   Future<void> _confirmDisconnect(
@@ -402,6 +489,8 @@ class _ProviderOptionTile extends StatelessWidget {
 
   IconData _iconForKey(String key) => switch (key) {
         'google_drive' => AppIcons.googleDriveLogo,
+        'household' => AppIcons.users,
+        'join' => AppIcons.signIn,
         'onedrive' => AppIcons.cloud,
         'dropbox' => AppIcons.cloud,
         'local' => AppIcons.folderOpen,
@@ -411,6 +500,8 @@ class _ProviderOptionTile extends StatelessWidget {
   // Hues of the providers' brand colors, in the settings icon family.
   Color _colorForKey(String key) => switch (key) {
         'google_drive' => SettingsRowStyle.hue(217),
+        'household' => SettingsRowStyle.hue(262),
+        'join' => SettingsRowStyle.hue(150),
         'onedrive' => SettingsRowStyle.hue(206),
         'dropbox' => SettingsRowStyle.hue(217),
         'local' => SettingsRowStyle.hue(123),

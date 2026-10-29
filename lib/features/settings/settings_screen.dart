@@ -15,6 +15,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/number_format_provider.dart';
+import '../../core/sync/relay_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/autofill_provider.dart';
 import '../../core/providers/entry_mode_provider.dart';
@@ -29,7 +30,6 @@ import '../../core/providers/sync_provider.dart';
 import '../../core/providers/backup_reminder_provider.dart';
 import '../../core/providers/premium_provider.dart';
 import '../../core/providers/tx_colors_provider.dart';
-import '../../core/sync/google_drive_provider.dart';
 import '../../core/providers/member_names_provider.dart';
 import '../../core/services/household_members.dart' show DeviceIdentity;
 import '../../features/transactions/widgets/currency_sheet.dart';
@@ -50,7 +50,7 @@ import '../../shared/widgets/settings_row.dart';
 import '../../shared/widgets/sheet_title.dart';
 import 'base_currency_flow.dart';
 import 'member_name_dialog.dart';
-import 'share_household_sheet.dart';
+import 'household_invite_sheet.dart';
 import '../../shared/utils/biometric_errors.dart';
 import '../../shared/theme/app_icons.dart';
 import '../../core/services/crash_reports.dart';
@@ -160,9 +160,18 @@ const _inSheetTitlePad = EdgeInsetsDirectional.only(bottom: 12);
 // Shared helper functions (used by both SettingsScreen and SettingsDetailScreen)
 // ═══════════════════════════════════════════════════════════════════════════
 
-void _showShareHousehold(BuildContext context, WidgetRef ref) {
+/// In a household: its invite. Otherwise Cloud Sync, where one is started.
+Future<void> _showShareHousehold(BuildContext context, WidgetRef ref) async {
     final notifier = ref.read(syncProvider.notifier);
-    showShareHouseholdSheet(context, notifier.googleDrive);
+    if (ref.read(syncProvider).activeProvider is RelayProvider) {
+      final key = await notifier.relay.key;
+      if (key != null && context.mounted) {
+        await showHouseholdInviteSheet(context, key);
+      }
+      return;
+    }
+    if (!checkPremiumAccess(context, ref, PremiumFeature.sync)) return;
+    context.push('/sync');
   }
 
   void _showAutofillSettings(BuildContext context, WidgetRef ref) {
@@ -1201,33 +1210,26 @@ class _SettingsDetailScreenState extends ConsumerState<SettingsDetailScreen> {
                       ? AppColors.overspent
                       : AppColors.accent,
                   onTap: () {
-                    if (!checkPremiumAccess(context, ref, PremiumFeature.sync)) return;
+                    // Joining someone's household needs no premium of its own.
+                    if (sync.activeProvider is! RelayProvider &&
+                        !checkPremiumAccess(context, ref, PremiumFeature.sync)) {
+                      return;
+                    }
                     context.push('/sync');
                   });
             })),
           _Find(keys: (t) => [t.tileShareHousehold],
               child: Builder(builder: (context) {
               final syncState = ref.watch(syncProvider);
-              final isConnected = syncState.activeProvider is GoogleDriveProvider;
+              final inHousehold = syncState.activeProvider is RelayProvider;
               return _SettingsTile(
                 icon: AppIcons.users,
                 title: S.of(context).tileShareHousehold,
-                subtitle: isConnected
+                subtitle: inHousehold
                     ? S.of(context).tileShareHouseholdConnected
-                    : S.of(context).tileShareHouseholdDisconnected,
+                    : S.of(context).householdStartSub,
                 iconColor: SettingsRowStyle.hue(262),
-                onTap: () {
-                  if (isConnected) {
-                    _showShareHousehold(context, ref);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(S.of(context).tileShareHouseholdSnackbar),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
-                },
+                onTap: () => _showShareHousehold(context, ref),
               );
             })),
           // Who's on this device in a shared budget (shown next to what it

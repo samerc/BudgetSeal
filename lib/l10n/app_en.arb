@@ -970,7 +970,6 @@
   "@periodStartsEachMonth": {"placeholders": {"date": {"type": "String"}, "day": {"type": "int"}}},
   "fundMoreThanAvailable": "{amount} more than available in {currency}",
   "@fundMoreThanAvailable": {"placeholders": {"amount": {"type": "String"}, "currency": {"type": "String"}}},
-  "shareHouseholdFailed": "Couldn't create the invite. Check your connection and try again.",
   "a11yPctOfTarget": "{pct}% of {amount}",
   "@a11yPctOfTarget": {"placeholders": {"pct": {"type": "int"}, "amount": {"type": "String"}}},
   "a11yFlexibleEnvelope": "flexible envelope",
@@ -992,7 +991,6 @@
   "onboardConnectFailed": "Couldn't connect to {provider}",
   "@onboardConnectFailed": {"placeholders": {"provider": {"type": "String"}}},
   "onboardNoSyncFile": "No budget found in this folder",
-  "onboardDriveJoinFailed": "Couldn't connect to Google Drive. Make sure you're signed in and have access to the shared folder.",
   "onboardNoSyncFileShared": "No budget found in the shared folder",
   "billNoteTitle": "Bill split",
   "billNoteTotal": "Bill: {total}",
@@ -3405,37 +3403,9 @@
   "@syncDisconnectMsg": {
     "description": "Dialog content"
   },
-  "syncShareDesc": "Share your BudgetSeal data with another person. They will be able to sync to the same file on Google Drive.",
-  "@syncShareDesc": {
-    "description": "Sheet description"
-  },
-  "syncTheirEmail": "Their email address",
-  "@syncTheirEmail": {
-    "description": "Field label"
-  },
-  "syncEmailHint": "partner@gmail.com",
-  "@syncEmailHint": {
-    "description": "Field hint"
-  },
-  "syncSharing": "Sharing...",
-  "@syncSharing": {
-    "description": "Button"
-  },
-  "syncGenerateInvite": "Generate invite code",
-  "@syncGenerateInvite": {
-    "description": "Button"
-  },
-  "syncInviteCode": "Invite code",
-  "@syncInviteCode": {
-    "description": "Label"
-  },
   "syncShareCode": "Share code",
   "@syncShareCode": {
     "description": "Button"
-  },
-  "syncValidEmailError": "Please enter a valid email address",
-  "@syncValidEmailError": {
-    "description": "Validation"
   },
   "syncEncryptionTitle": "Sync encryption",
   "@syncEncryptionTitle": {
@@ -3806,10 +3776,6 @@
   "@tileShareHousehold": { "description": "Tile title" },
   "tileShareHouseholdConnected": "Invite someone to share your data",
   "@tileShareHouseholdConnected": { "description": "Tile subtitle when connected" },
-  "tileShareHouseholdDisconnected": "Connect cloud sync first to share",
-  "@tileShareHouseholdDisconnected": { "description": "Tile subtitle when not connected" },
-  "tileShareHouseholdSnackbar": "Set up cloud sync with Google Drive first to share your household.",
-  "@tileShareHouseholdSnackbar": { "description": "Snackbar message" },
   "tileBackupRestore": "Backup & restore",
   "@tileBackupRestore": { "description": "Tile title" },
   "tileBackupRestoreSub": "Export or restore database",
@@ -5296,11 +5262,7 @@
   "@joinScanNoCamera": {
     "description": "Scanner: camera unavailable"
   },
-  "joinPickerNote": "Google then shows the shared BudgetSeal folder: tap it to give BudgetSeal access.",
-  "@joinPickerNote": {
-    "description": "Join sheet note"
-  },
-  "syncShareScanHint": "Or scan it on their phone: Join a household › Scan code.",
+  "syncShareScanHint": "On their phone: Join a household › Scan code.",
   "@syncShareScanHint": {
     "description": "Share sheet, under the QR"
   },
@@ -5311,6 +5273,86 @@
   "joinReplaceBody": "The shared budget replaces the one on this phone. A backup of it is saved first in Backup & Restore.",
   "@joinReplaceBody": {
     "description": "Cloud Sync: confirm join"
+  },
+  "relayName": "Household sync",
+  "@relayName": {
+    "description": "Sync provider name"
+  },
+  "relayErrNotFound": "No household found for this code. Ask for a new code.",
+  "@relayErrNotFound": {
+    "description": "Household sync error"
+  },
+  "relayErrKey": "This household code doesn't work any more. Ask for a new code.",
+  "@relayErrKey": {
+    "description": "Household sync error"
+  },
+  "relayErrFull": "This household has reached its storage limit.",
+  "@relayErrFull": {
+    "description": "Household sync error"
+  },
+  "relayErrBusy": "Household sync is busy. Try again in a minute.",
+  "@relayErrBusy": {
+    "description": "Household sync error"
+  },
+  "relayErrServer": "Household sync can't be reached right now. Try again later.",
+  "@relayErrServer": {
+    "description": "Household sync error"
+  },
+  "householdSection": "Household",
+  "@householdSection": {
+    "description": "Cloud Sync section"
+  },
+  "householdStart": "Start a household",
+  "@householdStart": {
+    "description": "Cloud Sync row / confirm button"
+  },
+  "householdStartSub": "Share this budget with your partner or family",
+  "@householdStartSub": {
+    "description": "Cloud Sync row / Settings tile subtitle"
+  },
+  "householdJoinSub": "Use a budget someone shared with you",
+  "@householdJoinSub": {
+    "description": "Cloud Sync row subtitle"
+  },
+  "householdStartTitle": "Start a household?",
+  "@householdStartTitle": {
+    "description": "Confirm title"
+  },
+  "householdStartBody": "Your budget will sync through BudgetSeal's server. It's encrypted on this phone first: only phones with your household's code can read it, not even BudgetSeal. On this phone it replaces Google Drive or folder sync.",
+  "@householdStartBody": {
+    "description": "Confirm message"
+  },
+  "householdInvite": "Invite someone",
+  "@householdInvite": {
+    "description": "Cloud Sync button"
+  },
+  "householdInviteTitle": "Invite to your household",
+  "@householdInviteTitle": {
+    "description": "Invite sheet title"
+  },
+  "householdInviteBody": "Anyone with this code can see and change your budget. Share it only with people you trust.",
+  "@householdInviteBody": {
+    "description": "Invite sheet subtitle"
+  },
+  "householdLeave": "Leave household",
+  "@householdLeave": {
+    "description": "Cloud Sync button / confirm"
+  },
+  "householdLeaveTitle": "Leave this household?",
+  "@householdLeaveTitle": {
+    "description": "Confirm title"
+  },
+  "householdLeaveBody": "This phone stops syncing with the household. The budget stays on this phone, and the others keep theirs.",
+  "@householdLeaveBody": {
+    "description": "Confirm message"
+  },
+  "householdLeftSnack": "Left the household",
+  "@householdLeftSnack": {
+    "description": "SnackBar"
+  },
+  "joinOldCode": "This code is from an older version of BudgetSeal. Ask for the app to be updated on the other phone, then share again.",
+  "@joinOldCode": {
+    "description": "Join validation"
   },
   "onboardHouseholdNameError": "Enter a household name",
   "@onboardHouseholdNameError": {

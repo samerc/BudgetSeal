@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/sync_provider.dart';
-import '../../core/sync/invite_code.dart';
+import '../../core/sync/household_key.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/app_icons.dart';
@@ -82,8 +82,12 @@ class _JoinHouseholdSheetState extends ConsumerState<JoinHouseholdSheet> {
       return;
     }
 
-    final folderId = decodeInviteCode(code);
-    if (folderId == null) {
+    if (HouseholdKey.isOldInvite(code)) {
+      setState(() => _error = s.joinOldCode);
+      return;
+    }
+    final key = HouseholdKey.fromCode(code);
+    if (key == null) {
       setState(() => _error = s.onboardInvalidCodeError);
       return;
     }
@@ -95,20 +99,7 @@ class _JoinHouseholdSheetState extends ConsumerState<JoinHouseholdSheet> {
 
     try {
       final notifier = ref.read(syncProvider.notifier);
-      final googleDrive = notifier.googleDrive;
-
-      final connected = await googleDrive.connectToSharedFolder(folderId);
-      if (!connected) {
-        if (googleDrive.connectCanceled) {
-          if (mounted) setState(() => _loading = false);
-        } else {
-          _fail(s.onboardDriveJoinFailed);
-        }
-        return;
-      }
-
-      await notifier.useConnectedProvider(googleDrive);
-      await notifier.restoreFromProvider(googleDrive);
+      await notifier.joinHousehold(key);
 
       final syncState = ref.read(syncProvider);
       if (syncState.status == SyncStatus.error) {
@@ -172,12 +163,6 @@ class _JoinHouseholdSheetState extends ConsumerState<JoinHouseholdSheet> {
                   icon: const Icon(AppIcons.qrCode, size: 20),
                   label: Text(s.joinScanCode),
                 ),
-                const SizedBox(height: 12),
-                Text(s.joinPickerNote,
-                    style: TextStyle(
-                        fontSize: TypographyTokens.captionSize,
-                        color: AppColors.ts(context),
-                        height: 1.4)),
               ],
               if (_error != null) ...[
                 const SizedBox(height: 12),

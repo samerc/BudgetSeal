@@ -2574,10 +2574,6 @@ class SEn extends S {
   }
 
   @override
-  String get shareHouseholdFailed =>
-      'Couldn\'t create the invite. Check your connection and try again.';
-
-  @override
   String a11yPctOfTarget(int pct, String amount) {
     return '$pct% of $amount';
   }
@@ -2631,10 +2627,6 @@ class SEn extends S {
 
   @override
   String get onboardNoSyncFile => 'No budget found in this folder';
-
-  @override
-  String get onboardDriveJoinFailed =>
-      'Couldn\'t connect to Google Drive. Make sure you\'re signed in and have access to the shared folder.';
 
   @override
   String get onboardNoSyncFileShared => 'No budget found in the shared folder';
@@ -4988,29 +4980,7 @@ class SEn extends S {
       'Your data will remain on your device, but automatic sync will stop. You can reconnect at any time.';
 
   @override
-  String get syncShareDesc =>
-      'Share your BudgetSeal data with another person. They will be able to sync to the same file on Google Drive.';
-
-  @override
-  String get syncTheirEmail => 'Their email address';
-
-  @override
-  String get syncEmailHint => 'partner@gmail.com';
-
-  @override
-  String get syncSharing => 'Sharing...';
-
-  @override
-  String get syncGenerateInvite => 'Generate invite code';
-
-  @override
-  String get syncInviteCode => 'Invite code';
-
-  @override
   String get syncShareCode => 'Share code';
-
-  @override
-  String get syncValidEmailError => 'Please enter a valid email address';
 
   @override
   String get syncEncryptionTitle => 'Sync encryption';
@@ -5343,14 +5313,6 @@ class SEn extends S {
 
   @override
   String get tileShareHouseholdConnected => 'Invite someone to share your data';
-
-  @override
-  String get tileShareHouseholdDisconnected =>
-      'Connect cloud sync first to share';
-
-  @override
-  String get tileShareHouseholdSnackbar =>
-      'Set up cloud sync with Google Drive first to share your household.';
 
   @override
   String get tileBackupRestore => 'Backup & restore';
@@ -6659,12 +6621,8 @@ class SEn extends S {
       'Couldn\'t open the camera. Type the code instead.';
 
   @override
-  String get joinPickerNote =>
-      'Google then shows the shared BudgetSeal folder: tap it to give BudgetSeal access.';
-
-  @override
   String get syncShareScanHint =>
-      'Or scan it on their phone: Join a household › Scan code.';
+      'On their phone: Join a household › Scan code.';
 
   @override
   String get joinReplaceTitle => 'Join a household?';
@@ -6672,6 +6630,74 @@ class SEn extends S {
   @override
   String get joinReplaceBody =>
       'The shared budget replaces the one on this phone. A backup of it is saved first in Backup & Restore.';
+
+  @override
+  String get relayName => 'Household sync';
+
+  @override
+  String get relayErrNotFound =>
+      'No household found for this code. Ask for a new code.';
+
+  @override
+  String get relayErrKey =>
+      'This household code doesn\'t work any more. Ask for a new code.';
+
+  @override
+  String get relayErrFull => 'This household has reached its storage limit.';
+
+  @override
+  String get relayErrBusy => 'Household sync is busy. Try again in a minute.';
+
+  @override
+  String get relayErrServer =>
+      'Household sync can\'t be reached right now. Try again later.';
+
+  @override
+  String get householdSection => 'Household';
+
+  @override
+  String get householdStart => 'Start a household';
+
+  @override
+  String get householdStartSub =>
+      'Share this budget with your partner or family';
+
+  @override
+  String get householdJoinSub => 'Use a budget someone shared with you';
+
+  @override
+  String get householdStartTitle => 'Start a household?';
+
+  @override
+  String get householdStartBody =>
+      'Your budget will sync through BudgetSeal\'s server. It\'s encrypted on this phone first: only phones with your household\'s code can read it, not even BudgetSeal. On this phone it replaces Google Drive or folder sync.';
+
+  @override
+  String get householdInvite => 'Invite someone';
+
+  @override
+  String get householdInviteTitle => 'Invite to your household';
+
+  @override
+  String get householdInviteBody =>
+      'Anyone with this code can see and change your budget. Share it only with people you trust.';
+
+  @override
+  String get householdLeave => 'Leave household';
+
+  @override
+  String get householdLeaveTitle => 'Leave this household?';
+
+  @override
+  String get householdLeaveBody =>
+      'This phone stops syncing with the household. The budget stays on this phone, and the others keep theirs.';
+
+  @override
+  String get householdLeftSnack => 'Left the household';
+
+  @override
+  String get joinOldCode =>
+      'This code is from an older version of BudgetSeal. Ask for the app to be updated on the other phone, then share again.';
 
   @override
   String get onboardHouseholdNameError => 'Enter a household name';

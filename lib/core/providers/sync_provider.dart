@@ -12,6 +12,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/auto_backup_service.dart';
 import '../../shared/utils/receipt_helper.dart';
+import '../sync/household_key.dart';
+import '../sync/relay_provider.dart';
 import '../sync/cloud_provider.dart';
 import '../sync/file_picker_provider.dart';
 import '../sync/google_drive_provider.dart';
@@ -99,6 +101,14 @@ class SyncNotifier extends Notifier<SyncState> {
   // Available providers
   final googleDrive = GoogleDriveProvider();
   final filePicker = FilePickerProvider();
+  final relay = RelayProvider();
+
+  /// The pref value naming [provider] (`sync_active_provider`).
+  static String _keyOf(CloudProvider provider) => switch (provider) {
+        GoogleDriveProvider() => 'google_drive',
+        RelayProvider() => 'household',
+        _ => 'file',
+      };
 
   /// All provider options shown in the UI. Local file uses the system file
   /// picker, which also reaches OneDrive/Dropbox when their apps are installed.
@@ -144,6 +154,8 @@ class SyncNotifier extends Notifier<SyncState> {
       if (restored) provider = googleDrive;
     } else if (savedProvider == 'file' && await filePicker.isConnected) {
       provider = filePicker;
+    } else if (savedProvider == 'household' && await relay.isConnected) {
+      provider = relay;
     }
 
     state = state.copyWith(
@@ -163,11 +175,37 @@ class SyncNotifier extends Notifier<SyncState> {
   /// Make [provider] — already signed in (joining a shared folder) — the
   /// active one, without signing in again.
   Future<void> useConnectedProvider(CloudProvider provider) async {
-    final key = provider is GoogleDriveProvider ? 'google_drive' : 'file';
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_prefActiveProvider, key);
+    await prefs.setString(_prefActiveProvider, _keyOf(provider));
 
     state = state.copyWith(activeProvider: provider);
+  }
+
+  /// Starts a household on the relay with this phone's budget: leaves
+  /// Drive or a folder (one sync at a time), uploads everything sealed.
+  /// The household key replaces the sync password, which every phone
+  /// would otherwise need too.
+  Future<void> startHousehold() async {
+    await _leaveOtherProvider();
+    await SyncEncryption.clearPassword();
+    await relay.connect();
+    await useConnectedProvider(relay);
+    await initialUpload();
+  }
+
+  /// Joins the household [key] opens, replacing this phone's budget (after
+  /// a backup). Throws [RelayException] when the relay refuses the key.
+  Future<void> joinHousehold(HouseholdKey key) async {
+    await relay.join(key);
+    await _leaveOtherProvider();
+    await SyncEncryption.clearPassword();
+    await restoreFromProvider(relay);
+  }
+
+  Future<void> _leaveOtherProvider() async {
+    final current = state.activeProvider;
+    if (current == null || current is RelayProvider) return;
+    await disconnectProvider();
   }
 
   /// Disconnect the current provider.
@@ -388,9 +426,8 @@ class SyncNotifier extends Notifier<SyncState> {
       // device's name (HouseholdMembers.shouldAsk).
       await HouseholdMembers.markJoined();
 
-      final key = provider is GoogleDriveProvider ? 'google_drive' : 'file';
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_prefActiveProvider, key);
+      await prefs.setString(_prefActiveProvider, _keyOf(provider));
       await prefs.setString(_prefLastSync, DateTime.now().toIso8601String());
 
       state = state.copyWith(
@@ -449,6 +486,11 @@ String syncErrorText(Object e) {
     FormatException() => s.syncErrCorrupt,
     CloudAuthException() || GoogleSignInException() => s.syncErrSignedOut,
     drive.DetailedApiRequestError(status: 401 || 403) => s.syncErrSignedOut,
+    RelayException(error: RelayError.notFound) => s.relayErrNotFound,
+    RelayException(error: RelayError.unauthorized) => s.relayErrKey,
+    RelayException(error: RelayError.full) => s.relayErrFull,
+    RelayException(error: RelayError.busy) => s.relayErrBusy,
+    RelayException() => s.relayErrServer,
     SocketException() || HttpException() || TimeoutException() ||
     http.ClientException() =>
       s.syncErrNetwork,
