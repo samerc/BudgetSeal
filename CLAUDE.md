@@ -6,7 +6,7 @@ Guidance for Claude Code in this repository. This file holds the rules that appl
 
 **BudgetSeal** (Dart package `budgetseal`; repo folder and some docs still say PocketPlan) — a YNAB-style envelope budgeting app for Android and iOS. Flutter + Drift (SQLite) + Riverpod 3 + GoRouter. Offline-first: SQLite is the data store, not a cache; the app works fully without internet. Optional file-based cloud sync (Google Drive, or the system file picker), goals & loans, subscriptions, planned payments, travel wallets, bill splitter with receipt OCR, CSV import/export, and a Web Companion (local WiFi server so a laptop browser can manage the budget).
 
-Toolchain: Flutter 3.47.5 / Dart 3.13, iOS target 15.5 (ML Kit), Android minSdk 26.
+Toolchain: Flutter 3.47.5 / Dart 3.13, iOS target 15.5 (ML Kit), Android minSdk 26; Gradle 9.3.1, AGP 9.1.0, Kotlin 2.4.0 (Flutter 3.47's tested set; runs on Android Studio's Java 25 — Gradle 8.x does not).
 
 | Area | Notes |
 |------|-------|
