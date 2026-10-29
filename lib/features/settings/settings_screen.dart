@@ -275,6 +275,8 @@ void _showShareHousehold(BuildContext context, WidgetRef ref) {
       // Clear preferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
+      // The router sends onboarding back to Home while a household is set.
+      ref.read(currentHouseholdIdProvider.notifier).set(null);
 
       // Navigate to onboarding — DB stays open so providers won't crash
       if (context.mounted) {
