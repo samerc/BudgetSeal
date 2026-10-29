@@ -25,7 +25,8 @@ Toolchain: Flutter 3.47.5 / Dart 3.13, iOS target 15.5 (ML Kit), Android minSdk 
 ```bash
 flutter pub get
 flutter run -d <device>
-flutter build apk --debug            # debug app id com.budgetseal.app.debug ("BudgetSeal Dev")
+flutter build apk --debug --dart-define-from-file=.env            # debug app id com.budgetseal.app.debug ("BudgetSeal Dev")
+flutter build appbundle --release --dart-define-from-file=.env    # Play upload — WITHOUT the .env flag Google Drive sign-in fails at once (0.12.0+13 shipped that way)
 dart run build_runner build --delete-conflicting-outputs   # Drift/Riverpod codegen
 dart analyze lib/
 flutter test                         # in-memory DB: AppDatabase.forTesting(NativeDatabase.memory())
