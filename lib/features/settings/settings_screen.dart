@@ -1049,9 +1049,7 @@ class _SettingsDetailScreenState extends ConsumerState<SettingsDetailScreen> {
       body: _SettingsQuery(
         query: query,
         child: ListView(
-        // A set padding drops the system navigation bar's inset: add it back.
-        padding: EdgeInsets.fromLTRB(
-            16, 8, 16, 32 + MediaQuery.of(context).viewPadding.bottom),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 12),

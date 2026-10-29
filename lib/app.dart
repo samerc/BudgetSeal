@@ -365,7 +365,9 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
           path: '/reports/view/:id',
           pageBuilder: (_, state) => slideUpPage(
               child: ReportView(id: state.pathParameters['id']!),
-              state: state),
+              state: state,
+              // The year in review's own dark page runs to the edge.
+              edgeToEdge: state.pathParameters['id'] == 'year'),
         ),
         GoRoute(
           path: '/month-close',
@@ -410,8 +412,10 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
         ),
         GoRoute(
           path: '/bill-splitter',
+          // Its raised bars reach the screen edge themselves.
           pageBuilder: (_, state) => slideUpPage(
-              child: const BillSplitterScreen(), state: state),
+              child: const BillSplitterScreen(), state: state,
+              edgeToEdge: true),
         ),
         GoRoute(
           path: '/planned-payments',

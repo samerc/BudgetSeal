@@ -49,6 +49,7 @@ One way to do each thing. New code follows this; the Oct 23 pass moved existing 
 | Confirm / delete dialog | `showConfirmDialog(context, title: '…?', message:, confirmLabel:, destructive:)` — Cancel outlined + red filled (`DialogButtons.destructive`) or accent filled | red `TextButton`s, `FilledButton.styleFrom(backgroundColor:)` |
 | Chip (filter / choice / type) | `AppChip(label, selected, onTap, icon:, color:)` | `_TypeChip`/`_FilterChip` copies, r10/r12 boxes |
 | Bottom bar under a form / flow | `BottomActionBar(children: [...], above:)` | hand-built shadows (`Colors.black26`, `0x14000000`) |
+| Pushed screen vs the system navigation bar | `slideUpPage` stops the screen above it (strip below = `AppColors.bg`), so a list's own `padding` needs no inset; `edgeToEdge: true` only for a screen that pads its own bottom and paints another colour there (bill splitter, year in review). Oct 29 2026: lists with a set padding hid their last row behind the 3-button bar | adding `viewPadding.bottom` per list |
 | Loading | `SkeletonList` on list screens, spinner only on detail screens | |
 | Empty | `EmptyState` (also for "no search match", with its own message — never the "nothing yet" text) | Text in a Center |
 | Load failure | `ErrorRetry` (now styled like `EmptyState`) — never fall through to the empty state | |
