@@ -255,7 +255,7 @@ class SyncScreen extends ConsumerWidget {
         ),
       );
       await _firstSync(context, ref, provider);
-    } else if (!ok && context.mounted) {
+    } else if (!ok && context.mounted && !provider.connectCanceled) {
       String errorMsg = S.of(context).syncFailedToConnect;
       if (provider is GoogleDriveProvider && provider.lastConnectError != null) {
         errorMsg = provider.lastConnectError!;

@@ -1040,7 +1040,11 @@ class _RestoreSheetState extends ConsumerState<_RestoreSheet> {
       final connected =
           await ref.read(syncProvider.notifier).connectProvider(provider);
       if (!connected) {
-        _fail(s.onboardConnectFailed(provider.displayName));
+        if (provider.connectCanceled) {
+          if (mounted) setState(() => _loading = false);
+        } else {
+          _fail(s.onboardConnectFailed(provider.displayName));
+        }
         return;
       }
 

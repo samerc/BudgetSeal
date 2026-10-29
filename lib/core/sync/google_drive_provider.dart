@@ -30,6 +30,9 @@ class GoogleDriveProvider implements CloudProvider {
   String? _folderId;
   bool _sharedFolder = false;
   String? lastConnectError;
+
+  @override
+  bool connectCanceled = false;
   bool _initialized = false;
 
   @override
@@ -53,6 +56,7 @@ class GoogleDriveProvider implements CloudProvider {
   Future<bool> connect() async {
     try {
       lastConnectError = null;
+      connectCanceled = false;
       await _ensureInitialized();
 
       _account = await GoogleSignIn.instance.authenticate();
@@ -66,6 +70,11 @@ class GoogleDriveProvider implements CloudProvider {
           _AuthClient(http.Client(), auth.accessToken, _refreshToken));
       return true;
     } catch (e) {
+      if (e is GoogleSignInException &&
+          e.code == GoogleSignInExceptionCode.canceled) {
+        connectCanceled = true;
+        return false;
+      }
       final msg = e.toString().toLowerCase();
       if (msg.contains('sign_in') || msg.contains('not configured') ||
           msg.contains('apiexception')) {

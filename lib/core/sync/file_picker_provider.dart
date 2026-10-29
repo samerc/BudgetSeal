@@ -35,9 +35,13 @@ class FilePickerProvider implements CloudProvider {
   }
 
   @override
+  bool connectCanceled = false;
+
+  @override
   Future<bool> connect() async {
     final folder = await FilePicker.getDirectoryPath(
         dialogTitle: currentS().filePickerTitle);
+    connectCanceled = folder == null;
     if (folder == null) return false;
     _folder = folder;
     final prefs = await SharedPreferences.getInstance();

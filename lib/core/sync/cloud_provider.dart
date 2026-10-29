@@ -14,6 +14,10 @@ abstract class CloudProvider {
   /// Returns true on success.
   Future<bool> connect();
 
+  /// The last [connect] returned false because the user backed out of the
+  /// account or folder picker — not an error, so nothing to show.
+  bool get connectCanceled;
+
   /// Disconnect / sign out.
   Future<void> disconnect();
 
