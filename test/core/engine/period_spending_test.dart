@@ -140,5 +140,41 @@ void main() {
           .first;
       expect(result[alloc], isNull);
     });
+
+    test('in base money: other currencies at their rate, no-rate rows out',
+        () async {
+      await db.into(db.accounts).insert(AccountsCompanion.insert(
+          id: 'eur',
+          householdId: hh,
+          name: 'Wallet',
+          type: 'cash',
+          currency: 'EUR',
+          deviceId: 'd'));
+      Future<void> spendEur(double amount, double rate) =>
+          engine.recordTransaction(
+            householdId: hh,
+            accountId: 'eur',
+            type: 'expense',
+            lines: [
+              TxLine(
+                  amount: amount,
+                  currency: 'EUR',
+                  categoryId: cat,
+                  accountId: 'eur',
+                  exchangeRateToBase: rate),
+            ],
+            baseCurrency: 'USD',
+            date: DateTime(2026, 3, 12),
+          );
+      await spend(30, DateTime(2026, 3, 10));
+      await spendEur(10, 1.1); // $11
+      await spendEur(50, 1.0); // no real rate: left out, as in every total
+
+      final result = await LedgerDao(db)
+          .watchBaseSpendingInPeriod(
+              hh, DateTime(2026, 3, 1), DateTime(2026, 4, 1), 'USD')
+          .first;
+      expect(result[alloc], closeTo(41, 0.001));
+    });
   });
 }

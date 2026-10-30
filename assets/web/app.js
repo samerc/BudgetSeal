@@ -1637,17 +1637,29 @@ function monthCard(s, year, month) {
   const monthName = name.charAt(0).toUpperCase() + name.slice(1);
   const f = v => fmt(v, s.currency);
   const hasBudget = s.budgeted > 0;
-  const left = s.budgeted - s.spent;
+  // "Spent" is what the spending envelopes paid for — the same money as
+  // "budgeted"; the rest of the month's expenses get their own line.
+  const budgetSpent = s.budgetSpent ?? s.spent;
+  const left = s.budgeted - budgetSpent;
   const over = left < -0.005;
   const detail = hasBudget
-    ? t('web_month_spent_of', { spent: f(s.spent), budgeted: f(s.budgeted), income: f(s.income) })
+    ? t('web_month_spent_of', { spent: f(budgetSpent), budgeted: f(s.budgeted), income: f(s.income) })
     : t('web_month_spent', { spent: f(s.spent), income: f(s.income) });
+  const fromFunds = Math.min(Math.max(s.fromFunds || 0, 0), s.spent);
+  const notBudgeted = Math.max(0, s.spent - budgetSpent - fromFunds);
+  const outsideParts = [
+    fromFunds >= 0.005 ? t('web_month_from_funds', { amount: f(fromFunds) }) : '',
+    notBudgeted >= 0.005 ? t('web_month_not_budgeted', { amount: f(notBudgeted) }) : '',
+  ].filter(Boolean).join(' · ');
+  const outside = hasBudget && fromFunds + notBudgeted >= 0.005
+    ? `<div class="month-outside">${esc(t('web_month_outside', { amount: f(fromFunds + notBudgeted) }))}${outsideParts ? `<span>${esc(outsideParts)}</span>` : ''}</div>`
+    : '';
   if (past && hasBudget && !over) {
     return `<div class="card month-card sealed">${sealSvg(34)}<div>
       <div class="month-title sm">${esc(t('web_month_sealed', { month: monthName }))}</div>
       <div class="month-detail">${esc(detail)}</div></div></div>`;
   }
-  const pct = hasBudget ? Math.min(100, Math.max(0, s.spent / s.budgeted * 100)) : 0;
+  const pct = hasBudget ? Math.min(100, Math.max(0, budgetSpent / s.budgeted * 100)) : 0;
   return `<div class="card month-card">
     <div class="month-top">
       <span class="month-title">${esc(hasBudget ? t('web_month_budget', { month: monthName }) : monthName)}</span>
@@ -1655,6 +1667,7 @@ function monthCard(s, year, month) {
     </div>
     ${hasBudget ? `<div class="bar"><span style="width:${pct.toFixed(1)}%;background:${over ? 'var(--overspent)' : 'var(--acc-bright)'}"></span></div>` : ''}
     <div class="month-detail">${esc(detail)}</div>
+    ${outside}
   </div>`;
 }
 

@@ -1870,6 +1870,29 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
         totalBudget += target;
       }
     }
+    // The card's "spent" is the same money as "budgeted": what the
+    // base-currency spending envelopes paid for this month. Expenses paid
+    // from other envelopes (sinking funds, savings goals) and ones no
+    // envelope paid for are named on their own line, so nothing goes
+    // missing and "over by" isn't inflated by planned payments.
+    final envSpending = ref
+            .watch(baseEnvelopeSpendingProvider((
+              from: DateTime(_selectedYear, _selectedMonth),
+              to: DateTime(_selectedYear, _selectedMonth + 1),
+            )))
+            .value ??
+        const <String, double>{};
+    double budgetSpent = 0, otherEnvelopes = 0;
+    for (final a in allocations) {
+      final v = envSpending[a.data.allocation.id] ?? 0;
+      final inBudget = a.data.allocation.type == 'spending' &&
+          (a.data.allocation.targetCurrency ?? baseCurrency) == baseCurrency;
+      if (inBudget) {
+        budgetSpent += v;
+      } else {
+        otherEnvelopes += v;
+      }
+    }
 
     return Column(
       children: [
@@ -1906,6 +1929,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                       year: _selectedYear,
                       month: _selectedMonth,
                       spent: monthExpense,
+                      budgetSpent: budgetSpent,
+                      otherEnvelopes: otherEnvelopes,
                       income: monthIncome,
                       budgeted: totalBudget,
                       currency: baseCurrency,
@@ -2610,7 +2635,14 @@ class _DateHeaderTile extends StatelessWidget {
 class _MonthBudgetCard extends StatelessWidget {
   final int year;
   final int month;
+  /// Every expense this month (base currency).
   final double spent;
+
+  /// What the base-currency spending envelopes paid for: compared with
+  /// [budgeted]. The rest of [spent] came from other envelopes
+  /// ([otherEnvelopes]) or from none.
+  final double budgetSpent;
+  final double otherEnvelopes;
   final double income;
   final double budgeted;
   final String currency;
@@ -2619,6 +2651,8 @@ class _MonthBudgetCard extends StatelessWidget {
     required this.year,
     required this.month,
     required this.spent,
+    required this.budgetSpent,
+    required this.otherEnvelopes,
     required this.income,
     required this.budgeted,
     required this.currency,
@@ -2633,13 +2667,21 @@ class _MonthBudgetCard extends StatelessWidget {
         formatMonth(DateTime(year, month, 15));
     String f(double v) => formatAmount(v, currency: currency);
     final hasBudget = budgeted > 0;
-    final left = budgeted - spent;
+    final left = budgeted - budgetSpent;
     final over = left < -0.005;
     final detail = hasBudget
-        ? s.txMonthSpentOf(f(spent), f(budgeted), f(income))
+        ? s.txMonthSpentOf(f(budgetSpent), f(budgeted), f(income))
         : s.txMonthSpent(f(spent), f(income));
-    final spentOf = s.txMonthSpentOfShort(f(spent), f(budgeted));
+    final spentOf = s.txMonthSpentOfShort(f(budgetSpent), f(budgeted));
     final incomeLine = s.txMonthIncome(f(income));
+    // Outside the budget: from other envelopes, and not budgeted at all.
+    final fromFunds = otherEnvelopes.clamp(0.0, spent);
+    final notBudgeted = (spent - budgetSpent - fromFunds).clamp(0.0, spent);
+    final outside = fromFunds + notBudgeted;
+    final outsideParts = [
+      if (fromFunds >= 0.005) s.txMonthFromFunds(f(fromFunds)),
+      if (notBudgeted >= 0.005) s.txMonthNotBudgeted(f(notBudgeted)),
+    ].join(' · ');
     const tabular = [FontFeature.tabularFigures()];
     final titleStyle = TextStyle(
       fontFamily: TypographyTokens.displayFamily,
@@ -2715,7 +2757,7 @@ class _MonthBudgetCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
-                value: (spent / budgeted).clamp(0.0, 1.0),
+                value: (budgetSpent / budgeted).clamp(0.0, 1.0),
                 minHeight: 8,
                 backgroundColor: AppColors.sfv(context),
                 valueColor: AlwaysStoppedAnimation<Color>(
@@ -2742,6 +2784,18 @@ class _MonthBudgetCard extends StatelessWidget {
             )
           else
             Text(detail, style: detailStyle),
+          // Grey, not red: paying the insurance from its sinking fund is
+          // the plan working.
+          if (hasBudget && outside >= 0.005) ...[
+            const SizedBox(height: 6),
+            Text(s.txMonthOutside(f(outside)),
+                style: detailStyle.copyWith(
+                    fontSize: 12.5, fontWeight: FontWeight.w600)),
+            if (outsideParts.isNotEmpty)
+              Text(outsideParts,
+                  style: detailStyle.copyWith(
+                      fontSize: 12, color: AppColors.th(context))),
+          ],
         ],
       ),
     );

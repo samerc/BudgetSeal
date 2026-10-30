@@ -943,6 +943,8 @@ kbd {
 .month-left { font-family: var(--display); font-size: 16px; font-weight: 700; color: var(--accent); white-space: nowrap; }
 .month-left.over { color: var(--overspent); }
 .month-detail { font-size: 13px; color: var(--text-2); }
+.month-outside { margin-top: 6px; font-size: 12.5px; font-weight: 600; color: var(--text-2); }
+.month-outside span { display: block; font-size: 12px; font-weight: 400; opacity: .8; }
 
 /* ── Seals ──────────────────────────────────────────────────────────────── */
 

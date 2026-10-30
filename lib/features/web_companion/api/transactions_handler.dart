@@ -4,6 +4,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/database/daos/ledger_dao.dart';
 import '../../../core/engine/allocation_engine.dart';
 import '../../../core/fx/fx_service.dart';
 import '../../../core/providers/database_provider.dart';
@@ -188,7 +189,10 @@ Handler listTransactionsHandler(Ref ref) {
 
 /// Spent and income in [from, to) in the base currency (lines without a
 /// real rate left out, as in the app) and the month's budget: the targets
-/// of spending envelopes in the base currency.
+/// of spending envelopes in the base currency. `budgetSpent` is what those
+/// envelopes paid for (compared with `budgeted`), `fromFunds` what other
+/// envelopes (savings goals, sinking funds) paid for — as on the app's
+/// Activity month card.
 Future<Map<String, dynamic>> _rangeSummary(AppDatabase db, String householdId,
     String base, DateTime from, DateTime to) async {
   final rows = await (db.select(db.transactionLines).join([
@@ -226,8 +230,25 @@ Future<Map<String, dynamic>> _rangeSummary(AppDatabase db, String householdId,
       budgeted += a.targetAmount!;
     }
   }
+  final inBudget = {
+    for (final a in envs)
+      if ((a.targetCurrency ?? base) == base) a.id,
+  };
+  final byEnvelope = await LedgerDao(db)
+      .watchBaseSpendingInPeriod(householdId, from, to, base)
+      .first;
+  var budgetSpent = 0.0, fromFunds = 0.0;
+  byEnvelope.forEach((id, v) {
+    if (inBudget.contains(id)) {
+      budgetSpent += v;
+    } else {
+      fromFunds += v;
+    }
+  });
   return {
     'spent': spent,
+    'budgetSpent': budgetSpent,
+    'fromFunds': fromFunds,
     'income': income,
     'budgeted': budgeted,
     'currency': base,

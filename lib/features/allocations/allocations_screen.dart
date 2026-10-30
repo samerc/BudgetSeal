@@ -467,13 +467,17 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                       baseCurrency);
               final totalBudgeted = baseAllocs.fold<double>(
                   0.0, (sum, a) => sum + (a.data.allocation.targetAmount ?? 0.0));
-              final spending = ref.watch(periodSpendingProvider).value ?? {};
-              final totalSpent = baseAllocs.fold<double>(
-                  0.0,
-                  (sum, a) =>
-                      sum + (spending[a.data.allocation.id]?[baseCurrency] ?? 0));
               final period = BudgetProgress.currentPeriod(
                   household?.periodStartDay ?? 1);
+              // In base money, other currencies at their rate — the same
+              // number as the Activity month card's Spent.
+              final spending = ref
+                      .watch(baseEnvelopeSpendingProvider(
+                          (from: period.start, to: period.end)))
+                      .value ??
+                  const <String, double>{};
+              final totalSpent = baseAllocs.fold<double>(0.0,
+                  (sum, a) => sum + (spending[a.data.allocation.id] ?? 0));
               final daysLeft =
                   calendarDaysBetween(DateTime.now(), period.end).clamp(0, 999);
               final left = totalBudgeted - totalSpent;

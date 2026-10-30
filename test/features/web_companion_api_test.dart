@@ -324,8 +324,15 @@ void main() {
     final income = items.firstWhere((t) => t['type'] == 'income');
     expect(income['impact'], isNull);
     expect(income['balanceAfter']['balance'], 500);
-    expect(list['summary'],
-        {'spent': 20.0, 'income': 500.0, 'budgeted': 50.0, 'currency': 'USD'});
+    // The $20 came out of the spending envelope: all of it is budget spent.
+    expect(list['summary'], {
+      'spent': 20.0,
+      'budgetSpent': 20.0,
+      'fromFunds': 0.0,
+      'income': 500.0,
+      'budgeted': 50.0,
+      'currency': 'USD',
+    });
 
     final envs = await call(listEnvelopesHandler(ref), 'GET');
     expect((envs['items'] as List).single['sealed'], isTrue);

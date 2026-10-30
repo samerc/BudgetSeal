@@ -104,6 +104,20 @@ final unallocatedProvider =
 /// What each envelope spent in the current budget period, by transaction
 /// date: `Map<allocationId, Map<currency, spent>>`. Re-evaluated when the
 /// period start day changes; reopening the app picks up a new period.
+/// What each envelope paid for in [from, to), in the base currency
+/// (`LedgerDao.watchBaseSpendingInPeriod`): the Budget tab's and the Activity
+/// month card's "Spent", so it's the same money as their "Budgeted".
+final baseEnvelopeSpendingProvider = StreamProvider.family<Map<String, double>,
+    ({DateTime from, DateTime to})>((ref, range) {
+  final db = ref.watch(databaseProvider);
+  final householdId = ref.watch(currentHouseholdIdProvider);
+  if (householdId == null) return const Stream.empty();
+  final base = ref.watch(
+      householdProvider.select((h) => h.value?.baseCurrency ?? 'USD'));
+  return LedgerDao(db)
+      .watchBaseSpendingInPeriod(householdId, range.from, range.to, base);
+});
+
 final periodSpendingProvider =
     StreamProvider<Map<String, Map<String, double>>>((ref) {
   final db = ref.watch(databaseProvider);

@@ -13906,6 +13906,24 @@ abstract class S {
   /// **'Income {amount}'**
   String txMonthIncome(Object amount);
 
+  /// Activity month card: expenses not paid by the spending envelopes
+  ///
+  /// In en, this message translates to:
+  /// **'Also {amount} outside the budget'**
+  String txMonthOutside(Object amount);
+
+  /// Activity month card: paid from savings goals and sinking funds
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} from savings and sinking funds'**
+  String txMonthFromFunds(Object amount);
+
+  /// Activity month card: expenses no envelope paid for
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} not budgeted'**
+  String txMonthNotBudgeted(Object amount);
+
   /// Activity month card line when no envelope has a target
   ///
   /// In en, this message translates to:

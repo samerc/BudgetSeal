@@ -132,6 +132,41 @@ class LedgerDao extends DatabaseAccessor<AppDatabase> with _$LedgerDaoMixin {
     });
   }
 
+  /// What each envelope paid for during [from, to) (by transaction date),
+  /// in [base]: other currencies at their row's rate, rows with no real rate
+  /// left out (as in every base total). `Map<allocationId, spent>`. The
+  /// month card and the Budget tab's Spent read it, so "spent" is the same
+  /// money as "budgeted" on both.
+  Stream<Map<String, double>> watchBaseSpendingInPeriod(
+      String householdId, DateTime from, DateTime to, String base) {
+    return customSelect(
+      'SELECT l.allocation_id AS allocation_id, '
+      'SUM(CASE WHEN l.currency = ? THEN l.amount '
+      'ELSE l.amount * l.exchange_rate_to_base END) AS total '
+      'FROM allocation_ledger l '
+      'INNER JOIN allocations a ON a.id = l.allocation_id '
+      'INNER JOIN transactions t ON t.id = l.source_transaction_id '
+      "WHERE a.household_id = ? AND l.entry_type = 'consumption' "
+      'AND t.deleted = 0 AND t.created_at >= ? AND t.created_at < ? '
+      'AND (l.currency = ? OR ABS(l.exchange_rate_to_base - 1.0) >= 0.001) '
+      'GROUP BY l.allocation_id',
+      variables: [
+        Variable.withString(base),
+        Variable.withString(householdId),
+        Variable.withInt(from.millisecondsSinceEpoch ~/ 1000),
+        Variable.withInt(to.millisecondsSinceEpoch ~/ 1000),
+        Variable.withString(base),
+      ],
+      readsFrom: {allocationLedger, attachedDatabase.allocations,
+          attachedDatabase.transactions},
+    ).watch().map((rows) => {
+          for (final row in rows)
+            if (-((row.data['total'] as num?)?.toDouble() ?? 0) > 0.001)
+              row.data['allocation_id'] as String:
+                  -(row.data['total'] as num).toDouble(),
+        });
+  }
+
   /// Money put into each envelope during [from, to), net of what was taken
   /// back out — funding and moves in, less moves out and withdrawals to
   /// Ready to assign (by ledger date). Only positive totals are returned:

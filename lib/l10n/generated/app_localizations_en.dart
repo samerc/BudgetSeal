@@ -7941,6 +7941,21 @@ class SEn extends S {
   }
 
   @override
+  String txMonthOutside(Object amount) {
+    return 'Also $amount outside the budget';
+  }
+
+  @override
+  String txMonthFromFunds(Object amount) {
+    return '$amount from savings and sinking funds';
+  }
+
+  @override
+  String txMonthNotBudgeted(Object amount) {
+    return '$amount not budgeted';
+  }
+
+  @override
   String txMonthSpent(String spent, String income) {
     return 'Spent $spent · income $income';
   }

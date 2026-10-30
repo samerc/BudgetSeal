@@ -8034,6 +8034,21 @@ class SFr extends S {
   }
 
   @override
+  String txMonthOutside(Object amount) {
+    return 'Aussi $amount hors budget';
+  }
+
+  @override
+  String txMonthFromFunds(Object amount) {
+    return '$amount depuis l’épargne et les fonds planifiés';
+  }
+
+  @override
+  String txMonthNotBudgeted(Object amount) {
+    return '$amount hors enveloppes';
+  }
+
+  @override
   String txMonthSpent(String spent, String income) {
     return 'Dépensé $spent · revenus $income';
   }

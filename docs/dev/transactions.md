@@ -111,7 +111,7 @@ The list answers "what did this do to my budget" (no longer Cashew's rows):
 
 ## Future Months
 
-Transaction list caps month tabs to current month. No future months shown. No arrows (Oct 30: the left caret beside a clipped month read as broken) — tap or swipe the strip; `FadedEdges` 64/64 hides a month cut at the edge. Year picker only shows up to current year. Day headers leave the year out for this year's dates (`formatDateNoYear()`). The month card's line is "Spent $X of $Y" on the start and "Income $Z" on the end (a `Wrap` that drops income under it on narrow screens).
+Transaction list caps month tabs to current month. No future months shown. No arrows (Oct 30: the left caret beside a clipped month read as broken) — tap or swipe the strip; `FadedEdges` 64/64 hides a month cut at the edge. Year picker only shows up to current year. Day headers leave the year out for this year's dates (`formatDateNoYear()`). The month card's line is "Spent $X of $Y" on the start and "Income $Z" on the end (a `Wrap` that drops income under it on narrow screens). **Spent** there is `budgetSpent`: what the base-currency spending envelopes paid for this month (`baseEnvelopeSpendingProvider` → `LedgerDao.watchBaseSpendingInPeriod`: consumption rows by transaction date, other currencies at their row's rate, no-rate rows left out) — the same money as Budgeted and the Budget tab's Spent tile (user's call, Oct 30: all expenses vs the spending budget overstated "over by"). The rest of the month's expenses get a gray line: "Also $X outside the budget" + "$A from savings and sinking funds · $B not budgeted" (A = other envelopes' consumption, B = the remainder of all expenses).
 
 ## Reports Categories Tab
 

@@ -2635,6 +2635,9 @@ tx_month_budget,"Activity month card title, e.g. ""October budget""",{month} bud
 tx_month_spent_of,Activity month card line,Spent {spent} of {budgeted} budgeted · income {income},أُنفق {spent} من {budgeted} مخصّصة · الدخل {income},Dépensé {spent} sur {budgeted} prévus · revenus {income}
 tx_month_spent_of_short,Activity month card: start of the line,Spent {spent} of {budgeted},أُنفق {spent} من {budgeted},Dépensé {spent} sur {budgeted}
 tx_month_income,Activity month card: end of the line,Income {amount},الدخل {amount},Revenus {amount}
+tx_month_outside,Activity month card: expenses not paid by the spending envelopes,Also {amount} outside the budget,وأيضًا {amount} خارج الميزانية,Aussi {amount} hors budget
+tx_month_from_funds,Activity month card: paid from savings goals and sinking funds,{amount} from savings and sinking funds,{amount} من المدخرات وصناديق الادخار المجدولة,{amount} depuis l’épargne et les fonds planifiés
+tx_month_not_budgeted,Activity month card: expenses no envelope paid for,{amount} not budgeted,{amount} غير مخصّصة,{amount} hors enveloppes
 tx_month_spent,Activity month card line when no envelope has a target,Spent {spent} · income {income},أُنفق {spent} · الدخل {income},Dépensé {spent} · revenus {income}
 web_gs_title,Web Companion: getting-started checklist on Home (same as the app),Get started,ابدأ,Pour commencer
 web_gs_progress,Web Companion: getting-started checklist on Home (same as the app),{done} of {total},{done} من {total},{done} sur {total}
@@ -2656,6 +2659,9 @@ web_impact_over,"Web transaction row / month card: ""over by $8.00""",over by {a
 web_impact_not_budgeted,Web transaction row pill: no envelope for this category,Not budgeted,خارج الميزانية,Hors budget
 web_month_budget,"Web transactions: month card title, e.g. ""October budget""",{month} budget,ميزانية {month},Budget de {month}
 web_month_spent_of,Web transactions: month card line,Spent {spent} of {budgeted} budgeted · income {income},أُنفق {spent} من {budgeted} مخصّصة · الدخل {income},Dépensé {spent} sur {budgeted} prévus · revenus {income}
+web_month_outside,"Web transactions: month card, outside the budget",Also {amount} outside the budget,وأيضًا {amount} خارج الميزانية,Aussi {amount} hors budget
+web_month_from_funds,"Web transactions: month card, outside the budget",{amount} from savings and sinking funds,{amount} من المدخرات وصناديق الادخار المجدولة,{amount} depuis l’épargne et les fonds planifiés
+web_month_not_budgeted,"Web transactions: month card, outside the budget",{amount} not budgeted,{amount} غير مخصّصة,{amount} hors enveloppes
 web_month_spent,Web transactions: month card line without envelope targets,Spent {spent} · income {income},أُنفق {spent} · الدخل {income},Dépensé {spent} · revenus {income}
 web_overspent_title,Web Home: card listing envelopes below zero,Overspent envelopes,أظرف متجاوزة,Enveloppes dépassées
 web_env_over_by,"Web Home: overspent envelope row, e.g. ""Over by $9.00""",Over by {amount},تجاوز بـ {amount},Dépassée de {amount}

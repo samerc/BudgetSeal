@@ -7972,6 +7972,21 @@ class SAr extends S {
   }
 
   @override
+  String txMonthOutside(Object amount) {
+    return 'وأيضًا $amount خارج الميزانية';
+  }
+
+  @override
+  String txMonthFromFunds(Object amount) {
+    return '$amount من المدخرات وصناديق الادخار المجدولة';
+  }
+
+  @override
+  String txMonthNotBudgeted(Object amount) {
+    return '$amount غير مخصّصة';
+  }
+
+  @override
   String txMonthSpent(String spent, String income) {
     return 'أُنفق $spent · الدخل $income';
   }
