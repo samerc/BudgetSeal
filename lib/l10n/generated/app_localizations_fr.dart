@@ -7673,6 +7673,17 @@ class SFr extends S {
   String get plannedBadge => 'Planifié';
 
   @override
+  String plannedMoreLater(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count autres plus tard',
+      one: '1 autre plus tard',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String travelExchangeSuccess(String fromAmount, String toAmount) {
     return 'Échangé $fromAmount → $toAmount. Ouvrez le portefeuille de voyage et utilisez « Reconvertir et fermer » pour récupérer le solde restant.';
   }

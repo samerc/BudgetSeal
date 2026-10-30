@@ -7610,6 +7610,17 @@ class SAr extends S {
   String get plannedBadge => 'مخططة';
 
   @override
+  String plannedMoreLater(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count دفعات أخرى لاحقًا',
+      one: 'دفعة أخرى لاحقًا',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String travelExchangeSuccess(String fromAmount, String toAmount) {
     return 'تم التحويل $fromAmount → $toAmount. افتح محفظة السفر واستخدم \"تحويل وإغلاق\" لاسترداد المبلغ المتبقي.';
   }

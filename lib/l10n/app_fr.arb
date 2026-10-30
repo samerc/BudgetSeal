@@ -5505,6 +5505,7 @@
   "plannedCreated": "Paiement planifié",
   "plannedSaveFailed": "Impossible d'enregistrer le paiement planifié",
   "plannedBadge": "Planifié",
+  "plannedMoreLater": "{count, plural, =1{1 autre plus tard} other{{count} autres plus tard}}",
   "travelExchangeSuccess": "Échangé {fromAmount} → {toAmount}. Ouvrez le portefeuille de voyage et utilisez « Reconvertir et fermer » pour récupérer le solde restant.",
   "@travelExchangeSuccess": { "description": "SnackBar after successful travel exchange", "placeholders": { "fromAmount": { "type": "String" }, "toAmount": { "type": "String" } } },
   "backupRestoreDialogBody": "Du : {date}\nTaille : {size}\n\nCela remplacera vos données actuelles. L'application devra redémarrer.",

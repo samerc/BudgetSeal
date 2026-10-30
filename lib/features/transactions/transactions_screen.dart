@@ -125,6 +125,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
 
   // Planned payments for the visible month
   List<Transaction> _plannedTxs = [];
+  /// Planned payments past the next 30 days (current month only): not
+  /// listed, counted in "N more later".
+  int _plannedLater = 0;
   Map<String, List<TransactionLine>> _plannedLinesByTx = {};
   Map<String, Account> _plannedAccountMap = {};
   Map<String, Category> _plannedCategoryMap = {};
@@ -437,10 +440,24 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             t.createdAt.isSmallerThanValue(monthEnd));
       }
 
-      final txs = await query.get();
+      var txs = await query.get();
+      // This month lists what's overdue and the next 30 days; the rest is
+      // a count that opens Planned payments.
+      var later = 0;
+      if (isCurrentMonth) {
+        final cutoff = DateTime(now.year, now.month, now.day + 31);
+        later = txs.where((t) => !t.createdAt.isBefore(cutoff)).length;
+        txs = txs.where((t) => t.createdAt.isBefore(cutoff)).toList();
+      }
 
       if (txs.isEmpty) {
-        if (mounted) setState(() { _plannedTxs = []; _plannedLinesByTx = {}; });
+        if (mounted) {
+          setState(() {
+            _plannedTxs = [];
+            _plannedLinesByTx = {};
+            _plannedLater = later;
+          });
+        }
         return;
       }
 
@@ -466,6 +483,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       if (mounted) {
         setState(() {
           _plannedTxs = txs;
+          _plannedLater = later;
           _plannedLinesByTx = linesByTx;
           _plannedAccountMap = accountMap;
           _plannedCategoryMap = catMap;
@@ -1913,7 +1931,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               ),
               // Planned payments section (dimmed, above real transactions);
               // not while searching or filtering — it isn't filtered.
-              if (_plannedTxs.isNotEmpty && !hasAnyFilter && !sortLargest)
+              if ((_plannedTxs.isNotEmpty || _plannedLater > 0) &&
+                  !hasAnyFilter &&
+                  !sortLargest)
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
@@ -1922,6 +1942,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                       linesByTx: _plannedLinesByTx,
                       accountMap: _plannedAccountMap,
                       categoryMap: _plannedCategoryMap,
+                      later: _plannedLater,
                       onRefresh: _loadPlanned,
                     ),
                   ),
@@ -2183,11 +2204,14 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
 // Planned payments section (dimmed, above real transactions)
 // ---------------------------------------------------------------------------
 
-class _PlannedSection extends StatelessWidget {
+/// Folds away (the choice is kept); folded, only overdue payments show —
+/// they need doing. Overdue rows are full strength, the rest dimmed.
+class _PlannedSection extends StatefulWidget {
   final List<Transaction> transactions;
   final Map<String, List<TransactionLine>> linesByTx;
   final Map<String, Account> accountMap;
   final Map<String, Category> categoryMap;
+  final int later;
   final VoidCallback? onRefresh;
 
   const _PlannedSection({
@@ -2195,54 +2219,113 @@ class _PlannedSection extends StatelessWidget {
     required this.linesByTx,
     required this.accountMap,
     required this.categoryMap,
+    this.later = 0,
     this.onRefresh,
   });
 
   @override
+  State<_PlannedSection> createState() => _PlannedSectionState();
+}
+
+class _PlannedSectionState extends State<_PlannedSection> {
+  static const _prefKey = 'activity_planned_folded';
+  bool _folded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance().then((p) {
+      if (mounted) setState(() => _folded = p.getBool(_prefKey) ?? false);
+    }).catchError((Object _) {});
+  }
+
+  void _toggle() {
+    setState(() => _folded = !_folded);
+    SharedPreferences.getInstance()
+        .then((p) => p.setBool(_prefKey, _folded))
+        .catchError((Object _) => false);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Opacity(
-      opacity: 0.5,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: AppColors.pastel(context, kPlannedColor,
-                      light: 0.85, dark: 0.75),
-                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                ),
-                child: Text(
-                  S.of(context).plannedBadge,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: kPlannedColor,
+    final s = S.of(context);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    bool overdue(Transaction t) => t.createdAt.toLocal().isBefore(today);
+    final shown = _folded
+        ? widget.transactions.where(overdue).toList()
+        : widget.transactions;
+    final count = widget.transactions.length + widget.later;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Tappable(
+          onTap: _toggle,
+          borderRadius: BorderRadius.circular(RadiusTokens.sm),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppColors.pastel(context, kPlannedColor,
+                        light: 0.85, dark: 0.75),
+                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                  ),
+                  child: Text(
+                    '${s.plannedBadge} · ${formatNumber(count.toDouble(), decimals: 0)}',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: kPlannedColor,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Divider(
-                  color: AppColors.bd(context),
-                  height: 1,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Divider(color: AppColors.bd(context), height: 1),
+                ),
+                const SizedBox(width: 8),
+                Icon(_folded ? AppIcons.caretDown : AppIcons.caretUp,
+                    size: 18, color: AppColors.ts(context)),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        for (final tx in shown)
+          Opacity(
+            opacity: overdue(tx) ? 1 : 0.55,
+            child: _PlannedTile(
+              tx: tx,
+              lines: widget.linesByTx[tx.id] ?? [],
+              accountMap: widget.accountMap,
+              categoryMap: widget.categoryMap,
+              overdue: overdue(tx),
+              onRefresh: widget.onRefresh,
+            ),
+          ),
+        if (!_folded && widget.later > 0)
+          Tappable(
+            onTap: () async {
+              await context.push('/planned-payments');
+              widget.onRefresh?.call();
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                '${s.plannedMoreLater(widget.later)} · ${s.commonSeeAll}',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.accent,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          for (final tx in transactions)
-            _PlannedTile(
-              tx: tx,
-              lines: linesByTx[tx.id] ?? [],
-              accountMap: accountMap,
-              categoryMap: categoryMap,
-              onRefresh: onRefresh,
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 }
@@ -2252,6 +2335,7 @@ class _PlannedTile extends StatelessWidget {
   final List<TransactionLine> lines;
   final Map<String, Account> accountMap;
   final Map<String, Category> categoryMap;
+  final bool overdue;
   final VoidCallback? onRefresh;
 
   const _PlannedTile({
@@ -2259,6 +2343,7 @@ class _PlannedTile extends StatelessWidget {
     required this.lines,
     required this.accountMap,
     required this.categoryMap,
+    this.overdue = false,
     this.onRefresh,
   });
 
@@ -2360,10 +2445,15 @@ class _PlannedTile extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  formatDate(date),
+                  overdue
+                      ? '${S.of(context).dashOverdue} · ${formatDate(date)}'
+                      : formatDate(date),
                   style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.th(context),
+                    fontWeight: overdue ? FontWeight.w600 : null,
+                    color: overdue
+                        ? AppColors.billOverdue
+                        : AppColors.th(context),
                   ),
                 ),
               ],

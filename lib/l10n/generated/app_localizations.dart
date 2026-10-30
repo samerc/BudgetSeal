@@ -13354,6 +13354,12 @@ abstract class S {
   /// **'Planned'**
   String get plannedBadge;
 
+  /// Activity: planned payments past the next 30 days
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more later} other{{count} more later}}'**
+  String plannedMoreLater(int count);
+
   /// SnackBar after successful travel exchange
   ///
   /// In en, this message translates to:

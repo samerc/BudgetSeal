@@ -1178,6 +1178,7 @@ planned_edit_title,AppBar title,Edit planned payment,تعديل الدفعة ا�
 planned_target_month,Section label,Target month,الشهر المستهدف,Mois cible
 planned_exact_date,Field label,Pick exact date (optional),اختر تاريخاً محدداً (اختياري),Choisir une date précise (optionnel)
 planned_badge,Badge label,Planned,مخططة,Planifié
+planned_more_later,Badge label,"{count, plural, =1{1 more later} other{{count} more later}}","{count, plural, =1{دفعة أخرى لاحقًا} other{{count} دفعات أخرى لاحقًا}}","{count, plural, =1{1 autre plus tard} other{{count} autres plus tard}}"
 planned_post,Action button,Post,ترحيل,Enregistrer
 # ──────────────────────────────────────────────,,,,
 # SYNC ERRORS,,,,

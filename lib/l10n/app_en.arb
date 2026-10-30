@@ -6094,6 +6094,8 @@
   "@plannedSaveFailed": { "description": "Snackbar when saving a planned payment fails" },
   "plannedBadge": "Planned",
   "@plannedBadge": { "description": "Badge label for planned transactions" },
+  "plannedMoreLater": "{count, plural, =1{1 more later} other{{count} more later}}",
+  "@plannedMoreLater": {"description": "Activity: planned payments past the next 30 days", "placeholders": {"count": {"type": "int"}}},
   "travelExchangeSuccess": "Exchanged {fromAmount} → {toAmount}. Open the travel wallet and use \"Convert back & close\" to return leftover money.",
   "@travelExchangeSuccess": { "description": "SnackBar after successful travel exchange", "placeholders": { "fromAmount": { "type": "String" }, "toAmount": { "type": "String" } } },
   "backupRestoreDialogBody": "From: {date}\nSize: {size}\n\nThis will replace your current data. The app will need to restart.",

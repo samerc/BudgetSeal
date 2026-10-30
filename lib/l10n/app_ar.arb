@@ -5505,6 +5505,7 @@
   "plannedCreated": "تم تخطيط الدفعة",
   "plannedSaveFailed": "تعذّر حفظ الدفعة المخططة",
   "plannedBadge": "مخططة",
+  "plannedMoreLater": "{count, plural, =1{دفعة أخرى لاحقًا} other{{count} دفعات أخرى لاحقًا}}",
   "travelExchangeSuccess": "تم التحويل {fromAmount} → {toAmount}. افتح محفظة السفر واستخدم \"تحويل وإغلاق\" لاسترداد المبلغ المتبقي.",
   "@travelExchangeSuccess": { "description": "SnackBar after successful travel exchange", "placeholders": { "fromAmount": { "type": "String" }, "toAmount": { "type": "String" } } },
   "backupRestoreDialogBody": "من: {date}\nالحجم: {size}\n\nسيتم استبدال جميع بياناتك الحالية. يجب إعادة تشغيل التطبيق.",

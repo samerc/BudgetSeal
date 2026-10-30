@@ -7583,6 +7583,17 @@ class SEn extends S {
   String get plannedBadge => 'Planned';
 
   @override
+  String plannedMoreLater(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more later',
+      one: '1 more later',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String travelExchangeSuccess(String fromAmount, String toAmount) {
     return 'Exchanged $fromAmount → $toAmount. Open the travel wallet and use \"Convert back & close\" to return leftover money.';
   }
