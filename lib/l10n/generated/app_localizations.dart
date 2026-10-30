@@ -4053,6 +4053,54 @@ abstract class S {
   /// **'Dismissed'**
   String get reviewDismissed;
 
+  /// To review (one at a time): the line at the top
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe right to add a payment as it was read, left to skip it. Tap it to change something first.'**
+  String get reviewSwipeHint;
+
+  /// To review: which card this is ({n} of {total})
+  ///
+  /// In en, this message translates to:
+  /// **'{n} of {total}'**
+  String reviewOneOf(Object n, Object total);
+
+  /// To review: SnackBar after adding a payment as read (with Undo)
+  ///
+  /// In en, this message translates to:
+  /// **'Added to {category}'**
+  String reviewAddedTo(Object category);
+
+  /// To review: skip this payment (button and swipe left)
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get reviewSkip;
+
+  /// To review: no category is known for this shop yet, so Add opens the form
+  ///
+  /// In en, this message translates to:
+  /// **'No category for this shop yet — Add opens the form'**
+  String get reviewNoCategory;
+
+  /// To review: under the card, the payment that comes next
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {what}'**
+  String reviewNext(Object what);
+
+  /// To review: app bar button to see every payment as a list
+  ///
+  /// In en, this message translates to:
+  /// **'Show as a list'**
+  String get reviewShowList;
+
+  /// To review: app bar button to go back to one payment at a time
+  ///
+  /// In en, this message translates to:
+  /// **'Show one at a time'**
+  String get reviewShowCards;
+
   /// Bank alerts (notifications from bank apps) and To review
   ///
   /// In en, this message translates to:
@@ -9717,6 +9765,24 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Require fingerprint or face to open'**
   String get tileBiometricSub;
+
+  /// Settings › Security switch, and the eye button's tooltip on Home: every amount shows as $••• (for showing the app to someone)
+  ///
+  /// In en, this message translates to:
+  /// **'Hide amounts'**
+  String get tileHideAmounts;
+
+  /// Settings › Security: under Hide amounts
+  ///
+  /// In en, this message translates to:
+  /// **'Show \$••• instead of numbers, to show the app to someone'**
+  String get tileHideAmountsSub;
+
+  /// Home: tooltip of the eye button while amounts are hidden
+  ///
+  /// In en, this message translates to:
+  /// **'Show amounts'**
+  String get amountsShow;
 
   /// Tile title
   ///
@@ -17417,6 +17483,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Add'**
   String get widgetAddLabel;
+
+  /// Templates home-screen widget (Android) with no templates yet
+  ///
+  /// In en, this message translates to:
+  /// **'Save a template and it shows here, one tap to add'**
+  String get widgetTemplatesEmpty;
 
   /// Web Companion: change history, usual spending
   ///

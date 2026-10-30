@@ -179,6 +179,8 @@ class MainActivity : FlutterFragmentActivity() {
                 EnvelopesWidget.updateAppWidget(context, manager, id)
             for (id in manager.getAppWidgetIds(ComponentName(context, QuickAddWidget::class.java)))
                 QuickAddWidget.updateAppWidget(context, manager, id)
+            for (id in manager.getAppWidgetIds(ComponentName(context, TemplatesWidget::class.java)))
+                TemplatesWidget.updateAppWidget(context, manager, id)
         }
     }
 }

@@ -83,6 +83,11 @@ class _RollingNumberState extends State<RollingNumber>
   Widget build(BuildContext context) {
     final style = widget.style ?? Theme.of(context).textTheme.titleLarge!;
 
+    // Hidden amounts don't roll: "$•••" as it is.
+    if (amountsHidden) {
+      return Text(_format(widget.amount),
+          style: style, textAlign: widget.textAlign);
+    }
     if (_firstBuild && widget.lazyFirstRender) {
       return Text(_newText, style: style, textAlign: widget.textAlign);
     }

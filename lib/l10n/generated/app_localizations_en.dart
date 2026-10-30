@@ -2286,6 +2286,38 @@ class SEn extends S {
   String get reviewDismissed => 'Dismissed';
 
   @override
+  String get reviewSwipeHint =>
+      'Swipe right to add a payment as it was read, left to skip it. Tap it to change something first.';
+
+  @override
+  String reviewOneOf(Object n, Object total) {
+    return '$n of $total';
+  }
+
+  @override
+  String reviewAddedTo(Object category) {
+    return 'Added to $category';
+  }
+
+  @override
+  String get reviewSkip => 'Skip';
+
+  @override
+  String get reviewNoCategory =>
+      'No category for this shop yet — Add opens the form';
+
+  @override
+  String reviewNext(Object what) {
+    return 'Next: $what';
+  }
+
+  @override
+  String get reviewShowList => 'Show as a list';
+
+  @override
+  String get reviewShowCards => 'Show one at a time';
+
+  @override
   String get reviewNoAmount => 'No amount found';
 
   @override
@@ -5566,6 +5598,16 @@ class SEn extends S {
 
   @override
   String get tileBiometricSub => 'Require fingerprint or face to open';
+
+  @override
+  String get tileHideAmounts => 'Hide amounts';
+
+  @override
+  String get tileHideAmountsSub =>
+      'Show \$••• instead of numbers, to show the app to someone';
+
+  @override
+  String get amountsShow => 'Show amounts';
 
   @override
   String get tileResetEverything => 'Reset everything';
@@ -10205,6 +10247,10 @@ class SEn extends S {
 
   @override
   String get widgetAddLabel => 'Add';
+
+  @override
+  String get widgetTemplatesEmpty =>
+      'Save a template and it shows here, one tap to add';
 
   @override
   String get webHistoryBtn => 'History';

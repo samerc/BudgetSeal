@@ -13,6 +13,7 @@ import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/categories_provider.dart';
 import '../../core/providers/database_provider.dart';
+import '../../core/providers/hide_amounts_provider.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/report_stats_provider.dart';
 import '../../core/providers/transactions_provider.dart';
@@ -111,6 +112,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
             LargeTitleHeader(
               title: household?.name ?? S.of(context).dashboardDefaultName,
               actions: [
+                // Hide amounts — before showing the screen to someone.
+                IconButton(
+                  tooltip: ref.watch(hideAmountsProvider)
+                      ? S.of(context).amountsShow
+                      : S.of(context).tileHideAmounts,
+                  icon: Icon(
+                      ref.watch(hideAmountsProvider)
+                          ? AppIcons.eyeSlash
+                          : AppIcons.eye,
+                      color: AppColors.ts(context),
+                      size: 22),
+                  onPressed: () =>
+                      ref.read(hideAmountsProvider.notifier).toggle(),
+                ),
                 IconButton(
                   tooltip: S.of(context).dashboardCustomizeTooltip,
                   icon: Icon(AppIcons.slidersHorizontal,

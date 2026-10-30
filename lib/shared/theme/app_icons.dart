@@ -45,6 +45,7 @@ abstract final class AppIcons {
   static const calendarX = IconData(0xe10c, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const camera = IconData(0xe10e, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const caretDown = IconData(0xe136, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
+  static const cards = IconData(0xe0f8, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const caretLeft = IconData(0xe138, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter', matchTextDirection: true);
   static const caretRight = IconData(0xe13a, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter', matchTextDirection: true);
   static const caretUp = IconData(0xe13c, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');

@@ -11,6 +11,7 @@ import 'core/capture/bank_alerts.dart';
 import 'core/capture/share_intake.dart';
 import 'core/providers/accent_color_provider.dart';
 import 'core/providers/arabic_digits_provider.dart';
+import 'core/providers/hide_amounts_provider.dart';
 import 'core/providers/locale_provider.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'core/providers/accounts_provider.dart';
@@ -52,6 +53,7 @@ import 'features/recurring/recurring_screen.dart';
 import 'features/recurring/upcoming_bills_screen.dart';
 import 'features/transactions/calendar_screen.dart';
 import 'features/settings/import_screen.dart';
+import 'features/templates/template_picker.dart';
 import 'features/templates/templates_screen.dart';
 import 'features/periods/period_transition_screen.dart';
 import 'features/reports/export_report_screen.dart';
@@ -110,6 +112,17 @@ class BudgetSealApp extends ConsumerStatefulWidget {
 
 class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
     with WidgetsBindingObserver {
+  /// Every widget builds again (a setting the formatter reads changed).
+  void _rebuildAll() {
+    if (!mounted) return;
+    void mark(Element e) {
+      e.markNeedsBuild();
+      e.visitChildren(mark);
+    }
+
+    (context as Element).visitChildren(mark);
+  }
+
   late final GoRouter _router;
   bool _showSplash = true;
   bool _showLock = false;
@@ -536,7 +549,7 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
 
   /// Home-screen widget: Ready to assign and today's spending (base
   /// currency), refreshed whenever the app goes to the background.
-  void _updateHomeWidget() {
+  Future<void> _updateHomeWidget() async {
     try {
       final household = ref.read(householdProvider).value;
       if (household == null) return;
@@ -577,7 +590,25 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
               );
             }(),
       ];
+      // Templates widget: the most used, as the Home card lists them.
+      final db = ref.read(databaseProvider);
+      final templates = await (db.select(db.transactionTemplates)
+            ..where((t) =>
+                t.householdId.equals(household.id) & t.deleted.equals(false))
+            ..orderBy([(t) => OrderingTerm.desc(t.useCount)])
+            ..limit(HomeWidgetService.maxTemplates))
+          .get();
       HomeWidgetService.update(
+        templates: [
+          for (final t in templates)
+            (
+              id: t.id,
+              label: t.amount > 0
+                  ? '${t.title}\n${formatAmount(t.amount, currency: t.currency)}'
+                  : t.title,
+            ),
+        ],
+        templatesEmpty: l.widgetTemplatesEmpty,
         title: l.widgetReadyToAssign(formatAmount(rta, currency: base)),
         line: l.widgetSpentToday(formatAmount(spentToday, currency: base)),
         envelopesTitle: l.widgetEnvelopesTitle,
@@ -598,8 +629,29 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
       if (NotificationService.openRoute.value == null) return;
       NotificationService.openRoute.value = null;
       if (ref.read(currentHouseholdIdProvider) == null) return;
+      if (route.startsWith(_templateRoute)) {
+        _openTemplate(route.substring(_templateRoute.length));
+        return;
+      }
       _router.push(route);
     });
+  }
+
+  static const _templateRoute = '/template/';
+
+  /// A template's button on the templates widget: the add form, filled in
+  /// from it (an empty form if it was deleted meanwhile).
+  Future<void> _openTemplate(String id) async {
+    try {
+      final db = ref.read(databaseProvider);
+      final t = await (db.select(db.transactionTemplates)
+            ..where((r) => r.id.equals(id) & r.deleted.equals(false)))
+          .getSingleOrNull();
+      final extra = t == null ? null : await useTemplate(ref, t);
+      if (mounted) _router.push('/add-transaction', extra: extra);
+    } catch (e) {
+      debugPrint('[HomeWidget] Opening template failed: $e');
+    }
   }
 
   /// A bank message, receipt photo or screenshot shared into the app opens
@@ -749,6 +801,12 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
     // Arabic-Indic digits: only when locale is Arabic AND user opted in
     final useArabic = ref.watch(arabicDigitsProvider);
     setUseArabicDigits(resolvedLocale == 'ar' && useArabic);
+    // Hide amounts: the formatter reads it, so redraw every screen.
+    final hide = ref.watch(hideAmountsProvider);
+    if (hide != amountsHidden) {
+      setHideAmounts(hide);
+      WidgetsBinding.instance.addPostFrameCallback((_) => _rebuildAll());
+    }
 
     if (_showSplash) {
       return MaterialApp(

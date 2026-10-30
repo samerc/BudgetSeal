@@ -7,4 +7,6 @@
     <color name="widget_text">#FFF2EEE6</color>
     <color name="widget_text_secondary">#FFA8A49B</color>
     <color name="widget_negative">#FFF87171</color>
+    <!-- Template buttons at night (AppColors.darkSurfaceVariant) -->
+    <color name="widget_chip">#FF25262E</color>
 </resources>

@@ -6,7 +6,10 @@ import 'package:flutter/services.dart';
 
 import '../../shared/utils/ocr_service.dart';
 import '../../shared/utils/receipt_helper.dart';
+import '../../shared/utils/format_number.dart' show roundRate;
 import '../database/app_database.dart';
+import '../engine/allocation_engine.dart';
+import '../fx/fx_service.dart';
 import '../services/last_used_service.dart';
 import 'bank_alerts.dart';
 import 'capture_rules.dart';
@@ -204,4 +207,62 @@ Future<void> captureSaved(
   if (app != null && text != null) {
     await BankAlerts.learnAmount(app, text, amount);
   }
+}
+
+/// To review's swipe right: saves a bank alert as it was read — the
+/// account, category, note and date the form would start with — then
+/// learns from it like the form does ([captureSaved]). Returns the new
+/// transaction's id, or null when the form is needed instead: no amount,
+/// no category for the shop yet, no account in its currency, or no rate.
+Future<String?> saveAlertAsRead(
+  AlertItem item, {
+  required AppDatabase db,
+  required AllocationEngine engine,
+  required FxService fx,
+  required String householdId,
+  required String baseCurrency,
+}) async {
+  final args = await alertFormArgs(item,
+      db: db, householdId: householdId, baseCurrency: baseCurrency);
+  final line = (args['editLines'] as List).first as Map<String, dynamic>;
+  final amount = line['amount'] as double;
+  final currency = line['currency'] as String;
+  final categoryId = line['categoryId'] as String?;
+  final accountId = line['accountId'] as String?;
+  if (amount <= 0 || categoryId == null || accountId == null) return null;
+  var rateToBase = 1.0;
+  if (currency != baseCurrency) {
+    try {
+      final rate = roundRate(await fx.getRateWithCache(baseCurrency, currency));
+      if (rate <= 0) return null;
+      rateToBase = 1.0 / rate;
+    } catch (e) {
+      debugPrint('[Capture] No rate for $currency: $e');
+      return null;
+    }
+  }
+  final txId = await engine.recordTransaction(
+    householdId: householdId,
+    accountId: accountId,
+    type: args['editType'] as String,
+    lines: [
+      TxLine(
+          amount: amount,
+          currency: currency,
+          categoryId: categoryId,
+          accountId: accountId,
+          exchangeRateToBase: rateToBase),
+    ],
+    baseCurrency: baseCurrency,
+    note: args['editNote'] as String,
+    date: args['editDate'] as DateTime?,
+  );
+  await LastUsedService.rememberAccount(accountId);
+  await captureSaved(db,
+      householdId: householdId,
+      capture: (args['capture'] as Map).cast<String, dynamic>(),
+      amount: amount,
+      categoryId: categoryId,
+      accountId: accountId);
+  return txId;
 }

@@ -144,6 +144,24 @@ void setUseArabicDigits(bool value) {
   _useArabicDigits = value;
 }
 
+/// Hide amounts (Settings › Security, the eye on Home): [formatAmount] and
+/// [formatSignedAmount] show "$•••" — the symbol and sign stay, the number
+/// doesn't. Rates and percentages ([formatNumber]) aren't money and stay.
+bool _hideAmounts = false;
+
+bool get amountsHidden => _hideAmounts;
+
+/// Call from app.dart when the setting changes.
+void setHideAmounts(bool value) {
+  _hideAmounts = value;
+}
+
+final _digitRun = RegExp(
+    r"[0-9٠-٩](?:[0-9٠-٩.,'’٫٬   ]*[0-9٠-٩])?");
+
+String _masked(String formatted) =>
+    _hideAmounts ? formatted.replaceAll(_digitRun, '•••') : formatted;
+
 /// Convert Western digits 0-9 to Arabic-Indic ٠-٩.
 String _toArabicDigits(String input) {
   const western = '0123456789';
@@ -213,9 +231,9 @@ int currencyDecimals(String? currency, [int? accountDecimals]) {
 /// and negative format. If [decimals] is null, auto-detects from currency.
 String formatAmount(double value, {String? currency, int? decimals}) {
   final isNeg = value < 0;
-  return isNeg
+  return _masked(isNeg
       ? bidiSafeAmount(_formatAmount(value, currency, decimals))
-      : _formatAmount(value, currency, decimals);
+      : _formatAmount(value, currency, decimals));
 }
 
 String _formatAmount(double value, String? currency, int? decimals) {
@@ -272,7 +290,7 @@ String formatSignedAmount(
   } else {
     out = '$currency ${applySign(formatted)}';
   }
-  return isExpense || isIncome ? bidiSafeAmount(out) : out;
+  return _masked(isExpense || isIncome ? bidiSafeAmount(out) : out);
 }
 
 /// Format a number for display in calculator/input fields.

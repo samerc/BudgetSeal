@@ -9,6 +9,7 @@ import '../../core/capture/bank_alerts.dart';
 import '../../core/database/app_database.dart';
 import '../../core/providers/accent_color_provider.dart';
 import '../../core/providers/biometric_provider.dart';
+import '../../core/providers/hide_amounts_provider.dart';
 import '../../core/providers/currency_symbol_provider.dart';
 import '../../core/providers/database_provider.dart';
 import 'package:intl/intl.dart';
@@ -1487,6 +1488,15 @@ class _SettingsDetailScreenState extends ConsumerState<SettingsDetailScreen> {
           _Find.section(child: _SectionHeader(title: l.settingsSecuritySection)),
           _Find(keys: (t) => [t.tileBiometricLock, t.tileBiometricSub],
               child: _BiometricTile()),
+          _Find(keys: (t) => [t.tileHideAmounts, t.tileHideAmountsSub],
+              child: SettingsSwitchRow(
+                icon: AppIcons.eyeSlash,
+                iconColor: SettingsRowStyle.hue(256),
+                title: l.tileHideAmounts,
+                subtitle: l.tileHideAmountsSub,
+                value: ref.watch(hideAmountsProvider),
+                onChanged: (_) => ref.read(hideAmountsProvider.notifier).toggle(),
+              )),
           _Find.section(child: const SizedBox(height: Spacing.sectionGap)),
           // ── Danger zone ──
           _Find(keys: (t) => [t.tileResetEverything, t.tileResetSub],
@@ -1548,6 +1558,7 @@ final _settingsKeys = <_Keys>[
   (t) => [t.tileNumberFormat],
   (t) => [t.tileDateFormat],
   (t) => [t.tileBiometricLock, t.tileBiometricSub],
+  (t) => [t.tileHideAmounts, t.tileHideAmountsSub],
   (t) => [t.tileResetEverything, t.tileResetSub],
 ];
 

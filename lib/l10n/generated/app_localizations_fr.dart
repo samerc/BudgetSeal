@@ -2303,6 +2303,38 @@ class SFr extends S {
   String get reviewDismissed => 'Ignorée';
 
   @override
+  String get reviewSwipeHint =>
+      'Glissez à droite pour ajouter un paiement tel qu’il a été lu, à gauche pour le passer. Touchez-le pour modifier d’abord.';
+
+  @override
+  String reviewOneOf(Object n, Object total) {
+    return '$n sur $total';
+  }
+
+  @override
+  String reviewAddedTo(Object category) {
+    return 'Ajouté à $category';
+  }
+
+  @override
+  String get reviewSkip => 'Passer';
+
+  @override
+  String get reviewNoCategory =>
+      'Pas encore de catégorie pour ce commerce — Ajouter ouvre le formulaire';
+
+  @override
+  String reviewNext(Object what) {
+    return 'Ensuite : $what';
+  }
+
+  @override
+  String get reviewShowList => 'Afficher en liste';
+
+  @override
+  String get reviewShowCards => 'Afficher un par un';
+
+  @override
   String get reviewNoAmount => 'Aucun montant trouvé';
 
   @override
@@ -5629,6 +5661,16 @@ class SFr extends S {
 
   @override
   String get tileBiometricSub => 'Exiger empreinte ou visage pour ouvrir';
+
+  @override
+  String get tileHideAmounts => 'Masquer les montants';
+
+  @override
+  String get tileHideAmountsSub =>
+      'Afficher \$••• au lieu des chiffres, pour montrer l’app à quelqu’un';
+
+  @override
+  String get amountsShow => 'Afficher les montants';
 
   @override
   String get tileResetEverything => 'Tout réinitialiser';
@@ -10319,6 +10361,10 @@ class SFr extends S {
 
   @override
   String get widgetAddLabel => 'Ajouter';
+
+  @override
+  String get widgetTemplatesEmpty =>
+      'Enregistrez un modèle et il apparaît ici, un geste pour l’ajouter';
 
   @override
   String get webHistoryBtn => 'Historique';

@@ -621,7 +621,7 @@
 <h3 id="bank-alerts">Bank alerts and To review (Android)</h3>
 
 <p>BudgetSeal can suggest transactions from the notifications your bank or wallet app posts. Turn it on in <strong>Settings</strong> → <strong>Bank alerts</strong>: tap <strong>Allow in settings</strong> and switch BudgetSeal on in your phone's notification access list. Your apps show up under <strong>Apps to read</strong> once they post a notification — switch on your bank's. BudgetSeal reads only those apps, keeps their text on your phone, and never sends it anywhere.</p>
-<p>Each payment it reads waits in <strong>To review</strong> (Home shows <em>1 payment to review</em>): the amount, the shop and — if a <a href="#share-in">rule</a> knows the shop — the category, with the message underneath. <strong>Add</strong> opens the form filled in; check it and save. <strong>Dismiss</strong> drops it (Undo brings it back). Nothing touches your budget until you add it. If BudgetSeal took the wrong number — say your bank writes the balance first — fix the amount when you add it: it remembers which number is the payment for that bank.</p>
+<p>Each payment it reads waits in <strong>To review</strong> (Home shows <em>1 payment to review</em>), one card at a time: the shop, the amount and — if a <a href="#share-in">rule</a> knows the shop — the category, with the message underneath. <strong>Swipe right</strong> (or <strong>Add</strong>) to add it just as it was read; <strong>swipe left</strong> (or <strong>Skip</strong>) to drop it — Undo brings either back. <strong>Tap</strong> the card (or <strong>Edit</strong>) to open the form filled in and change something first. A shop with no category yet always opens the form; once you've saved it, the next one from that shop adds with one swipe. Prefer to see them all? The list button at the top shows every payment with <strong>Add</strong> and <strong>Dismiss</strong>. Nothing touches your budget until you add it. If BudgetSeal took the wrong number — say your bank writes the balance first — fix the amount when you add it: it remembers which number is the payment for that bank.</p>
 
 <h3 id="pay-with-change">Paying with change in another currency</h3>
 
@@ -1390,6 +1390,9 @@
   <li>The app will now require authentication every time you open it or switch back to it</li>
 </ol>
 
+<h3 id="hide-amounts">Hide amounts</h3>
+<p>Showing the app to someone, or taking a screenshot? Tap the <strong>eye</strong> at the top of Home (or turn on <strong>Settings</strong> → <strong>Hide amounts</strong>): every amount shows as <em>$•••</em> — the currency and sign stay, the numbers don't. Tap the eye again to see them. Exchange rates and percentages still show, and so does the amount you're typing in the calculator. It's for this phone only.</p>
+
 <!-- ══════════════════════════════════════════ -->
 <h2 id="appearance">Appearance</h2>
 
@@ -1497,11 +1500,12 @@
 <p>Make sure notifications are enabled in your device settings for BudgetSeal. On Android 13+, you need to grant notification permission explicitly. Go to <strong>Settings</strong> → <strong>Notifications</strong> to configure daily reminders and bill alerts. BudgetSeal asks for the permission the first time you open your budget. Bill reminders are scheduled for each bill (see <a href="#recurring">Upcoming bills</a>); envelope alerts are checked when the app opens or comes back, at most once a day each; the daily reminder skips days you've already logged something.</p>
 
 <h3>Home screen widgets (Android)</h3>
-<p>Long-press your home screen, choose <strong>Widgets</strong> and find BudgetSeal. There are three:</p>
+<p>Long-press your home screen, choose <strong>Widgets</strong> and find BudgetSeal. There are four:</p>
 <ul>
   <li><strong>Summary</strong> — your Ready to assign amount and what you've spent today. Tap it to open BudgetSeal</li>
   <li><strong>Envelopes</strong> — up to four spending envelopes (in your Budget order) and what's left in each; overspent ones are red. Tap it to fund your envelopes</li>
   <li><strong>Quick add</strong> — one button that opens a new transaction</li>
+  <li><strong>Quick templates</strong> — your three most-used <a href="#templates">templates</a> ("Coffee $4.00") and a <strong>+</strong>. Tap a template and the form opens filled in from it, ready to save</li>
 </ul>
 <p>Widgets update each time you leave the app, and follow your phone's light or dark mode.</p>
 

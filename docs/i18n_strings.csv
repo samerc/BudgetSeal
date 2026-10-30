@@ -1512,6 +1512,9 @@ tile_number_format,,Number format,تنسيق الأرقام,Format des nombres
 tile_date_format,,Date format,تنسيق التاريخ,Format de date
 tile_biometric_lock,,Biometric lock,القفل البيومتري,Verrouillage biométrique
 tile_biometric_sub,,Require fingerprint or face to open,طلب بصمة أو وجه للفتح,Exiger empreinte ou visage pour ouvrir
+tile_hide_amounts,"Settings › Security switch, and the eye button's tooltip on Home: every amount shows as $••• (for showing the app to someone)",Hide amounts,إخفاء المبالغ,Masquer les montants
+tile_hide_amounts_sub,Settings › Security: under Hide amounts,"Show $••• instead of numbers, to show the app to someone",اعرض $••• بدل الأرقام عند عرض التطبيق على أحد,"Afficher $••• au lieu des chiffres, pour montrer l’app à quelqu’un"
+amounts_show,Home: tooltip of the eye button while amounts are hidden,Show amounts,إظهار المبالغ,Afficher les montants
 tile_reset_everything,,Reset everything,إعادة تعيين الكل,Tout réinitialiser
 tile_reset_sub,,Erase all data and start fresh,مسح جميع البيانات والبدء من جديد,Effacer toutes les données et recommencer
 entry_mode_title,,Entry mode,وضع الإدخال,Mode de saisie
@@ -1873,6 +1876,14 @@ review_intro,Bank alerts (notifications from bank apps) and To review,Payments r
 review_add,Bank alerts (notifications from bank apps) and To review,Add,إضافة,Ajouter
 review_dismiss,Bank alerts (notifications from bank apps) and To review,Dismiss,تجاهل,Ignorer
 review_dismissed,Bank alerts (notifications from bank apps) and To review,Dismissed,تم التجاهل,Ignorée
+review_swipe_hint,To review (one at a time): the line at the top,"Swipe right to add a payment as it was read, left to skip it. Tap it to change something first.",اسحب لليمين لإضافة الدفعة كما قُرئت، ولليسار لتخطيها. اضغط عليها لتعديل شيء أولاً.,"Glissez à droite pour ajouter un paiement tel qu’il a été lu, à gauche pour le passer. Touchez-le pour modifier d’abord."
+review_one_of,To review: which card this is ({n} of {total}),{n} of {total},{n} من {total},{n} sur {total}
+review_added_to,To review: SnackBar after adding a payment as read (with Undo),Added to {category},أضيفت إلى {category},Ajouté à {category}
+review_skip,To review: skip this payment (button and swipe left),Skip,تخطَّ,Passer
+review_no_category,"To review: no category is known for this shop yet, so Add opens the form",No category for this shop yet — Add opens the form,لا فئة لهذا المتجر بعد — «إضافة» تفتح النموذج,Pas encore de catégorie pour ce commerce — Ajouter ouvre le formulaire
+review_next,"To review: under the card, the payment that comes next",Next: {what},التالي: {what},Ensuite : {what}
+review_show_list,To review: app bar button to see every payment as a list,Show as a list,اعرض كقائمة,Afficher en liste
+review_show_cards,To review: app bar button to go back to one payment at a time,Show one at a time,اعرض واحدة تلو الأخرى,Afficher un par un
 review_no_amount,Bank alerts (notifications from bank apps) and To review,No amount found,لم يُعثر على مبلغ,Aucun montant trouvé
 review_card,Bank alerts (notifications from bank apps) and To review,"{n, plural, =1{1 payment to review} other{{n} payments to review}}","{n, plural, =1{دفعة واحدة للمراجعة} other{{n} دفعات للمراجعة}}","{n, plural, =1{1 paiement à vérifier} other{{n} paiements à vérifier}}"
 shot_check,Check an account against a screenshot of the bank list,Check a screenshot,تحقّق من لقطة شاشة,Vérifier une capture d’écran
@@ -3221,6 +3232,7 @@ onboard_restore_backup_hint,"Onboarding backup restore, home widgets",A .db file
 widget_envelopes_title,"Onboarding backup restore, home widgets",Envelopes,الأظرف,Enveloppes
 widget_envelopes_empty,"Onboarding backup restore, home widgets",No spending envelopes yet,لا أظرف إنفاق بعد,Aucune enveloppe de dépenses
 widget_add_label,"Onboarding backup restore, home widgets",Add,إضافة,Ajouter
+widget_templates_empty,Templates home-screen widget (Android) with no templates yet,"Save a template and it shows here, one tap to add",احفظ قالباً وسيظهر هنا، لمسة واحدة للإضافة,"Enregistrez un modèle et il apparaît ici, un geste pour l’ajouter"
 web_history_btn,"Web Companion: change history, usual spending",History,السجل,Historique
 web_history_title,"Web Companion: change history, usual spending",Change history,سجل التغييرات,Historique
 web_history_intro,"Web Companion: change history, usual spending","The last {n} changes to your transactions, newest first.",آخر {n} تغيير على معاملاتك، الأحدث أولاً.,"Les {n} dernières modifications de vos transactions, les plus récentes d'abord."

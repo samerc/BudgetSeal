@@ -8,4 +8,6 @@
     <color name="widget_text">#FF1C1A16</color>
     <color name="widget_text_secondary">#FF6B655B</color>
     <color name="widget_negative">#FFDC2626</color>
+    <!-- Template buttons (AppColors.surfaceVariant) -->
+    <color name="widget_chip">#FFEFECE6</color>
 </resources>

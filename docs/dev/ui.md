@@ -158,7 +158,8 @@ Bill Splitter is also accessible from: Dashboard quick actions ("Split" button),
 - **APPEARANCE**: Theme (System/Light/Dark/Black), Colors, Entry Mode, Auto-fill, Start Screen, Font, Text Size, Transaction List layout
 - **DATA**: Cloud Sync, Share Household, Backup & Restore, Import & Export, Notifications, Health Check
 - **PREFERENCES**: Household Name, Base Currency, Period Start Day, Currency Symbols, Number Format, Date Format
-- **SECURITY**: Biometric Lock
+- **SECURITY**: Biometric Lock, Hide amounts
+- **Hide amounts** (Oct 30 2026, from YNAB): `hideAmountsProvider` (`hide_amounts` pref, this phone) → app.dart calls `setHideAmounts()` (like Arabic digits) and, when it changes, marks every element dirty (`_rebuildAll`) so all screens redraw at once. `formatAmount` / `formatSignedAmount` replace each run of digits with `•••` ("$•••", "LBP -•••"); `formatNumber` (rates, percentages) and the calculator are untouched; `RollingNumber` shows plain text while hidden. Toggled by the eye on Home's header and Settings › Security. The home-screen widgets pick it up on their next update. Not in the Web Companion yet. Test: `test/core/bidi_amount_test.dart`.
 - **Search** (Oct 24 2026): a field at the top filters the rows. Each top-level child of the list is wrapped in `_Find(keys: (t) => [t.title, t.sub…])` (section headers and gaps in `_Find.section`, hidden while searching); the query (`SearchQuery` from `shared/utils/search_match.dart`, so accents and Arabic letter forms are ignored) reaches them through the `_SettingsQuery` inherited widget. `_settingsKeys` repeats every row's keys so `_SettingsNoMatch` can say "No settings match" — **a new Settings row needs both its `_Find` wrapper and an entry in `_settingsKeys`**.
 
 

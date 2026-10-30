@@ -2287,6 +2287,38 @@ class SAr extends S {
   String get reviewDismissed => 'تم التجاهل';
 
   @override
+  String get reviewSwipeHint =>
+      'اسحب لليمين لإضافة الدفعة كما قُرئت، ولليسار لتخطيها. اضغط عليها لتعديل شيء أولاً.';
+
+  @override
+  String reviewOneOf(Object n, Object total) {
+    return '$n من $total';
+  }
+
+  @override
+  String reviewAddedTo(Object category) {
+    return 'أضيفت إلى $category';
+  }
+
+  @override
+  String get reviewSkip => 'تخطَّ';
+
+  @override
+  String get reviewNoCategory =>
+      'لا فئة لهذا المتجر بعد — «إضافة» تفتح النموذج';
+
+  @override
+  String reviewNext(Object what) {
+    return 'التالي: $what';
+  }
+
+  @override
+  String get reviewShowList => 'اعرض كقائمة';
+
+  @override
+  String get reviewShowCards => 'اعرض واحدة تلو الأخرى';
+
+  @override
   String get reviewNoAmount => 'لم يُعثر على مبلغ';
 
   @override
@@ -5590,6 +5622,16 @@ class SAr extends S {
 
   @override
   String get tileBiometricSub => 'طلب بصمة أو وجه للفتح';
+
+  @override
+  String get tileHideAmounts => 'إخفاء المبالغ';
+
+  @override
+  String get tileHideAmountsSub =>
+      'اعرض \$••• بدل الأرقام عند عرض التطبيق على أحد';
+
+  @override
+  String get amountsShow => 'إظهار المبالغ';
 
   @override
   String get tileResetEverything => 'إعادة تعيين الكل';
@@ -10238,6 +10280,10 @@ class SAr extends S {
 
   @override
   String get widgetAddLabel => 'إضافة';
+
+  @override
+  String get widgetTemplatesEmpty =>
+      'احفظ قالباً وسيظهر هنا، لمسة واحدة للإضافة';
 
   @override
   String get webHistoryBtn => 'السجل';

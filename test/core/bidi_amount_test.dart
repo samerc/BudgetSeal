@@ -20,4 +20,18 @@ void main() {
     Intl.defaultLocale = 'en';
     expect(formatAmount(-450, currency: 'USD'), '-\$450.00');
   });
+
+  test('hide amounts: the number goes, the symbol and sign stay', () {
+    Intl.defaultLocale = 'en';
+    setHideAmounts(true);
+    addTearDown(() => setHideAmounts(false));
+    expect(formatAmount(1234.5, currency: 'USD'), r'$•••');
+    expect(formatAmount(-1200000, currency: 'LBP'), 'LBP -•••');
+    expect(formatSignedAmount(200, currency: 'USD', type: 'income'),
+        r'+$•••');
+    // Rates and percentages aren't money.
+    expect(formatNumber(89500, decimals: 0), '89,500');
+    setHideAmounts(false);
+    expect(formatAmount(1234.5, currency: 'USD'), r'$1,234.50');
+  });
 }
