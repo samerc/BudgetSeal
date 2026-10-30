@@ -5074,6 +5074,18 @@ class SEn extends S {
   String get syncShareCode => 'Share code';
 
   @override
+  String get syncWifiOnly => 'Sync on Wi-Fi only';
+
+  @override
+  String get syncWifiOnlySub =>
+      'Automatic syncs wait for Wi-Fi. Pulling down to refresh and Sync now still use mobile data.';
+
+  @override
+  String syncPullFailed(Object reason) {
+    return 'Couldn\'t sync: $reason';
+  }
+
+  @override
   String get syncEncryptionTitle => 'Sync encryption';
 
   @override
@@ -6679,7 +6691,7 @@ class SEn extends S {
 
   @override
   String get onboardJoinDesc =>
-      'Enter the invite code shared with you to join an existing BudgetSeal household.';
+      'Scan the QR code on their phone, or paste the invite they sent you.';
 
   @override
   String get onboardInviteCode => 'Invite code';
@@ -6701,6 +6713,16 @@ class SEn extends S {
   String get joinScanCode => 'Scan code';
 
   @override
+  String get joinOrPaste => 'Or paste the invite you were sent';
+
+  @override
+  String get joinPasteHint =>
+      'Paste the whole message — no need to type the code';
+
+  @override
+  String get joinPaste => 'Paste';
+
+  @override
   String get joinScanTitle => 'Scan the invite code';
 
   @override
@@ -6714,6 +6736,12 @@ class SEn extends S {
   @override
   String get syncShareScanHint =>
       'On their phone: Join a household › Scan code.';
+
+  @override
+  String get inviteCantScan => 'Can\'t scan? Send the invite instead';
+
+  @override
+  String get inviteShowCode => 'Show the code';
 
   @override
   String get joinReplaceTitle => 'Join a household?';

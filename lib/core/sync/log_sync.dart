@@ -101,6 +101,18 @@ class LogSync {
     return applied;
   }
 
+  /// Whether this phone has entries not yet written to the store.
+  Future<bool> hasUnpushed() async {
+    final me = await _me();
+    final last = (await db.customSelect(
+            'SELECT MAX(seq) AS s FROM sync_ops WHERE device = ?',
+            variables: [Variable.withString(me)]).getSingle())
+        .read<int?>('s');
+    if (last == null) return false;
+    final written = await _meta('pushed_seq_$me');
+    return written == null || int.parse(written) < last;
+  }
+
   /// Writes this phone's entries: only the files with entries not yet
   /// written (normally the last one).
   Future<void> push(LogStore store) async {

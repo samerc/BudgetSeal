@@ -642,6 +642,9 @@ sync_connection_failed,Dialog title,Connection failed,فشل الاتصال,Éch
 sync_failed_to_connect,Default error,Failed to connect,فشل الاتصال,Échec de la connexion
 sync_disconnect_msg,Dialog content,"Your data will remain on your device, but automatic sync will stop. You can reconnect at any time.",ستبقى بياناتك على جهازك، لكن المزامنة التلقائية ستتوقف. يمكنك إعادة الاتصال في أي وقت.,"Vos données resteront sur votre appareil, mais la synchronisation automatique s'arrêtera. Vous pourrez vous reconnecter à tout moment."
 sync_share_code,Button,Share code,مشاركة الرمز,Partager le code
+sync_wifi_only,Cloud Sync: switch,Sync on Wi-Fi only,المزامنة عبر Wi-Fi فقط,Synchroniser en Wi-Fi uniquement
+sync_wifi_only_sub,Cloud Sync: under the switch,Automatic syncs wait for Wi-Fi. Pulling down to refresh and Sync now still use mobile data.,تنتظر المزامنة التلقائية شبكة Wi-Fi. السحب للتحديث و«زامن الآن» يستخدمان بيانات الجوال.,Les synchronisations automatiques attendent le Wi-Fi. Tirer pour actualiser et Synchroniser maintenant utilisent les données mobiles.
+sync_pull_failed,Pull to refresh: sync failed SnackBar,Couldn't sync: {reason},تعذّرت المزامنة: {reason},Synchronisation impossible : {reason}
 sync_encryption_title,Card title,Sync encryption,تشفير المزامنة,Chiffrement de la synchronisation
 sync_encrypted,Subtitle,Your sync file is encrypted with AES-256,ملف المزامنة مشفر بـ AES-256,Votre fichier de synchronisation est chiffré en AES-256
 sync_not_encrypted,Subtitle,Sync file is not encrypted,ملف المزامنة غير مشفر,Le fichier de synchronisation n'est pas chiffré
@@ -803,17 +806,22 @@ onboard_restore_title,Sheet title,Restore your budget,استعادة ميزان�
 onboard_restore_desc,Sheet description,"Choose where your budget syncs: Google Drive, or a folder on this phone or one another app keeps in sync. It replaces any data on this phone.",اختر مكان مزامنة ميزانيتك: Google Drive، أو مجلد على هذا الهاتف أو مجلد يزامنه تطبيق آخر. سيحلّ محلّ أي بيانات على هذا الهاتف.,"Choisissez où votre budget se synchronise : Google Drive, ou un dossier sur ce téléphone ou synchronisé par une autre app. Il remplace les données de ce téléphone."
 onboard_google_drive,Button,Google Drive,Google Drive,Google Drive
 onboard_pick_file,Button,Pick a folder,اختر مجلدًا,Choisir un dossier
-onboard_join_desc,Sheet description,Enter the invite code shared with you to join an existing BudgetSeal household.,أدخل رمز الدعوة المُشارَك لك للانضمام لأسرة BudgetSeal موجودة.,Entrez le code d'invitation partagé avec vous pour rejoindre un foyer BudgetSeal existant.
+onboard_join_desc,Sheet description,"Scan the QR code on their phone, or paste the invite they sent you.",امسح رمز QR على هاتفهم، أو الصق الدعوة التي أرسلوها لك.,"Scannez le QR code sur leur téléphone, ou collez l’invitation qu’ils vous ont envoyée."
 onboard_invite_code,Field label,Invite code,رمز الدعوة,Code d'invitation
 onboard_invite_hint,Field hint,BS1-...,BS1-...,BS1-...
 onboard_join_button,Button,Join household,الانضمام للأسرة,Rejoindre le foyer
 onboard_enter_code_error,Validation,Please enter an invite code,الرجاء إدخال رمز الدعوة,Veuillez saisir un code d'invitation
 onboard_invalid_code_error,Validation,Invalid invite code. It should start with BS1-,رمز دعوة غير صالح. يجب أن يبدأ بـ BS1-,Code d'invitation invalide. Il doit commencer par BS1-
 join_scan_code,Join sheet button,Scan code,مسح الرمز,Scanner le code
+join_or_paste,Join a household: above the paste field,Or paste the invite you were sent,أو الصق الدعوة التي وصلتك,Ou collez l’invitation reçue
+join_paste_hint,Join a household: paste field hint,Paste the whole message — no need to type the code,الصق الرسالة كاملة — لا حاجة لكتابة الرمز,Collez tout le message — inutile de taper le code
+join_paste,Join a household: paste button,Paste,لصق,Coller
 join_scan_title,Scanner screen title,Scan the invite code,امسح رمز الدعوة,Scanner le code d'invitation
 join_scan_hint,Scanner screen hint,Point the camera at the QR code on the other phone.,وجّه الكاميرا نحو رمز QR على الهاتف الآخر.,Pointez l'appareil photo vers le code QR de l'autre téléphone.
 join_scan_no_camera,Scanner: camera unavailable,Couldn't open the camera. Type the code instead.,تعذّر فتح الكاميرا. اكتب الرمز بدلًا من ذلك.,Impossible d'ouvrir l'appareil photo. Saisissez plutôt le code.
 sync_share_scan_hint,"Share sheet, under the QR",On their phone: Join a household › Scan code.,على الهاتف الآخر: الانضمام إلى أسرة › مسح الرمز.,Sur l'autre téléphone : Rejoindre un foyer › Scanner le code.
+invite_cant_scan,Invite sheet: under the QR,Can't scan? Send the invite instead,لا يمكن المسح؟ أرسل الدعوة بدلًا من ذلك,Impossible de scanner ? Envoyez plutôt l’invitation
+invite_show_code,Invite sheet: reveal the code,Show the code,إظهار الرمز,Afficher le code
 join_replace_title,Cloud Sync: confirm join,Join a household?,الانضمام إلى أسرة؟,Rejoindre un foyer ?
 join_replace_body,Cloud Sync: confirm join,The shared budget replaces the one on this phone. A backup of it is saved first in Backup & Restore.,تحلّ الميزانية المُشارَكة محلّ الميزانية الموجودة على هذا الهاتف، مع حفظ نسخة احتياطية منها أولًا في النسخ الاحتياطي والاستعادة.,Le budget partagé remplace celui de ce téléphone ; une sauvegarde est d'abord enregistrée dans Sauvegarde et restauration.
 relay_name,Sync provider name,Household sync,مزامنة الأسرة,Synchronisation du foyer

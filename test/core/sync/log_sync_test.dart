@@ -99,6 +99,28 @@ void main() {
     expect(mine.read<int>('n'), 0);
   });
 
+  test('sync on save: only this phone\'s new entries count as unsent',
+      () async {
+    final store = MemoryStore();
+    final a = await phone('phone-a');
+    await household(a);
+    expect(await LogSync(a).hasUnpushed(), isTrue);
+    await LogSync(a).sync(store);
+    expect(await LogSync(a).hasUnpushed(), isFalse);
+
+    // What another phone sent, once merged, isn't ours to send.
+    final b = await phone('phone-b');
+    await LogSync(b).replaceFrom(store);
+    expect(await LogSync(b).hasUnpushed(), isFalse);
+
+    DeviceIdentity.debugSet('phone-a');
+    await AllocationEngine(a).recordTransaction(
+      householdId: 'h', accountId: 'bank', type: 'expense',
+      lines: const [TxLine(amount: 3, currency: 'USD', categoryId: 'food')],
+      baseCurrency: 'USD');
+    expect(await LogSync(a).hasUnpushed(), isTrue);
+  });
+
   test('edits to different fields of one row both stick', () async {
     final store = MemoryStore();
     final a = await phone('phone-a');

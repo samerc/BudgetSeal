@@ -109,6 +109,15 @@ class SyncScreen extends ConsumerWidget {
                   ? null
                   : () => notifier.sync(),
             ),
+            const SizedBox(height: 4),
+            SettingsSwitchRow(
+              icon: AppIcons.wifiHigh,
+              title: S.of(context).syncWifiOnly,
+              subtitle: S.of(context).syncWifiOnlySub,
+              value: ref.watch(syncWifiOnlyProvider),
+              onChanged: (v) =>
+                  ref.read(syncWifiOnlyProvider.notifier).set(v),
+            ),
             const SizedBox(height: 12),
             if (inHousehold) ...[
               _ActionButton(

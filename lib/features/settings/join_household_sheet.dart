@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -74,6 +75,17 @@ class _JoinHouseholdSheetState extends ConsumerState<JoinHouseholdSheet> {
     }
   }
 
+  /// Fills the field from the clipboard (the whole shared message is fine).
+  Future<void> _paste() async {
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    final text = data?.text?.trim();
+    if (text == null || text.isEmpty || !mounted) return;
+    setState(() {
+      _codeController.text = text;
+      _error = null;
+    });
+  }
+
   Future<void> _join() async {
     final s = S.of(context);
     final code = _codeController.text.trim();
@@ -141,27 +153,40 @@ class _JoinHouseholdSheetState extends ConsumerState<JoinHouseholdSheet> {
                       child: CircularProgressIndicator(color: AppColors.accent)),
                 )
               else ...[
-                TextField(
-                  controller: _codeController,
-                  decoration: InputDecoration(
-                    labelText: s.onboardInviteCode,
-                    hintText: s.onboardInviteHint,
-                    prefixIcon: const Icon(AppIcons.key),
-                  ),
-                  style: const TextStyle(fontFamily: 'monospace', fontSize: 15),
-                  onSubmitted: (_) => _join(),
-                ),
-                const SizedBox(height: 16),
+                // Scanning is the easy way: nothing to type.
                 FilledButton.icon(
-                  onPressed: _join,
-                  icon: const Icon(AppIcons.signIn, size: 20),
-                  label: Text(s.onboardJoinButton),
-                ),
-                const SizedBox(height: 10),
-                OutlinedButton.icon(
                   onPressed: () => Navigator.pop(context, _scan),
                   icon: const Icon(AppIcons.qrCode, size: 20),
                   label: Text(s.joinScanCode),
+                ),
+                const SizedBox(height: 24),
+                Text(s.joinOrPaste,
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.ts(context))),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _codeController,
+                  minLines: 1,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    hintText: s.joinPasteHint,
+                    prefixIcon: const Icon(AppIcons.key),
+                    suffixIcon: IconButton(
+                      tooltip: s.joinPaste,
+                      icon: const Icon(AppIcons.clipboardText, size: 20),
+                      onPressed: _paste,
+                    ),
+                  ),
+                  style: const TextStyle(fontSize: 14),
+                  onSubmitted: (_) => _join(),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: _join,
+                  icon: const Icon(AppIcons.signIn, size: 20),
+                  label: Text(s.onboardJoinButton),
                 ),
               ],
               if (_error != null) ...[

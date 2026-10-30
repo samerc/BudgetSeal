@@ -8830,6 +8830,24 @@ abstract class S {
   /// **'Share code'**
   String get syncShareCode;
 
+  /// Cloud Sync: switch
+  ///
+  /// In en, this message translates to:
+  /// **'Sync on Wi-Fi only'**
+  String get syncWifiOnly;
+
+  /// Cloud Sync: under the switch
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic syncs wait for Wi-Fi. Pulling down to refresh and Sync now still use mobile data.'**
+  String get syncWifiOnlySub;
+
+  /// Pull to refresh: sync failed SnackBar
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t sync: {reason}'**
+  String syncPullFailed(Object reason);
+
   /// Card title
   ///
   /// In en, this message translates to:
@@ -11857,7 +11875,7 @@ abstract class S {
   /// Onboarding join sheet description
   ///
   /// In en, this message translates to:
-  /// **'Enter the invite code shared with you to join an existing BudgetSeal household.'**
+  /// **'Scan the QR code on their phone, or paste the invite they sent you.'**
   String get onboardJoinDesc;
 
   /// Onboarding join text field label
@@ -11896,6 +11914,24 @@ abstract class S {
   /// **'Scan code'**
   String get joinScanCode;
 
+  /// Join a household: above the paste field
+  ///
+  /// In en, this message translates to:
+  /// **'Or paste the invite you were sent'**
+  String get joinOrPaste;
+
+  /// Join a household: paste field hint
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the whole message — no need to type the code'**
+  String get joinPasteHint;
+
+  /// Join a household: paste button
+  ///
+  /// In en, this message translates to:
+  /// **'Paste'**
+  String get joinPaste;
+
   /// Scanner screen title
   ///
   /// In en, this message translates to:
@@ -11919,6 +11955,18 @@ abstract class S {
   /// In en, this message translates to:
   /// **'On their phone: Join a household › Scan code.'**
   String get syncShareScanHint;
+
+  /// Invite sheet: under the QR
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t scan? Send the invite instead'**
+  String get inviteCantScan;
+
+  /// Invite sheet: reveal the code
+  ///
+  /// In en, this message translates to:
+  /// **'Show the code'**
+  String get inviteShowCode;
 
   /// Cloud Sync: confirm join
   ///

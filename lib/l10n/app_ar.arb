@@ -3053,6 +3053,9 @@
   "@syncShareCode": {
     "description": "Button"
   },
+  "syncWifiOnly": "المزامنة عبر Wi-Fi فقط",
+  "syncWifiOnlySub": "تنتظر المزامنة التلقائية شبكة Wi-Fi. السحب للتحديث و«زامن الآن» يستخدمان بيانات الجوال.",
+  "syncPullFailed": "تعذّرت المزامنة: {reason}",
   "syncEncryptionTitle": "تشفير المزامنة",
   "@syncEncryptionTitle": {
     "description": "Card title"
@@ -3872,7 +3875,7 @@
   "@onboardPickFile": {
     "description": "Button"
   },
-  "onboardJoinDesc": "أدخل رمز الدعوة المُشارَك لك للانضمام لأسرة BudgetSeal موجودة.",
+  "onboardJoinDesc": "امسح رمز QR على هاتفهم، أو الصق الدعوة التي أرسلوها لك.",
   "@onboardJoinDesc": {
     "description": "Sheet description"
   },
@@ -3900,6 +3903,9 @@
   "@joinScanCode": {
     "description": "Join sheet button"
   },
+  "joinOrPaste": "أو الصق الدعوة التي وصلتك",
+  "joinPasteHint": "الصق الرسالة كاملة — لا حاجة لكتابة الرمز",
+  "joinPaste": "لصق",
   "joinScanTitle": "امسح رمز الدعوة",
   "@joinScanTitle": {
     "description": "Scanner screen title"
@@ -3916,6 +3922,8 @@
   "@syncShareScanHint": {
     "description": "Share sheet, under the QR"
   },
+  "inviteCantScan": "لا يمكن المسح؟ أرسل الدعوة بدلًا من ذلك",
+  "inviteShowCode": "إظهار الرمز",
   "joinReplaceTitle": "الانضمام إلى أسرة؟",
   "@joinReplaceTitle": {
     "description": "Cloud Sync: confirm join"

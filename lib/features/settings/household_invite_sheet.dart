@@ -20,14 +20,24 @@ Future<void> showHouseholdInviteSheet(BuildContext context, HouseholdKey key) {
   );
 }
 
-class _InviteSheet extends StatelessWidget {
+/// The QR first (scanning needs no typing); the long code only on request —
+/// it is the household's key, which is why it's long.
+class _InviteSheet extends StatefulWidget {
   const _InviteSheet({required this.code, required this.tr});
 
   final String code;
   final S tr;
 
   @override
+  State<_InviteSheet> createState() => _InviteSheetState();
+}
+
+class _InviteSheetState extends State<_InviteSheet> {
+  bool _showCode = false;
+
+  @override
   Widget build(BuildContext context) {
+    final tr = widget.tr;
     return SafeArea(
       top: false,
       child: SingleChildScrollView(
@@ -48,33 +58,47 @@ class _InviteSheet extends StatelessWidget {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(RadiusTokens.md),
                 ),
-                child: QrImageView(data: code, version: QrVersions.auto, size: 200),
+                child: QrImageView(
+                    data: widget.code, version: QrVersions.auto, size: 220),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Text(tr.syncShareScanHint,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.tp(context))),
+            const SizedBox(height: 24),
+            Text(tr.inviteCantScan,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     fontSize: TypographyTokens.captionSize,
                     color: AppColors.ts(context))),
-            const SizedBox(height: 16),
-            SelectableText(
-              code,
-              textAlign: TextAlign.center,
-              textDirection: TextDirection.ltr,
-              style: TextStyle(
-                fontSize: 13,
-                fontFamily: 'monospace',
-                color: AppColors.tp(context),
-              ),
-            ),
-            const SizedBox(height: 16),
-            FilledButton.icon(
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
               onPressed: () => SharePlus.instance
-                  .share(ShareParams(text: tr.syncShareInviteText(code))),
+                  .share(ShareParams(text: tr.syncShareInviteText(widget.code))),
               icon: const Icon(AppIcons.shareNetwork, size: 20),
               label: Text(tr.syncShareCode),
             ),
+            if (_showCode) ...[
+              const SizedBox(height: 12),
+              SelectableText(
+                widget.code,
+                textAlign: TextAlign.center,
+                textDirection: TextDirection.ltr,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontFamily: 'monospace',
+                  color: AppColors.tp(context),
+                ),
+              ),
+            ] else
+              TextButton(
+                onPressed: () => setState(() => _showCode = true),
+                child: Text(tr.inviteShowCode),
+              ),
           ],
         ),
       ),

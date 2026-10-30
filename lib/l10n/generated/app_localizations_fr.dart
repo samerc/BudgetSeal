@@ -5123,6 +5123,18 @@ class SFr extends S {
   String get syncShareCode => 'Partager le code';
 
   @override
+  String get syncWifiOnly => 'Synchroniser en Wi-Fi uniquement';
+
+  @override
+  String get syncWifiOnlySub =>
+      'Les synchronisations automatiques attendent le Wi-Fi. Tirer pour actualiser et Synchroniser maintenant utilisent les données mobiles.';
+
+  @override
+  String syncPullFailed(Object reason) {
+    return 'Synchronisation impossible : $reason';
+  }
+
+  @override
   String get syncEncryptionTitle => 'Chiffrement de la synchronisation';
 
   @override
@@ -6758,7 +6770,7 @@ class SFr extends S {
 
   @override
   String get onboardJoinDesc =>
-      'Entrez le code d\'invitation partagé avec vous pour rejoindre un foyer BudgetSeal existant.';
+      'Scannez le QR code sur leur téléphone, ou collez l’invitation qu’ils vous ont envoyée.';
 
   @override
   String get onboardInviteCode => 'Code d\'invitation';
@@ -6780,6 +6792,16 @@ class SFr extends S {
   String get joinScanCode => 'Scanner le code';
 
   @override
+  String get joinOrPaste => 'Ou collez l’invitation reçue';
+
+  @override
+  String get joinPasteHint =>
+      'Collez tout le message — inutile de taper le code';
+
+  @override
+  String get joinPaste => 'Coller';
+
+  @override
   String get joinScanTitle => 'Scanner le code d\'invitation';
 
   @override
@@ -6793,6 +6815,13 @@ class SFr extends S {
   @override
   String get syncShareScanHint =>
       'Sur l\'autre téléphone : Rejoindre un foyer › Scanner le code.';
+
+  @override
+  String get inviteCantScan =>
+      'Impossible de scanner ? Envoyez plutôt l’invitation';
+
+  @override
+  String get inviteShowCode => 'Afficher le code';
 
   @override
   String get joinReplaceTitle => 'Rejoindre un foyer ?';

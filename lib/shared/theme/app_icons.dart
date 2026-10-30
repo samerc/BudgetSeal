@@ -71,6 +71,7 @@ abstract final class AppIcons {
   static const coins = IconData(0xe78e, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const columns = IconData(0xe546, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const copy = IconData(0xe1ca, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
+  static const clipboardText = IconData(0xe198, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const creditCard = IconData(0xe1d2, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const currencyCircleDollar = IconData(0xe54c, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');
   static const currencyDollar = IconData(0xe550, fontFamily: 'PhosphorRegular', fontPackage: 'phosphor_flutter');

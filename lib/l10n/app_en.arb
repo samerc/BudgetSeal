@@ -3443,6 +3443,12 @@
   "@syncShareCode": {
     "description": "Button"
   },
+  "syncWifiOnly": "Sync on Wi-Fi only",
+  "@syncWifiOnly": {"description": "Cloud Sync: switch"},
+  "syncWifiOnlySub": "Automatic syncs wait for Wi-Fi. Pulling down to refresh and Sync now still use mobile data.",
+  "@syncWifiOnlySub": {"description": "Cloud Sync: under the switch"},
+  "syncPullFailed": "Couldn't sync: {reason}",
+  "@syncPullFailed": {"description": "Pull to refresh: sync failed SnackBar", "placeholders": {"reason": {}}},
   "syncEncryptionTitle": "Sync encryption",
   "@syncEncryptionTitle": {
     "description": "Card title"
@@ -5258,7 +5264,7 @@
   "@onboardPickFile": {
     "description": "Onboarding restore option"
   },
-  "onboardJoinDesc": "Enter the invite code shared with you to join an existing BudgetSeal household.",
+  "onboardJoinDesc": "Scan the QR code on their phone, or paste the invite they sent you.",
   "@onboardJoinDesc": {
     "description": "Onboarding join sheet description"
   },
@@ -5286,6 +5292,12 @@
   "@joinScanCode": {
     "description": "Join sheet button"
   },
+  "joinOrPaste": "Or paste the invite you were sent",
+  "@joinOrPaste": {"description": "Join a household: above the paste field"},
+  "joinPasteHint": "Paste the whole message — no need to type the code",
+  "@joinPasteHint": {"description": "Join a household: paste field hint"},
+  "joinPaste": "Paste",
+  "@joinPaste": {"description": "Join a household: paste button"},
   "joinScanTitle": "Scan the invite code",
   "@joinScanTitle": {
     "description": "Scanner screen title"
@@ -5302,6 +5314,10 @@
   "@syncShareScanHint": {
     "description": "Share sheet, under the QR"
   },
+  "inviteCantScan": "Can't scan? Send the invite instead",
+  "@inviteCantScan": {"description": "Invite sheet: under the QR"},
+  "inviteShowCode": "Show the code",
+  "@inviteShowCode": {"description": "Invite sheet: reveal the code"},
   "joinReplaceTitle": "Join a household?",
   "@joinReplaceTitle": {
     "description": "Cloud Sync: confirm join"

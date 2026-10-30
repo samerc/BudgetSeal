@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -135,9 +136,64 @@ class SyncNotifier extends Notifier<SyncState> {
 
   @override
   SyncState build() {
-    _engine = SyncEngine(ref.read(databaseProvider));
+    final db = ref.read(databaseProvider);
+    _engine = SyncEngine(db);
     _loadSavedProvider();
+    // Sync on save: a few seconds after this phone changes something, its
+    // entries go up (merges by a sync change tables too, but leave nothing
+    // to push, so they don't start another).
+    final changes = db.tableUpdates().listen((_) {
+      if (state.activeProvider == null) return;
+      _saveTimer?.cancel();
+      _saveTimer = Timer(_afterSave, _syncIfPending);
+    });
+    ref.onDispose(() {
+      changes.cancel();
+      _saveTimer?.cancel();
+    });
     return const SyncState();
+  }
+
+  static const _afterSave = Duration(seconds: 4);
+  Timer? _saveTimer;
+
+  Future<void> _syncIfPending() async {
+    try {
+      if (await _logSync.hasUnpushed()) await autoSync();
+    } catch (e) {
+      debugPrint('[Sync] After-save sync skipped: $e');
+    }
+  }
+
+  /// An automatic sync (opening or leaving the app, after a save): skipped
+  /// while one runs, and off Wi-Fi when the user asked for Wi-Fi only.
+  /// Sync now and pull to refresh call [sync] and always run.
+  Future<void> autoSync() async {
+    if (state.activeProvider == null ||
+        state.status == SyncStatus.syncing ||
+        AutoBackupService.restorePending) {
+      return;
+    }
+    if (ref.read(syncWifiOnlyProvider) && !await _onWifi()) return;
+    await sync();
+  }
+
+  /// Pull to refresh: syncs now (any network) when sync is on. Returns why
+  /// it failed, or null.
+  Future<String?> pullToRefresh() async {
+    if (state.activeProvider == null) return null;
+    await sync();
+    return state.status == SyncStatus.error ? state.lastError : null;
+  }
+
+  static Future<bool> _onWifi() async {
+    try {
+      final now = await Connectivity().checkConnectivity();
+      return now.contains(ConnectivityResult.wifi) ||
+          now.contains(ConnectivityResult.ethernet);
+    } catch (_) {
+      return true; // Can't tell: don't hold sync back.
+    }
   }
 
   Future<void> _loadSavedProvider() async {
@@ -527,3 +583,27 @@ String syncErrorText(Object e) {
 
 final syncProvider =
     NotifierProvider<SyncNotifier, SyncState>(SyncNotifier.new);
+
+
+/// Automatic syncs only on Wi-Fi (Cloud Sync switch, pref `sync_wifi_only`).
+final syncWifiOnlyProvider =
+    NotifierProvider<SyncWifiOnlyNotifier, bool>(SyncWifiOnlyNotifier.new);
+
+class SyncWifiOnlyNotifier extends Notifier<bool> {
+  static const _key = 'sync_wifi_only';
+
+  @override
+  bool build() {
+    SharedPreferences.getInstance().then((p) {
+      final v = p.getBool(_key);
+      if (v != null && ref.mounted) state = v;
+    }).catchError((Object _) {});
+    return false;
+  }
+
+  Future<void> set(bool value) async {
+    state = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_key, value);
+  }
+}

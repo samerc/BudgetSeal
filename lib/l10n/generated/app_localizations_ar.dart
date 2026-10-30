@@ -5098,6 +5098,18 @@ class SAr extends S {
   String get syncShareCode => 'مشاركة الرمز';
 
   @override
+  String get syncWifiOnly => 'المزامنة عبر Wi-Fi فقط';
+
+  @override
+  String get syncWifiOnlySub =>
+      'تنتظر المزامنة التلقائية شبكة Wi-Fi. السحب للتحديث و«زامن الآن» يستخدمان بيانات الجوال.';
+
+  @override
+  String syncPullFailed(Object reason) {
+    return 'تعذّرت المزامنة: $reason';
+  }
+
+  @override
   String get syncEncryptionTitle => 'تشفير المزامنة';
 
   @override
@@ -6695,7 +6707,7 @@ class SAr extends S {
 
   @override
   String get onboardJoinDesc =>
-      'أدخل رمز الدعوة المُشارَك لك للانضمام لأسرة BudgetSeal موجودة.';
+      'امسح رمز QR على هاتفهم، أو الصق الدعوة التي أرسلوها لك.';
 
   @override
   String get onboardInviteCode => 'رمز الدعوة';
@@ -6717,6 +6729,15 @@ class SAr extends S {
   String get joinScanCode => 'مسح الرمز';
 
   @override
+  String get joinOrPaste => 'أو الصق الدعوة التي وصلتك';
+
+  @override
+  String get joinPasteHint => 'الصق الرسالة كاملة — لا حاجة لكتابة الرمز';
+
+  @override
+  String get joinPaste => 'لصق';
+
+  @override
   String get joinScanTitle => 'امسح رمز الدعوة';
 
   @override
@@ -6728,6 +6749,12 @@ class SAr extends S {
   @override
   String get syncShareScanHint =>
       'على الهاتف الآخر: الانضمام إلى أسرة › مسح الرمز.';
+
+  @override
+  String get inviteCantScan => 'لا يمكن المسح؟ أرسل الدعوة بدلًا من ذلك';
+
+  @override
+  String get inviteShowCode => 'إظهار الرمز';
 
   @override
   String get joinReplaceTitle => 'الانضمام إلى أسرة؟';

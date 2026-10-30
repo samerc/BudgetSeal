@@ -3053,6 +3053,9 @@
   "@syncShareCode": {
     "description": "Button"
   },
+  "syncWifiOnly": "Synchroniser en Wi-Fi uniquement",
+  "syncWifiOnlySub": "Les synchronisations automatiques attendent le Wi-Fi. Tirer pour actualiser et Synchroniser maintenant utilisent les données mobiles.",
+  "syncPullFailed": "Synchronisation impossible : {reason}",
   "syncEncryptionTitle": "Chiffrement de la synchronisation",
   "@syncEncryptionTitle": {
     "description": "Card title"
@@ -3872,7 +3875,7 @@
   "@onboardPickFile": {
     "description": "Button"
   },
-  "onboardJoinDesc": "Entrez le code d'invitation partagé avec vous pour rejoindre un foyer BudgetSeal existant.",
+  "onboardJoinDesc": "Scannez le QR code sur leur téléphone, ou collez l’invitation qu’ils vous ont envoyée.",
   "@onboardJoinDesc": {
     "description": "Sheet description"
   },
@@ -3900,6 +3903,9 @@
   "@joinScanCode": {
     "description": "Join sheet button"
   },
+  "joinOrPaste": "Ou collez l’invitation reçue",
+  "joinPasteHint": "Collez tout le message — inutile de taper le code",
+  "joinPaste": "Coller",
   "joinScanTitle": "Scanner le code d'invitation",
   "@joinScanTitle": {
     "description": "Scanner screen title"
@@ -3916,6 +3922,8 @@
   "@syncShareScanHint": {
     "description": "Share sheet, under the QR"
   },
+  "inviteCantScan": "Impossible de scanner ? Envoyez plutôt l’invitation",
+  "inviteShowCode": "Afficher le code",
   "joinReplaceTitle": "Rejoindre un foyer ?",
   "@joinReplaceTitle": {
     "description": "Cloud Sync: confirm join"

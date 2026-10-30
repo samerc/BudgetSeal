@@ -679,15 +679,11 @@ class _BudgetSealAppState extends ConsumerState<BudgetSealApp>
     });
   }
 
+  /// Opening or leaving the app syncs (Wi-Fi only when the user asked).
   void _autoSync() {
-    // A restored backup replaces the DB on next launch — don't sync the old one.
-    if (AutoBackupService.restorePending) return;
-    final syncState = ref.read(syncProvider);
-    if (syncState.activeProvider != null &&
-        syncState.status != SyncStatus.syncing) {
-      ref.read(syncProvider.notifier).sync();
-    }
+    ref.read(syncProvider.notifier).autoSync();
   }
+
 
   @override
   Widget build(BuildContext context) {

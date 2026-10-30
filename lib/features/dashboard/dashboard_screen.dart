@@ -9,6 +9,7 @@ import '../capture/review_screen.dart';
 import '../family/requests_screen.dart';
 import '../forecast/forecast_screen.dart';
 import '../../core/database/app_database.dart';
+import '../../core/providers/sync_provider.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/allocations_provider.dart';
 import '../../core/providers/categories_provider.dart';
@@ -90,6 +91,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
+          // Pulling down fetches the other phones' changes first.
+          final failed =
+              await ref.read(syncProvider.notifier).pullToRefresh();
+          if (failed != null && context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(S.of(context).syncPullFailed(failed)),
+              behavior: SnackBarBehavior.floating,
+            ));
+          }
           // Invalidate root providers — dependents (unallocatedProvider, etc.)
           // refresh automatically via Riverpod's dependency graph.
           ref.invalidate(accountsWithBalanceProvider);
