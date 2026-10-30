@@ -18,6 +18,7 @@ Future<void> showRedeemDialog(BuildContext context, WidgetRef ref,
     context: context,
     builder: (dialogCtx) => StatefulBuilder(
       builder: (sbCtx, setDialogState) => AlertDialog(
+        scrollable: true,
         title: Text(l.upgradeRedeemCode),
         content: TextField(
           controller: controller,

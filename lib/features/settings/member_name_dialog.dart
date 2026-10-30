@@ -40,6 +40,7 @@ Future<void> showMemberNameDialog(BuildContext context, WidgetRef ref,
     context: context,
     barrierDismissible: !firstTime,
     builder: (ctx) => AlertDialog(
+      scrollable: true,
       icon: firstTime
           ? Icon(AppIcons.users, size: 48, color: AppColors.accent)
           : null,

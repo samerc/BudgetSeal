@@ -502,6 +502,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     final name = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
+        scrollable: true,
         title: Text(tr.billAddPerson),
         content: TextField(
           controller: ctrl,
@@ -689,6 +690,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setLocal) => AlertDialog(
+          scrollable: true,
           title: Text(item == null ? tr.billAddItem : tr.commonEdit),
           content: Column(
             mainAxisSize: MainAxisSize.min,

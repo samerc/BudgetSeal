@@ -853,6 +853,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     final result = await showDialog<String>(
       context: context,
       builder: (dCtx) => AlertDialog(
+        scrollable: true,
         title: Text(tr.quickNoteTitle),
         content: TextField(
           controller: ctrl,

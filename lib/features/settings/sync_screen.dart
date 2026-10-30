@@ -594,6 +594,7 @@ class _SyncEncryptionCardState extends State<_SyncEncryptionCard> {
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
+        scrollable: true,
         title: Text(tr.syncSetPasswordTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,

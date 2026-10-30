@@ -986,6 +986,7 @@ class _AssistedTransactionScreenState
     final result = await showDialog<String>(
       context: context,
       builder: (dCtx) => AlertDialog(
+        scrollable: true,
         title: Text(tr.commonTitle),
         content: TextField(
           controller: ctrl,

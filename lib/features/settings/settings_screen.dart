@@ -1966,6 +1966,7 @@ class _CurrencySymbolSheetState extends ConsumerState<_CurrencySymbolSheet> {
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
+        scrollable: true,
         title: Text(tr.currencySymbolFor(code)),
         content: TextField(
           controller: ctrl,
