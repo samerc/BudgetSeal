@@ -677,6 +677,13 @@
   "forecastEstimate": "الدخل المعتاد (تقدير)",
   "forecastEmpty": "أضف فاتورة أو دخلًا متكررًا، أو دفعة مخطَّطة، لترى ما هو قادم.",
   "forecastPerDay": "{amount} في اليوم",
+  "forecastFree": "المتاح حتى ذلك الحين",
+  "forecastDividedBy": "{count, plural, =1{÷ يوم واحد} =2{÷ يومان} few{÷ {count} أيام} other{÷ {count} يومًا}}",
+  "forecastFreeMoney": "المال المتاح",
+  "forecastSafeShort": "يمكنك إنفاقه",
+  "forecastADayUntil": "في اليوم حتى {date}",
+  "forecastADayUntilEst": "في اليوم حتى {date} تقريبًا",
+  "forecastADay30": "في اليوم خلال الثلاثين يومًا القادمة",
   "familyPrivate": "خاص",
   "familyPrivateLine": "مغلّفات خاصة",
   "familyPrivateSwitch": "خاص",
@@ -1055,6 +1062,7 @@
   "@dashboardThisMonth": {
     "description": "Toggle label"
   },
+  "dashSpendingTitle": "الإنفاق",
   "dashboardSearchPlaceholder": "البحث في المعاملات والحسابات...",
   "@dashboardSearchPlaceholder": {
     "description": "Global search hint"
@@ -1754,7 +1762,7 @@
   "@txListAccountLabel": {
     "description": "Setting title"
   },
-  "txListAccountSubtitle": "إظهار اسم الحساب على كل معاملة",
+  "txListAccountSubtitle": "إظهار الحساب ورصيده بعد كل معاملة",
   "@txListAccountSubtitle": {
     "description": "Setting subtitle"
   },
@@ -2104,6 +2112,7 @@
       }
     }
   },
+  "allocPercentLeft": "متبقٍّ {pct}%",
   "fundTitle": "تمويل الأظرف",
   "@fundTitle": {
     "description": "AppBar title"
@@ -2279,6 +2288,10 @@
       }
     }
   },
+  "billsThisWeek": "هذا الأسبوع",
+  "billsLater": "لاحقًا",
+  "billsSumOut": "يخرج {amount}",
+  "billsSumIn": "يدخل {amount}",
   "subTitle": "الاشتراكات",
   "@subTitle": {
     "description": "Screen title"
@@ -5586,6 +5599,8 @@
   "txImpactNotBudgeted": "خارج الميزانية",
   "txMonthBudget": "ميزانية {month}",
   "txMonthSpentOf": "أُنفق {spent} من {budgeted} مخصّصة · الدخل {income}",
+  "txMonthSpentOfShort": "أُنفق {spent} من {budgeted}",
+  "txMonthIncome": "الدخل {amount}",
   "txMonthSpent": "أُنفق {spent} · الدخل {income}",
   "webGsTitle": "ابدأ",
   "webGsProgress": "{done} من {total}",
@@ -5827,12 +5842,19 @@
   "allocNeedsAttention": "يحتاج انتباهك",
   "allocSpentOf": "صُرف {spent} من {budget}",
   "allocNothingSpent": "لم يُصرف شيء بعد",
+  "allocBudgetedLabel": "المخصّص",
+  "allocSpentLabel": "المُنفَق",
+  "allocAllSpent": "أُنفق كامل {amount} · انتهى لهذا الشهر",
+  "allocNearlyGone": "أوشك على النفاد",
+  "allocDone": "اكتمل",
   "rptSpanMonth": "شهر",
   "rptSpan3": "3 أشهر",
   "rptSpan6": "6 أشهر",
   "rptSpan12": "12 شهراً",
   "rptSpanYear": "هذه السنة",
   "rptSpanCustom": "مخصص…",
+  "rptMoreRanges": "فترات أخرى",
+  "rptNoCompare": "لا بيانات سابقة",
   "rptComparedWith": "{range} · مقارنةً {n, plural, =1{بالشهر السابق} other{بالـ {n} أشهر السابقة}}",
   "rptPickFrom": "من",
   "rptPickTo": "إلى",

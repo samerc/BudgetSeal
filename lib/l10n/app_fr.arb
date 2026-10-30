@@ -677,6 +677,13 @@
   "forecastEstimate": "Revenu habituel (estimation)",
   "forecastEmpty": "Ajoutez une facture ou un revenu récurrent, ou un paiement prévu, pour voir ce qui arrive.",
   "forecastPerDay": "{amount} par jour",
+  "forecastFree": "Libre jusque-là",
+  "forecastDividedBy": "{count, plural, =1{÷ 1 jour} other{÷ {count} jours}}",
+  "forecastFreeMoney": "Argent disponible",
+  "forecastSafeShort": "Dépensable",
+  "forecastADayUntil": "par jour jusqu’au {date}",
+  "forecastADayUntilEst": "par jour jusqu’au {date} environ",
+  "forecastADay30": "par jour pendant 30 jours",
   "familyPrivate": "Privé",
   "familyPrivateLine": "Enveloppes privées",
   "familyPrivateSwitch": "Privée",
@@ -1055,6 +1062,7 @@
   "@dashboardThisMonth": {
     "description": "Toggle label"
   },
+  "dashSpendingTitle": "Dépenses",
   "dashboardSearchPlaceholder": "Rechercher transactions, comptes...",
   "@dashboardSearchPlaceholder": {
     "description": "Global search hint"
@@ -1754,7 +1762,7 @@
   "@txListAccountLabel": {
     "description": "Setting title"
   },
-  "txListAccountSubtitle": "Afficher le nom du compte sur chaque transaction",
+  "txListAccountSubtitle": "Afficher le compte et son solde après chaque opération",
   "@txListAccountSubtitle": {
     "description": "Setting subtitle"
   },
@@ -2104,6 +2112,7 @@
       }
     }
   },
+  "allocPercentLeft": "{pct}% restant",
   "fundTitle": "Financer les enveloppes",
   "@fundTitle": {
     "description": "AppBar title"
@@ -2279,6 +2288,10 @@
       }
     }
   },
+  "billsThisWeek": "Cette semaine",
+  "billsLater": "Plus tard",
+  "billsSumOut": "{amount} sortants",
+  "billsSumIn": "{amount} entrants",
   "subTitle": "Abonnements",
   "@subTitle": {
     "description": "Screen title"
@@ -5586,6 +5599,8 @@
   "txImpactNotBudgeted": "Hors budget",
   "txMonthBudget": "Budget de {month}",
   "txMonthSpentOf": "Dépensé {spent} sur {budgeted} prévus · revenus {income}",
+  "txMonthSpentOfShort": "Dépensé {spent} sur {budgeted}",
+  "txMonthIncome": "Revenus {amount}",
   "txMonthSpent": "Dépensé {spent} · revenus {income}",
   "webGsTitle": "Pour commencer",
   "webGsProgress": "{done} sur {total}",
@@ -5827,12 +5842,19 @@
   "allocNeedsAttention": "À surveiller",
   "allocSpentOf": "{spent} dépensé sur {budget}",
   "allocNothingSpent": "Rien de dépensé",
+  "allocBudgetedLabel": "Budgété",
+  "allocSpentLabel": "Dépensé",
+  "allocAllSpent": "{amount} dépensés · terminé pour le mois",
+  "allocNearlyGone": "Presque épuisé",
+  "allocDone": "Terminé",
   "rptSpanMonth": "Mois",
   "rptSpan3": "3 mois",
   "rptSpan6": "6 mois",
   "rptSpan12": "12 mois",
   "rptSpanYear": "Cette année",
   "rptSpanCustom": "Personnalisé…",
+  "rptMoreRanges": "Autres périodes",
+  "rptNoCompare": "Rien avant",
   "rptComparedWith": "{range} · comparé {n, plural, =1{au mois précédent} other{aux {n} mois précédents}}",
   "rptPickFrom": "Du",
   "rptPickTo": "Au",

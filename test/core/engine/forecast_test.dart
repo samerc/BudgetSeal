@@ -155,5 +155,25 @@ void main() {
     )['USD']!;
     expect((f.safeToSpend, f.short), (0.0, 200.0));
     expect(f.lowest, -200);
+    expect(f.free, -200);
+  });
+
+  test('free until payday adds up to safe to spend × the days; the chart '
+      'line leaves out what savings goals keep', () async {
+    final f = buildForecast(
+      now: now,
+      cash: {'USD': 6444.13},
+      recurring: await recurring([
+        ('Rent', 'expense', 1450, DateTime(2026, 11, 1)),
+        ('Salary', 'income', 3200, DateTime(2026, 11, 1)),
+      ]),
+      savings: {'USD': 5632.99},
+    )['USD']!;
+    // The screen's rows: in accounts − due − saved = free; ÷ days = the
+    // number on top.
+    expect(f.free, closeTo(6444.13 - f.dueBefore - 5632.99, 1e-9));
+    expect(f.safeToSpend * f.daysLeft, closeTo(f.free, 1e-9));
+    expect(f.freeDaily.length, f.daily.length);
+    expect(f.freeDaily.first, closeTo(f.daily.first - 5632.99, 1e-9));
   });
 }

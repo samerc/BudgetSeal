@@ -13,15 +13,16 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_icons.dart';
 import '../../../shared/theme/design_tokens.dart';
 import '../../../shared/utils/format_number.dart';
-import '../../../shared/widgets/app_chip.dart';
 import '../../../shared/widgets/section_header.dart';
 import '../../../shared/widgets/seal_mark.dart';
 import '../../../shared/widgets/sheet_title.dart';
 import '../../../shared/widgets/tappable.dart';
 import 'report_period.dart';
 
-/// The period chips every time report shares (Month … Custom), with the
-/// range and what it's compared with under them.
+/// The period picker every time report shares: Month / 3 / 6 / 12 months
+/// as one segmented switch, and a calendar button for This year and Custom
+/// (six chips wrapped onto two rows); the range and what it's compared
+/// with under them.
 class ReportSpanChips extends ConsumerWidget {
   const ReportSpanChips({super.key});
 
@@ -31,13 +32,42 @@ class ReportSpanChips extends ConsumerWidget {
     final state = ref.watch(reportSpanProvider);
     final period = ref.watch(reportPeriodProvider);
     final notifier = ref.read(reportSpanProvider.notifier);
-    Widget chip(ReportSpan span, String label) => AppChip(
-          label: label,
-          selected: state.span == span,
-          onTap: () => span == ReportSpan.custom
-              ? _pickCustom(context, ref)
-              : notifier.set(span),
-        );
+    Widget segment(ReportSpan span, String label) {
+      final on = state.span == span;
+      return Expanded(
+        child: Semantics(
+          selected: on,
+          button: true,
+          child: Tappable(
+            onTap: on ? null : () => notifier.set(span),
+            borderRadius: BorderRadius.circular(RadiusTokens.md),
+            color: on ? AppColors.sf(context) : Colors.transparent,
+            child: SizedBox(
+              height: 36,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(label,
+                        maxLines: 1,
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: on ? FontWeight.w800 : FontWeight.w600,
+                            color: on
+                                ? AppColors.tp(context)
+                                : AppColors.ts(context))),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final other =
+        state.span == ReportSpan.year || state.span == ReportSpan.custom;
     final last = period.end.subtract(const Duration(days: 1));
     final range = period.length == 1
         ? formatMonth(period.buckets.first, year: true)
@@ -48,13 +78,43 @@ class ReportSpanChips extends ConsumerWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Wrap(spacing: 8, runSpacing: 8, children: [
-            chip(ReportSpan.month, tr.rptSpanMonth),
-            chip(ReportSpan.months3, tr.rptSpan3),
-            chip(ReportSpan.months6, tr.rptSpan6),
-            chip(ReportSpan.months12, tr.rptSpan12),
-            chip(ReportSpan.year, tr.rptSpanYear),
-            chip(ReportSpan.custom, tr.rptSpanCustom),
+          child: Row(children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: AppColors.sfv(context),
+                  borderRadius: BorderRadius.circular(RadiusTokens.lg),
+                ),
+                child: Row(children: [
+                  segment(ReportSpan.month, tr.rptSpanMonth),
+                  segment(ReportSpan.months3, tr.rptSpan3),
+                  segment(ReportSpan.months6, tr.rptSpan6),
+                  segment(ReportSpan.months12, tr.rptSpan12),
+                ]),
+              ),
+            ),
+            const SizedBox(width: 8),
+            // This year / Custom: accent while one of them is picked.
+            Tooltip(
+              message: tr.rptMoreRanges,
+              child: Tappable(
+                onTap: () => _pickOther(context, ref),
+                borderRadius: BorderRadius.circular(RadiusTokens.lg),
+                color: other
+                    ? AppColors.pastel(context, AppColors.accent,
+                        light: 0.85, dark: 0.78)
+                    : AppColors.sfv(context),
+                child: SizedBox.square(
+                  dimension: 44,
+                  child: Icon(AppIcons.calendarBlank,
+                      size: 20,
+                      color: other
+                          ? AppColors.accentText(context)
+                          : AppColors.tp(context)),
+                ),
+              ),
+            ),
           ]),
         ),
         Padding(
@@ -73,6 +133,43 @@ class ReportSpanChips extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  /// The calendar button: This year, or a custom range.
+  Future<void> _pickOther(BuildContext context, WidgetRef ref) async {
+    final tr = S.of(context);
+    final state = ref.read(reportSpanProvider);
+    final pick = await showModalBottomSheet<ReportSpan>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SheetTitle(tr.rptMoreRanges),
+            for (final (span, label, icon) in [
+              (ReportSpan.year, tr.rptSpanYear, AppIcons.calendarBlank),
+              (ReportSpan.custom, tr.rptSpanCustom, AppIcons.pencilSimple),
+            ])
+              ListTile(
+                leading: Icon(icon),
+                title: Text(label),
+                trailing: state.span == span
+                    ? Icon(AppIcons.checkCircleFill,
+                        color: AppColors.accentText(ctx))
+                    : null,
+                onTap: () => Navigator.pop(ctx, span),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (pick == null || !context.mounted) return;
+    if (pick == ReportSpan.custom) {
+      await _pickCustom(context, ref);
+    } else {
+      ref.read(reportSpanProvider.notifier).set(pick);
+    }
   }
 
   /// Two month pickers in a sheet: from, to.
@@ -277,18 +374,24 @@ class ReportsHome extends ConsumerWidget {
             // Equal heights: each tile as tall as the tallest.
             child: IntrinsicHeight(
               child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              tile(tr.rptEarned, money(t.income), delta(t.income, b.income),
-                  subColor: good(t.income >= b.income)),
+              tile(tr.rptEarned, money(t.income),
+                  delta(t.income, b.income) ?? tr.rptNoCompare,
+                  subColor: delta(t.income, b.income) == null
+                      ? null
+                      : good(t.income >= b.income)),
               const SizedBox(width: 8),
-              tile(tr.rptSpent, money(t.spent), delta(t.spent, b.spent),
-                  subColor: good(t.spent <= b.spent)),
+              tile(tr.rptSpent, money(t.spent),
+                  delta(t.spent, b.spent) ?? tr.rptNoCompare,
+                  subColor: delta(t.spent, b.spent) == null
+                      ? null
+                      : good(t.spent <= b.spent)),
               const SizedBox(width: 8),
               tile(
                   tr.rptKept,
                   money(t.kept),
                   t.income > 0.005
                       ? tr.rptOfIncome((t.kept / t.income * 100).round())
-                      : null),
+                      : '—'),
             ])),
           ),
         _group(context, tr.rptGroupBudget, AppColors.accent, [

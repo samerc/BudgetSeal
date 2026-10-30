@@ -103,7 +103,16 @@ class _TappableState extends State<Tappable>
   Widget build(BuildContext context) {
     final isDisabled = widget.onTap == null && widget.onLongPress == null;
 
-    if (isDisabled) return widget.child;
+    // Not tappable (a selected segment): still painted with its fill.
+    if (isDisabled) {
+      return widget.color == null
+          ? widget.child
+          : DecoratedBox(
+              decoration: BoxDecoration(
+                  color: widget.color, borderRadius: widget.borderRadius),
+              child: widget.child,
+            );
+    }
 
     // iOS: opacity fade + scale, no ink ripple
     if (_isIOS) {

@@ -56,6 +56,20 @@ String formatDate(DateTime date) {
   return DateFormat(_datePattern).format(date);
 }
 
+/// The user's date format without the year when the date is in this year
+/// ("Oct 29", "29/10"); another year keeps it. ISO dates stay whole.
+String formatDateNoYear(DateTime date) {
+  if (date.year != DateTime.now().year) return formatDate(date);
+  final pattern = switch (_datePattern) {
+    'MMM d, y' => 'MMM d',
+    'd MMM y' => 'd MMM',
+    'd/M/y' => 'd/M',
+    'M/d/y' => 'M/d',
+    _ => _datePattern,
+  };
+  return DateFormat(pattern).format(date);
+}
+
 /// Format a date with the user's preferred format, with smart "Today"/"Yesterday" prefix.
 /// Date in the user's format plus the time (locale's 12/24-hour style),
 /// e.g. for backups and sync timestamps.

@@ -451,7 +451,10 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
             ),
           ),
 
-          // -- One line: budgeted · spent, days left (base currency) --
+          // -- Budgeted · spent · left, as three small tiles (base
+          // currency, spending envelopes only — the same "budgeted" as the
+          // Activity tab's month card; savings targets aren't a month's
+          // budget) --
           if (_searchQuery.isEmpty)
           SliverToBoxAdapter(
             child: Builder(builder: (context) {
@@ -459,8 +462,9 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
               if (allocations.isEmpty) return const SizedBox.shrink();
               // Only base-currency envelopes: currencies never mix.
               final baseAllocs = allocations.where((a) =>
+                  a.data.allocation.type == 'spending' &&
                   (a.data.allocation.targetCurrency ?? baseCurrency) ==
-                  baseCurrency);
+                      baseCurrency);
               final totalBudgeted = baseAllocs.fold<double>(
                   0.0, (sum, a) => sum + (a.data.allocation.targetAmount ?? 0.0));
               final spending = ref.watch(periodSpendingProvider).value ?? {};
@@ -472,22 +476,50 @@ class _AllocationsScreenState extends ConsumerState<AllocationsScreen>
                   household?.periodStartDay ?? 1);
               final daysLeft =
                   calendarDaysBetween(DateTime.now(), period.end).clamp(0, 999);
-              final style = TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.ts(context));
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-                child: Row(children: [
+              final left = totalBudgeted - totalSpent;
+              Widget tile(String label, double value, {bool over = false}) =>
                   Expanded(
-                    child: Text(
-                        l.allocBudgetLine(
-                            formatAmount(totalBudgeted, currency: baseCurrency),
-                            formatAmount(totalSpent, currency: baseCurrency)),
-                        style: style),
-                  ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 11, vertical: 9),
+                      decoration: BoxDecoration(
+                        color: AppColors.sfv(context),
+                        borderRadius: BorderRadius.circular(RadiusTokens.md),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontSize: TypographyTokens.captionSize,
+                                  color: AppColors.ts(context))),
+                          // Long amounts (LBP) shrink instead of wrapping.
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: AlignmentDirectional.centerStart,
+                            child: Text(
+                                formatAmount(value, currency: baseCurrency),
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                    color: over
+                                        ? AppColors.overspent
+                                        : AppColors.tp(context))),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Row(children: [
+                  tile(l.allocBudgetedLabel, totalBudgeted),
                   const SizedBox(width: 8),
-                  Text(l.allocDaysLeft(daysLeft), style: style),
+                  tile(l.allocSpentLabel, totalSpent),
+                  const SizedBox(width: 8),
+                  tile(l.allocDaysLeft(daysLeft), left, over: left < -0.005),
                 ]),
               );
             }),

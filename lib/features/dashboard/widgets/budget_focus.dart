@@ -15,11 +15,13 @@ import '../../../shared/widgets/envelope_row.dart' show overspentCurrency;
 import '../../../shared/widgets/ready_to_assign_banner.dart';
 import '../../allocations/move_money_sheet.dart';
 import '../../../shared/widgets/tappable.dart';
+import '../../forecast/forecast_screen.dart' show hasHomeForecast;
 import 'bills_boxes.dart';
 
 /// Home's first section — what the budget needs now: money waiting in
-/// Ready to assign, envelopes that are overspent (with Cover), and bills
-/// due this week. Budget-first, unlike an expense tracker's home.
+/// Ready to assign, envelopes that are overspent (with Cover), bills due
+/// this week and safe to spend. Budget-first, unlike an expense tracker's
+/// home. Every block is 12 apart.
 class BudgetFocus extends ConsumerWidget {
   final String baseCurrency;
 
@@ -74,8 +76,8 @@ class BudgetFocus extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
         ],
-        BillsBoxes(baseCurrency: baseCurrency),
-        const SizedBox(height: 8),
+        BillsBoxes(
+            baseCurrency: baseCurrency, withForecast: hasHomeForecast(ref)),
       ],
     );
   }

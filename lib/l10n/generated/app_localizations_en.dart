@@ -2356,6 +2356,39 @@ class SEn extends S {
   }
 
   @override
+  String get forecastFree => 'Free until then';
+
+  @override
+  String forecastDividedBy(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '÷ $count days',
+      one: '÷ 1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get forecastFreeMoney => 'Free money';
+
+  @override
+  String get forecastSafeShort => 'Safe to spend';
+
+  @override
+  String forecastADayUntil(Object date) {
+    return 'a day until $date';
+  }
+
+  @override
+  String forecastADayUntilEst(Object date) {
+    return 'a day until about $date';
+  }
+
+  @override
+  String get forecastADay30 => 'a day for the next 30 days';
+
+  @override
   String get familyPrivate => 'Private';
 
   @override
@@ -3034,6 +3067,9 @@ class SEn extends S {
   String get dashboardThisMonth => 'This month';
 
   @override
+  String get dashSpendingTitle => 'Spending';
+
+  @override
   String get dashboardSearchPlaceholder => 'Search transactions, accounts...';
 
   @override
@@ -3527,7 +3563,8 @@ class SEn extends S {
   String get txListAccountLabel => 'Account label';
 
   @override
-  String get txListAccountSubtitle => 'Show account name on each transaction';
+  String get txListAccountSubtitle =>
+      'Show the account and its balance after each transaction';
 
   @override
   String get txListCategoryIcon => 'Category icon';
@@ -3834,6 +3871,11 @@ class SEn extends S {
   @override
   String allocPercentSaved(int pct) {
     return '$pct% saved';
+  }
+
+  @override
+  String allocPercentLeft(int pct) {
+    return '$pct% left';
   }
 
   @override
@@ -4581,6 +4623,22 @@ class SEn extends S {
   @override
   String upcomingDueInDays(int days) {
     return 'Due in $days days';
+  }
+
+  @override
+  String get billsThisWeek => 'This week';
+
+  @override
+  String get billsLater => 'Later';
+
+  @override
+  String billsSumOut(Object amount) {
+    return '$amount out';
+  }
+
+  @override
+  String billsSumIn(Object amount) {
+    return '$amount in';
   }
 
   @override
@@ -7873,6 +7931,16 @@ class SEn extends S {
   }
 
   @override
+  String txMonthSpentOfShort(Object spent, Object budgeted) {
+    return 'Spent $spent of $budgeted';
+  }
+
+  @override
+  String txMonthIncome(Object amount) {
+    return 'Income $amount';
+  }
+
+  @override
   String txMonthSpent(String spent, String income) {
     return 'Spent $spent · income $income';
   }
@@ -8782,6 +8850,23 @@ class SEn extends S {
   String get allocNothingSpent => 'Nothing spent yet';
 
   @override
+  String get allocBudgetedLabel => 'Budgeted';
+
+  @override
+  String get allocSpentLabel => 'Spent';
+
+  @override
+  String allocAllSpent(Object amount) {
+    return 'All $amount spent · done for the month';
+  }
+
+  @override
+  String get allocNearlyGone => 'Nearly gone';
+
+  @override
+  String get allocDone => 'Done';
+
+  @override
   String get rptSpanMonth => 'Month';
 
   @override
@@ -8798,6 +8883,12 @@ class SEn extends S {
 
   @override
   String get rptSpanCustom => 'Custom…';
+
+  @override
+  String get rptMoreRanges => 'More ranges';
+
+  @override
+  String get rptNoCompare => 'No earlier data';
 
   @override
   String rptComparedWith(String range, int n) {

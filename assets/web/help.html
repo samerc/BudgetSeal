@@ -576,7 +576,7 @@
 <!-- ══════════════════════════════════════════ -->
 <h2 id="forecast">Forecast</h2>
 
-<p>The Home card <strong>Safe to spend today</strong> tells you how much you can spend each day until your next income without missing a bill: the money in your accounts, minus every bill, subscription and planned payment due before then, minus what your <a href="#sinking-funds">sinking funds</a> keep for later and what your savings envelopes hold for their goals, divided by the days left. If that's not enough, it says by how much you're short. It also shows the lowest your money will go in the next 90 days, and when.</p>
+<p>The Home card <strong>Safe to spend today</strong> tells you how much you can spend each day until your next income without missing a bill: the money in your accounts, minus every bill, subscription and planned payment due before then, minus what your <a href="#sinking-funds">sinking funds</a> keep for later and what your savings envelopes hold for their goals, divided by the days left. It sits beside <strong>Upcoming</strong> on Home ("a day until Nov 1"). If that's not enough, it says by how much you're short. Tap it for the <strong>Forecast</strong>: every step of the sum down to <strong>Free until then</strong> and the "÷ days" that gives the number on top, then a chart of your <strong>free money</strong> (what's left after sinking funds and savings goals) over the next 90 days with its lowest point — touch the chart for any day.</p>
 <p>Tap it for the <strong>Forecast</strong>: how the number adds up, a line of your balance over the next 90 days (touch it to see any day), and everything coming up. It uses your recurring bills and incomes, subscriptions (with their price changes) and planned payments. If you haven't set up your salary as a recurring income, BudgetSeal estimates it from the last three months and shows it as <em>Usual income (estimate)</em>. Each currency has its own forecast — they're never added together.</p>
 
 <h2 id="transactions">Transactions</h2>
@@ -698,7 +698,7 @@
   <li><strong>Month card</strong> — at the top: how much of this month's budget is left (your spending envelopes' targets), a gold bar, and what you spent and earned. A past month that stayed within budget shows as "<em>September sealed</em>"</li>
   <li><strong>One card per day</strong> — the day's name and date, with the day's net on the right</li>
   <li><strong>More room</strong> — scrolling down slides the title and month tabs away; scrolling up brings them back. The selected month stays in the middle of the month tabs</li>
-  <li><strong>Under each expense</strong> — the envelope it came from and what was left in it right after ("Food &amp; drink · $142.80 left"). In red: "over by …"; while the envelope is still below zero, its latest expense has a <strong>Cover</strong> button. An amber <strong>Not budgeted</strong> tag means the category has no envelope</li>
+  <li><strong>Under each expense</strong> — the envelope it came from and what was left in it right after. Turn on <strong>Account label</strong> in the list settings to also see the account's balance after each transaction (it always shows when you filter to one account) ("Food &amp; drink · $142.80 left"). In red: "over by …"; while the envelope is still below zero, its latest expense has a <strong>Cover</strong> button. An amber <strong>Not budgeted</strong> tag means the category has no envelope</li>
   <li><strong>Income</strong> shows <strong>→ Ready to assign</strong> — it's waiting for you to give it a job. Transfers show "Bank → Cash"</li>
   <li><strong>Amounts</strong> — expenses in plain text (red is kept for overspending), income in green with a +, transfers in grey. Under the amount: the account and its balance right after the transaction. Filtered to one account, just the balance</li>
 </ul>
@@ -713,7 +713,7 @@
   <li><strong>Duplicate</strong> — select a single transaction and tap the copy icon (or <strong>Duplicate</strong> on its detail screen). Splits and transfers are copied with all their lines and accounts</li>
   <li><strong>No rate</strong> — an amber tag on a transaction means a foreign-currency amount was saved without an exchange rate, so totals and reports leave it out. Open it and add a rate, or set one in Settings → Exchange rates</li>
   <li><strong>Search</strong> — tap the search icon on the Activity tab. Searching (or setting a date range) looks through every month, not just the one open. Every word you type must match (title, note, account or category), in any order; accents and Arabic letter forms don't matter (<em>cafe</em> finds <em>Café</em>, <em>قهوه</em> finds <em>قهوة</em>). Add an amount condition like <strong>&gt;50</strong>, <strong>&lt;20</strong>, <strong>=12.5</strong> or <strong>&gt;1,000</strong> (e.g. <em>fuel &gt;40</em>); it checks each transaction's amount in its own currency, like the amount range in the filter panel. The sort button next to the search box lists the results largest first, each with its date. <strong>Largest first</strong> is also in the filter panel (the funnel), so you can sort a month without searching</li>
-  <li><strong>List settings</strong> — the sliders icon on Activity picks a row layout and whether rows show the account label, category icon and time, and whether each day shows its total</li>
+  <li><strong>List settings</strong> — the sliders icon on Activity picks a row layout and whether rows show the account and its balance, category icon and time, and whether each day shows its total</li>
   <li><strong>Filter</strong> — by type (All/Income/Expense/Transfer), account, category (includes its subcategories), date range, or amount range (<code>1,200</code> works). Active filters show as chips under the month tabs: tap a chip to remove that filter, or <strong>Clear all</strong></li>
   <li><strong>See all</strong> — on an account or envelope, opens the Activity tab filtered to it across all months</li>
   <li><strong>Bulk changes</strong> — select transactions, then ⋮ for <strong>Select all</strong>, <strong>Change category</strong>, <strong>Change account</strong>, <strong>Change date</strong> or <strong>Export CSV</strong>. Envelope balances update; transfers only take a new date</li>
@@ -786,7 +786,7 @@
 <h3>Seals</h3>
 <p>BudgetSeal marks finished budgeting with a gold wax seal:</p>
 <ul>
-  <li><strong>Fully funded</strong> — an envelope with a target gets a seal on its icon once it's fully funded: a spending envelope when this period's funding reaches the target (money moved or withdrawn out again doesn't count; spending from it afterwards keeps the seal; going below zero takes it away), a rollover envelope when its balance reaches the target</li>
+  <li><strong>Fully funded</strong> — an envelope with a target gets a seal after its name once it's fully funded: a spending envelope when this period's funding reaches the target (money moved or withdrawn out again doesn't count; spending from it afterwards keeps the seal; going below zero takes it away), a rollover envelope when its balance reaches the target</li>
   <li><strong>All sealed</strong> — when Ready to assign is at zero, no envelope is overspent and your envelopes hold your money, the gold banner reads <strong>All sealed</strong>: every bit of your money has a job</li>
   <li><strong>&lt;Month&gt; sealed</strong> — in the first week of a new period, the Budget tab sums up the month you just closed: what you spent of what you budgeted. It carries the seal when you stayed within budget; a month that went over is just "&lt;Month&gt; budget", with how much it went over. Tap <strong>See the recap</strong> for the full close: a dated seal, what you budgeted, spent and kept, which envelopes held and which went over, what happened to the leftovers, and a button to plan the new month. <strong>Share recap</strong> sends it as a picture</li>
 </ul>
@@ -877,9 +877,9 @@
 
 <h3>Reading the Budget tab</h3>
 <ul>
-  <li>Under Ready to assign, one line sums up the month: what you budgeted, what you spent, and how many days are left</li>
+  <li>Under Ready to assign, three small tiles sum up the month for your spending envelopes: <strong>Budgeted</strong>, <strong>Spent</strong>, and what's left with how many days to go (the same numbers as the month card on Activity)</li>
   <li><strong>Needs attention</strong> — overspent envelopes are gathered at the top in a red card, each with <strong>Cover</strong> to move money in</li>
-  <li>The rest sit in one card per section. Each row shows what's left, a thin bar of what you've used, and "$36 spent of $100" (or "N% saved" for a rollover envelope with a target). The bar turns amber when less than a tenth is left</li>
+  <li>The rest sit in one card per section. Each row shows what's left, a thin bar of what you've used, and "$36 spent of $100" (or "N% saved" for a rollover envelope with a target). The bar turns amber with <em>Nearly gone</em> when less than 15% is left, and once an envelope is spent down to zero it shows <strong>Done</strong> with a gray bar — done for the month, not a warning</li>
   <li>Tap a row to open the envelope; its <strong>Spend</strong> button adds an expense from it</li>
 </ul>
 <figure class="shot"><img src="help/budget.webp" alt="The Budget tab" loading="lazy" width="480" height="967"><figcaption>The Budget tab</figcaption></figure>
@@ -931,10 +931,11 @@
 <p>Go to <strong>More</strong> → <strong>Calendar</strong> (or the calendar button on Recurring &amp; bills) to see your month as a grid. Each day with transactions is colored by its total: <strong>green</strong> when more came in than went out, <strong>red</strong> when you spent more, with the amount under the date. Today and the days ahead show the bills due, in blue. Tap a day to see its transactions and bills — tap a bill to open Upcoming bills, where you can pay or skip it. To add a transaction on a past day, use <strong>Add on this day</strong> under the list, or double-tap the day.</p>
 
 <h3>Upcoming bills</h3>
-<p>Tap <strong>Upcoming</strong> or <strong>Overdue</strong> on the Home tab (or a bill in the Calendar, or long-press the app icon → <strong>Upcoming bills</strong>) to see all bills sorted by due date with urgency indicators:</p>
+<p>Tap <strong>Upcoming</strong> or <strong>Overdue</strong> on the Home tab (or a bill in the Calendar, or long-press the app icon → <strong>Upcoming bills</strong>) to see all bills sorted by due date, in two groups — <strong>This week</strong> and <strong>Later</strong> — each with what goes out and comes in. The due label gets stronger as a bill nears:</p>
 <ul>
-  <li><span style="color:#6577E0"><strong>Indigo</strong></span> — Overdue</li>
-  <li><span style="color:#58A4C2"><strong>Blue</strong></span> — Due today, tomorrow, or in a few days</li>
+  <li><span style="color:#6577E0"><strong>Indigo</strong></span> — Overdue, or waiting for you to confirm the amount</li>
+  <li><span style="color:#58A4C2"><strong>Blue</strong></span> — Due in the next 3 days</li>
+  <li>Plain — further out</li>
 </ul>
 <p>Tap a bill to <strong>Post now</strong> (pay it early — it's recorded today and the next date moves on), <strong>Paid on another day</strong> (you paid it on a different day — pick the date; an overdue bill starts on its due date), <strong>Skip this one</strong> (move to the next date without recording it), or <strong>Edit</strong> it. Subscriptions show the price that will actually be charged, including scheduled price changes; changing a subscription's amount in Edit adds a price change from today. If you deleted a bill's payment by mistake, set its next date back in Edit and tap <strong>Post now</strong> to record it again (bills are never re-posted on their own after you delete them).</p>
 <p><strong>Bills that change every time</strong> (electricity, generator, a top-up): turn on <strong>Ask before posting</strong> when you add or edit the bill. When it's due it isn't recorded on its own — it shows <em>Confirm the amount</em>; tap it, choose <strong>Confirm amount and post</strong>, and the calculator opens with the bill's name for what you actually paid. The bill keeps its usual amount for next time.</p>
@@ -1144,7 +1145,7 @@
 <!-- ══════════════════════════════════════════ -->
 <h2 id="reports">Reports</h2>
 
-<p>The Reports tab starts with the <strong>period</strong>: <em>Month</em>, <em>3 months</em>, <em>6 months</em>, <em>12 months</em>, <em>This year</em> or <em>Custom…</em> (pick a first and last month). Every report you open uses the same period, and compares it with the same length of time just before it — except the one-month reports (<em>Month overview</em>, <em>By category</em>, <em>Month insights</em>), which have their own month arrows, and <em>Balance sheet</em>, which compares with a date.</p>
+<p>The Reports tab starts with the <strong>period</strong>: <em>Month</em>, <em>3 months</em>, <em>6 months</em> or <em>12 months</em> on the switch, or the calendar button beside it for <em>This year</em> or <em>Custom…</em> (pick a first and last month). Every report you open uses the same period, and compares it with the same length of time just before it — except the one-month reports (<em>Month overview</em>, <em>By category</em>, <em>Month insights</em>), which have their own month arrows, and <em>Balance sheet</em>, which compares with a date.</p>
 <p>Under the period, a few plain sentences say how it went — how much of what you earned you kept, which category took the most, and whether spending went up or down — with <strong>Earned</strong>, <strong>Spent</strong> and <strong>Kept</strong> and their change. Then the reports, in four groups:</p>
 <ul>
   <li><strong>Budget</strong> — <em>Budget vs actual</em>: for all envelopes or one, each month's spending against what the envelope had to spend (red when it went over), and every envelope's <strong>track record</strong> — a dot per month: held, went over, or not used. <em>Month insights</em>: pace, savings rate, age of money and tips for one month</li>

@@ -859,6 +859,15 @@ class _AllocationDetailScreenState
     final elapsed = isSpending
         ? BudgetProgress.fractionOfPeriod(period.start, period.end)
         : null;
+    final trackColor =
+        AppColors.pastel(context, envColor, light: 0.62, dark: 0.6);
+    // The envelope's own deep tone (light in dark mode) for the chip text
+    // and the Fund button, so they match the hero instead of the accent.
+    final deep = AppColors.pastel(context, envColor,
+        light: 0.5, dark: 0.5, inverse: true);
+    final pct = hasTarget
+        ? (mainBalance / _targetAmount * 100).clamp(0, 999).round()
+        : 0;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
@@ -881,7 +890,27 @@ class _AllocationDetailScreenState
                   ),
                 ),
               ),
-              if (sealed)
+              // How far along, as a chip beside the label (it used to sit
+              // half on, half off the bar's edge).
+              if (hasTarget)
+                Container(
+                  margin: const EdgeInsetsDirectional.only(end: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: trackColor,
+                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                  ),
+                  child: Text(
+                      isSpending
+                          ? S.of(context).allocPercentLeft(pct)
+                          : S.of(context).allocPercentSaved(pct),
+                      style: TextStyle(
+                          color: deep,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800)),
+                )
+              else if (sealed)
                 Padding(
                   padding: const EdgeInsetsDirectional.only(end: 8),
                   child: Text(S.of(context).sealFullyFunded,
@@ -937,10 +966,8 @@ class _AllocationDetailScreenState
             BudgetProgress(
               progress: mainBalance / _targetAmount,
               color: envColor,
-              height: 22,
-              showPercent: true,
-              trackColor: AppColors.pastel(context, envColor,
-                  light: 0.62, dark: 0.6),
+              height: 12,
+              trackColor: trackColor,
               overspent: mainBalance < 0,
               // Bar shows what's left: marker = share that should remain.
               todayFraction: elapsed == null ? null : 1 - elapsed,
@@ -1035,6 +1062,13 @@ class _AllocationDetailScreenState
           Row(children: [
             Expanded(
               child: FilledButton.icon(
+                // The envelope's colour, not the gold accent: a gold button
+                // on a blue hero clashed (the one place a FilledButton
+                // takes its own colour).
+                style: FilledButton.styleFrom(
+                  backgroundColor: deep,
+                  foregroundColor: AppColors.inkOn(deep),
+                ),
                 onPressed: () => _showFundSheet(targetCurrency),
                 icon: const Icon(AppIcons.plus, size: 20),
                 label: Text(S.of(context).allocFund),

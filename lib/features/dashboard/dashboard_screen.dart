@@ -7,7 +7,6 @@ import 'package:drift/drift.dart' hide Column;
 
 import '../capture/review_screen.dart';
 import '../family/requests_screen.dart';
-import '../forecast/forecast_screen.dart';
 import '../../core/database/app_database.dart';
 import '../../core/providers/sync_provider.dart';
 import '../../core/providers/accounts_provider.dart';
@@ -34,7 +33,6 @@ import '../../shared/widgets/tappable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/providers/premium_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
-import '../transactions/widgets/feature_colors.dart';
 import '../transactions/widgets/tx_tile.dart';
 import '../../shared/theme/app_icons.dart';
 import '../../shared/widgets/app_card.dart';
@@ -46,7 +44,6 @@ import '../reports/widgets/income_expense_summary.dart';
 import '../../core/providers/getting_started_provider.dart';
 import 'widgets/getting_started_card.dart';
 import 'widgets/budget_focus.dart';
-import '../../core/providers/date_format_provider.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -180,8 +177,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       } else {
                         cutoff = DateTime(now.year, now.month, 1);
                       }
+                      // From the cutoff on: income booked at 00:00 on the
+                      // 1st belongs to the month.
                       final filtered = entries
-                          .where((e) => e.tx.createdAt.isAfter(cutoff));
+                          .where((e) => !e.tx.createdAt.isBefore(cutoff));
 
                       double totalIncome = 0;
                       double totalExpense = 0;
@@ -349,7 +348,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       _QuickAction(
                         icon: AppIcons.minus,
                         label: qs.typeExpense,
-                        color: ref.watch(txColorsProvider).expense,
                         onTap: () => context.push('/add-transaction',
                             extra: {'editType': 'expense'}),
                       ),
@@ -357,7 +355,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       _QuickAction(
                         icon: AppIcons.plus,
                         label: qs.typeIncome,
-                        color: ref.watch(txColorsProvider).income,
                         onTap: () => context.push('/add-transaction',
                             extra: {'editType': 'income'}),
                       ),
@@ -365,7 +362,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       _QuickAction(
                         icon: AppIcons.arrowsLeftRight,
                         label: qs.dashboardQuickTransfer,
-                        color: ref.watch(txColorsProvider).transfer,
                         onTap: () => context.push('/add-transaction',
                             extra: {'editType': 'transfer'}),
                       ),
@@ -375,7 +371,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                           icon: AppIcons.piggyBank,
                           label: qs.dashboardQuickFund,
                           tooltip: qs.dashboardFundEnvelopesTooltip,
-                          color: kPlannedColor,
                           onTap: () => context.push('/funding'),
                         ),
                       ],
@@ -384,7 +379,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                         icon: AppIcons.arrowsSplit,
                         label: qs.dashboardQuickSplit,
                         tooltip: qs.dashboardSplitBillTooltip,
-                        color: kSplitColor,
                         onTap: () {
                           if (!checkPremiumAccess(context, ref, PremiumFeature.billSplitter)) return;
                           context.push('/bill-splitter');
@@ -397,10 +391,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     ];
 
     sectionWidgets[DashboardSection.budget] = [
+                  // Ready to assign, overspent, bills and safe to spend.
                   BudgetFocus(baseCurrency: baseCurrency),
-                  const SizedBox(height: 12),
-                  // Safe to spend today and the lowest point ahead.
-                  const ForecastCard(),
+                  const SizedBox(height: 8),
     ];
 
     sectionWidgets[DashboardSection.money] = [
@@ -600,8 +593,6 @@ class _SpendingOverviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final periodLabel =
-        showWeekly ? S.of(context).dashboardLast7Days : formatMonth(DateTime.now());
     final sorted = categorySpend.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     final topCategories = sorted.take(5).toList();
@@ -621,34 +612,53 @@ class _SpendingOverviewCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // "Spending" and a two-way switch that names both periods (one
+          // chip naming the other period read as the card's own title).
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(periodLabel,
-                  style: TextStyle(
-                      fontSize: TypographyTokens.cardTitleSize,
-                      fontWeight: TypographyTokens.cardTitleWeight,
-                      color: AppColors.tp(context))),
-              Tappable(
-                onTap: onTogglePeriod,
-                borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                scaleFactor: 0.95,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.sfv(context),
-                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                  ),
-                  child: Text(
-                    showWeekly ? S.of(context).dashboardThisMonth : S.of(context).dashboardLast7Days,
+              Expanded(
+                child: Text(S.of(context).dashSpendingTitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: TypographyTokens.overlineSize,
-                      fontWeight: TypographyTokens.overlineWeight,
-                      color: AppColors.accentText(context),
-                    ),
-                  ),
+                        fontSize: TypographyTokens.cardTitleSize,
+                        fontWeight: TypographyTokens.cardTitleWeight,
+                        color: AppColors.tp(context))),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  color: AppColors.sfv(context),
+                  borderRadius: BorderRadius.circular(RadiusTokens.md),
                 ),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  for (final (weekly, label) in [
+                    (false, S.of(context).dashboardThisMonth),
+                    (true, S.of(context).dashboardLast7Days),
+                  ])
+                    Tappable(
+                      onTap: weekly == showWeekly ? null : onTogglePeriod,
+                      borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                      color: weekly == showWeekly
+                          ? AppColors.sf(context)
+                          : Colors.transparent,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
+                        child: Text(label,
+                            style: TextStyle(
+                              fontSize: TypographyTokens.overlineSize,
+                              fontWeight: weekly == showWeekly
+                                  ? FontWeight.w800
+                                  : TypographyTokens.overlineWeight,
+                              color: weekly == showWeekly
+                                  ? AppColors.tp(context)
+                                  : AppColors.ts(context),
+                            )),
+                      ),
+                    ),
+                ]),
               ),
             ],
           ),
@@ -766,62 +776,63 @@ class _SpendingOverviewCard extends StatelessWidget {
 class _QuickAction extends StatelessWidget {
   final IconData icon;
   final String label;
-  final Color color;
   final VoidCallback onTap;
   final String? tooltip;
   const _QuickAction(
       {required this.icon,
       required this.label,
-      required this.color,
       required this.onTap,
       this.tooltip});
 
   @override
   Widget build(BuildContext context) {
+    // One family: card tiles with the accent in the icon circle — colour
+    // is kept for meaning (overspent, income), not for buttons.
     return Expanded(
       child: Semantics(
         label: tooltip ?? S.of(context).dashboardAddLabel(label),
         button: true,
         child: Tooltip(
           message: tooltip ?? S.of(context).dashboardAddLabel(label),
-          child: Tappable(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(CardTokens.radius),
-            scaleFactor: 0.93,
-            haptic: true,
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              decoration: BoxDecoration(
-                color: AppColors.pastel(context, color, light: 0.85, dark: 0.78),
-                borderRadius: BorderRadius.circular(CardTokens.radius),
+          child: DecoratedBox(
+            decoration: AppColors.card(context),
+            child: Tappable(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(CardTokens.radius),
+              color: AppColors.sf(context),
+              scaleFactor: 0.93,
+              haptic: true,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Column(children: [
+                  Container(
+                    width: CategoryIconTokens.compactSize,
+                    height: CategoryIconTokens.compactSize,
+                    decoration: BoxDecoration(
+                      color: AppColors.pastel(context, AppColors.accent,
+                          light: 0.85, dark: 0.78),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icon,
+                        size: 20, color: AppColors.accentText(context)),
+                  ),
+                  const SizedBox(height: 6),
+                  // Five actions share the width: shrink the label rather
+                  // than cut it ("Expen…") on narrow phones.
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(label,
+                          maxLines: 1,
+                          style: TextStyle(
+                              fontSize: TypographyTokens.captionSize,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.tp(context))),
+                    ),
+                  ),
+                ]),
               ),
-              child: Column(children: [
-                Container(
-                  width: CategoryIconTokens.compactSize,
-                  height: CategoryIconTokens.compactSize,
-                  decoration: BoxDecoration(
-                    color: AppColors.pastel(context, color,
-                        light: 0.6, dark: 0.5),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, size: 20, color: AppColors.tp(context)),
-                ),
-                const SizedBox(height: 6),
-                // Five actions share the width: shrink the label rather
-                // than cut it ("Expen…") on narrow phones.
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(label,
-                        maxLines: 1,
-                        style: TextStyle(
-                            fontSize: TypographyTokens.captionSize,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.tp(context))),
-                  ),
-                ),
-              ]),
             ),
           ),
         ),

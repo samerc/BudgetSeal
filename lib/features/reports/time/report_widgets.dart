@@ -142,7 +142,10 @@ String axisAmount(double v) {
   final a = v.abs();
   if (a >= 1000000) return '${formatNumber(v / 1000000, decimals: 1)}M';
   if (a >= 10000) return '${formatNumber(v / 1000, decimals: 0)}k';
-  if (a >= 1000) return '${formatNumber(v / 1000, decimals: 1)}k';
+  // "5k", not "5.0k"; "2.5k" keeps its decimal.
+  if (a >= 1000) {
+    return '${formatNumber(v / 1000, decimals: a % 1000 == 0 ? 0 : 1)}k';
+  }
   return formatNumber(v, decimals: 0);
 }
 

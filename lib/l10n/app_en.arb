@@ -864,6 +864,20 @@
   "@forecastEmpty": {"description": "Forecast: the next 90 days and safe to spend today"},
   "forecastPerDay": "{amount} a day",
   "@forecastPerDay": {"description": "Forecast: the next 90 days and safe to spend today", "placeholders": {"amount": {"type": "String"}}},
+  "forecastFree": "Free until then",
+  "@forecastFree": {"description": "Forecast: total free until the next income"},
+  "forecastDividedBy": "{count, plural, =1{÷ 1 day} other{÷ {count} days}}",
+  "@forecastDividedBy": {"description": "Forecast: free money divided by the days until the next income", "placeholders": {"count": {"type": "int"}}},
+  "forecastFreeMoney": "Free money",
+  "@forecastFreeMoney": {"description": "Forecast: chart title (balance less sinking funds and savings goals)"},
+  "forecastSafeShort": "Safe to spend",
+  "@forecastSafeShort": {"description": "Home: Safe to spend box title (half width)"},
+  "forecastADayUntil": "a day until {date}",
+  "@forecastADayUntil": {"description": "Home: under the safe-to-spend amount", "placeholders": {"date": {}}},
+  "forecastADayUntilEst": "a day until about {date}",
+  "@forecastADayUntilEst": {"description": "Home: under the safe-to-spend amount, estimated income", "placeholders": {"date": {}}},
+  "forecastADay30": "a day for the next 30 days",
+  "@forecastADay30": {"description": "Home: under the safe-to-spend amount, no income coming"},
   "familyPrivate": "Private",
   "@familyPrivate": {"description": "Family: members, roles, private envelopes"},
   "familyPrivateLine": "Private envelopes",
@@ -1332,6 +1346,8 @@
   "@dashboardThisMonth": {
     "description": "Toggle label"
   },
+  "dashSpendingTitle": "Spending",
+  "@dashSpendingTitle": {"description": "Home: spending card title"},
   "dashboardSearchPlaceholder": "Search transactions, accounts...",
   "@dashboardSearchPlaceholder": {
     "description": "Global search hint"
@@ -2039,7 +2055,7 @@
   "@txListAccountLabel": {
     "description": "Setting title"
   },
-  "txListAccountSubtitle": "Show account name on each transaction",
+  "txListAccountSubtitle": "Show the account and its balance after each transaction",
   "@txListAccountSubtitle": {
     "description": "Setting subtitle"
   },
@@ -2467,6 +2483,8 @@
       }
     }
   },
+  "allocPercentLeft": "{pct}% left",
+  "@allocPercentLeft": {"description": "Envelope detail: chip beside Available (spending envelope)", "placeholders": {"pct": {"type": "int"}}},
   "allocFlexibleTitle": "Rollover",
   "allocFlexibleDesc": "Unspent money rolls over to the next period. Set an optional target, or leave it open.",
   "allocCycleHelp": "\u2022 Periodic: resets each month (e.g. groceries budget)\n\u2022 Permanent: accumulates over time (e.g. emergency fund)",
@@ -2838,6 +2856,14 @@
       }
     }
   },
+  "billsThisWeek": "This week",
+  "@billsThisWeek": {"description": "Upcoming bills: group (late and next 7 days)"},
+  "billsLater": "Later",
+  "@billsLater": {"description": "Upcoming bills: group"},
+  "billsSumOut": "{amount} out",
+  "@billsSumOut": {"description": "Upcoming bills: group header total going out", "placeholders": {"amount": {}}},
+  "billsSumIn": "{amount} in",
+  "@billsSumIn": {"description": "Upcoming bills: group header total coming in", "placeholders": {"amount": {}}},
   "subTitle": "Subscriptions",
   "@subTitle": {
     "description": "Screen title"
@@ -6248,6 +6274,10 @@
   "@txMonthBudget": { "description": "Activity month card title, e.g. \"October budget\"", "placeholders": { "month": { "type": "String" } } },
   "txMonthSpentOf": "Spent {spent} of {budgeted} budgeted · income {income}",
   "@txMonthSpentOf": { "description": "Activity month card line", "placeholders": { "spent": { "type": "String" }, "budgeted": { "type": "String" }, "income": { "type": "String" } } },
+  "txMonthSpentOfShort": "Spent {spent} of {budgeted}",
+  "@txMonthSpentOfShort": {"description": "Activity month card: start of the line", "placeholders": {"spent": {}, "budgeted": {}}},
+  "txMonthIncome": "Income {amount}",
+  "@txMonthIncome": {"description": "Activity month card: end of the line", "placeholders": {"amount": {}}},
   "txMonthSpent": "Spent {spent} · income {income}",
   "@txMonthSpent": { "description": "Activity month card line when no envelope has a target", "placeholders": { "spent": { "type": "String" }, "income": { "type": "String" } } },
   "webGsTitle": "Get started",
@@ -6730,6 +6760,16 @@
   "@allocSpentOf": {"description": "Budget tab row: spending envelope progress", "placeholders": {"spent": {"type": "String"}, "budget": {"type": "String"}}},
   "allocNothingSpent": "Nothing spent yet",
   "@allocNothingSpent": {"description": "Budget tab row: spending envelope with no spending this period"},
+  "allocBudgetedLabel": "Budgeted",
+  "@allocBudgetedLabel": {"description": "Budget tab: summary tile"},
+  "allocSpentLabel": "Spent",
+  "@allocSpentLabel": {"description": "Budget tab: summary tile"},
+  "allocAllSpent": "All {amount} spent · done for the month",
+  "@allocAllSpent": {"description": "Budget tab row: spending envelope spent to zero", "placeholders": {"amount": {}}},
+  "allocNearlyGone": "Nearly gone",
+  "@allocNearlyGone": {"description": "Budget tab row: under 15% left"},
+  "allocDone": "Done",
+  "@allocDone": {"description": "Budget tab row: in place of $0.00 when spent to zero"},
   "rptSpanMonth": "Month",
   "@rptSpanMonth": {"description": "Reports: period chip"},
   "rptSpan3": "3 months",
@@ -6742,6 +6782,10 @@
   "@rptSpanYear": {"description": "Reports: period chip"},
   "rptSpanCustom": "Custom…",
   "@rptSpanCustom": {"description": "Reports: period chip, opens a month range picker"},
+  "rptMoreRanges": "More ranges",
+  "@rptMoreRanges": {"description": "Reports: calendar button and sheet (This year, Custom)"},
+  "rptNoCompare": "No earlier data",
+  "@rptNoCompare": {"description": "Reports tile: nothing in the period before to compare with"},
   "rptComparedWith": "{range} · compared with {n, plural, =1{the month before} other{the {n} months before}}",
   "@rptComparedWith": {"description": "Reports: the period shown and what it is compared with", "placeholders": {"range": {"type": "String"}, "n": {"type": "int"}}},
   "rptPickFrom": "From",

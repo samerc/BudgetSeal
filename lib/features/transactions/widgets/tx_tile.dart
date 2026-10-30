@@ -373,7 +373,7 @@ class TxTile extends ConsumerWidget {
       String title,
       TxListSettings settings,
       ({double value, String currency}) amount) {
-    final under = _underAmount(context, s, amount);
+    final under = _underAmount(context, ref, s, amount);
     final end = under.isEmpty ? null : under.first;
     final showImpact = !settings.compact;
     if (!showImpact && !showBalance && !showDate) return const [];
@@ -409,8 +409,8 @@ class TxTile extends ConsumerWidget {
   }
 
   // ── Under the amount: balance after / date / conversion ─────────
-  List<Widget> _underAmount(
-      BuildContext context, S s, ({double value, String currency}) amount) {
+  List<Widget> _underAmount(BuildContext context, WidgetRef ref, S s,
+      ({double value, String currency}) amount) {
     final tx = entry.tx;
     final lines = entry.lines;
     final isTransfer = tx.type == 'transfer';
@@ -424,9 +424,15 @@ class TxTile extends ConsumerWidget {
         lines.any(
             (l) => !isRealRate(l.currency, tx.currency, l.exchangeRateToBase));
 
+    // The account's running balance: only when the list asks for it
+    // (Settings › Transaction list › Account label) or shows one account —
+    // beside the envelope balance it crowded both off the line.
+    final balanceShown = showBalance &&
+        (balanceAccountId != null ||
+            ref.watch(txListSettingsProvider).showAccount);
     if (showDate) {
       out.add(Text(formatDate(tx.createdAt.toLocal()), style: small));
-    } else if (!showBalance) {
+    } else if (!balanceShown) {
       out.add(const SizedBox.shrink());
     } else {
       final single = entry.involvedAccountNames.length <= 1;

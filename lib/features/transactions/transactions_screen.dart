@@ -1159,31 +1159,14 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             height: 50,
             child: Row(
               children: [
-                // Left arrow
-                Tappable(
-                  borderRadius: BorderRadius.circular(RadiusTokens.md),
-                  onTap: () {
-                    hapticLight();
-                    if (_selectedMonth == 1) {
-                      _setMonth(_selectedYear - 1, 12);
-                    } else {
-                      _setMonth(_selectedYear, _selectedMonth - 1);
-                    }
-                    _scrollMonthIntoView();
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Icon(AppIcons.caretLeft,
-                        size: 22, color: AppColors.ts(context)),
-                  ),
-                ),
                 // Year + Month list (year is the first item)
                 Expanded(
                   // Wide enough that a month cut at the edge fades out
-                  // instead of showing a stray letter.
+                  // instead of showing a stray letter ("ɟust"). No arrow:
+                  // tapping or swiping the strip moves between months.
                   child: FadedEdges(
-                  startFade: 48,
-                  endFade: 32,
+                  startFade: 64,
+                  endFade: 64,
                   child: LayoutBuilder(builder: (context, box) => ListView.builder(
                     controller: _monthScrollCtrl,
                     scrollDirection: Axis.horizontal,
@@ -2579,13 +2562,13 @@ class _DateHeaderTile extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           // "Wednesday" + a long date at large text: the date shrinks
-          // instead of losing its year.
+          // instead of being cut. This year's dates leave the year out.
           Expanded(
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: AlignmentDirectional.centerStart,
               child: Text(
-                formatDate(date),
+                formatDateNoYear(date),
                 style: TextStyle(fontSize: 12.5, color: AppColors.ts(context)),
                 maxLines: 1,
               ),
@@ -2655,6 +2638,8 @@ class _MonthBudgetCard extends StatelessWidget {
     final detail = hasBudget
         ? s.txMonthSpentOf(f(spent), f(budgeted), f(income))
         : s.txMonthSpent(f(spent), f(income));
+    final spentOf = s.txMonthSpentOfShort(f(spent), f(budgeted));
+    final incomeLine = s.txMonthIncome(f(income));
     const tabular = [FontFeature.tabularFigures()];
     final titleStyle = TextStyle(
       fontFamily: TypographyTokens.displayFamily,
@@ -2739,7 +2724,24 @@ class _MonthBudgetCard extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 8),
-          Text(detail, style: detailStyle),
+          // Spent of budgeted on the start, income on the end; on a narrow
+          // screen income goes under it instead of wrapping mid-amount.
+          if (hasBudget)
+            SizedBox(
+              // Full width, so spaceBetween reaches the end.
+              width: double.infinity,
+              child: Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                spacing: 12,
+                runSpacing: 2,
+                children: [
+                  Text(spentOf, style: detailStyle),
+                  Text(incomeLine, style: detailStyle),
+                ],
+              ),
+            )
+          else
+            Text(detail, style: detailStyle),
         ],
       ),
     );

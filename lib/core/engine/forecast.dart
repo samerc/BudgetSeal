@@ -107,6 +107,14 @@ class CurrencyForecast {
   });
 
   bool get hasEstimate => events.any((e) => e.kind == ForecastKind.estimate);
+
+  /// Free until the next income: cash − due − reserved − saved (negative
+  /// when it falls short). [safeToSpend] is this ÷ [daysLeft].
+  double get free => start - dueBefore - reserved - saved;
+
+  /// Each day's balance less what's kept for sinking funds and savings
+  /// goals: the money that's free to spend (the forecast chart).
+  List<double> get freeDaily => [for (final v in daily) v - reserved - saved];
 }
 
 DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
@@ -222,6 +230,7 @@ Map<String, CurrencyForecast> buildForecast({
           (f.thisPeriod[c] ?? 0);
     }
     final saved = math.max(0.0, savings[c] ?? 0);
+    // Same as CurrencyForecast.free.
     final free = start - dueBefore - reserved - saved;
     out[c] = CurrencyForecast(
       currency: c,

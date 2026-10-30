@@ -2356,6 +2356,41 @@ class SAr extends S {
   }
 
   @override
+  String get forecastFree => 'المتاح حتى ذلك الحين';
+
+  @override
+  String forecastDividedBy(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '÷ $count يومًا',
+      few: '÷ $count أيام',
+      two: '÷ يومان',
+      one: '÷ يوم واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get forecastFreeMoney => 'المال المتاح';
+
+  @override
+  String get forecastSafeShort => 'يمكنك إنفاقه';
+
+  @override
+  String forecastADayUntil(Object date) {
+    return 'في اليوم حتى $date';
+  }
+
+  @override
+  String forecastADayUntilEst(Object date) {
+    return 'في اليوم حتى $date تقريبًا';
+  }
+
+  @override
+  String get forecastADay30 => 'في اليوم خلال الثلاثين يومًا القادمة';
+
+  @override
   String get familyPrivate => 'خاص';
 
   @override
@@ -3051,6 +3086,9 @@ class SAr extends S {
   String get dashboardThisMonth => 'هذا الشهر';
 
   @override
+  String get dashSpendingTitle => 'الإنفاق';
+
+  @override
   String get dashboardSearchPlaceholder => 'البحث في المعاملات والحسابات...';
 
   @override
@@ -3541,7 +3579,7 @@ class SAr extends S {
   String get txListAccountLabel => 'تسمية الحساب';
 
   @override
-  String get txListAccountSubtitle => 'إظهار اسم الحساب على كل معاملة';
+  String get txListAccountSubtitle => 'إظهار الحساب ورصيده بعد كل معاملة';
 
   @override
   String get txListCategoryIcon => 'أيقونة الفئة';
@@ -3844,6 +3882,11 @@ class SAr extends S {
   @override
   String allocPercentSaved(int pct) {
     return '$pct% مدّخر';
+  }
+
+  @override
+  String allocPercentLeft(int pct) {
+    return 'متبقٍّ $pct%';
   }
 
   @override
@@ -4608,6 +4651,22 @@ class SAr extends S {
   @override
   String upcomingDueInDays(int days) {
     return 'مستحقة خلال $days أيام';
+  }
+
+  @override
+  String get billsThisWeek => 'هذا الأسبوع';
+
+  @override
+  String get billsLater => 'لاحقًا';
+
+  @override
+  String billsSumOut(Object amount) {
+    return 'يخرج $amount';
+  }
+
+  @override
+  String billsSumIn(Object amount) {
+    return 'يدخل $amount';
   }
 
   @override
@@ -7903,6 +7962,16 @@ class SAr extends S {
   }
 
   @override
+  String txMonthSpentOfShort(Object spent, Object budgeted) {
+    return 'أُنفق $spent من $budgeted';
+  }
+
+  @override
+  String txMonthIncome(Object amount) {
+    return 'الدخل $amount';
+  }
+
+  @override
   String txMonthSpent(String spent, String income) {
     return 'أُنفق $spent · الدخل $income';
   }
@@ -8809,6 +8878,23 @@ class SAr extends S {
   String get allocNothingSpent => 'لم يُصرف شيء بعد';
 
   @override
+  String get allocBudgetedLabel => 'المخصّص';
+
+  @override
+  String get allocSpentLabel => 'المُنفَق';
+
+  @override
+  String allocAllSpent(Object amount) {
+    return 'أُنفق كامل $amount · انتهى لهذا الشهر';
+  }
+
+  @override
+  String get allocNearlyGone => 'أوشك على النفاد';
+
+  @override
+  String get allocDone => 'اكتمل';
+
+  @override
   String get rptSpanMonth => 'شهر';
 
   @override
@@ -8825,6 +8911,12 @@ class SAr extends S {
 
   @override
   String get rptSpanCustom => 'مخصص…';
+
+  @override
+  String get rptMoreRanges => 'فترات أخرى';
+
+  @override
+  String get rptNoCompare => 'لا بيانات سابقة';
 
   @override
   String rptComparedWith(String range, int n) {

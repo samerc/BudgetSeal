@@ -22,9 +22,11 @@ String? overspentCurrency(Map<String, double> balances, String main) {
 }
 
 
-/// One envelope on the Budget tab: icon (with the seal when fully funded),
-/// name and what's left, a thin bar of what's been used, and a line on how
-/// it's going. Rows sit together in one card per section; an overspent one
+/// One envelope on the Budget tab: icon, name (with the seal after it when
+/// fully funded) and what's left, a thin bar of what's been used, and a line
+/// on how it's going. A spending envelope's bar has three states: on track
+/// (accent), nearly gone (amber, under 15% left) and done (spent to zero:
+/// muted, "Done" in place of $0.00). Rows sit together in one card per section; an overspent one
 /// goes in the "Needs attention" card with a Cover button.
 class EnvelopeRow extends StatelessWidget {
   final String name;
@@ -104,24 +106,14 @@ class EnvelopeRow extends StatelessWidget {
               color: AppColors.pastel(context, color,
                   light: 0.5, dark: 0.5, inverse: true)));
     }
-    return SizedBox.square(
-      dimension: 38,
-      child: Stack(clipBehavior: Clip.none, children: [
-        Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            color: AppColors.pastel(context, color, light: 0.55, dark: 0.45),
-            shape: BoxShape.circle,
-          ),
-          child: Center(child: inner),
-        ),
-        PositionedDirectional(
-          end: -4,
-          bottom: -4,
-          child: SealStamp(sealed: sealed, size: 18),
-        ),
-      ]),
+    return Container(
+      width: 38,
+      height: 38,
+      decoration: BoxDecoration(
+        color: AppColors.pastel(context, color, light: 0.55, dark: 0.45),
+        shape: BoxShape.circle,
+      ),
+      child: Center(child: inner),
     );
   }
 
@@ -167,6 +159,23 @@ class EnvelopeRow extends StatelessWidget {
           ? tr.allocSpentOf(money(spent), money(target))
           : tr.allocNothingSpent;
     }
+    // Spent down to zero: done for the period, not a warning.
+    final done = !_isFlexible &&
+        !over &&
+        target != null &&
+        balance.abs() < 0.005 &&
+        spent > 0.005;
+    // Spending envelopes nearly empty (under 15% left) turn amber.
+    final low = !_isFlexible &&
+        !over &&
+        target != null &&
+        balance > 0.005 &&
+        balance < target * 0.15;
+    if (done) {
+      sub = tr.allocAllSpent(money(spent));
+    } else if (low && sub != null) {
+      sub = '${tr.allocNearlyGone} · $sub';
+    }
     final extras = <String>[
       if (plannedAmount != null && plannedAmount! > 0)
         '${formatAmount(plannedAmount!, currency: plannedCurrency ?? cur)} ${tr.plannedChipLabel}',
@@ -191,14 +200,11 @@ class EnvelopeRow extends StatelessWidget {
             '${secondSpent > 0.005 ? tr.allocSpentOf(money2(secondSpent), money2(target2)) : tr.allocNothingSpent}';
       }
     }
-    // Spending envelopes nearly empty turn the bar amber.
-    final low = !_isFlexible &&
-        target != null &&
-        balance > 0 &&
-        balance < target * 0.1;
     final barColor = _isFlexible
         ? AppColors.healthy
-        : (low ? AppColors.caution : AppColors.accentBright);
+        : done
+            ? AppColors.th(context)
+            : (low ? AppColors.caution : AppColors.accentBright);
 
     final semantic = <String>[
       name,
@@ -235,19 +241,33 @@ class EnvelopeRow extends StatelessWidget {
                       const SizedBox(width: 6),
                     ],
                     Expanded(
-                      child: Text(name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.w700)),
+                      child: Row(children: [
+                        Flexible(
+                          child: Text(name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.w700)),
+                        ),
+                        // The seal follows the name (not stamped on the
+                        // icon). Always built, so it's stamped on when
+                        // funding seals it (empty space until then).
+                        const SizedBox(width: 5),
+                        SealStamp(sealed: sealed, size: 15),
+                      ]),
                     ),
                     const SizedBox(width: 8),
                     if (!over)
-                      Text(money(balance),
-                          style: const TextStyle(
+                      Text(done ? tr.allocDone : money(balance),
+                          style: TextStyle(
                               fontFamily: TypographyTokens.displayFamily,
                               fontSize: 16,
-                              fontWeight: FontWeight.w800)),
+                              fontWeight: FontWeight.w800,
+                              color: done
+                                  ? AppColors.ts(context)
+                                  : low
+                                      ? AppColors.caution
+                                      : null)),
                   ]),
                   if (used != null) ...[
                     const SizedBox(height: 6),
@@ -274,7 +294,11 @@ class EnvelopeRow extends StatelessWidget {
                         style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: over ? bad : AppColors.ts(context))),
+                            color: over
+                                ? bad
+                                : low
+                                    ? AppColors.caution
+                                    : AppColors.ts(context))),
                   ],
                   if (used2 != null) ...[
                     const SizedBox(height: 6),

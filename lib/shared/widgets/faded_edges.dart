@@ -41,7 +41,12 @@ class FadedEdges extends StatelessWidget {
       return child;
     }
 
-    final isVertical = topFade > 0 || bottomFade > 0;
+    // A start or end fade makes it horizontal (bottomFade has a default,
+    // so it can't decide: the month strip faded its bottom edge instead of
+    // its sides).
+    final isVertical = startFade == 0 && endFade == 0;
+    final lead = isVertical ? topFade : startFade;
+    final trail = isVertical ? bottomFade : endFade;
     final AlignmentGeometry begin;
     final AlignmentGeometry end;
     if (isVertical) {
@@ -57,10 +62,9 @@ class FadedEdges extends StatelessWidget {
         final stops = <double>[];
         final colors = <Color>[];
 
-        if (topFade > 0 || startFade > 0) {
-          final fade = topFade > 0 ? topFade : startFade;
-          final ratio = (fade / (topFade > 0 ? rect.height : rect.width))
-              .clamp(0.0, 0.4);
+        final length = isVertical ? rect.height : rect.width;
+        if (lead > 0) {
+          final ratio = (lead / length).clamp(0.0, 0.4);
           stops.addAll([0.0, ratio]);
           colors.addAll([Colors.transparent, Colors.white]);
         } else {
@@ -68,11 +72,8 @@ class FadedEdges extends StatelessWidget {
           colors.add(Colors.white);
         }
 
-        if (bottomFade > 0 || endFade > 0) {
-          final fade = bottomFade > 0 ? bottomFade : endFade;
-          final ratio =
-              (1.0 - (fade / (bottomFade > 0 ? rect.height : rect.width)))
-                  .clamp(0.6, 1.0);
+        if (trail > 0) {
+          final ratio = (1.0 - trail / length).clamp(0.6, 1.0);
           stops.addAll([ratio, 1.0]);
           colors.addAll([Colors.white, Colors.transparent]);
         } else {

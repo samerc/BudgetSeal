@@ -13,6 +13,7 @@ import '../../../shared/utils/format_number.dart';
 import '../../../shared/widgets/tappable.dart';
 import '../../../shared/theme/app_icons.dart';
 import '../../../shared/theme/design_tokens.dart';
+import '../../forecast/forecast_screen.dart' show ForecastCard;
 
 /// Enabled recurring bills, live from the database.
 final _enabledRecurringProvider =
@@ -28,17 +29,25 @@ final _enabledRecurringProvider =
 });
 
 /// Cashew's home "Upcoming" / "Overdue" boxes: count + total of bills due
-/// in the next 7 days and (when any) bills already past due. Hidden when the
-/// user has no recurring bills at all.
+/// in the next 7 days and (when any) bills already past due. With
+/// [withForecast], Safe to spend sits beside Upcoming (or under both boxes
+/// when Overdue shows, or alone when there are no bills).
 class BillsBoxes extends ConsumerWidget {
-  const BillsBoxes({super.key, required this.baseCurrency});
+  const BillsBoxes(
+      {super.key, required this.baseCurrency, this.withForecast = false});
 
   final String baseCurrency;
+  final bool withForecast;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bills = ref.watch(_enabledRecurringProvider).value ?? const [];
-    if (!bills.any((b) => b.type == 'expense')) return const SizedBox.shrink();
+    if (!bills.any((b) => b.type == 'expense')) {
+      return withForecast
+          ? const Padding(
+              padding: EdgeInsets.only(bottom: 12), child: ForecastCard())
+          : const SizedBox.shrink();
+    }
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -59,39 +68,64 @@ class BillsBoxes extends ConsumerWidget {
       }
     }
 
+    final besideUpcoming = withForecast && overdue.isEmpty;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: _Box(
-              label: S.of(context).dashUpcoming,
-              icon: AppIcons.calendarDots,
-              color: AppColors.billUpcoming,
-              bills: upcoming,
-              baseCurrency: baseCurrency,
-              wide: overdue.isEmpty,
+          _sameHeight(
+            pair: overdue.isNotEmpty || besideUpcoming,
+            child: Row(
+              crossAxisAlignment: overdue.isNotEmpty || besideUpcoming
+                  ? CrossAxisAlignment.stretch
+                  : CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: _Box(
+                    label: S.of(context).dashUpcoming,
+                    icon: AppIcons.calendarDots,
+                    color: AppColors.billUpcoming,
+                    bills: upcoming,
+                    baseCurrency: baseCurrency,
+                    wide: overdue.isEmpty && !besideUpcoming,
+                  ),
+                ),
+                // The recurring engine posts due bills at launch, so overdue
+                // is rare — only show that box when something is late.
+                if (overdue.isNotEmpty) ...[
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _Box(
+                      label: S.of(context).dashOverdue,
+                      icon: AppIcons.clockCounterClockwise,
+                      color: AppColors.billOverdue,
+                      bills: overdue,
+                      baseCurrency: baseCurrency,
+                    ),
+                  ),
+                ],
+                if (besideUpcoming) ...[
+                  const SizedBox(width: 12),
+                  const Expanded(child: ForecastCard(compact: true)),
+                ],
+              ],
             ),
           ),
-          // The recurring engine posts due bills at launch, so overdue is
-          // rare — only show that box when something is actually late.
-          if (overdue.isNotEmpty) ...[
-          const SizedBox(width: 12),
-          Expanded(
-            child: _Box(
-              label: S.of(context).dashOverdue,
-              icon: AppIcons.clockCounterClockwise,
-              color: AppColors.billOverdue,
-              bills: overdue,
-              baseCurrency: baseCurrency,
-            ),
-          ),
+          if (withForecast && !besideUpcoming) ...[
+            const SizedBox(height: 12),
+            const ForecastCard(),
           ],
         ],
       ),
     );
   }
 }
+
+/// Two boxes in a row share the taller one's height. A single full-width
+/// box is left alone: its LayoutBuilder can't report an intrinsic height.
+Widget _sameHeight({required bool pair, required Widget child}) =>
+    pair ? IntrinsicHeight(child: child) : child;
 
 class _Box extends StatelessWidget {
   const _Box({

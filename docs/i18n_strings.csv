@@ -79,6 +79,7 @@ dashboard_spent,Donut chart center,spent,مُنفَق,dépensé
 dashboard_no_spending,Empty donut placeholder,No spending,لا إنفاق,Aucune dépense
 dashboard_last_7_days,Toggle label,Last 7 days,آخر 7 أيام,7 derniers jours
 dashboard_this_month,Toggle label,This month,هذا الشهر,Ce mois-ci
+dash_spending_title,Home: spending card title,Spending,الإنفاق,Dépenses
 dashboard_search_placeholder,Global search hint,"Search transactions, accounts...",البحث في المعاملات والحسابات...,"Rechercher transactions, comptes..."
 dashboard_type_at_least_2,Search hint,Type at least 2 characters,اكتب حرفين على الأقل,Tapez au moins 2 caractères
 dashboard_no_results_for,Search empty state,"No results for ""{query}""","لا نتائج لـ """"{query}""""",Aucun résultat pour « {query} »
@@ -240,7 +241,7 @@ tx_list_select_layout,Section title,Select layout,اختر التنسيق,Choisi
 tx_list_date_banner,Setting label,Date banner total,إجمالي شريط التاريخ,Total de la bannière de date
 tx_list_day_total,Dropdown option,Day total,إجمالي اليوم,Total du jour
 tx_list_account_label,Setting title,Account label,تسمية الحساب,Libellé du compte
-tx_list_account_subtitle,Setting subtitle,Show account name on each transaction,إظهار اسم الحساب على كل معاملة,Afficher le nom du compte sur chaque transaction
+tx_list_account_subtitle,Setting subtitle,Show the account and its balance after each transaction,إظهار الحساب ورصيده بعد كل معاملة,Afficher le compte et son solde après chaque opération
 tx_list_category_icon,Setting title,Category icon,أيقونة الفئة,Icône de catégorie
 tx_list_category_subtitle,Setting subtitle,Show category icon circle,إظهار دائرة أيقونة الفئة,Afficher le cercle d'icône de catégorie
 tx_list_time,Setting title,Time,الوقت,Heure
@@ -335,6 +336,7 @@ alloc_delete_title,Dialog title,Delete envelope?,حذف الظرف؟,Supprimer l
 alloc_archive_instead,Dialog button,Archive instead,أرشفة بدلاً من ذلك,Archiver à la place
 alloc_delete_permanently,Dialog button,Delete permanently,حذف نهائي,Supprimer définitivement
 alloc_percent_saved,Progress text,{pct}% saved,{pct}% مدّخر,{pct}% épargné
+alloc_percent_left,Envelope detail: chip beside Available (spending envelope),{pct}% left,متبقٍّ {pct}%,{pct}% restant
 # ──────────────────────────────────────────────,,,,
 # FUNDING SCREEN,,,,
 # ──────────────────────────────────────────────,,,,
@@ -397,6 +399,10 @@ upcoming_overdue,Urgency label,Overdue by {days} day(s),مستحقة منذ {day
 upcoming_due_today,Urgency label,Due today,مستحقة اليوم,Due aujourd'hui
 upcoming_due_tomorrow,Urgency label,Due tomorrow,مستحقة غداً,Due demain
 upcoming_due_in_days,Urgency label,Due in {days} days,مستحقة خلال {days} أيام,Due dans {days} jours
+bills_this_week,Upcoming bills: group (late and next 7 days),This week,هذا الأسبوع,Cette semaine
+bills_later,Upcoming bills: group,Later,لاحقًا,Plus tard
+bills_sum_out,Upcoming bills: group header total going out,{amount} out,يخرج {amount},{amount} sortants
+bills_sum_in,Upcoming bills: group header total coming in,{amount} in,يدخل {amount},{amount} entrants
 # ──────────────────────────────────────────────,,,,
 # SUBSCRIPTIONS,,,,
 # ──────────────────────────────────────────────,,,,
@@ -1893,6 +1899,13 @@ forecast_upcoming,Forecast: the next 90 days and safe to spend today,Coming up,�
 forecast_estimate,Forecast: the next 90 days and safe to spend today,Usual income (estimate),الدخل المعتاد (تقدير),Revenu habituel (estimation)
 forecast_empty,Forecast: the next 90 days and safe to spend today,"Add a recurring bill or income, or a planned payment, to see what’s coming.",أضف فاتورة أو دخلًا متكررًا، أو دفعة مخطَّطة، لترى ما هو قادم.,"Ajoutez une facture ou un revenu récurrent, ou un paiement prévu, pour voir ce qui arrive."
 forecast_per_day,Forecast: the next 90 days and safe to spend today,{amount} a day,{amount} في اليوم,{amount} par jour
+forecast_free,Forecast: total free until the next income,Free until then,المتاح حتى ذلك الحين,Libre jusque-là
+forecast_divided_by,Forecast: free money divided by the days until the next income,"{count, plural, =1{÷ 1 day} other{÷ {count} days}}","{count, plural, =1{÷ يوم واحد} =2{÷ يومان} few{÷ {count} أيام} other{÷ {count} يومًا}}","{count, plural, =1{÷ 1 jour} other{÷ {count} jours}}"
+forecast_free_money,Forecast: chart title (balance less sinking funds and savings goals),Free money,المال المتاح,Argent disponible
+forecast_safe_short,Home: Safe to spend box title (half width),Safe to spend,يمكنك إنفاقه,Dépensable
+forecast_a_day_until,Home: under the safe-to-spend amount,a day until {date},في اليوم حتى {date},par jour jusqu’au {date}
+forecast_a_day_until_est,"Home: under the safe-to-spend amount, estimated income",a day until about {date},في اليوم حتى {date} تقريبًا,par jour jusqu’au {date} environ
+forecast_a_day_30,"Home: under the safe-to-spend amount, no income coming",a day for the next 30 days,في اليوم خلال الثلاثين يومًا القادمة,par jour pendant 30 jours
 family_private,"Family: members, roles, private envelopes",Private,خاص,Privé
 family_private_line,"Family: members, roles, private envelopes",Private envelopes,مغلّفات خاصة,Enveloppes privées
 family_private_switch,"Family: members, roles, private envelopes",Private,خاص,Privée
@@ -2620,6 +2633,8 @@ tx_impact_over,"Activity row / month card: how far below zero, e.g. ""over by $8
 tx_impact_not_budgeted,Activity row pill: expense whose category has no envelope,Not budgeted,خارج الميزانية,Hors budget
 tx_month_budget,"Activity month card title, e.g. ""October budget""",{month} budget,ميزانية {month},Budget de {month}
 tx_month_spent_of,Activity month card line,Spent {spent} of {budgeted} budgeted · income {income},أُنفق {spent} من {budgeted} مخصّصة · الدخل {income},Dépensé {spent} sur {budgeted} prévus · revenus {income}
+tx_month_spent_of_short,Activity month card: start of the line,Spent {spent} of {budgeted},أُنفق {spent} من {budgeted},Dépensé {spent} sur {budgeted}
+tx_month_income,Activity month card: end of the line,Income {amount},الدخل {amount},Revenus {amount}
 tx_month_spent,Activity month card line when no envelope has a target,Spent {spent} · income {income},أُنفق {spent} · الدخل {income},Dépensé {spent} · revenus {income}
 web_gs_title,Web Companion: getting-started checklist on Home (same as the app),Get started,ابدأ,Pour commencer
 web_gs_progress,Web Companion: getting-started checklist on Home (same as the app),{done} of {total},{done} من {total},{done} sur {total}
@@ -3236,3 +3251,10 @@ base_change_no_rate,Settings: change base currency,No rate known yet. Enter one 
 base_change_edit_rate,Settings: change base currency,Change rate,تغيير السعر,Changer le taux
 base_change_rate_sheet,Settings: change base currency,1 {from} in {to},1 {from} بـ{to},1 {from} en {to}
 base_change_shared_note,Settings: change base currency,It changes for everyone who shares this budget.,تتغيّر لكل من يشارك هذه الميزانية.,Elle change pour tous ceux qui partagent ce budget.
+alloc_budgeted_label,Budget tab: summary tile,Budgeted,المخصّص,Budgété
+alloc_spent_label,Budget tab: summary tile,Spent,المُنفَق,Dépensé
+alloc_all_spent,Budget tab row: spending envelope spent to zero,All {amount} spent · done for the month,أُنفق كامل {amount} · انتهى لهذا الشهر,{amount} dépensés · terminé pour le mois
+alloc_nearly_gone,Budget tab row: under 15% left,Nearly gone,أوشك على النفاد,Presque épuisé
+alloc_done,Budget tab row: in place of $0.00 when spent to zero,Done,اكتمل,Terminé
+rpt_more_ranges,"Reports: calendar button and sheet (This year, Custom)",More ranges,فترات أخرى,Autres périodes
+rpt_no_compare,Reports tile: nothing in the period before to compare with,No earlier data,لا بيانات سابقة,Rien avant

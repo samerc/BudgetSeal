@@ -2374,6 +2374,39 @@ class SFr extends S {
   }
 
   @override
+  String get forecastFree => 'Libre jusque-là';
+
+  @override
+  String forecastDividedBy(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '÷ $count jours',
+      one: '÷ 1 jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get forecastFreeMoney => 'Argent disponible';
+
+  @override
+  String get forecastSafeShort => 'Dépensable';
+
+  @override
+  String forecastADayUntil(Object date) {
+    return 'par jour jusqu’au $date';
+  }
+
+  @override
+  String forecastADayUntilEst(Object date) {
+    return 'par jour jusqu’au $date environ';
+  }
+
+  @override
+  String get forecastADay30 => 'par jour pendant 30 jours';
+
+  @override
   String get familyPrivate => 'Privé';
 
   @override
@@ -3058,6 +3091,9 @@ class SFr extends S {
   String get dashboardThisMonth => 'Ce mois-ci';
 
   @override
+  String get dashSpendingTitle => 'Dépenses';
+
+  @override
   String get dashboardSearchPlaceholder =>
       'Rechercher transactions, comptes...';
 
@@ -3558,7 +3594,7 @@ class SFr extends S {
 
   @override
   String get txListAccountSubtitle =>
-      'Afficher le nom du compte sur chaque transaction';
+      'Afficher le compte et son solde après chaque opération';
 
   @override
   String get txListCategoryIcon => 'Icône de catégorie';
@@ -3868,6 +3904,11 @@ class SFr extends S {
   @override
   String allocPercentSaved(int pct) {
     return '$pct% épargné';
+  }
+
+  @override
+  String allocPercentLeft(int pct) {
+    return '$pct% restant';
   }
 
   @override
@@ -4623,6 +4664,22 @@ class SFr extends S {
   @override
   String upcomingDueInDays(int days) {
     return 'Due dans $days jours';
+  }
+
+  @override
+  String get billsThisWeek => 'Cette semaine';
+
+  @override
+  String get billsLater => 'Plus tard';
+
+  @override
+  String billsSumOut(Object amount) {
+    return '$amount sortants';
+  }
+
+  @override
+  String billsSumIn(Object amount) {
+    return '$amount entrants';
   }
 
   @override
@@ -7967,6 +8024,16 @@ class SFr extends S {
   }
 
   @override
+  String txMonthSpentOfShort(Object spent, Object budgeted) {
+    return 'Dépensé $spent sur $budgeted';
+  }
+
+  @override
+  String txMonthIncome(Object amount) {
+    return 'Revenus $amount';
+  }
+
+  @override
   String txMonthSpent(String spent, String income) {
     return 'Dépensé $spent · revenus $income';
   }
@@ -8887,6 +8954,23 @@ class SFr extends S {
   String get allocNothingSpent => 'Rien de dépensé';
 
   @override
+  String get allocBudgetedLabel => 'Budgété';
+
+  @override
+  String get allocSpentLabel => 'Dépensé';
+
+  @override
+  String allocAllSpent(Object amount) {
+    return '$amount dépensés · terminé pour le mois';
+  }
+
+  @override
+  String get allocNearlyGone => 'Presque épuisé';
+
+  @override
+  String get allocDone => 'Terminé';
+
+  @override
   String get rptSpanMonth => 'Mois';
 
   @override
@@ -8903,6 +8987,12 @@ class SFr extends S {
 
   @override
   String get rptSpanCustom => 'Personnalisé…';
+
+  @override
+  String get rptMoreRanges => 'Autres périodes';
+
+  @override
+  String get rptNoCompare => 'Rien avant';
 
   @override
   String rptComparedWith(String range, int n) {

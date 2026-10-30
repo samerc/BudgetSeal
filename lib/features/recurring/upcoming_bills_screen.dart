@@ -18,7 +18,6 @@ import '../../core/providers/household_provider.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/format_number.dart';
-import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/calculator_amount_field.dart'
     show showCalculatorSheet;
 import '../../shared/widgets/empty_state.dart';
@@ -27,13 +26,15 @@ import '../../shared/widgets/large_title_header.dart';
 import '../../shared/widgets/sheet_title.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/theme/app_icons.dart';
+import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/skeleton_loader.dart';
+import '../../shared/widgets/tappable.dart';
 import 'recurring_format.dart';
 import 'recurring_screen.dart' show EditRecurringSheet;
 import '../../shared/utils/calendar_days.dart';
 
-/// Shows recurring transactions sorted by next due date,
-/// with visual urgency indicators for overdue / due soon items.
+/// Recurring bills and incomes by next due date, in two groups (this week,
+/// later) of compact rows; the due label grows stronger as a bill nears.
 class UpcomingBillsScreen extends ConsumerStatefulWidget {
   /// A bill to open on arrival (a notification's "Log it" button).
   final String? openBillId;
@@ -204,6 +205,85 @@ class _UpcomingBillsScreenState
     _load();
   }
 
+  /// "This week" (late, and due in the next 7 days) and "Later": a
+  /// header with what goes out and comes in (base currency only), then one
+  /// card of compact rows.
+  List<Widget> _sections(BuildContext context) {
+    final tr = S.of(context);
+    final base = ref.watch(householdProvider).value?.baseCurrency;
+    final now = DateTime.now();
+    final soon = <RecurringTransaction>[];
+    final later = <RecurringTransaction>[];
+    for (final b in _bills) {
+      (calendarDaysBetween(now, b.nextDueDate) < 7 ? soon : later).add(b);
+    }
+    String sums(List<RecurringTransaction> bills) {
+      var out = 0.0, inn = 0.0;
+      for (final b in bills) {
+        if (b.currency != base) continue;
+        final v = recurringAmountOn(b, b.nextDueDate);
+        if (b.type == 'expense') out += v;
+        if (b.type == 'income') inn += v;
+      }
+      return [
+        if (out > 0.005) tr.billsSumOut(formatAmount(out, currency: base)),
+        if (inn > 0.005) tr.billsSumIn(formatAmount(inn, currency: base)),
+      ].join(' · ');
+    }
+
+    final out = <Widget>[];
+    for (final (title, bills) in [
+      (tr.billsThisWeek, soon),
+      (tr.billsLater, later),
+    ]) {
+      if (bills.isEmpty) continue;
+      out.add(SliverPadding(
+        padding: EdgeInsets.fromLTRB(16, out.isEmpty ? 8 : 20, 16, 8),
+        sliver: SliverToBoxAdapter(
+          child: Row(children: [
+            SectionHeader(title),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(sums(bills),
+                  textAlign: TextAlign.end,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      fontSize: TypographyTokens.captionSize,
+                      color: AppColors.ts(context))),
+            ),
+          ]),
+        ),
+      ));
+      out.add(SliverPadding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        sliver: SliverToBoxAdapter(
+          child: Container(
+            decoration: AppColors.card(context),
+            clipBehavior: Clip.antiAlias,
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Column(children: [
+              for (var i = 0; i < bills.length; i++) ...[
+                if (i > 0)
+                  Divider(
+                      height: 1,
+                      indent: 70,
+                      endIndent: 14,
+                      color: AppColors.bd(context)),
+                _BillRow(
+                  bill: bills[i],
+                  onTap: () => _showBillActions(bills[i]),
+                ),
+              ],
+            ]),
+          ),
+        ),
+      ));
+    }
+    out.add(const SliverPadding(padding: EdgeInsets.only(bottom: 32)));
+    return out;
+  }
+
   @override
   Widget build(BuildContext context) {
     final tr = S.of(context);
@@ -242,17 +322,7 @@ class _UpcomingBillsScreenState
                 ),
               )
             else
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-                sliver: SliverList.separated(
-                  itemCount: _bills.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (_, i) => _BillCard(
-                    bill: _bills[i],
-                    onTap: () => _showBillActions(_bills[i]),
-                  ),
-                ),
-              ),
+              ..._sections(context),
           ],
         ),
       ),
@@ -260,10 +330,13 @@ class _UpcomingBillsScreenState
   }
 }
 
-class _BillCard extends ConsumerWidget {
+/// One bill: a date block, the name with how often and when ("Due in 2
+/// days" as a pill in the last 3 days, violet when late), the amount in ink
+/// (income keeps its colour; red is for overspending).
+class _BillRow extends ConsumerWidget {
   final RecurringTransaction bill;
   final VoidCallback onTap;
-  const _BillCard({required this.bill, required this.onTap});
+  const _BillRow({required this.bill, required this.onTap});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -271,129 +344,125 @@ class _BillCard extends ConsumerWidget {
     final due = bill.nextDueDate;
     final daysUntil = calendarDaysBetween(now, due);
     final isOverdue = daysUntil < 0;
-
-    // Cashew's bill colors: blue for upcoming, indigo for overdue — calm,
-    // not alarming red/amber/green.
-    final urgencyColor =
-        isOverdue ? AppColors.billOverdue : AppColors.billUpcoming;
-
     final tr = S.of(context);
     final toConfirm = bill.askFirst && daysUntil <= 0;
     final urgencyLabel = toConfirm
         ? tr.billToConfirm
         : isOverdue
-        ? tr.upcomingOverdue(-daysUntil)
-        : daysUntil == 0
-            ? tr.upcomingDueToday
-            : daysUntil == 1
-                ? tr.upcomingDueTomorrow
-                : tr.upcomingDueInDays(daysUntil);
-
-    final typeIcon = switch (bill.type) {
-      'income' => AppIcons.arrowDown,
-      'transfer' => AppIcons.arrowsLeftRight,
-      _ => AppIcons.arrowUp,
+            ? tr.upcomingOverdue(-daysUntil)
+            : daysUntil == 0
+                ? tr.upcomingDueToday
+                : daysUntil == 1
+                    ? tr.upcomingDueTomorrow
+                    : tr.upcomingDueInDays(daysUntil);
+    // Gently stronger as it nears: plain text, then the calm blue pill in
+    // the last 3 days, violet once late (Cashew's bill colours).
+    final Color? pill = isOverdue || toConfirm
+        ? AppColors.billOverdue
+        : daysUntil <= 3
+            ? AppColors.billUpcoming
+            : null;
+    final amountColor = switch (bill.type) {
+      'income' => ref.watch(txColorsProvider).income,
+      'transfer' => AppColors.ts(context),
+      _ => AppColors.tp(context),
     };
+    final subStyle = TextStyle(
+        fontSize: TypographyTokens.txSubtitleSize,
+        color: AppColors.ts(context));
 
-    final typeColor = ref.watch(txColorsProvider).forType(bill.type);
-
-    return AppCard(
+    return Tappable(
       onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: CategoryIconTokens.compactSize,
-                height: CategoryIconTokens.compactSize,
-                decoration: BoxDecoration(
-                  color: AppColors.pastel(context, typeColor,
-                      light: 0.8, dark: 0.7),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(typeIcon, size: 18, color: typeColor),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      bill.title.isNotEmpty ? bill.title : tr.subUntitled,
-                      style: TextStyle(
-                        fontSize: TypographyTokens.cardTitleSize,
-                        fontWeight: TypographyTokens.cardTitleWeight,
-                        color: AppColors.tp(context),
-                      ),
-                    ),
-                    Text(
-                      recurringFrequencyLabel(
-                          tr, bill.frequency, bill.interval),
-                      style: TextStyle(
-                        fontSize: TypographyTokens.txSubtitleSize,
-                        color: AppColors.ts(context),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                formatSignedAmount(recurringAmountOn(bill, bill.nextDueDate),
-                    currency: bill.currency, type: bill.type),
-                style: TextStyle(
-                  fontSize: TypographyTokens.amountRegularSize,
-                  fontWeight: TypographyTokens.amountRegularWeight,
-                  color: typeColor,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          // Urgency row
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.pastel(context, urgencyColor,
-                  light: 0.85, dark: 0.8),
-              borderRadius: BorderRadius.circular(RadiusTokens.md),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(10, 10, 14, 10),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 48,
+              child: Column(children: [
+                Text(formatMonth(due, short: true).toUpperCase(),
+                    maxLines: 1,
+                    style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.4,
+                        color: AppColors.th(context))),
+                Text(formatNumber(due.day.toDouble(), decimals: 0),
+                    style: TextStyle(
+                        fontFamily: TypographyTokens.displayFamily,
+                        fontSize: 20,
+                        height: 1.05,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.tp(context))),
+              ]),
             ),
-            child: Row(
-              children: [
-                Icon(
-                  toConfirm
-                      ? AppIcons.pencilSimple
-                      : isOverdue
-                          ? AppIcons.warningFill
-                          : AppIcons.clock,
-                  size: 14,
-                  color: urgencyColor,
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    urgencyLabel,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    bill.title.isNotEmpty ? bill.title : tr.subUntitled,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: urgencyColor,
+                      fontSize: TypographyTokens.txTitleSize,
+                      fontWeight: TypographyTokens.txTitleWeight,
+                      color: AppColors.tp(context),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  formatDate(due),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.ts(context),
-                  ),
-                ),
-              ],
+                  const SizedBox(height: 2),
+                  // How often stays whole; the due label takes the rest
+                  // (two loose Flexibles split the width in half).
+                  Row(children: [
+                    Text(
+                      recurringFrequencyLabel(
+                          tr, bill.frequency, bill.interval),
+                      maxLines: 1,
+                      style: subStyle,
+                    ),
+                    Text(' · ', style: subStyle),
+                    Flexible(
+                      child: Container(
+                        padding: pill == null
+                            ? EdgeInsets.zero
+                            : const EdgeInsets.symmetric(
+                                horizontal: 7, vertical: 1),
+                        decoration: pill == null
+                            ? null
+                            : BoxDecoration(
+                                color: AppColors.pastel(context, pill,
+                                    light: 0.85, dark: 0.8),
+                                borderRadius:
+                                    BorderRadius.circular(RadiusTokens.sm),
+                              ),
+                        child: Text(urgencyLabel,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: subStyle.copyWith(
+                              fontWeight: pill == null
+                                  ? FontWeight.w400
+                                  : FontWeight.w700,
+                              color: pill,
+                            )),
+                      ),
+                    ),
+                  ]),
+                ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: 8),
+            Text(
+              formatSignedAmount(recurringAmountOn(bill, bill.nextDueDate),
+                  currency: bill.currency, type: bill.type),
+              style: TextStyle(
+                fontSize: TypographyTokens.amountRegularSize,
+                fontWeight: FontWeight.w800,
+                color: amountColor,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

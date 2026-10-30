@@ -4167,6 +4167,48 @@ abstract class S {
   /// **'{amount} a day'**
   String forecastPerDay(String amount);
 
+  /// Forecast: total free until the next income
+  ///
+  /// In en, this message translates to:
+  /// **'Free until then'**
+  String get forecastFree;
+
+  /// Forecast: free money divided by the days until the next income
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{÷ 1 day} other{÷ {count} days}}'**
+  String forecastDividedBy(int count);
+
+  /// Forecast: chart title (balance less sinking funds and savings goals)
+  ///
+  /// In en, this message translates to:
+  /// **'Free money'**
+  String get forecastFreeMoney;
+
+  /// Home: Safe to spend box title (half width)
+  ///
+  /// In en, this message translates to:
+  /// **'Safe to spend'**
+  String get forecastSafeShort;
+
+  /// Home: under the safe-to-spend amount
+  ///
+  /// In en, this message translates to:
+  /// **'a day until {date}'**
+  String forecastADayUntil(Object date);
+
+  /// Home: under the safe-to-spend amount, estimated income
+  ///
+  /// In en, this message translates to:
+  /// **'a day until about {date}'**
+  String forecastADayUntilEst(Object date);
+
+  /// Home: under the safe-to-spend amount, no income coming
+  ///
+  /// In en, this message translates to:
+  /// **'a day for the next 30 days'**
+  String get forecastADay30;
+
   /// Family: members, roles, private envelopes
   ///
   /// In en, this message translates to:
@@ -5272,6 +5314,12 @@ abstract class S {
   /// **'This month'**
   String get dashboardThisMonth;
 
+  /// Home: spending card title
+  ///
+  /// In en, this message translates to:
+  /// **'Spending'**
+  String get dashSpendingTitle;
+
   /// Global search hint
   ///
   /// In en, this message translates to:
@@ -6139,7 +6187,7 @@ abstract class S {
   /// Setting subtitle
   ///
   /// In en, this message translates to:
-  /// **'Show account name on each transaction'**
+  /// **'Show the account and its balance after each transaction'**
   String get txListAccountSubtitle;
 
   /// Setting title
@@ -6717,6 +6765,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'{pct}% saved'**
   String allocPercentSaved(int pct);
+
+  /// Envelope detail: chip beside Available (spending envelope)
+  ///
+  /// In en, this message translates to:
+  /// **'{pct}% left'**
+  String allocPercentLeft(int pct);
 
   /// No description provided for @allocFlexibleTitle.
   ///
@@ -7899,6 +7953,30 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Due in {days} days'**
   String upcomingDueInDays(int days);
+
+  /// Upcoming bills: group (late and next 7 days)
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get billsThisWeek;
+
+  /// Upcoming bills: group
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get billsLater;
+
+  /// Upcoming bills: group header total going out
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} out'**
+  String billsSumOut(Object amount);
+
+  /// Upcoming bills: group header total coming in
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} in'**
+  String billsSumIn(Object amount);
 
   /// Screen title
   ///
@@ -13816,6 +13894,18 @@ abstract class S {
   /// **'Spent {spent} of {budgeted} budgeted · income {income}'**
   String txMonthSpentOf(String spent, String budgeted, String income);
 
+  /// Activity month card: start of the line
+  ///
+  /// In en, this message translates to:
+  /// **'Spent {spent} of {budgeted}'**
+  String txMonthSpentOfShort(Object spent, Object budgeted);
+
+  /// Activity month card: end of the line
+  ///
+  /// In en, this message translates to:
+  /// **'Income {amount}'**
+  String txMonthIncome(Object amount);
+
   /// Activity month card line when no envelope has a target
   ///
   /// In en, this message translates to:
@@ -15262,6 +15352,36 @@ abstract class S {
   /// **'Nothing spent yet'**
   String get allocNothingSpent;
 
+  /// Budget tab: summary tile
+  ///
+  /// In en, this message translates to:
+  /// **'Budgeted'**
+  String get allocBudgetedLabel;
+
+  /// Budget tab: summary tile
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get allocSpentLabel;
+
+  /// Budget tab row: spending envelope spent to zero
+  ///
+  /// In en, this message translates to:
+  /// **'All {amount} spent · done for the month'**
+  String allocAllSpent(Object amount);
+
+  /// Budget tab row: under 15% left
+  ///
+  /// In en, this message translates to:
+  /// **'Nearly gone'**
+  String get allocNearlyGone;
+
+  /// Budget tab row: in place of $0.00 when spent to zero
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get allocDone;
+
   /// Reports: period chip
   ///
   /// In en, this message translates to:
@@ -15297,6 +15417,18 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Custom…'**
   String get rptSpanCustom;
+
+  /// Reports: calendar button and sheet (This year, Custom)
+  ///
+  /// In en, this message translates to:
+  /// **'More ranges'**
+  String get rptMoreRanges;
+
+  /// Reports tile: nothing in the period before to compare with
+  ///
+  /// In en, this message translates to:
+  /// **'No earlier data'**
+  String get rptNoCompare;
 
   /// Reports: the period shown and what it is compared with
   ///
