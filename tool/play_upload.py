@@ -7,9 +7,10 @@ BUDGETSEAL_PLAY_KEY (default C:/Users/Samer/Documents/keys/budgetseal-play.json)
       Every track and its releases (read-only; the edit is thrown away).
 
   python tool/play_upload.py upload --aab build/app/outputs/bundle/release/app-release.aab \
-      --track alpha --notes-dir release_notes/0.12.1
-      Uploads the bundle, puts it on the track with the notes (one file per
-      language: en-US.txt, ar.txt, fr-FR.txt) and sends it for review.
+      --track alpha --track "App Hive Testing" --notes-dir release_notes/0.12.1
+      Uploads the bundle once, puts it on every --track given with the notes
+      (one file per language: en-US.txt, ar.txt, fr-FR.txt) and sends it for
+      review. A custom closed track's id is its name, as `status` prints it.
       --draft leaves it as a draft in Play Console instead.
 
   python tool/play_upload.py images --icon docs/store_assets/icon_512.png \
@@ -64,7 +65,7 @@ def read_notes(notes_dir):
     return notes
 
 
-def upload(api, aab, track, notes_dir, draft, name):
+def upload(api, aab, tracks, notes_dir, draft, name):
     notes = read_notes(notes_dir)
     edits = api.edits()
     edit = edits.insert(packageName=PACKAGE, body={}).execute()
@@ -84,14 +85,15 @@ def upload(api, aab, track, notes_dir, draft, name):
         }
         if name:
             release['name'] = name
-        edits.tracks().update(
-            packageName=PACKAGE, editId=edit_id, track=track,
-            body={'track': track, 'releases': [release]}).execute()
+        for track in tracks:
+            edits.tracks().update(
+                packageName=PACKAGE, editId=edit_id, track=track,
+                body={'track': track, 'releases': [release]}).execute()
         edits.commit(packageName=PACKAGE, editId=edit_id).execute()
     except Exception:
         edits.delete(packageName=PACKAGE, editId=edit_id).execute()
         raise
-    print(f"{'Saved as a draft on' if draft else 'Sent for review on'} {track}: {code}")
+    print(f"{'Saved as a draft on' if draft else 'Sent for review on'} {', '.join(tracks)}: {code}")
 
 
 def images(api, language, icon, feature, screenshots):
@@ -129,7 +131,8 @@ def main():
     sub.add_parser('status')
     up = sub.add_parser('upload')
     up.add_argument('--aab', required=True)
-    up.add_argument('--track', required=True)
+    up.add_argument('--track', required=True, action='append',
+                    help='Repeat to put the build on several tracks')
     up.add_argument('--notes-dir', required=True)
     up.add_argument('--name', help='Release name (Play uses the version name if empty)')
     up.add_argument('--draft', action='store_true')
