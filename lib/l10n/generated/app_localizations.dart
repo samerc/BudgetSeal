@@ -2841,12 +2841,6 @@ abstract class S {
   /// **'Paid by {name}'**
   String billSharePaidBy(String name);
 
-  /// No description provided for @billReceiptMatch.
-  ///
-  /// In en, this message translates to:
-  /// **'Matches the receipt total ({total})'**
-  String billReceiptMatch(String total);
-
   /// No description provided for @billCurrencyHint.
   ///
   /// In en, this message translates to:
@@ -2858,6 +2852,48 @@ abstract class S {
   /// In en, this message translates to:
   /// **'The receipt uses {rate} — use it'**
   String billReceiptRate(Object rate);
+
+  /// Bill splitter: title of the exchange-rate sheet (opened from the rate line under the total)
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange rate'**
+  String get billRateTitle;
+
+  /// Bill splitter: rate line under the total when no rate is set yet; tap to set it
+  ///
+  /// In en, this message translates to:
+  /// **'Set the exchange rate'**
+  String get billSetRate;
+
+  /// Bill splitter: tooltip of the button that swaps the rate's direction (1 USD = … LBP / 1 LBP = … USD)
+  ///
+  /// In en, this message translates to:
+  /// **'Swap the direction'**
+  String get billRateSwap;
+
+  /// Bill splitter: under the rate line, the receipt prints its own rate; tap to use it
+  ///
+  /// In en, this message translates to:
+  /// **'Use the receipt’s rate: {rate}'**
+  String billReceiptRateShort(Object rate);
+
+  /// Bill splitter: while picking a person's items, give them every item
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get billPickAll;
+
+  /// Bill splitter: beside Add item, the items add up to the receipt's total
+  ///
+  /// In en, this message translates to:
+  /// **'Matches the receipt'**
+  String get billReceiptMatchShort;
+
+  /// Bill splitter: after None while picking a person, items only they had are everyone's again (SnackBar with Undo)
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item was only theirs — it’s everyone’s again} other{{count} items were only theirs — they’re everyone’s again}}'**
+  String billItemsBackToEveryone(int count);
 
   /// No description provided for @billCurrencySwitched.
   ///
@@ -14115,6 +14151,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Custom'**
   String get billTipCustom;
+
+  /// Bill splitter: first segment of the tip switch (No tip | 10% | 15% | Custom)
+  ///
+  /// In en, this message translates to:
+  /// **'No tip'**
+  String get billNoTip;
 
   /// Bill splitter: optional link under the tip
   ///

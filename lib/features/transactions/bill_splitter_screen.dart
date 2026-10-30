@@ -36,7 +36,6 @@ import '../../shared/widgets/calculator_amount_field.dart';
 import 'widgets/category_sheet.dart';
 import 'widgets/currency_sheet.dart';
 import 'widgets/tx_ui.dart';
-import '../../shared/widgets/app_chip.dart';
 import '../../shared/widgets/confirm_dialog.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/sheet_title.dart';
@@ -195,6 +194,12 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
   String get _me => _people.first;
   List<String> get _others => _people.skip(1).toList();
   String _fmt(double v) => formatAmount(v, currency: _billCurrency);
+
+  /// An item's amount: the bill card names the currency, so a code ("LBP")
+  /// is left off; a symbol ("$") stays.
+  String _fmtItem(double v) => currencyHasSpacedPrefix(_billCurrency)
+      ? formatAmount(v, decimals: currencyDecimals(_billCurrency))
+      : _fmt(v);
 
   bool get _isEmpty =>
       _subtotalEntered == 0 && _items.isEmpty && _people.length == 1;
@@ -424,6 +429,126 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               roundRate(_rateInverted ? 1.0 / _exchangeRate : _exchangeRate));
         }
       });
+
+  bool get _rateSet => (_exchangeRate - 1.0).abs() >= 0.001;
+
+  /// "1 USD = 90,000 LBP", in the direction the rate is typed.
+  String get _rateText {
+    final rate =
+        roundRate(_rateInverted ? 1.0 / _exchangeRate : _exchangeRate);
+    final rateNum =
+        formatNumber(rate, decimals: rate >= 100 ? 0 : (rate >= 1 ? 2 : 6));
+    return _rateInverted
+        ? '1 $_baseCurrency = $rateNum $_billCurrency'
+        : '1 $_billCurrency = $rateNum $_baseCurrency';
+  }
+
+  /// The rate, in a sheet from the bill card's rate line: the field, the
+  /// direction swap, and the receipt's own rate when it prints one.
+  Future<void> _editRate() async {
+    final tr = S.of(context);
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setSheet) {
+        void update(VoidCallback change) {
+          change();
+          setSheet(() {});
+        }
+
+        final from = _rateInverted ? _baseCurrency : _billCurrency;
+        final to = _rateInverted ? _billCurrency : _baseCurrency;
+        final receipt = _receiptRateShown();
+        final muted = TextStyle(fontSize: 14, color: AppColors.ts(ctx));
+        return Padding(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(tr.billRateTitle,
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 14),
+                  Row(children: [
+                    Text('1 $from = ', style: muted),
+                    SizedBox(
+                      width: 130,
+                      child: TextField(
+                        controller: _rateCtrl,
+                        autofocus: !_rateSet,
+                        decoration: InputDecoration(
+                            hintText: tr.billRateHint, isDense: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        onChanged: (v) => update(() => _onRateTyped(v)),
+                      ),
+                    ),
+                    Text(' $to', style: muted),
+                    const Spacer(),
+                    IconButton(
+                      tooltip: tr.billRateSwap,
+                      onPressed: () => update(_swapRateDirection),
+                      icon: Icon(AppIcons.arrowsDownUp,
+                          size: 20, color: AppColors.accent),
+                    ),
+                  ]),
+                  if (_rateSet && _grand > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                          '≈ ${formatAmount(_toBase(_grand), currency: _baseCurrency)}',
+                          style: muted),
+                    ),
+                  // "TOTAL LL 2,265,000 / TOTAL \$ 25.17": the shop's own rate.
+                  if (receipt != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Material(
+                        color: AppColors.pastel(ctx, AppColors.accent,
+                            light: 0.86, dark: 0.74),
+                        borderRadius: BorderRadius.circular(RadiusTokens.md),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(RadiusTokens.md),
+                          onTap: () => update(() => _useReceiptRate(receipt)),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 10),
+                            child: Row(children: [
+                              Icon(AppIcons.receipt,
+                                  size: 18, color: AppColors.accentText(ctx)),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                    tr.billReceiptRate(
+                                        '1 $from = ${formatNumber(receipt, decimals: receipt >= 100 ? 0 : 4)} $to'),
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.accentText(ctx))),
+                              ),
+                            ]),
+                          ),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 18),
+                  FilledButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: Text(tr.commonDone),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
 
   // ─── Total, tip, tax ───────────────────────────────────────────────────────
 
@@ -699,6 +824,55 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       // Everyone again = the default.
       if (item.people.length == _people.length) item.people.clear();
     });
+  }
+
+  /// All / None while picking: the person gets every item, or comes off
+  /// every item. An item only they had can't be left with nobody — it goes
+  /// back to everyone, with an Undo.
+  void _pickAllItems(bool all) {
+    final p = _painting;
+    if (p == null) return;
+    final tr = S.of(context);
+    final backup = {for (final i in _items) i: Set.of(i.people)};
+    var backToEveryone = 0;
+    setState(() {
+      for (final item in _items) {
+        final owners = _owners(item);
+        if (all) {
+          owners.add(p);
+        } else if (!owners.contains(p)) {
+          continue;
+        } else if (owners.length == 1) {
+          backToEveryone++;
+          owners.clear();
+        } else {
+          owners.remove(p);
+        }
+        item.people
+          ..clear()
+          ..addAll(owners);
+        if (item.people.length == _people.length) item.people.clear();
+      }
+    });
+    if (backToEveryone == 0) return;
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(
+        content: Text(tr.billItemsBackToEveryone(backToEveryone)),
+        behavior: SnackBarBehavior.floating,
+        persist: false,
+        action: SnackBarAction(
+          label: tr.txUndoAction,
+          onPressed: () {
+            if (!mounted) return;
+            setState(() => backup.forEach((item, people) {
+                  item.people
+                    ..clear()
+                    ..addAll(people);
+                }));
+          },
+        ),
+      ));
   }
 
   /// Add (item null) or edit an item: name, amount, split a quantity, delete.
@@ -1616,12 +1790,13 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             const SizedBox(height: Spacing.sectionGap),
             SectionHeader(
               tr.billWhosIn,
-              trailing: _ModeSwitch(
-                evenly: _mode == _SplitMode.evenly,
-                evenlyLabel: tr.billEvenly,
-                byItemLabel: tr.billByItem,
-                onChanged: (evenly) =>
-                    _setMode(evenly ? _SplitMode.evenly : _SplitMode.byItem),
+              trailing: _Segments<_SplitMode>(
+                value: _mode,
+                onChanged: _setMode,
+                options: [
+                  (_SplitMode.evenly, tr.billEvenly),
+                  (_SplitMode.byItem, tr.billByItem),
+                ],
               ),
             ),
             const SizedBox(height: Spacing.headerToCard),
@@ -1649,14 +1824,34 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 ),
               if (_items.isNotEmpty) ...[
                 _itemsCard(tr),
-                Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: TextButton.icon(
+                Row(children: [
+                  TextButton.icon(
                     onPressed: _editItem,
+                    style: TextButton.styleFrom(minimumSize: const Size(0, 44)),
                     icon: const Icon(AppIcons.plus, size: 18),
                     label: Text(tr.billAddItem),
                   ),
-                ),
+                  // A match needs no card: one quiet line beside Add item.
+                  if (_receiptMatches() == true)
+                    Expanded(
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Icon(AppIcons.checkCircleFill,
+                                size: 16, color: AppColors.healthy),
+                            const SizedBox(width: 5),
+                            Flexible(
+                              child: Text(tr.billReceiptMatchShort,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.ts(context))),
+                            ),
+                          ]),
+                    ),
+                ]),
               ] else
                 // No items yet: read them off the receipt, or type them.
                 Row(children: [
@@ -1690,12 +1885,13 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
 
   Widget _billCard(S tr) {
     final byItem = _mode == _SplitMode.byItem;
-    final parts = <String>[
-      if (_tipTotal != 0) tr.billPlusTip(_fmt(_tipTotal)),
-      if (_taxTotal != 0) tr.billPlusTax(_fmt(_taxTotal)),
-    ];
-    final breakdown =
-        parts.isEmpty ? null : '${_fmt(_subtotal)} ${parts.join(' ')}';
+    // The tip's amount isn't on its switch: say what it adds.
+    final breakdown = _tipTotal == 0
+        ? null
+        : '${_fmt(_subtotal)} ${[
+            tr.billPlusTip(_fmt(_tipTotal)),
+            if (_taxTotal != 0) tr.billPlusTax(_fmt(_taxTotal)),
+          ].join(' ')}';
     final isCross = _billCurrency != _baseCurrency;
     final tipChoice = _tipIsAmount
         ? 'custom'
@@ -1703,7 +1899,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             ? '0'
             : _tipPercent.toStringAsFixed(0);
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: AppColors.card(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1773,111 +1969,77 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                 ),
               ),
             ),
-          if (isCross) ...[
-            const SizedBox(height: 8),
-            Row(children: [
-              Text('1 ${_rateInverted ? _baseCurrency : _billCurrency} = ',
-                  style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
-              SizedBox(
-                width: 110,
-                child: TextField(
-                  controller: _rateCtrl,
-                  decoration:
-                      InputDecoration(hintText: tr.billRateHint, isDense: true),
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  onChanged: _onRateTyped,
-                ),
-              ),
-              Text(' ${_rateInverted ? _billCurrency : _baseCurrency}',
-                  style: TextStyle(fontSize: 13, color: AppColors.ts(context))),
-              IconButton(
-                onPressed: _swapRateDirection,
-                icon: Icon(AppIcons.arrowsDownUp,
-                    size: 18, color: AppColors.accent),
-              ),
-              const Spacer(),
-              if ((_exchangeRate - 1.0).abs() >= 0.001 && _grand > 0)
-                Flexible(
-                  child: Text(
-                    '≈ ${formatAmount(_toBase(_grand), currency: _baseCurrency)}',
-                    overflow: TextOverflow.ellipsis,
-                    style:
-                        TextStyle(fontSize: 13, color: AppColors.ts(context)),
-                  ),
-                ),
-            ]),
-            // "TOTAL LL 2,265,000 / TOTAL \$ 25.17": the shop's own rate.
-            if (_receiptRateShown() case final shown?)
-              Tappable(
-                onTap: () => _useReceiptRate(shown),
-                borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(children: [
-                    Icon(AppIcons.receipt,
-                        size: 16, color: AppColors.accentText(context)),
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                          tr.billReceiptRate(
-                              '1 ${_rateInverted ? _baseCurrency : _billCurrency}'
-                              ' = ${formatNumber(shown, decimals: shown >= 100 ? 0 : 4)}'
-                              ' ${_rateInverted ? _billCurrency : _baseCurrency}'),
-                          style: TextStyle(
+          // "≈ $25.17 · 1 USD = 90,000 LBP" — tap for the rate sheet.
+          if (isCross)
+            Tappable(
+              onTap: _editRate,
+              borderRadius: BorderRadius.circular(RadiusTokens.sm),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(children: [
+                  Flexible(
+                    child: Text(
+                      !_rateSet
+                          ? tr.billSetRate
+                          : _grand > 0
+                              ? '≈ ${formatAmount(_toBase(_grand), currency: _baseCurrency)} · $_rateText'
+                              : _rateText,
+                      style: _rateSet
+                          ? TextStyle(
+                              fontSize: 13, color: AppColors.ts(context))
+                          : TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.accentText(context))),
+                              color: AppColors.accentText(context)),
                     ),
-                  ]),
-                ),
+                  ),
+                  const SizedBox(width: 6),
+                  Icon(AppIcons.pencilSimple,
+                      size: 14, color: AppColors.accentText(context)),
+                ]),
               ),
-            // Everyone pays in the base currency (an LBP bill paid in USD).
-            if (_canSplitInBase)
-              Row(children: [
-                Expanded(
-                  child: Text(tr.billSplitInBase(_baseCurrency),
-                      style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.tp(context))),
-                ),
-                Switch(value: _splitInBase, onChanged: _toggleSplitInBase),
-              ]),
-          ],
+            ),
+          // The receipt prints its own rate and it isn't the one in use.
+          if (_receiptRateShown() case final shown?)
+            Tappable(
+              onTap: () => _useReceiptRate(shown),
+              borderRadius: BorderRadius.circular(RadiusTokens.sm),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Row(children: [
+                  Icon(AppIcons.receipt,
+                      size: 16, color: AppColors.accentText(context)),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                        tr.billReceiptRateShort(formatNumber(shown,
+                            decimals: shown >= 100 ? 0 : 4)),
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.accentText(context))),
+                  ),
+                ]),
+              ),
+            ),
           const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              SizedBox(
-                width: 34,
-                child: Text(tr.billTip,
-                    style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.ts(context))),
+          _Segments<String>(
+            expand: true,
+            value: tipChoice,
+            onChanged: _setTip,
+            options: [
+              ('0', tr.billNoTip),
+              ('10', '10%'),
+              ('15', '15%'),
+              (
+                'custom',
+                _tipIsAmount && _tipAmount > 0
+                    ? _fmt(_tipAmount)
+                    : tr.billTipCustom
               ),
-              for (final (value, label) in [
-                ('0', tr.commonNone),
-                ('10', '10%'),
-                ('15', '15%'),
-                (
-                  'custom',
-                  _tipIsAmount && _tipAmount > 0
-                      ? _fmt(_tipAmount)
-                      : tr.billTipCustom
-                ),
-              ])
-                AppChip(
-                  label: label,
-                  selected: tipChoice == value,
-                  onTap: () => _setTip(value),
-                ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           if (!_taxOn)
             TextButton.icon(
               onPressed: _editTax,
@@ -1888,33 +2050,44 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               label: Text(tr.billAddTax),
             )
           else
-            Row(children: [
-              Expanded(
-                child: Tappable(
-                  onTap: _editTax,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Text(
-                      _taxIsAmount
-                          ? '${tr.billAddTax} · ${_fmt(_taxAmount)}'
-                          : '${tr.billAddTax} · ${formatNumber(_taxPercent)}% · ${_fmt(_taxTotal)}',
-                      style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.tp(context)),
+            // One chip: tap to change, × to drop it.
+            Material(
+              color: AppColors.pastel(context, AppColors.accent,
+                  light: 0.86, dark: 0.74),
+              shape: const StadiumBorder(),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Flexible(
+                  child: InkWell(
+                    onTap: _editTax,
+                    customBorder: const StadiumBorder(),
+                    child: Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(14, 9, 4, 9),
+                      child: Text(
+                        _taxIsAmount
+                            ? '${tr.billTaxLabel} · ${_fmt(_taxAmount)}'
+                            : '${tr.billTaxLabel} · ${formatNumber(_taxPercent)}% · ${_fmt(_taxTotal)}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.accentText(context)),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              IconButton(
-                visualDensity: VisualDensity.compact,
-                onPressed: () => setState(() {
-                  _taxOn = false;
-                  _fixed.clear();
-                }),
-                icon: Icon(AppIcons.x, size: 18, color: AppColors.th(context)),
-              ),
-            ]),
+                IconButton(
+                  tooltip: tr.commonRemove,
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => setState(() {
+                    _taxOn = false;
+                    _fixed.clear();
+                  }),
+                  icon: Icon(AppIcons.x,
+                      size: 16, color: AppColors.accentText(context)),
+                ),
+              ]),
+            ),
         ],
       ),
     );
@@ -2021,19 +2194,43 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
         color: AppColors.pastel(context, c, light: 0.82, dark: 0.72),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
       ),
-      child: Row(children: [
-        _Avatar(label: _initials(p), color: c, size: 32),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(tr.billTapWhatHad(p == _me ? tr.billYou : p),
-              style:
-                  const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-        ),
-        TextButton(
-          onPressed: () => setState(() => _painting = null),
-          child: Text(tr.commonDone),
-        ),
-      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            _Avatar(label: _initials(p), color: c, size: 32),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(tr.billTapWhatHad(p == _me ? tr.billYou : p),
+                  style: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w600)),
+            ),
+            TextButton(
+              onPressed: () => setState(() => _painting = null),
+              child: Text(tr.commonDone),
+            ),
+          ]),
+          // A long bill: take everything, or start from nothing.
+          if (_people.length > 1)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(start: 42, bottom: 4),
+              child: Wrap(spacing: 8, runSpacing: 8, children: [
+                _Pill(
+                  onTap: () => _pickAllItems(true),
+                  icon: AppIcons.check,
+                  label: tr.billPickAll,
+                  color: AppColors.sf(context),
+                ),
+                _Pill(
+                  onTap: () => _pickAllItems(false),
+                  icon: AppIcons.circle,
+                  label: tr.commonNone,
+                  color: AppColors.sf(context),
+                ),
+              ]),
+            ),
+        ],
+      ),
     );
   }
 
@@ -2064,12 +2261,12 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     if (_people.length == 1) {
       sub = '';
     } else if (everyone) {
-      sub = tr.billEveryoneEach(_fmt(each));
+      sub = tr.billEveryoneEach(_fmtItem(each));
     } else if (owners.length == 1) {
       final o = owners.first;
       sub = tr.billOnly(o == _me ? tr.billYou : o);
     } else {
-      sub = tr.billSharedEach(owners.length, _fmt(each));
+      sub = tr.billSharedEach(owners.length, _fmtItem(each));
     }
     final paintColor = painting == null ? null : _colorOf(painting);
     return Material(
@@ -2085,7 +2282,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-          Row(children: [
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             if (painting != null) ...[
               Container(
                 width: 24,
@@ -2140,46 +2337,68 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            Text(
-              _fmt(item.amount),
-              style: TextStyle(
-                fontFamily: TypographyTokens.displayFamily,
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
-                fontFeatures: const [FontFeature.tabularFigures()],
-                color:
-                    item.amount < 0 ? AppColors.healthy : AppColors.tp(context),
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  _fmtItem(item.amount),
+                  style: TextStyle(
+                    fontFamily: TypographyTokens.displayFamily,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                    color: item.amount < 0
+                        ? AppColors.healthy
+                        : AppColors.tp(context),
+                  ),
+                ),
+                // Several of the same ("×3"): split them so each can go
+                // to whoever had it.
+                if (painting == null && item.qty > 1 && item.amount > 0)
+                  Tappable(
+                    onTap: () => setState(() => _splitItem(item)),
+                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 2, bottom: 2),
+                      child: Text(tr.billSplitInto(item.qty),
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.accentText(context))),
+                    ),
+                  ),
+              ],
             ),
           ]),
-          // Several of the same ("×3"): split them so each can go to
-          // whoever had it — on the row, full width, so it's found.
-          if (painting == null && item.qty > 1 && item.amount > 0)
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: _Pill(
-                onTap: () => setState(() => _splitItem(item)),
-                icon: AppIcons.arrowsSplit,
-                label: tr.billSplitInto(item.qty),
-              ),
-            ),
               ]),
         ),
       ),
     );
   }
 
-  /// Items vs the receipt's total (or the total typed before itemizing), so
-  /// a missed or misread line shows.
-  List<Widget> _receiptCheck(S tr) {
-    final receipt =
-        _ocr?.receiptTotal ?? (_subtotalEntered > 0 ? _subtotalEntered : null);
-    if (receipt == null || _items.isEmpty) return const [];
+  /// The receipt's total (or the total typed before itemizing), when there
+  /// is one to check the items against.
+  double? get _receiptTotal =>
+      _ocr?.receiptTotal ?? (_subtotalEntered > 0 ? _subtotalEntered : null);
+
+  /// Whether the items add up to [_receiptTotal]; null when there's nothing
+  /// to check.
+  bool? _receiptMatches() {
+    final receipt = _receiptTotal;
+    if (receipt == null || _items.isEmpty) return null;
     final items = _itemsTotal;
     final tax = _ocr?.taxTotal ?? 0;
-    final matches = (items - receipt).abs() <= _tolerance ||
+    return (items - receipt).abs() <= _tolerance ||
         (tax > 0 && (items + tax - receipt).abs() <= _tolerance);
-    final color = matches ? AppColors.healthy : AppColors.caution;
+  }
+
+  /// Items that don't add up to the receipt, so a missed or misread line
+  /// shows (a match is the quiet line beside Add item).
+  List<Widget> _receiptCheck(S tr) {
+    if (_receiptMatches() != false) return const [];
+    final receipt = _receiptTotal!;
+    final items = _itemsTotal;
+    final color = AppColors.caution;
     return [
       Container(
         margin: const EdgeInsets.only(top: 4),
@@ -2189,14 +2408,11 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
           borderRadius: BorderRadius.circular(RadiusTokens.md),
         ),
         child: Row(children: [
-          Icon(matches ? AppIcons.checkCircleFill : AppIcons.warningCircleFill,
-              size: 18, color: color),
+          Icon(AppIcons.warningCircleFill, size: 18, color: color),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              matches
-                  ? tr.billReceiptMatch(_fmt(receipt))
-                  : tr.billReceiptDiff(_fmt(items), _fmt(receipt)),
+              tr.billReceiptDiff(_fmt(items), _fmt(receipt)),
               style: TextStyle(fontSize: 12.5, color: AppColors.tp(context)),
             ),
           ),
@@ -2259,6 +2475,53 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
 
   /// The editing view's bar: the people chips (By item) and See totals.
   Widget _editBar(S tr, Map<String, double> shares) {
+    // Just you (the usual start after a scan): the strip and the button
+    // share a row. With others the strip gets its own row, so nobody
+    // scrolls out of sight behind the button.
+    final byItem = _mode == _SplitMode.byItem;
+    final oneRow = byItem && _people.length == 1;
+    final seeTotals = FilledButton(
+      style: oneRow
+          ? FilledButton.styleFrom(
+              minimumSize: const Size(0, 50),
+              padding: const EdgeInsets.symmetric(horizontal: 22))
+          : null,
+      onPressed: _grand > 0
+          ? () => setState(() {
+                _painting = null;
+                _reviewing = true;
+              })
+          : null,
+      child: Text(tr.billSeeTotals),
+    );
+    // Sized by its content (a fixed height overflowed at large text
+    // sizes); scrolls sideways with many people.
+    final strip = SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final p in _people)
+            _PersonChip(
+              label: _initials(p),
+              color: _colorOf(p),
+              amount: _fmtPay(shares[p] ?? 0),
+              selected: _painting == p,
+              semantics: p == _me ? tr.billYou : p,
+              onTap: () => _pickPainter(p),
+              onLongPress: () => _personActions(p),
+            ),
+          _PersonChip(
+            label: '+',
+            color: AppColors.ts(context),
+            amount: tr.commonAdd,
+            selected: false,
+            semantics: tr.billAddPerson,
+            onTap: _addPerson,
+          ),
+        ],
+      ),
+    );
     return Material(
       color: AppColors.sf(context),
       elevation: 8,
@@ -2269,53 +2532,20 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (_mode == _SplitMode.byItem) ...[
-                // Sized by its content (a fixed height overflowed at large
-                // text sizes); scrolls sideways with many people.
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (final p in _people)
-                        _PersonChip(
-                          label: _initials(p),
-                          color: _colorOf(p),
-                          amount: _fmtPay(shares[p] ?? 0),
-                          selected: _painting == p,
-                          semantics: p == _me ? tr.billYou : p,
-                          onTap: () => _pickPainter(p),
-                          onLongPress: () => _personActions(p),
-                        ),
-                      _PersonChip(
-                        label: '+',
-                        color: AppColors.ts(context),
-                        amount: tr.commonAdd,
-                        selected: false,
-                        semantics: tr.billAddPerson,
-                        onTap: _addPerson,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 6),
-              ],
-              FilledButton(
-                onPressed: _grand > 0
-                    ? () => setState(() {
-                          _painting = null;
-                          _reviewing = true;
-                        })
-                    : null,
-                child: Text(tr.billSeeTotals),
-              ),
-            ],
-          ),
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+          child: !byItem
+              ? seeTotals
+              : oneRow
+                  ? Row(children: [
+                      Expanded(child: strip),
+                      const SizedBox(width: 12),
+                      seeTotals,
+                    ])
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [strip, const SizedBox(height: 6), seeTotals],
+                    ),
         ),
       ),
     );
@@ -2363,13 +2593,6 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
         fontSize: 13,
         fontWeight: FontWeight.w700,
         color: AppColors.ts(context));
-    final rate = roundRate(
-        _rateInverted ? 1.0 / _exchangeRate : _exchangeRate);
-    final rateNum =
-        formatNumber(rate, decimals: rate >= 100 ? 0 : (rate >= 1 ? 2 : 6));
-    final rateText = _rateInverted
-        ? '1 $_baseCurrency = $rateNum $_billCurrency'
-        : '1 $_billCurrency = $rateNum $_baseCurrency';
 
     return PopScope(
       canPop: false,
@@ -2413,7 +2636,7 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                   ),
                   if (cross)
                     Text(
-                        '≈ ${formatAmount(_toBase(_grand), currency: _baseCurrency)} · $rateText',
+                        '≈ ${formatAmount(_toBase(_grand), currency: _baseCurrency)} · $_rateText',
                         style: TextStyle(
                             fontSize: 13, color: AppColors.ts(context))),
                   if (_tipTotal != 0 || _taxTotal != 0) ...[
@@ -2710,6 +2933,7 @@ class _Pill extends StatelessWidget {
   final Widget? leading;
   final double height;
   final bool accent;
+  final Color? color;
   const _Pill({
     required this.onTap,
     required this.label,
@@ -2718,13 +2942,14 @@ class _Pill extends StatelessWidget {
     this.leading,
     this.height = 36,
     this.accent = false,
+    this.color,
   });
 
   @override
   Widget build(BuildContext context) {
     final fg = accent ? AppColors.accentText(context) : AppColors.tp(context);
     return Material(
-      color: AppColors.sfv(context),
+      color: color ?? AppColors.sfv(context),
       shape: const StadiumBorder(),
       child: InkWell(
         onTap: onTap,
@@ -2757,61 +2982,70 @@ class _Pill extends StatelessWidget {
   }
 }
 
-/// Evenly | By item.
-class _ModeSwitch extends StatelessWidget {
-  final bool evenly;
-  final String evenlyLabel;
-  final String byItemLabel;
-  final ValueChanged<bool> onChanged;
-  const _ModeSwitch({
-    required this.evenly,
-    required this.evenlyLabel,
-    required this.byItemLabel,
+/// A segmented switch: Evenly | By item, and the tip. [expand] fills the
+/// width with equal segments (labels shrink to fit).
+class _Segments<T> extends StatelessWidget {
+  final List<(T, String)> options;
+  final T value;
+  final ValueChanged<T> onChanged;
+  final bool expand;
+  const _Segments({
+    required this.options,
+    required this.value,
     required this.onChanged,
+    this.expand = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    Widget seg(String label, bool on, bool value) => Semantics(
-          selected: on,
-          button: true,
-          child: Tappable(
-            borderRadius: BorderRadius.circular(RadiusTokens.pill),
-            onTap: () => onChanged(value),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              height: 32,
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                // In dark mode sf is darker than the track: lift it.
-                color: !on
-                    ? Colors.transparent
-                    : Theme.of(context).brightness == Brightness.dark
-                        ? AppColors.lightenPastel(AppColors.sfv(context), 0.12)
-                        : AppColors.sf(context),
-                borderRadius: BorderRadius.circular(RadiusTokens.pill),
-                boxShadow: on ? AppColors.cardShadow(context) : null,
-              ),
-              child: Text(label,
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: on ? FontWeight.w700 : FontWeight.w600,
-                      color:
-                          on ? AppColors.tp(context) : AppColors.ts(context))),
+    Widget seg(T v, String label) {
+      final on = v == value;
+      final text = Text(label,
+          maxLines: 1,
+          style: TextStyle(
+              fontSize: expand ? 14 : 13,
+              fontWeight: on ? FontWeight.w700 : FontWeight.w600,
+              color: on ? AppColors.tp(context) : AppColors.ts(context)));
+      final child = Semantics(
+        selected: on,
+        button: true,
+        child: Tappable(
+          borderRadius: BorderRadius.circular(RadiusTokens.pill),
+          onTap: () => onChanged(v),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            height: expand ? 36 : 32,
+            padding: EdgeInsets.symmetric(horizontal: expand ? 6 : 14),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              // In dark mode sf is darker than the track: lift it.
+              color: !on
+                  ? Colors.transparent
+                  : Theme.of(context).brightness == Brightness.dark
+                      ? AppColors.lightenPastel(AppColors.sfv(context), 0.12)
+                      : AppColors.sf(context),
+              borderRadius: BorderRadius.circular(RadiusTokens.pill),
+              boxShadow: on ? AppColors.cardShadow(context) : null,
             ),
+            child: expand
+                ? FittedBox(fit: BoxFit.scaleDown, child: text)
+                : text,
           ),
-        );
+        ),
+      );
+      return expand ? Expanded(child: child) : child;
+    }
+
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         color: AppColors.sfv(context),
         borderRadius: BorderRadius.circular(RadiusTokens.pill),
       ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        seg(evenlyLabel, evenly, true),
-        seg(byItemLabel, !evenly, false),
-      ]),
+      child: Row(
+        mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+        children: [for (final (v, label) in options) seg(v, label)],
+      ),
     );
   }
 }

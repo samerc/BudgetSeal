@@ -1553,11 +1553,6 @@ class SAr extends S {
   }
 
   @override
-  String billReceiptMatch(String total) {
-    return 'يطابق مجموع الإيصال ($total)';
-  }
-
-  @override
   String billCurrencyHint(String currency) {
     return 'يبدو أنه بـ$currency — تبديل؟';
   }
@@ -1565,6 +1560,37 @@ class SAr extends S {
   @override
   String billReceiptRate(Object rate) {
     return 'الإيصال يعتمد $rate — استخدمه';
+  }
+
+  @override
+  String get billRateTitle => 'سعر الصرف';
+
+  @override
+  String get billSetRate => 'حدّد سعر الصرف';
+
+  @override
+  String get billRateSwap => 'اعكس الاتجاه';
+
+  @override
+  String billReceiptRateShort(Object rate) {
+    return 'استخدم سعر الإيصال: $rate';
+  }
+
+  @override
+  String get billPickAll => 'الكل';
+
+  @override
+  String get billReceiptMatchShort => 'يطابق الإيصال';
+
+  @override
+  String billItemsBackToEveryone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count بنود كانت لهذا الشخص وحده — عادت للجميع',
+      one: 'بند واحد كان لهذا الشخص وحده — عاد للجميع',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -8108,6 +8134,9 @@ class SAr extends S {
 
   @override
   String get billTipCustom => 'مخصّص';
+
+  @override
+  String get billNoTip => 'بلا إكرامية';
 
   @override
   String get billAddTax => 'ضريبة أو رسم خدمة';

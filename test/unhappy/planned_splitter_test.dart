@@ -881,5 +881,59 @@ void main() {
           reason: 'Alex should be back to half the pizza');
       await _unmount(tester);
     });
+
+    testWidgets('picking a person: All and None, items only theirs go back',
+        (tester) async {
+      await _pump(tester, container, const BillSplitterScreen());
+      await tester.tap(find.text('By item'));
+      await tester.pumpAndSettle();
+      for (final (name, price) in [('Pizza', '30'), ('Drink', '10')]) {
+        await tester.tap(find.text('Add item').first);
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField).last, name);
+        await tester.tap(find.text('Amount'));
+        await tester.pumpAndSettle();
+        await _calc(tester, price);
+        await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+        await tester.pumpAndSettle();
+      }
+      await tester.tap(find.text('+').last);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).last, 'Sam');
+      await tester.tap(find.widgetWithText(FilledButton, 'Add'));
+      await tester.pumpAndSettle();
+      Future<void> pick(String chip, String button) async {
+        await tester.tap(find.text(chip).last);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(button));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(chip).last); // stop picking
+        await tester.pumpAndSettle();
+      }
+
+      // Everything is everyone's: 20 each.
+      expect(find.text(r'$20.00'), findsNWidgets(2));
+      // Sam had none of it: it's all yours (and the total, $40.00).
+      await pick('S', 'None');
+      expect(find.text(r'$40.00'), findsNWidgets(2));
+      expect(find.text(r'$0.00'), findsOneWidget);
+      // All: Sam is on everything again.
+      await pick('S', 'All');
+      expect(find.text(r'$20.00'), findsNWidgets(2));
+      // You come off everything: it's all Sam's.
+      await pick('Me', 'None');
+      expect(find.text(r'$40.00'), findsNWidgets(2));
+      // Sam off items only Sam had: they go back to everyone, with Undo.
+      await pick('S', 'None');
+      expect(find.text('2 items were only theirs — they’re everyone’s again'),
+          findsOneWidget);
+      expect(find.text(r'$20.00'), findsNWidgets(2));
+      await tester.tap(find.text('Undo'));
+      await tester.pumpAndSettle();
+      expect(find.text(r'$40.00'), findsNWidgets(2),
+          reason: 'Undo gives Sam both items back');
+      expect(tester.takeException(), isNull);
+      await _unmount(tester);
+    });
   });
 }

@@ -1564,11 +1564,6 @@ class SFr extends S {
   }
 
   @override
-  String billReceiptMatch(String total) {
-    return 'Correspond au total du ticket ($total)';
-  }
-
-  @override
   String billCurrencyHint(String currency) {
     return 'Semble être en $currency — changer ?';
   }
@@ -1576,6 +1571,38 @@ class SFr extends S {
   @override
   String billReceiptRate(Object rate) {
     return 'Le reçu applique $rate — l’utiliser';
+  }
+
+  @override
+  String get billRateTitle => 'Taux de change';
+
+  @override
+  String get billSetRate => 'Indiquer le taux de change';
+
+  @override
+  String get billRateSwap => 'Inverser le sens';
+
+  @override
+  String billReceiptRateShort(Object rate) {
+    return 'Utiliser le taux du reçu : $rate';
+  }
+
+  @override
+  String get billPickAll => 'Tout';
+
+  @override
+  String get billReceiptMatchShort => 'Correspond au reçu';
+
+  @override
+  String billItemsBackToEveryone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count articles n’étaient qu’à cette personne — ils reviennent à tout le monde',
+      one: '1 article n’était qu’à cette personne — il revient à tout le monde',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -8173,6 +8200,9 @@ class SFr extends S {
 
   @override
   String get billTipCustom => 'Autre';
+
+  @override
+  String get billNoTip => 'Sans pourboire';
 
   @override
   String get billAddTax => 'Taxe ou frais de service';

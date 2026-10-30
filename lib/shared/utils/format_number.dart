@@ -95,6 +95,14 @@ bool _needsSpace(String symbol) {
   return false;
 }
 
+/// Whether [currency] is written as a spaced prefix ("LBP 1,200",
+/// "CHF 12") rather than a tight symbol ("$12") — lists under a header that
+/// already names the currency can leave the prefix off.
+bool currencyHasSpacedPrefix(String currency) {
+  final symbol = _resolveSymbol(currency);
+  return symbol == null || _needsSpace(symbol);
+}
+
 /// Format the raw number with the user's preferred separators.
 /// When the app locale is Arabic, digits are converted to Arabic-Indic (٠١٢٣٤٥٦٧٨٩).
 String _formatNumber(double absValue, int decimalDigits) {

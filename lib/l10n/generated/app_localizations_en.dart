@@ -1555,11 +1555,6 @@ class SEn extends S {
   }
 
   @override
-  String billReceiptMatch(String total) {
-    return 'Matches the receipt total ($total)';
-  }
-
-  @override
   String billCurrencyHint(String currency) {
     return 'Looks like $currency — switch?';
   }
@@ -1567,6 +1562,37 @@ class SEn extends S {
   @override
   String billReceiptRate(Object rate) {
     return 'The receipt uses $rate — use it';
+  }
+
+  @override
+  String get billRateTitle => 'Exchange rate';
+
+  @override
+  String get billSetRate => 'Set the exchange rate';
+
+  @override
+  String get billRateSwap => 'Swap the direction';
+
+  @override
+  String billReceiptRateShort(Object rate) {
+    return 'Use the receipt’s rate: $rate';
+  }
+
+  @override
+  String get billPickAll => 'All';
+
+  @override
+  String get billReceiptMatchShort => 'Matches the receipt';
+
+  @override
+  String billItemsBackToEveryone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items were only theirs — they’re everyone’s again',
+      one: '1 item was only theirs — it’s everyone’s again',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -8078,6 +8104,9 @@ class SEn extends S {
 
   @override
   String get billTipCustom => 'Custom';
+
+  @override
+  String get billNoTip => 'No tip';
 
   @override
   String get billAddTax => 'Tax or service charge';

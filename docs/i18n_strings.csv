@@ -2105,9 +2105,15 @@ bill_loan_name,,Bill split · {date},تقسيم فاتورة · {date},Addition 
 bill_share,,Share split,مشاركة التقسيم,Partager la répartition
 bill_share_header,,Bill split · total {total},تقسيم فاتورة · المجموع {total},Addition partagée · total {total}
 bill_share_paid_by,,Paid by {name},دفعها {name},Payé par {name}
-bill_receipt_match,,Matches the receipt total ({total}),يطابق مجموع الإيصال ({total}),Correspond au total du ticket ({total})
 bill_currency_hint,Under the bill total after a scan,Looks like {currency} — switch?,يبدو أنه بـ{currency} — تبديل؟,Semble être en {currency} — changer ?
 bill_receipt_rate,"Bill splitter: under the rate, the rate the receipt prints (its total in both currencies); tap to use it",The receipt uses {rate} — use it,الإيصال يعتمد {rate} — استخدمه,Le reçu applique {rate} — l’utiliser
+bill_rate_title,Bill splitter: title of the exchange-rate sheet (opened from the rate line under the total),Exchange rate,سعر الصرف,Taux de change
+bill_set_rate,Bill splitter: rate line under the total when no rate is set yet; tap to set it,Set the exchange rate,حدّد سعر الصرف,Indiquer le taux de change
+bill_rate_swap,Bill splitter: tooltip of the button that swaps the rate's direction (1 USD = … LBP / 1 LBP = … USD),Swap the direction,اعكس الاتجاه,Inverser le sens
+bill_receipt_rate_short,"Bill splitter: under the rate line, the receipt prints its own rate; tap to use it",Use the receipt’s rate: {rate},استخدم سعر الإيصال: {rate},Utiliser le taux du reçu : {rate}
+bill_pick_all,"Bill splitter: while picking a person's items, give them every item",All,الكل,Tout
+bill_receipt_match_short,"Bill splitter: beside Add item, the items add up to the receipt's total",Matches the receipt,يطابق الإيصال,Correspond au reçu
+bill_items_back_to_everyone,"Bill splitter: after None while picking a person, items only they had are everyone's again (SnackBar with Undo)","{count, plural, =1{1 item was only theirs — it’s everyone’s again} other{{count} items were only theirs — they’re everyone’s again}}","{count, plural, =1{بند واحد كان لهذا الشخص وحده — عاد للجميع} other{{count} بنود كانت لهذا الشخص وحده — عادت للجميع}}","{count, plural, =1{1 article n’était qu’à cette personne — il revient à tout le monde} other{{count} articles n’étaient qu’à cette personne — ils reviennent à tout le monde}}"
 bill_currency_switched,SnackBar after a scan,"Bill switched to {currency}, as on the receipt",تم تحويل الفاتورة إلى {currency} كما في الإيصال,"Facture passée en {currency}, comme sur le ticket"
 bill_receipt_diff,,Items add up to {items} · receipt total {total},مجموع البنود {items} · مجموع الإيصال {total},Les articles font {items} · total du ticket {total}
 
@@ -2673,6 +2679,7 @@ bill_total_label,Bill splitter,Bill total,مجموع الفاتورة,Total de l
 bill_plus_tip,"Bill splitter: under the total, e.g. ""+ tip $9.00""",+ tip {amount},+ بقشيش {amount},+ pourboire {amount}
 bill_plus_tax,Bill splitter: under the total,+ tax or service {amount},+ ضريبة أو خدمة {amount},+ taxe ou service {amount}
 bill_tip_custom,"Bill splitter: tip chip, any amount",Custom,مخصّص,Autre
+bill_no_tip,Bill splitter: first segment of the tip switch (No tip | 10% | 15% | Custom),No tip,بلا إكرامية,Sans pourboire
 bill_add_tax,Bill splitter: optional link under the tip,Tax or service charge,ضريبة أو رسم خدمة,Taxe ou frais de service
 bill_tax_percent,Bill splitter: tax choice,Percentage of the bill,نسبة من الفاتورة,Pourcentage de l'addition
 bill_tax_fixed,Bill splitter: tax choice,Fixed amount,مبلغ ثابت,Montant fixe
