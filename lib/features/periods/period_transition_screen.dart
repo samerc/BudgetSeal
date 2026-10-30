@@ -104,16 +104,20 @@ class _PeriodTransitionScreenState
     try {
       final engine = ref.read(periodEngineProvider);
 
-      for (final r in _resolutions) {
-        await engine.resolveLeftover(
-          allocationId: r.allocationId,
-          currency: r.currency,
-          leftoverAmount: r.balance,
-          resolution: r.resolution,
-          deviceId: 'local',
-          targetAllocationId: r.targetAllocationId,
-        );
-      }
+      // All choices or none: a failure halfway must not leave some
+      // envelopes reviewed and others not.
+      await engine.inTransaction(() async {
+        for (final r in _resolutions) {
+          await engine.resolveLeftover(
+            allocationId: r.allocationId,
+            currency: r.currency,
+            leftoverAmount: r.balance,
+            resolution: r.resolution,
+            deviceId: 'local',
+            targetAllocationId: r.targetAllocationId,
+          );
+        }
+      });
 
       ref.invalidate(allocationsProvider);
       ref.invalidate(unallocatedProvider);
@@ -253,7 +257,15 @@ class _PeriodTransitionScreenState
             BottomActionBar(
               children: [
                 FilledButton(
-                  onPressed: _completing ? null : _completeTransition,
+                  // Every "Move to" needs its envelope chosen first.
+                  onPressed: _completing ||
+                          _resolutions.any((r) =>
+                              r.resolution ==
+                                  LeftoverResolution.toOtherAllocation &&
+                              r.balance > 0 &&
+                              r.targetAllocationId == null)
+                      ? null
+                      : _completeTransition,
                   child: _completing
                       ? SizedBox(
                           height: 20,

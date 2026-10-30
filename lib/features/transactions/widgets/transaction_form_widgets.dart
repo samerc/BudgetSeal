@@ -403,6 +403,7 @@ class LineCard extends StatelessWidget {
                 child: AmountField(
                   controller: line.amountCtrl,
                   onChanged: onChanged,
+                  decimals: currencyDecimals(line.currency),
                 ),
               ),
               const SizedBox(width: 12),

@@ -143,38 +143,28 @@ class _ObjectiveDetailScreenState
     final householdId = ref.read(currentHouseholdIdProvider);
     if (householdId == null) return;
 
-    // Primary: search by objective ID tag (new format)
-    // Fallback: search by name (legacy transactions before ID tagging)
-    // Matches "[obj:ID]" and "[obj:ID|amount]".
+    // Payments carry an "[obj:ID]" / "[obj:ID|amount]" tag in their note
+    // (since May 2026, before the first release). There used to be a
+    // fallback matching the goal's NAME in notes for older payments, but it
+    // caught unrelated transactions ("Car" → "Car wash", "Carrefour") —
+    // and deleting the goal with "Delete everything" then deleted them.
+    // Only tagged payments are a goal's payments.
     final idTag = '[obj:${widget.objectiveId}';
-    final name = _nameCtrl.text.trim();
 
-    var txs = await (db.select(db.transactions)
+    final txs = await (db.select(db.transactions)
           ..where((t) =>
               t.householdId.equals(householdId) &
               t.deleted.equals(false) &
               t.status.isNull() & // a planned payment isn't paid yet
               t.note.like('%$idTag%'))
           ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
-        .get();
+        .get()
+        // The LIKE is a prefix: keep "[obj:ID]" / "[obj:ID|", not "[obj:ID2".
+        .then((all) => all
+            .where((t) =>
+                t.note.contains('$idTag]') || t.note.contains('$idTag|'))
+            .toList());
     await _syncCurrentAmount(db, txs);
-
-    // Fallback: match by name for pre-existing payments
-    if (txs.isEmpty && name.isNotEmpty) {
-      // Escape SQL LIKE wildcards in user input
-      final escapedName = name
-          .replaceAll('\\', '\\\\')
-          .replaceAll('%', '\\%')
-          .replaceAll('_', '\\_');
-      txs = await (db.select(db.transactions)
-            ..where((t) =>
-                t.householdId.equals(householdId) &
-                t.deleted.equals(false) &
-                t.status.isNull() &
-                t.note.like('%$escapedName%', escapeChar: r'\'))
-            ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
-          .get();
-    }
 
     final lineRows = txs.isEmpty
         ? const <TransactionLine>[]
@@ -197,8 +187,7 @@ class _ObjectiveDetailScreenState
   /// Progress is the sum of the tagged payments themselves (their lines in
   /// the objective's currency). A stored "+= amount" counter lost payments
   /// when two synced devices both paid, and never went down when a payment
-  /// was deleted. Name-matched legacy payments are shown but not summed — a
-  /// name match can include unrelated transactions.
+  /// was deleted.
   Future<void> _syncCurrentAmount(
       AppDatabase db, List<Transaction> tagged) async {
     if (tagged.isEmpty) return;

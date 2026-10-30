@@ -42,6 +42,7 @@ Conventions for every list:
 - **Currencies** are ISO 4217 codes (`USD`, `EUR`, `LBP`).
 - **Deleted rows stay in the file** with `"deleted": true`, so that every synced phone learns about the deletion. Skip them when reading.
 - **New fields may appear** in later versions. A reader should ignore keys it doesn't know; BudgetSeal does the same.
+- **`version` goes up only when an older reader would misread the file.** BudgetSeal refuses to restore a file with a higher `version` than it knows (update the app first), and a file with no household in `households` (it isn't a budget). A missing `version` reads as 1.
 
 Most rows carry `lastModified`. When two phones sync, the newer row wins. Transaction lines are never edited: changing a transaction makes a new transaction and deletes the old one.
 

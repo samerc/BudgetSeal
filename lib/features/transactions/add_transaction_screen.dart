@@ -90,6 +90,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   String? _fromAccountId;
   String? _destAccountId;
   bool _rateInverted = false;
+
+  /// The transfer rate was fetched or typed (so even 1 is meant, not the
+  /// default).
+  bool _transferRateKnown = false;
+
+  /// [_save] is running (it awaits dialogs before [_loading] is set).
+  bool _saveInFlight = false;
   double? _originalRate;
   final _noteCtrl = TextEditingController();
   final _titleCtrl = TextEditingController();
@@ -529,10 +536,20 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         setState(() {
           _lines.first.rateCtrl.text = formatRateForInput(rate);
           _lines.first.exchangeRateToBase = rate;
+          _transferRateKnown = rate > 0;
         });
       }
     } catch (e) {
       debugPrint('Failed to fetch transfer FX rate: $e');
+      // No rate for this pair (offline): don't keep the last pair's rate;
+      // the empty field asks for one and Save says so.
+      if (mounted && _lines.isNotEmpty) {
+        setState(() {
+          _lines.first.rateCtrl.text = '';
+          _lines.first.exchangeRateToBase = 1.0;
+          _transferRateKnown = false;
+        });
+      }
     }
   }
 
@@ -766,6 +783,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       if (_lines.isEmpty || _lines.first.amount <= 0) {
         return S.of(context).txFormEnterAmount;
       }
+      if (_lines.first.amount > InputLimits.maxAmount) {
+        return _tooLargeText(_lines.first.currency);
+      }
+      // Two currencies need a rate: never save what left as 1:1 of what
+      // arrived just because no rate could be fetched (offline).
+      final (from, to) = _transferCurrencies;
+      if (from != null && to != null && from != to && _transferRateMissing) {
+        return S.of(context).txFormSetTransferRate(from, to);
+      }
     } else {
       for (var i = 0; i < _lines.length; i++) {
         final l = _lines[i];
@@ -779,9 +805,29 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               ? S.of(context).txFormEnterAmountItem(i + 1)
               : S.of(context).txFormEnterAmountTx;
         }
+        if (l.amount > InputLimits.maxAmount) return _tooLargeText(l.currency);
       }
     }
     return null;
+  }
+
+  String _tooLargeText(String currency) => S.of(context).txAmountTooLarge(
+      formatAmount(InputLimits.maxAmount, currency: currency));
+
+  /// A transfer's source and destination currencies (null until chosen).
+  (String?, String?) get _transferCurrencies {
+    final accounts = ref.read(accountsProvider).value ?? const <Account>[];
+    String? cur(String? id) =>
+        accounts.where((a) => a.id == id).firstOrNull?.currency;
+    return (cur(_fromAccountId), cur(_destAccountId));
+  }
+
+  /// No usable transfer rate: none fetched or typed (still the 1.0 default),
+  /// or not positive.
+  bool get _transferRateMissing {
+    if (_lines.isEmpty) return true;
+    final r = _lines.first.exchangeRateToBase;
+    return !r.isFinite || r <= 0 || (r == 1.0 && !_transferRateKnown);
   }
 
   /// Check if a transaction with the same amount, category, and date exists.
@@ -862,6 +908,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   Future<void> _save({bool addAnother = false}) async {
+    // A second tap while the first save is still running (or its dialogs
+    // are open) would record the transaction twice.
+    if (_loading || _saveInFlight) return;
+    _saveInFlight = true;
+    try {
+      await _saveOnce(addAnother: addAnother);
+    } finally {
+      _saveInFlight = false;
+    }
+  }
+
+  Future<void> _saveOnce({bool addAnother = false}) async {
     final error = _validate();
     if (error != null) {
       setState(() => _validationError = error);
@@ -869,10 +927,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       return;
     }
 
-    // Warn if any line has a foreign currency with no exchange rate set
+    // Warn if any line has a foreign currency with no exchange rate set.
+    // Not for transfers: they move money between accounts at their own
+    // rate (checked in _validate), with no base-currency line.
     final tr = S.of(context);
     final missingRateLines = <int>[];
-    for (var i = 0; i < _lines.length; i++) {
+    for (var i = 0; _type != _TxType.transfer && i < _lines.length; i++) {
       final l = _lines[i];
       if (l.currency != _baseCurrency &&
           (l.exchangeRateToBase - 1.0).abs() < 0.001) {
@@ -939,7 +999,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           deviceId: 'local',
           note: effectiveNote,
           date: _effectiveDateTime,
-          rateGot: true,
+          // Only a real rate becomes the "last rate got".
+          rateGot: !_transferRateMissing,
           editing: widget.editTransactionId,
         );
       } else {
@@ -1239,7 +1300,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   Future<void> _editHeaderAmount() async {
     if (_lines.isEmpty) _addLine();
     final line = _lines.first;
-    final v = await showCalculatorSheet(context, line.amount);
+    final v = await showCalculatorSheet(context, line.amount,
+        decimals: currencyDecimals(line.currency));
     if (v == null || !mounted) return;
     setState(() {
       setAmountText(line.amountCtrl, v);
@@ -1715,6 +1777,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                               final r =
                                   double.tryParse(val.replaceAll(',', ''));
                               if (r != null && r > 0) {
+                                _transferRateKnown = true;
                                 if (_rateInverted) {
                                   _lines.first.exchangeRateToBase = 1.0 / r;
                                 } else {

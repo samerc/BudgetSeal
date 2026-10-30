@@ -1020,9 +1020,11 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     if (text.isEmpty) return;
 
     // Parse: last number token is the amount, rest is the note/title
-    // "Coffee 4,50" and "Rent 1,200.00" both work.
+    // "Coffee 4,50", "Rent 1,200.00" and "قهوة ٤٫٥" all work. Arabic and
+    // Persian digits are matched as ASCII (same length, so the positions
+    // hold for the original text).
     final numPattern = RegExp(r'(\d[\d.,]*)\s*$');
-    final match = numPattern.firstMatch(text);
+    final match = numPattern.firstMatch(asciiDigits(text));
 
     String note = text;
     double? amount;
@@ -1719,9 +1721,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 return false;
               }
             }
-            // Amount range
+            // Amount range: like a search's ">50", on the row's amount in
+            // its own currency (a transfer's sent side), not the base total.
             if (hasAmountFilter) {
-              final amt = e.tx.amount;
+              final amt = _rowAmount(e).abs();
               if (_amountMin != null && amt < _amountMin!) return false;
               if (_amountMax != null && amt > _amountMax!) return false;
             }

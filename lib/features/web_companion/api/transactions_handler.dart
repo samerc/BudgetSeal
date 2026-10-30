@@ -371,6 +371,10 @@ Future<({String? error, Future<String> Function()? write})> _prepareCreate(
   final engine = ref.read(allocationEngineProvider);
   final note = truncate(optString(body, 'note') ?? '', kMaxNoteLength);
   final date = parseWebDate(optString(body, 'date'));
+  // A date that was sent but can't be read is refused, not saved as today.
+  if (body['date'] != null && date == null) {
+    return (error: 'date must be a real YYYY-MM-DD day', write: null);
+  }
 
   if (type == 'transfer') {
     final transfer = await _readTransfer(db, householdId, body);
@@ -461,9 +465,12 @@ Handler updateTransactionHandler(Ref ref) {
           : visibleNote(existing.note);
       final note =
           truncate(visible.trim() + noteTag(existing.note), kMaxNoteLength);
-      final date = parseWebDate(optString(body, 'date'),
-              keepTimeOf: existing.createdAt) ??
-          existing.createdAt;
+      final newDate = parseWebDate(optString(body, 'date'),
+          keepTimeOf: existing.createdAt);
+      if (body['date'] != null && newDate == null) {
+        return badRequest('date must be a real YYYY-MM-DD day');
+      }
+      final date = newDate ?? existing.createdAt;
 
       // Validate everything before writing anything.
       _Transfer? transfer;
@@ -493,6 +500,11 @@ Handler updateTransactionHandler(Ref ref) {
           if (amount != null && (amount <= 0 || amount > kMaxAmount)) {
             return badRequest('amount must be a positive number');
           }
+          final rate = optDouble(body, 'exchangeRateToBase');
+          if (body['exchangeRateToBase'] != null &&
+              (rate == null || rate <= 0)) {
+            return badRequest('exchangeRateToBase must be positive');
+          }
           final catId = optString(body, 'categoryId');
           if (catId != null &&
               await validateIdExists(db, 'categories', catId, householdId) ==
@@ -509,9 +521,7 @@ Handler updateTransactionHandler(Ref ref) {
                       categoryId:
                           body.containsKey('categoryId') ? catId : l.categoryId,
                       accountId: optString(body, 'accountId') ?? l.accountId,
-                      exchangeRateToBase:
-                          optDouble(body, 'exchangeRateToBase') ??
-                              l.exchangeRateToBase,
+                      exchangeRateToBase: rate ?? l.exchangeRateToBase,
                       note: existingLines.length == 1 ? note : l.note,
                     )
                   : TxLine(
@@ -607,6 +617,16 @@ DateTime? parseWebDate(String? s, {DateTime? keepTimeOf}) {
   if (s == null) return null;
   final d = DateTime.tryParse(s);
   if (d == null) return null;
+  // DateTime.parse rolls impossible days over (Feb 30 → Mar 2, month 13 →
+  // next January): only a real calendar day counts.
+  final ymd = RegExp(r'^(\d{4})-(\d{2})-(\d{2})').firstMatch(s);
+  if (ymd == null) return null;
+  final y = int.parse(ymd.group(1)!),
+      m = int.parse(ymd.group(2)!),
+      day = int.parse(ymd.group(3)!);
+  if (m < 1 || m > 12 || day < 1 || day > DateTime(y, m + 1, 0).day) {
+    return null;
+  }
   if (s.length > 10) return d;
   if (keepTimeOf != null) {
     final t = keepTimeOf.toLocal();

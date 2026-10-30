@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:intl/intl.dart';
 
 import '../../core/providers/number_format_provider.dart';
@@ -297,33 +299,78 @@ String formatRateForInput(double rate) {
   return rounded.toStringAsFixed(6);
 }
 
+/// Arabic-Indic (٠-٩) and Persian (۰-۹) digits as 0-9, the Arabic decimal
+/// mark ٫ as '.' and the Arabic thousands mark ٬ as ','. What an Arabic or
+/// Persian keyboard types, read like ASCII.
+String asciiDigits(String s) {
+  final out = StringBuffer();
+  for (final r in s.runes) {
+    if (r >= 0x0660 && r <= 0x0669) {
+      out.writeCharCode(0x30 + r - 0x0660);
+    } else if (r >= 0x06F0 && r <= 0x06F9) {
+      out.writeCharCode(0x30 + r - 0x06F0);
+    } else if (r == 0x066B) {
+      out.write('.');
+    } else if (r == 0x066C) {
+      out.write(',');
+    } else {
+      out.writeCharCode(r);
+    }
+  }
+  return out.toString();
+}
+
+/// [v] rounded to [decimals] places (a currency's minor units).
+double roundToDecimals(double v, int decimals) {
+  if (!v.isFinite) return v;
+  final f = math.pow(10, decimals).toDouble();
+  return (v * f).roundToDouble() / f;
+}
+
 /// Typed or imported amounts in either convention: `1,234.56`, `1.234,56`, `12,50`,
-/// `-5`, `(5.00)` (negative), with or without a currency symbol. A lone comma
+/// `-5`, `12.50-`, `(5.00)` (negative), with or without a currency symbol or
+/// code around it, in ASCII, Arabic-Indic or Persian digits. A lone comma
 /// followed by exactly three digits is a thousands separator (`1,234`);
-/// otherwise it is the decimal mark.
+/// otherwise it is the decimal mark. Not an amount (null): no digits, two
+/// marks in a row (`1..2`), or anything but digits, marks and spaces between
+/// the digits (a date `2026-01-15`, `1/2`, `12abc3`).
 double? parseLooseAmount(String raw) {
-  var s = raw.trim();
-  final negative = s.contains('-') || (s.startsWith('(') && s.endsWith(')'));
-  s = s.replaceAll(RegExp(r'[^0-9.,]'), '');
-  if (s.isEmpty) return null;
-  final lastComma = s.lastIndexOf(',');
-  final lastDot = s.lastIndexOf('.');
+  final s = asciiDigits(raw).trim();
+  final first = s.indexOf(RegExp(r'[0-9]'));
+  if (first < 0) return null;
+  final last = s.lastIndexOf(RegExp(r'[0-9]'));
+  // A mark right before the first digit belongs to the number (".5").
+  final coreStart = first > 0 && '.,'.contains(s[first - 1]) ? first - 1 : first;
+  final prefix = s.substring(0, coreStart);
+  final suffix = s.substring(last + 1);
+  var core = s.substring(coreStart, last + 1);
+  // Spaces (also no-break) and apostrophes group digits: 1 234, 1'234.
+  if (core.contains(RegExp(r"[^0-9.,\s\u00a0\u202f']"))) return null;
+  core = core.replaceAll(RegExp(r"[\s\u00a0\u202f']"), '');
+  if (core.contains(RegExp(r'[.,]{2,}'))) return null;
+  final negative = prefix.contains('-') ||
+      prefix.contains('\u2212') ||
+      suffix.startsWith('-') ||
+      (prefix.contains('(') && suffix.contains(')'));
+  final lastComma = core.lastIndexOf(',');
+  final lastDot = core.lastIndexOf('.');
   String normalized;
   if (lastComma >= 0 && lastDot >= 0) {
     // Both present: whichever comes last is the decimal mark.
     final dec = lastComma > lastDot ? ',' : '.';
     final thou = dec == ',' ? '.' : ',';
-    normalized = s.replaceAll(thou, '').replaceAll(dec, '.');
+    if (dec.allMatches(core).length > 1) return null; // 1.234.5,6
+    normalized = core.replaceAll(thou, '').replaceAll(dec, '.');
   } else if (lastComma >= 0) {
-    final commas = ','.allMatches(s).length;
-    final decimals = s.length - lastComma - 1;
+    final commas = ','.allMatches(core).length;
+    final decimals = core.length - lastComma - 1;
     normalized = commas == 1 && decimals != 3
-        ? s.replaceAll(',', '.')
-        : s.replaceAll(',', '');
-  } else if ('.'.allMatches(s).length > 1) {
-    normalized = s.replaceAll('.', ''); // 1.234.567
+        ? core.replaceAll(',', '.')
+        : core.replaceAll(',', '');
+  } else if ('.'.allMatches(core).length > 1) {
+    normalized = core.replaceAll('.', ''); // 1.234.567
   } else {
-    normalized = s;
+    normalized = core;
   }
   final v = double.tryParse(normalized);
   if (v == null) return null;

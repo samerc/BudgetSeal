@@ -149,6 +149,8 @@ tx_form_select_source,Validation error,Select a source account,اختر حساب
 tx_form_select_dest,Validation error,Select a destination account,اختر حساب الوجهة,Sélectionnez un compte de destination
 tx_form_source_dest_differ,Validation error,Source and destination must differ,يجب أن يختلف المصدر عن الوجهة,La source et la destination doivent être différents
 tx_form_enter_amount,Validation error,Enter an amount,أدخل مبلغاً,Saisissez un montant
+txAmountTooLarge,Validation error: amount over the app's limit,"That amount is too large. One transaction can be at most {max}.","هذا المبلغ كبير جداً. الحد الأقصى للمعاملة الواحدة هو {max}.","Ce montant est trop élevé. Une transaction peut aller jusqu'à {max}."
+txFormSetTransferRate,Validation error: a transfer between two currencies has no rate,Enter the exchange rate from {from} to {to},أدخل سعر الصرف من {from} إلى {to},Saisissez le taux de change de {from} vers {to}
 tx_form_select_account_item,Validation error,Select an account for item {n},اختر حساباً للعنصر {n},Sélectionnez un compte pour l'élément {n}
 tx_form_select_account,Validation error,Select an account for the transaction,اختر حساباً للمعاملة,Sélectionnez un compte pour la transaction
 tx_form_enter_amount_item,Validation error,Enter an amount for item {n},أدخل مبلغاً للعنصر {n},Saisissez un montant pour l'élément {n}
@@ -803,10 +805,10 @@ onboard_google_drive,Button,Google Drive,Google Drive,Google Drive
 onboard_pick_file,Button,Pick a folder,اختر مجلدًا,Choisir un dossier
 onboard_join_desc,Sheet description,Enter the invite code shared with you to join an existing BudgetSeal household.,أدخل رمز الدعوة المُشارَك لك للانضمام لأسرة BudgetSeal موجودة.,Entrez le code d'invitation partagé avec vous pour rejoindre un foyer BudgetSeal existant.
 onboard_invite_code,Field label,Invite code,رمز الدعوة,Code d'invitation
-onboard_invite_hint,Field hint,PP-...,PP-...,PP-...
+onboard_invite_hint,Field hint,BS1-...,BS1-...,BS1-...
 onboard_join_button,Button,Join household,الانضمام للأسرة,Rejoindre le foyer
 onboard_enter_code_error,Validation,Please enter an invite code,الرجاء إدخال رمز الدعوة,Veuillez saisir un code d'invitation
-onboard_invalid_code_error,Validation,Invalid invite code. It should start with PP-,رمز دعوة غير صالح. يجب أن يبدأ بـ PP-,Code d'invitation invalide. Il doit commencer par PP-
+onboard_invalid_code_error,Validation,Invalid invite code. It should start with BS1-,رمز دعوة غير صالح. يجب أن يبدأ بـ BS1-,Code d'invitation invalide. Il doit commencer par BS1-
 join_scan_code,Join sheet button,Scan code,مسح الرمز,Scanner le code
 join_scan_title,Scanner screen title,Scan the invite code,امسح رمز الدعوة,Scanner le code d'invitation
 join_scan_hint,Scanner screen hint,Point the camera at the QR code on the other phone.,وجّه الكاميرا نحو رمز QR على الهاتف الآخر.,Pointez l'appareil photo vers le code QR de l'autre téléphone.
@@ -820,6 +822,7 @@ relay_err_key,Household sync error,This household code doesn't work any more. As
 relay_err_full,Household sync error,This household has reached its storage limit.,بلغت هذه الأسرة الحدّ الأقصى للتخزين.,Ce foyer a atteint sa limite de stockage.
 relay_err_busy,Household sync error,Household sync is busy. Try again in a minute.,مزامنة الأسرة مشغولة. حاول مجددًا بعد دقيقة.,La synchronisation du foyer est occupée. Réessayez dans une minute.
 relay_err_server,Household sync error,Household sync can't be reached right now. Try again later.,تعذّر الوصول إلى مزامنة الأسرة الآن. حاول لاحقًا.,La synchronisation du foyer est injoignable pour le moment. Réessayez plus tard.
+relay_empty_household,Joining a household whose creator never synced,This household has no budget yet. Ask the person who invited you to open BudgetSeal and sync.,لا توجد ميزانية في هذه الأسرة بعد. اطلب من الشخص الذي دعاك أن يفتح BudgetSeal ويُجري المزامنة.,Ce foyer n'a pas encore de budget. Demandez à la personne qui vous a invité d'ouvrir BudgetSeal et de synchroniser.
 household_section,Cloud Sync section,Household,الأسرة,Foyer
 household_start,Cloud Sync row / confirm button,Start a household,إنشاء أسرة,Créer un foyer
 household_start_sub,Cloud Sync row / Settings tile subtitle,Share this budget with your partner or family,شارك هذه الميزانية مع شريكك أو عائلتك,Partagez ce budget avec votre conjoint ou votre famille
@@ -1234,6 +1237,10 @@ reports_tip_saving_low,,Your savings rate is low ({percent}%). Try to set aside 
 reports_tip_age_low,,"{days, plural, =1{Your money sits only 1 day before being spent. A buffer of 30+ days is healthier.} other{Your money sits only {days} days before being spent. A buffer of 30+ days is healthier.}}","{days, plural, =0{تُنفق أموالك في اليوم نفسه. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.} =1{تبقى أموالك يومًا واحدًا فقط قبل إنفاقها. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.} =2{تبقى أموالك يومين فقط قبل إنفاقها. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.} few{تبقى أموالك {days} أيام فقط قبل إنفاقها. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.} other{تبقى أموالك {days} يومًا فقط قبل إنفاقها. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.}}","{days, plural, =0{Votre argent ne reste même pas un jour avant d'être dépensé. Une réserve de 30 jours ou plus est plus saine.} =1{Votre argent ne reste qu'un jour avant d'être dépensé. Une réserve de 30 jours ou plus est plus saine.} other{Votre argent ne reste que {days} jours avant d'être dépensé. Une réserve de 30 jours ou plus est plus saine.}}"
 tx_no_rate_between,,"No exchange rate from {from} to {to}. Enter a rate for this amount, or refresh rates in Settings › Exchange rates.",لا يوجد سعر صرف من {from} إلى {to}. أدخل سعرًا لهذا المبلغ، أو حدّث الأسعار من الإعدادات › أسعار الصرف.,"Aucun taux de change de {from} vers {to}. Saisissez un taux pour ce montant, ou actualisez les taux dans Paramètres › Taux de change."
 acct_archive_non_zero,,"This account still holds {amount}. Transfer it to another account or adjust the balance to zero, then archive it — archived accounts no longer count toward your money.",لا يزال هذا الحساب يحتوي على {amount}. حوّله إلى حساب آخر أو اضبط الرصيد على صفر، ثم أرشفه — الحسابات المؤرشفة لا تُحتسب ضمن أموالك.,"Ce compte contient encore {amount}. Transférez-le vers un autre compte ou ajustez le solde à zéro, puis archivez-le : les comptes archivés ne comptent plus dans votre argent."
+acct_delete_non_zero,Account delete (opening balance left),This account still holds {amount}. Deleting it would take that money out of Ready to assign. Transfer it to another account or adjust the balance to zero first.,لا يزال هذا الحساب يحتوي على {amount}. حذفه سيُخرج هذا المبلغ من «جاهز للتوزيع». حوّله إلى حساب آخر أو اضبط الرصيد على صفر أولاً.,Ce compte contient encore {amount}. Le supprimer retirerait cet argent de « Prêt à répartir ». Transférez-le d'abord vers un autre compte ou ajustez le solde à zéro.
+acct_currency_locked,Account settings (currency read-only),"The currency can't change once the account has money or transactions in it. To use another currency, add a new account.",لا يمكن تغيير العملة بعد أن يحتوي الحساب على مال أو معاملات. لاستخدام عملة أخرى، أضف حساباً جديداً.,"La devise ne peut plus changer une fois que le compte contient de l'argent ou des transactions. Pour une autre devise, ajoutez un nouveau compte."
+acct_bills_off_note,Archive/delete account dialog,"{n, plural, =1{Its bill will be switched off.} other{Its {n} bills will be switched off.}}","{n, plural, =1{سيتم إيقاف فاتورته.} =2{سيتم إيقاف فاتورتيه.} few{سيتم إيقاف فواتيره الـ{n}.} many{سيتم إيقاف فواتيره الـ{n}.} other{سيتم إيقاف فواتيره الـ{n}.}}","{n, plural, =1{Sa facture sera désactivée.} other{Ses {n} factures seront désactivées.}}"
+acct_plans_deleted_note,Archive account dialog,"{n, plural, =1{Its planned payment will be deleted.} other{Its {n} planned payments will be deleted.}}","{n, plural, =1{سيتم حذف دفعته المخطط لها.} =2{سيتم حذف دفعتيه المخطط لهما.} few{سيتم حذف دفعاته المخطط لها الـ{n}.} many{سيتم حذف دفعاته المخطط لها الـ{n}.} other{سيتم حذف دفعاته المخطط لها الـ{n}.}}","{n, plural, =1{Son paiement planifié sera supprimé.} other{Ses {n} paiements planifiés seront supprimés.}}"
 receipt_pick_failed,,Couldn't add the photo. Check camera and photo permissions.,تعذّرت إضافة الصورة. تحقق من أذونات الكاميرا والصور.,Impossible d'ajouter la photo. Vérifiez les autorisations de l'appareil photo et des photos.
 backup_close_app,,Close app,إغلاق التطبيق,Fermer l'application
 import_skipped_rows,,{count} rows skipped (unreadable date or amount),تم تخطي {count} صفوف (تاريخ أو مبلغ غير مقروء),{count} lignes ignorées (date ou montant illisible)
@@ -1394,6 +1401,8 @@ acct_balance_adjustment,,Balance adjustment,تعديل الرصيد,Ajustement d
 acct_balance_adjusted_by,,Balance adjusted by {amount},تم تعديل الرصيد بمقدار {amount},Solde ajusté de {amount}
 acct_convert_back,,Convert back,تحويل مرة أخرى,Reconvertir
 acct_convert_back_msg,,Convert {amount} back to your account,تحويل {amount} مرة أخرى إلى حسابك,Reconvertir {amount} vers votre compte
+acctConvertBackEnvelopes,Convert back & close sheet: envelopes holding the wallet currency,Your envelopes hold {amount} of it. That goes back to Ready to assign first.,أظرفك تحتفظ بـ{amount} منه، وسيعود أولاً إلى «جاهز للتوزيع».,Vos enveloppes en contiennent {amount}. Ce montant retourne d'abord dans « Prêt à répartir ».
+travelEnvelopeReturnedNote,Envelope ledger note when closing a travel wallet empties envelopes in its currency,Trip closed: back to Ready to assign,انتهت الرحلة: عاد إلى «جاهز للتوزيع»,Voyage terminé : retour dans « Prêt à répartir »
 acct_transfer_to,,Transfer to,تحويل إلى,Transférer vers
 acct_amount_received,,Amount received,المبلغ المستلم,Montant reçu
 acct_convert_archive,,Convert & archive,تحويل وأرشفة,Convertir et archiver
@@ -1424,6 +1433,7 @@ cat_restored,,Category restored,تم استعادة الفئة,Catégorie restau
 cat_archived,,Category archived,تم أرشفة الفئة,Catégorie archivée
 cat_delete_title,,Delete category?,حذف الفئة؟,Supprimer la catégorie ?
 cat_delete_no_tx,,This category has no transactions. Delete permanently?,هذه الفئة ليس لها معاملات. حذف نهائي؟,Cette catégorie n'a aucune transaction. Supprimer définitivement ?
+cat_delete_subs_kept,Delete group dialog,"{n, plural, =1{Its subcategory will become a top-level category.} other{Its {n} subcategories will become top-level categories.}}","{n, plural, =1{ستصبح فئتها الفرعية فئة رئيسية.} =2{ستصبح فئتاها الفرعيتان فئتين رئيسيتين.} few{ستصبح فئاتها الفرعية الـ{n} فئات رئيسية.} many{ستصبح فئاتها الفرعية الـ{n} فئات رئيسية.} other{ستصبح فئاتها الفرعية الـ{n} فئات رئيسية.}}","{n, plural, =1{Sa sous-catégorie deviendra une catégorie principale.} other{Ses {n} sous-catégories deviendront des catégories principales.}}"
 cat_deleted,,Category deleted,تم حذف الفئة,Catégorie supprimée
 cat_new_title,,New category,فئة جديدة,Nouvelle catégorie
 cat_edit_title,,Edit category,تعديل الفئة,Modifier la catégorie
@@ -1617,6 +1627,8 @@ recurring_delete_body,,This will be permanently removed.,ستتم إزالتها
 recurring_deleted,,Recurring transaction deleted,تم حذف المعاملة المتكررة,Transaction récurrente supprimée
 recurring_created,,Recurring transaction created,تم إنشاء المعاملة المتكررة,Transaction récurrente créée
 recurring_updated,,Recurring transaction updated,تم تحديث المعاملة المتكررة,Transaction récurrente mise à jour
+recurring_catch_up_title,Edit bill: next due moved back,Record {count} missed payments?,"{count, plural, =1{تسجيل دفعة فائتة واحدة؟} =2{تسجيل دفعتين فائتتين؟} few{تسجيل {count} دفعات فائتة؟} many{تسجيل {count} دفعة فائتة؟} other{تسجيل {count} دفعة فائتة؟}}",Enregistrer {count} paiements manqués ?
+recurring_catch_up_message,Edit bill: next due moved back,"The next due date is in the past. Next time the app opens, it records every payment due since then (up to a year back).","تاريخ الاستحقاق التالي في الماضي. في المرة القادمة التي يُفتح فيها التطبيق، يسجّل كل دفعة مستحقة منذ ذلك الحين (حتى سنة إلى الوراء).","La prochaine échéance est dans le passé. À la prochaine ouverture, l'app enregistre chaque paiement dû depuis (jusqu'à un an en arrière)."
 recurring_new_title,,New recurring transaction,معاملة متكررة جديدة,Nouvelle transaction récurrente
 recurring_new_sub_title,,New subscription,اشتراك جديد,Nouvel abonnement
 recurring_edit_title,,Edit recurring transaction,تعديل المعاملة المتكررة,Modifier la transaction récurrente
@@ -1642,6 +1654,7 @@ import_from_bank,,Import from bank CSV,استيراد من ملف CSV بنكي,I
 import_csv_desc,,Select a CSV export from your bank. Column roles will be auto-detected.,اختر ملف CSV من البنك. سيتم اكتشاف أدوار الأعمدة تلقائياً.,Sélectionnez un export CSV de votre banque. Les rôles des colonnes seront détectés automatiquement.
 import_load_csv,,Load CSV,تحميل CSV,Charger CSV
 import_failed,,Import failed. Please check the file format.,فشل الاستيراد. يرجى التحقق من تنسيق الملف.,Échec de l'importation. Vérifiez le format du fichier.
+import_file_empty,Import (empty file picked),"This file is empty, so there's nothing to import.",هذا الملف فارغ، فلا يوجد ما يمكن استيراده.,Ce fichier est vide : il n'y a rien à importer.
 import_found_rows,,Found {count} rows in {fileName},تم العثور على {count} صف في {fileName},{count} lignes trouvées dans {fileName}
 import_column_mapping,,Column mapping,تعيين الأعمدة,Mappage des colonnes
 import_column_map_desc,,Assign a role to each column. Roles were auto-detected -- adjust as needed.,عيّن دوراً لكل عمود. تم الاكتشاف التلقائي — عدّل حسب الحاجة.,Attribuez un rôle à chaque colonne. Les rôles ont été détectés automatiquement — ajustez si nécessaire.
@@ -1941,6 +1954,9 @@ alloc_move_button,,Move,نقل,Déplacer
 alloc_cover_button,,Cover,تغطية,Couvrir
 alloc_move_menu,,Move money,نقل المال,Déplacer de l'argent
 alloc_move_not_enough,,{name} only has {amount}.,{name} فيه {amount} فقط.,{name} ne contient que {amount}.
+allocMoveOverRta,Move money sheet: moving more than Ready to assign holds,Ready to assign only has {amount}. It will go negative.,في «جاهز للتوزيع» {amount} فقط، وسيصبح بالسالب.,« Prêt à répartir » ne contient que {amount}. Il deviendra négatif.
+allocRemoveMoneyBack,Archive/delete envelope dialog: the money it holds,"It holds {amount}, which goes back to Ready to assign.",فيه {amount}، وسيعود إلى «جاهز للتوزيع».,"Elle contient {amount}, qui retourne dans « Prêt à répartir »."
+allocRemoveOverspent,Archive/delete envelope dialog: an overspent envelope,"It is over by {amount}, which comes out of Ready to assign.",تجاوز بمقدار {amount}، وسيُخصم من «جاهز للتوزيع».,"Elle est dépassée de {amount}, pris sur « Prêt à répartir »."
 alloc_moved_to,,Moved to {name},نُقل إلى {name},Déplacé vers {name}
 alloc_moved_from,,Moved from {name},نُقل من {name},Déplacé depuis {name}
 alloc_move_done,,Moved {amount} from {from} to {to},نُقل {amount} من {from} إلى {to},{amount} déplacé de {from} vers {to}
@@ -2016,6 +2032,8 @@ calendar_future_day,Calendar: selected day in the future,This day hasn't come ye
 upcoming_paid_on_day,Bill sheet action,Paid on another day,دُفعت في يوم آخر,Payé un autre jour
 upcoming_paid_on_day_desc,Bill sheet action subtitle,Record it on the day you paid it,سجّلها في اليوم الذي دفعتها فيه,L'enregistrer le jour où vous l'avez payé
 upcoming_posted,,Bill posted,تم تسجيل الفاتورة,Facture enregistrée
+upcoming_bill_ended,Post now on a bill past its end date,"This bill has ended, so it isn't paid any more.",انتهت هذه الفاتورة، فلم تعد تُدفع.,"Cette facture est terminée, elle n'est plus payée."
+tx_account_unavailable,Posting a bill or planned payment whose account is archived or deleted,This payment's account is archived or deleted. Move it to another account first.,حساب هذه الدفعة مؤرشف أو محذوف. انقلها إلى حساب آخر أولًا.,Le compte de ce paiement est archivé ou supprimé. Déplacez-le d'abord vers un autre compte.
 upcoming_skipped,,Skipped — next date updated,تم التخطي — حُدّث الموعد التالي,Ignorée — prochaine date mise à jour
 recurring_posted_n,,"{n, plural, =1{1 recurring item posted} other{{n} recurring items posted}}","{n, plural, =1{سُجّل بند متكرر واحد} =2{سُجّل بندان متكرران} few{سُجّلت {n} بنود متكررة} many{سُجّل {n} بنداً متكرراً} other{سُجّل {n} بند متكرر}}","{n, plural, =1{1 élément récurrent enregistré} other{{n} éléments récurrents enregistrés}}"
 
@@ -2399,6 +2417,7 @@ wc_signed_out_all,,All browsers signed out — they need the PIN again,تم تس
 # ADDED FROM ARB (Oct 2026 audit sync),,,,
 sync_err_wrong_password,,Wrong sync password. Use the same password as on your other device.,كلمة مرور المزامنة غير صحيحة. استخدم نفس كلمة المرور الموجودة على جهازك الآخر.,Mot de passe de synchronisation incorrect. Utilisez le même que sur votre autre appareil.
 sync_err_corrupt,,The sync file couldn't be read. Sync again from your other device.,تعذّرت قراءة ملف المزامنة. زامن مجددًا من جهازك الآخر.,Le fichier de synchronisation est illisible. Synchronisez à nouveau depuis votre autre appareil.
+sync_err_too_new,Restoring a file from a newer app version,"This file was made by a newer version of BudgetSeal. Update the app, then try again.",أُنشئ هذا الملف بإصدار أحدث من BudgetSeal. حدّث التطبيق ثم حاول مجددًا.,"Ce fichier a été créé par une version plus récente de BudgetSeal. Mettez l'application à jour, puis réessayez."
 sync_err_signed_out,,You were signed out of Google Drive. Connect again to keep syncing.,تم تسجيل خروجك من Google Drive. اتصل مجددًا لمتابعة المزامنة.,Vous avez été déconnecté de Google Drive. Reconnectez-vous pour continuer la synchronisation.
 sync_err_generic,,Sync didn't finish. Please try again in a moment.,لم تكتمل المزامنة. حاول مرة أخرى بعد قليل.,La synchronisation n'a pas abouti. Réessayez dans un instant.
 sync_err_backup_failed,,"Couldn't back up your current data, so nothing was replaced.",تعذّر نسخ بياناتك الحالية احتياطيًا، لذلك لم يُستبدل أي شيء.,Impossible de sauvegarder vos données actuelles : rien n'a été remplacé.
@@ -2647,6 +2666,12 @@ bill_pick_person_hint,Bill splitter,"Tap a person below, then the items they had
 bill_everyone_each,Bill splitter,Everyone · {amount} each,الجميع · {amount} لكل شخص,Tout le monde · {amount} chacun
 bill_only,Bill splitter,{name} only,{name} فقط,{name} seulement
 bill_items_shared_now,Bill splitter,{name}'s items are now shared by everyone,بنود {name} أصبحت للجميع,Les articles de {name} sont maintenant partagés par tous
+bill_person_removed,Bill splitter,{name} removed from the split,أُزيل {name} من التقسيم,{name} retiré du partage
+bill_need_account,Bill splitter: Save with no account,Add an account first — the split is saved as a payment from one of your accounts.,أضف حسابًا أولًا — يُحفظ التقسيم كدفعة من أحد حساباتك.,Ajoutez d'abord un compte — le partage est enregistré comme un paiement depuis l'un de vos comptes.
+bill_scan_kept_items,Bill splitter: a scan without prices keeps typed items,No prices found on the receipt. Your items are kept.,لم يُعثر على أسعار في الإيصال. بقيت بنودك كما هي.,Aucun prix trouvé sur le ticket. Vos articles sont conservés.
+bill_replace_items_title,Bill splitter: scanning with items already entered,Replace your items?,استبدال بنودك؟,Remplacer vos articles ?
+bill_replace_items_message,Bill splitter,"{count, plural, =1{The receipt's items replace the item you entered.} other{The receipt's items replace the {count} items you entered.}}","{count, plural, =1{تحلّ بنود الإيصال محلّ البند الذي أدخلته.} =2{تحلّ بنود الإيصال محلّ البندين اللذين أدخلتهما.} few{تحلّ بنود الإيصال محلّ {count} بنود أدخلتها.} many{تحلّ بنود الإيصال محلّ {count} بندًا أدخلتها.} other{تحلّ بنود الإيصال محلّ {count} بند أدخلتها.}}","{count, plural, =1{Les articles du ticket remplacent l'article que vous avez saisi.} other{Les articles du ticket remplacent les {count} articles que vous avez saisis.}}"
+bill_replace_items,Bill splitter: confirm button,Replace,استبدال,Remplacer
 bill_set_share,Bill splitter,Set share,تحديد الحصّة,Fixer la part
 bill_reset_share,Bill splitter,Split it evenly again,إعادة التقسيم بالتساوي,Répartir à nouveau également
 bill_unpriced_lines,Bill splitter: receipt lines read without a price,Lines without a price: {count} — tap one to add it,أسطر بلا سعر: {count} — اضغط على أحدها لإضافته,Lignes sans prix : {count} — touchez-en une pour l'ajouter

@@ -132,8 +132,12 @@ class LedgerDao extends DatabaseAccessor<AppDatabase> with _$LedgerDaoMixin {
     });
   }
 
-  /// Money put into each envelope during [from, to) — funding and moves in
-  /// (by ledger date): `Map<allocationId, Map<currency, funded>>`.
+  /// Money put into each envelope during [from, to), net of what was taken
+  /// back out — funding and moves in, less moves out and withdrawals to
+  /// Ready to assign (by ledger date). Only positive totals are returned:
+  /// `Map<allocationId, Map<currency, funded>>`. Net, so an envelope funded
+  /// to its target and then emptied again is not "fully funded" (the seal).
+  /// Spending and period resets are not funding and don't count.
   Future<Map<String, Map<String, double>>> fundedInPeriod(
       String householdId, DateTime from, DateTime to) async {
     final rows = await customSelect(
@@ -141,8 +145,9 @@ class LedgerDao extends DatabaseAccessor<AppDatabase> with _$LedgerDaoMixin {
       'SUM(l.amount) AS total '
       'FROM allocation_ledger l '
       'INNER JOIN allocations a ON a.id = l.allocation_id '
-      "WHERE a.household_id = ? AND l.entry_type IN ('funding', 'transfer') "
-      'AND l.amount > 0 AND l.created_at >= ? AND l.created_at < ? '
+      'WHERE a.household_id = ? '
+      "AND l.entry_type IN ('funding', 'transfer', 'withdrawal') "
+      'AND l.created_at >= ? AND l.created_at < ? '
       'GROUP BY l.allocation_id, l.currency',
       variables: [
         Variable.withString(householdId),

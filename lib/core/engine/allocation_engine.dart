@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../l10n/s_lookup.dart';
+import '../../shared/theme/design_tokens.dart' show InputLimits;
 import '../../shared/utils/format_number.dart'
     show currencyDecimals, formatAmount, isRealRate;
 import '../database/app_database.dart';
@@ -556,8 +557,8 @@ class AllocationEngine {
     if (lines.any((l) => l.amount < 0)) {
       throw ArgumentError('line amounts must be non-negative');
     }
-    if (lines.any((l) => l.amount > 1e9)) {
-      throw ArgumentError('line amount exceeds maximum (1 billion)');
+    if (lines.any((l) => l.amount > InputLimits.maxAmount)) {
+      throw ArgumentError('line amount exceeds maximum (1 trillion)');
     }
     if (lines.any((l) => l.exchangeRateToBase <= 0)) {
       throw ArgumentError('exchange rate must be positive');

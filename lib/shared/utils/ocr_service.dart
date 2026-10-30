@@ -616,7 +616,20 @@ class OcrService {
   /// Normalises "1,234.56" / "1.234,56" / "4,50" / "450,000T" to a number.
   /// [decimals] is the bill currency's: in a 3-decimal currency (KWD, BHD…)
   /// one separator before exactly 3 digits is the decimal point.
+  ///
+  /// Anything a billion or more (or not finite) is not a price — a barcode,
+  /// a card number, misread digits — and gives null. (The money engine
+  /// refuses lines over a billion too.)
   static double? _parsePrice(String rawPrice, [int? decimals]) {
+    final v = _parsePriceRaw(rawPrice, decimals);
+    if (v == null || !v.isFinite || v.abs() >= maxReceiptPrice) return null;
+    return v;
+  }
+
+  /// Upper bound for one price read from a receipt.
+  static const maxReceiptPrice = 1e9;
+
+  static double? _parsePriceRaw(String rawPrice, [int? decimals]) {
     // Clean price: strip trailing suffixes (T, TTC, HT, VAT, etc.), remove spaces
     var priceStr = _stripPriceSuffix(rawPrice).replaceAll(' ', '');
     // Strip leading separator: ",450,000" → "450,000"

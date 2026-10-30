@@ -7,6 +7,14 @@ import '../database/app_database.dart';
 import '../database/normalize_transactions.dart';
 import 'sync_encryption.dart';
 
+/// A sync/backup file written by a newer BudgetSeal than this one.
+class SyncFileTooNewException implements Exception {
+  const SyncFileTooNewException(this.version);
+  final int version;
+  @override
+  String toString() => 'SyncFileTooNewException($version)';
+}
+
 /// The readable snapshot (`BudgetSeal_Sync.json`, docs/file-format.md):
 /// exports the whole database as JSON and restores one (an old sync
 /// folder, or a backup). Sync itself exchanges change logs (log_sync.dart).
@@ -15,6 +23,9 @@ class SyncEngine {
   final AppDatabase _db;
 
   SyncEngine(this._db);
+
+  /// The file format this app writes and the newest it can restore.
+  static const formatVersion = 1;
 
   // ── Export ────────────────────────────────────────────────────
 
@@ -39,7 +50,7 @@ class SyncEngine {
     final reviews = await _db.select(_db.monthReviews).get();
 
     final data = {
-      'version': 1,
+      'version': formatVersion,
       'exportedAt': DateTime.now().toUtc().toIso8601String(),
       'households': households.map(_householdToMap).toList(),
       'users': users.map(_userToMap).toList(),
@@ -70,8 +81,25 @@ class SyncEngine {
   /// Replace all local data with the contents of a sync file.
   /// Used for restore-from-backup scenarios.
   /// Automatically decrypts if the file is encrypted.
+  ///
+  /// Checked before anything is deleted: a JSON file that holds no
+  /// household (another app's file, `{}`) is refused as damaged
+  /// ([FormatException]), and one written by a newer format than this app
+  /// reads ([SyncFileTooNewException]) — restoring it would drop the
+  /// fields this app doesn't know.
   Future<void> restoreFromJson(String rawContent) async {
     final data = await _readFile(rawContent);
+    final version = data['version'] ?? 1;
+    if (version is! int) {
+      throw const FormatException('Sync file has no valid version');
+    }
+    if (version > formatVersion) throw SyncFileTooNewException(version);
+    final households = data['households'];
+    if (households is! List ||
+        households.isEmpty ||
+        households.any((h) => h is! Map || h['id'] is! String)) {
+      throw const FormatException('Sync file holds no budget');
+    }
 
     await _db.transaction(() async {
       // Delete all existing data (order matters for foreign keys)

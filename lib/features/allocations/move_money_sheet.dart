@@ -74,6 +74,8 @@ Future<bool> showMoveMoneySheet(
       builder: (ctx, setSheet) {
         final fromBal = balanceOf(from);
         final short = from != _readyToAssign && value > fromBal + 0.005;
+        // Ready to assign may go negative (as when funding), but say so.
+        final overRta = from == _readyToAssign && value > fromBal + 0.005;
         Widget picker(String label, String selected, ValueChanged<String> on,
                 {required String exclude}) =>
             DropdownButtonFormField<String>(
@@ -131,6 +133,15 @@ Future<bool> showMoveMoneySheet(
                 Text(
                   tr.allocMoveNotEnough(
                       names[from] ?? '', formatAmount(fromBal, currency: cur)),
+                  style: const TextStyle(
+                      fontSize: TypographyTokens.captionSize,
+                      color: AppColors.overspent),
+                ),
+              ],
+              if (overRta) ...[
+                const SizedBox(height: 8),
+                Text(
+                  tr.allocMoveOverRta(formatAmount(fromBal, currency: cur)),
                   style: const TextStyle(
                       fontSize: TypographyTokens.captionSize,
                       color: AppColors.overspent),

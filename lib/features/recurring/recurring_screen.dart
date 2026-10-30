@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,12 @@ import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart' show Value;
 
 import '../../core/database/app_database.dart';
+import '../../core/engine/recurring_engine.dart'
+    show
+        AccountUnavailableException,
+        catchUpCount,
+        catchUpCutoff,
+        ensureAccountsUsable;
 import '../../core/providers/tx_colors_provider.dart';
 import '../../core/providers/accounts_provider.dart';
 import '../../core/providers/categories_provider.dart';
@@ -448,12 +456,14 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom +
         MediaQuery.of(context).viewPadding.bottom;
-    return Container(
+    // A Material, not a coloured box: the switches' ListTiles paint their
+    // ink on the nearest Material (a coloured DecoratedBox hides it and
+    // trips ListTile's debug check).
+    return Material(
+      color: AppColors.popup(context),
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
+      child: Padding(
       padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottomInset),
-      decoration: BoxDecoration(
-        color: AppColors.popup(context),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
-      ),
       child: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -556,11 +566,18 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: () async {
+                final now = DateTime.now();
+                final first = DateTime(now.year, now.month, now.day);
+                // Not after the end date: such a bill would never post.
+                final farOut = DateTime(now.year + 30);
+                final last = _endDate != null && !_endDate!.isBefore(first)
+                    ? _endDate!
+                    : farOut;
                 final picked = await showDatePicker(
                   context: context,
-                  initialDate: _startDate,
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime(2030),
+                  initialDate: clampDate(_startDate, first, last),
+                  firstDate: first,
+                  lastDate: last,
                 );
                 if (picked != null) setState(() => _startDate = picked);
               },
@@ -571,12 +588,17 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
             const SizedBox(height: 8),
             OutlinedButton.icon(
               onPressed: () async {
+                final first = _startDate;
+                final farOut = DateTime(DateTime.now().year + 40);
+                final last = first.isAfter(farOut) ? first : farOut;
                 final picked = await showDatePicker(
                   context: context,
-                  initialDate:
+                  initialDate: clampDate(
                       _endDate ?? _startDate.add(const Duration(days: 365)),
-                  firstDate: _startDate,
-                  lastDate: DateTime(2035),
+                      first,
+                      last),
+                  firstDate: first,
+                  lastDate: last,
                 );
                 if (picked != null) {
                   setState(() => _endDate = picked);
@@ -632,7 +654,7 @@ class _AddRecurringSheetState extends ConsumerState<AddRecurringSheet> {
         ),
         ),
       ),
-    );
+    ));
   }
 
   Future<void> _save() async {
@@ -767,12 +789,14 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom +
         MediaQuery.of(context).viewPadding.bottom;
-    return Container(
+    // A Material, not a coloured box: the switches' ListTiles paint their
+    // ink on the nearest Material (a coloured DecoratedBox hides it and
+    // trips ListTile's debug check).
+    return Material(
+      color: AppColors.popup(context),
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
+      child: Padding(
       padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottomInset),
-      decoration: BoxDecoration(
-        color: AppColors.popup(context),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(RadiusTokens.sheet)),
-      ),
       child: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -804,7 +828,12 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
               final accounts = ref.watch(accountsProvider).value ?? [];
               return DropdownButtonFormField<String>(
                 icon: AppIcons.dropdown,
-                initialValue: _accountId,
+                // A bill on an archived/deleted account: none picked (the
+                // dropdown asserts on a value missing from its items).
+                initialValue: accounts.isEmpty ||
+                        accounts.any((a) => a.id == _accountId)
+                    ? _accountId
+                    : null,
                 decoration: InputDecoration(labelText: S.of(context).commonAccount),
                 items: accounts
                     .map((a) => DropdownMenuItem(
@@ -847,11 +876,21 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: () async {
+                // At most a year back (launch posts at most a year of
+                // missed payments), and never a range that excludes the
+                // current due date (a bill skipped past 2030).
+                final now = DateTime.now();
+                final today = DateTime(now.year, now.month, now.day);
+                final cutoff = catchUpCutoff(today);
+                final first =
+                    _startDate.isBefore(cutoff) ? _startDate : cutoff;
+                final farOut = DateTime(today.year + 30);
+                final last = _startDate.isAfter(farOut) ? _startDate : farOut;
                 final picked = await showDatePicker(
                   context: context,
                   initialDate: _startDate,
-                  firstDate: DateTime(2020),
-                  lastDate: DateTime(2030),
+                  firstDate: first,
+                  lastDate: last,
                 );
                 if (picked != null) setState(() => _startDate = picked);
               },
@@ -862,12 +901,20 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
             const SizedBox(height: 8),
             OutlinedButton.icon(
               onPressed: () async {
+                final first = _startDate;
+                final farOut = DateTime(DateTime.now().year + 40);
+                final last = first.isAfter(farOut) ? first : farOut;
+                // A cancelled subscription's end is before its next due
+                // date: open on the first allowed day instead.
+                final initial = clampDate(
+                    _endDate ?? _startDate.add(const Duration(days: 365)),
+                    first,
+                    last);
                 final picked = await showDatePicker(
                   context: context,
-                  initialDate:
-                      _endDate ?? _startDate.add(const Duration(days: 365)),
-                  firstDate: _startDate,
-                  lastDate: DateTime(2035),
+                  initialDate: initial,
+                  firstDate: first,
+                  lastDate: last,
                 );
                 if (picked != null) {
                   setState(() => _endDate = picked);
@@ -949,7 +996,7 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
         ),
         ),
       ),
-    );
+    ));
   }
 
   Future<void> _save() async {
@@ -977,14 +1024,95 @@ class _EditRecurringSheetState extends ConsumerState<EditRecurringSheet> {
       return;
     }
 
+    final item = widget.item;
+    final db = ref.read(databaseProvider);
+    final tr = S.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    // Still on an archived/deleted account: pick a live one first.
+    try {
+      await ensureAccountsUsable(db, _accountId!);
+    } on AccountUnavailableException {
+      messenger.showSnackBar(SnackBar(
+          content: Text(tr.recurringFormSelectAccount),
+          behavior: SnackBarBehavior.floating));
+      return;
+    } catch (e) {
+      debugPrint('[Recurring] Account check failed: $e');
+    }
+    if (!mounted) return;
+    // Next due moved back: the next launch posts every missed payment
+    // since then — ask first when that's more than a few.
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    if (!_startDate.isAtSameMomentAs(item.nextDueDate) && !_askFirst) {
+      final n = catchUpCount(
+          item.copyWith(
+              frequency: _frequency,
+              anchorDay: Value(_startDate.day),
+              endDate: Value(_endDate)),
+          _startDate,
+          today);
+      if (n > 3) {
+        final ok = await showConfirmDialog(context,
+            title: tr.recurringCatchUpTitle(n),
+            message: tr.recurringCatchUpMessage,
+            confirmLabel: tr.commonSave,
+            destructive: false);
+        if (!ok || !mounted) return;
+      }
+    }
+
+    // A subscription's price change goes into its history (as the Web
+    // Companion does) — the history decides what each date is charged.
+    String? priceHistory = item.priceHistory;
+    if ((_isSubscription || item.priceHistory != null) &&
+        (_calcAmount - item.amount).abs() > 0.001) {
+      List<dynamic> history;
+      try {
+        history = item.priceHistory != null && item.priceHistory!.isNotEmpty
+            ? jsonDecode(item.priceHistory!) as List
+            : [];
+      } catch (_) {
+        history = [];
+      }
+      history.add({
+        'amount': _calcAmount,
+        'from': today.toIso8601String().substring(0, 10),
+      });
+      priceHistory = jsonEncode(history);
+    }
+    // Switched off because it ended, or its account went: on again when
+    // the end is cleared/moved out or it moves to a live account.
+    // (A bill the user paused stays paused.)
+    final ended = _endDate != null && _startDate.isAfter(_endDate!);
+    final wasEnded =
+        item.endDate != null && item.nextDueDate.isAfter(item.endDate!);
+    var oldAccountGone = false;
+    if (!item.enabled && _accountId != item.accountId) {
+      try {
+        await ensureAccountsUsable(db, item.accountId);
+      } on AccountUnavailableException {
+        oldAccountGone = true;
+      } catch (_) {}
+    }
+    final revive = !item.enabled && !ended && (wasEnded || oldAccountGone);
+    if (!mounted) return;
+
     setState(() => _saving = true);
     try {
-      final db = ref.read(databaseProvider);
       await (db.update(db.recurringTransactions)
             ..where((r) => r.id.equals(widget.item.id)))
           .write(RecurringTransactionsCompanion(
         title: Value(title),
         amount: Value(_calcAmount),
+        priceHistory: priceHistory != item.priceHistory
+            ? Value(priceHistory)
+            : const Value.absent(),
+        enabled: ended
+            ? const Value(false)
+            : revive
+                ? const Value(true)
+                : const Value.absent(),
         currency: Value(_currency),
         accountId: Value(_accountId!),
         categoryId: Value(_categoryId),

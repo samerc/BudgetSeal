@@ -4,6 +4,8 @@ import 'package:uuid/uuid.dart';
 import '../../shared/utils/format_number.dart' show isRealRate;
 import '../database/app_database.dart';
 import 'allocation_engine.dart';
+import 'recurring_engine.dart'
+    show ensureAccountsUsable;
 import '../services/household_members.dart' show DeviceIdentity;
 
 /// Looks up a `from → to` exchange rate; null when none is known.
@@ -144,6 +146,11 @@ class PlannedEngine {
   /// Rates: the plan was saved at 1.0, so a foreign line takes [rate]
   /// (falling back to 1.0, shown as "No rate"); a transfer between two
   /// currencies without a rate throws [CurrencyConversionException].
+  ///
+  /// A plan whose account (or a part's account, or a transfer's
+  /// destination) is deleted or archived throws
+  /// `AccountUnavailableException`: posting it would debit the envelope
+  /// while no visible account goes down (Ready to assign would grow).
   Future<String> post(
     String planId, {
     required String baseCurrency,
@@ -158,6 +165,8 @@ class PlannedEngine {
       if (await _exists(postedTxId)) return postedTxId;
       throw StateError('Planned payment $planId not found');
     }
+    await ensureAccountsUsable(_db, plan.accountId,
+        plan.type == 'transfer' ? plan.destinationAccountId : null);
     final today = now ?? DateTime.now();
     final date = plan.createdAt.isAfter(today) ? today : plan.createdAt;
 
@@ -185,6 +194,9 @@ class PlannedEngine {
       final stored = await (_db.select(_db.transactionLines)
             ..where((l) => l.transactionId.equals(planId)))
           .get();
+      for (final l in stored) {
+        if (l.accountId != null) await ensureAccountsUsable(_db, l.accountId!);
+      }
       lines = [
         for (final l in stored)
           TxLine(

@@ -268,6 +268,11 @@ String billRemindLabel(S tr, int? days) => switch (days) {
       _ => tr.billRemindDaysBefore(days),
     };
 
+/// [d] moved into [first]…[last] — a date picker asserts when its initial
+/// date is outside its range.
+DateTime clampDate(DateTime d, DateTime first, DateTime last) =>
+    d.isBefore(first) ? first : (d.isAfter(last) ? last : d);
+
 /// "Ask before posting" switch + "Remind me" picker, shared by the add and
 /// edit bill sheets (subscriptions edit through the same sheet).
 class BillOptionsFields extends StatelessWidget {
@@ -301,11 +306,15 @@ class BillOptionsFields extends StatelessWidget {
         const SizedBox(height: 8),
         DropdownButtonFormField<int?>(
           icon: AppIcons.dropdown,
+          isExpanded: true, // long labels overflow at 360 dp otherwise
           initialValue: billRemindChoices.contains(remindDays) ? remindDays : null,
           decoration: InputDecoration(labelText: tr.billRemindLabel),
           items: [
             for (final d in billRemindChoices)
-              DropdownMenuItem(value: d, child: Text(billRemindLabel(tr, d))),
+              DropdownMenuItem(
+                  value: d,
+                  child: Text(billRemindLabel(tr, d),
+                      overflow: TextOverflow.ellipsis)),
           ],
           onChanged: onRemindDays,
         ),

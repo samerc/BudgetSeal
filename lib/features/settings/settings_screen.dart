@@ -16,6 +16,7 @@ import 'package:intl/intl.dart';
 import '../../core/providers/date_format_provider.dart';
 import '../../core/providers/number_format_provider.dart';
 import '../../core/sync/relay_provider.dart';
+import '../../core/sync/sync_encryption.dart';
 import '../../core/providers/household_provider.dart';
 import '../../core/providers/autofill_provider.dart';
 import '../../core/providers/entry_mode_provider.dart';
@@ -277,9 +278,29 @@ Future<void> _showShareHousehold(BuildContext context, WidgetRef ref) async {
         batch.deleteAll(db.fxRates);
         batch.deleteAll(db.users);
         batch.deleteAll(db.households);
-        // The change log holds a copy of every row: erase it too.
+        // The change log holds a copy of every row: erase it too, and the
+        // sync bookkeeping (files read, entries written), or a sync set up
+        // for the new budget believes it already read/wrote them.
         batch.customStatement('DELETE FROM sync_ops');
+        batch.customStatement('DELETE FROM sync_files');
+        batch.customStatement('DELETE FROM sync_meta');
       });
+
+      // Leave sync: the active provider (Drive sign-in, folder), the
+      // household key and the sync password. Each on its own, so one
+      // failing doesn't keep the others.
+      final sync = ref.read(syncProvider.notifier);
+      for (final step in <Future<void> Function()>[
+        sync.disconnectProvider,
+        sync.relay.disconnect,
+        SyncEncryption.clearPassword,
+      ]) {
+        try {
+          await step();
+        } catch (e) {
+          debugPrint('[Reset] Leaving sync: $e');
+        }
+      }
 
       // Clear preferences
       final prefs = await SharedPreferences.getInstance();

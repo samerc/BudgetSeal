@@ -144,6 +144,7 @@
   "syncUseSyncedBudget": "استخدام الميزانية المتزامنة",
   "syncErrWrongPassword": "كلمة مرور المزامنة غير صحيحة. استخدم نفس كلمة المرور الموجودة على جهازك الآخر.",
   "syncErrCorrupt": "تعذّرت قراءة ملف المزامنة. زامن مجددًا من جهازك الآخر.",
+  "syncErrTooNew": "أُنشئ هذا الملف بإصدار أحدث من BudgetSeal. حدّث التطبيق ثم حاول مجددًا.",
   "syncErrSignedOut": "تم تسجيل خروجك من Google Drive. اتصل مجددًا لمتابعة المزامنة.",
   "syncErrGeneric": "لم تكتمل المزامنة. حاول مرة أخرى بعد قليل.",
   "syncErrBackupFailed": "تعذّر نسخ بياناتك الحالية احتياطيًا، لذلك لم يُستبدل أي شيء.",
@@ -513,6 +514,7 @@
   "upcomingPaidOnDayDesc": "سجّلها في اليوم الذي دفعتها فيه",
   "upcomingPosted": "تم تسجيل الفاتورة",
   "upcomingSkipped": "تم التخطي — حُدّث الموعد التالي",
+  "upcomingBillEnded": "انتهت هذه الفاتورة، فلم تعد تُدفع.",
   "recurringPostedN": "{n, plural, =1{سُجّل بند متكرر واحد} =2{سُجّل بندان متكرران} few{سُجّلت {n} بنود متكررة} many{سُجّل {n} بنداً متكرراً} other{سُجّل {n} بند متكرر}}",
   "objSummaryPerMonth": "المطلوب شهرياً",
   "catLinkEnvelope": "الظرف",
@@ -561,6 +563,9 @@
   "allocCoverButton": "تغطية",
   "allocMoveMenu": "نقل المال",
   "allocMoveNotEnough": "{name} فيه {amount} فقط.",
+  "allocMoveOverRta": "في «جاهز للتوزيع» {amount} فقط، وسيصبح بالسالب.",
+  "allocRemoveMoneyBack": "فيه {amount}، وسيعود إلى «جاهز للتوزيع».",
+  "allocRemoveOverspent": "تجاوز بمقدار {amount}، وسيُخصم من «جاهز للتوزيع».",
   "allocMovedTo": "نُقل إلى {name}",
   "allocMovedFrom": "نُقل من {name}",
   "allocMoveDone": "نُقل {amount} من {from} إلى {to}",
@@ -731,6 +736,8 @@
   "syncErrNeedsPassword": "ملف المزامنة مشفّر. أدخل كلمة مرور المزامنة في المزامنة السحابية لقراءته.",
   "travelExchangeNote": "صرف سفر ← {currency}",
   "travelConvertBackNote": "إعادة تحويل السفر ← {currency}",
+  "travelEnvelopeReturnedNote": "انتهت الرحلة: عاد إلى «جاهز للتوزيع»",
+  "acctConvertBackEnvelopes": "أظرفك تحتفظ بـ{amount} منه، وسيعود أولاً إلى «جاهز للتوزيع».",
   "healthUnallocShort": "غير مخصص: {amount}",
   "reportsRecurringSummary": "{count} نشطة · {amount}/شهريًا",
   "allocRevaluationNote": "إعادة تقييم: {amount} بسعر {rate} (كان {oldRate})",
@@ -764,7 +771,12 @@
   "reportsTipSavingLow": "معدل ادخارك منخفض ({percent}٪). حاول أن تدّخر 10–20٪ على الأقل.",
   "reportsTipAgeLow": "{days, plural, =0{تُنفق أموالك في اليوم نفسه. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.} =1{تبقى أموالك يومًا واحدًا فقط قبل إنفاقها. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.} =2{تبقى أموالك يومين فقط قبل إنفاقها. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.} few{تبقى أموالك {days} أيام فقط قبل إنفاقها. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.} other{تبقى أموالك {days} يومًا فقط قبل إنفاقها. الاحتفاظ بمخزون لـ 30 يومًا أو أكثر أفضل.}}",
   "txNoRateBetween": "لا يوجد سعر صرف من {from} إلى {to}. أدخل سعرًا لهذا المبلغ، أو حدّث الأسعار من الإعدادات › أسعار الصرف.",
+  "txAccountUnavailable": "حساب هذه الدفعة مؤرشف أو محذوف. انقلها إلى حساب آخر أولًا.",
   "acctArchiveNonZero": "لا يزال هذا الحساب يحتوي على {amount}. حوّله إلى حساب آخر أو اضبط الرصيد على صفر، ثم أرشفه — الحسابات المؤرشفة لا تُحتسب ضمن أموالك.",
+  "acctDeleteNonZero": "لا يزال هذا الحساب يحتوي على {amount}. حذفه سيُخرج هذا المبلغ من «جاهز للتوزيع». حوّله إلى حساب آخر أو اضبط الرصيد على صفر أولاً.",
+  "acctCurrencyLocked": "لا يمكن تغيير العملة بعد أن يحتوي الحساب على مال أو معاملات. لاستخدام عملة أخرى، أضف حساباً جديداً.",
+  "acctBillsOffNote": "{n, plural, =1{سيتم إيقاف فاتورته.} =2{سيتم إيقاف فاتورتيه.} few{سيتم إيقاف فواتيره الـ{n}.} many{سيتم إيقاف فواتيره الـ{n}.} other{سيتم إيقاف فواتيره الـ{n}.}}",
+  "acctPlansDeletedNote": "{n, plural, =1{سيتم حذف دفعته المخطط لها.} =2{سيتم حذف دفعتيه المخطط لهما.} few{سيتم حذف دفعاته المخطط لها الـ{n}.} many{سيتم حذف دفعاته المخطط لها الـ{n}.} other{سيتم حذف دفعاته المخطط لها الـ{n}.}}",
   "receiptPickFailed": "تعذّرت إضافة الصورة. تحقق من أذونات الكاميرا والصور.",
   "backupCloseApp": "إغلاق التطبيق",
   "importSkippedRows": "تم تخطي {count} صفوف (تاريخ أو مبلغ غير مقروء)",
@@ -1405,6 +1417,16 @@
   "txFormEnterAmount": "أدخل مبلغاً",
   "@txFormEnterAmount": {
     "description": "Validation error"
+  },
+  "txAmountTooLarge": "هذا المبلغ كبير جداً. الحد الأقصى للمعاملة الواحدة هو {max}.",
+  "@txAmountTooLarge": {
+    "description": "Validation error: amount over the app's limit",
+    "placeholders": { "max": { "type": "String" } }
+  },
+  "txFormSetTransferRate": "أدخل سعر الصرف من {from} إلى {to}",
+  "@txFormSetTransferRate": {
+    "description": "Validation error: a transfer between two currencies has no rate",
+    "placeholders": { "from": { "type": "String" }, "to": { "type": "String" } }
   },
   "txFormSelectAccountItem": "اختر حساباً للعنصر {n}",
   "@txFormSelectAccountItem": {
@@ -3857,7 +3879,7 @@
   "@onboardInviteCode": {
     "description": "Field label"
   },
-  "onboardInviteHint": "PP-...",
+  "onboardInviteHint": "BS1-...",
   "@onboardInviteHint": {
     "description": "Field hint"
   },
@@ -3869,7 +3891,7 @@
   "@onboardEnterCodeError": {
     "description": "Validation"
   },
-  "onboardInvalidCodeError": "رمز دعوة غير صالح. يجب أن يبدأ بـ PP-",
+  "onboardInvalidCodeError": "رمز دعوة غير صالح. يجب أن يبدأ بـ BS1-",
   "@onboardInvalidCodeError": {
     "description": "Validation"
   },
@@ -3924,6 +3946,10 @@
   "relayErrServer": "تعذّر الوصول إلى مزامنة الأسرة الآن. حاول لاحقًا.",
   "@relayErrServer": {
     "description": "Household sync error"
+  },
+  "relayEmptyHousehold": "لا توجد ميزانية في هذه الأسرة بعد. اطلب من الشخص الذي دعاك أن يفتح BudgetSeal ويُجري المزامنة.",
+  "@relayEmptyHousehold": {
+    "description": "Joining a household whose creator never synced"
   },
   "householdSection": "الأسرة",
   "@householdSection": {
@@ -5164,6 +5190,7 @@
   "catArchived": "تم أرشفة الفئة",
   "catDeleteTitle": "حذف الفئة؟",
   "catDeleteNoTx": "هذه الفئة ليس لها معاملات. حذف نهائي؟",
+  "catDeleteSubsKept": "{n, plural, =1{ستصبح فئتها الفرعية فئة رئيسية.} =2{ستصبح فئتاها الفرعيتان فئتين رئيسيتين.} few{ستصبح فئاتها الفرعية الـ{n} فئات رئيسية.} many{ستصبح فئاتها الفرعية الـ{n} فئات رئيسية.} other{ستصبح فئاتها الفرعية الـ{n} فئات رئيسية.}}",
   "catDeleted": "تم حذف الفئة",
   "catNewTitle": "فئة جديدة",
   "catEditTitle": "تعديل الفئة",
@@ -5217,6 +5244,8 @@
   "recurringDeleted": "تم حذف المعاملة المتكررة",
   "recurringCreated": "تم إنشاء المعاملة المتكررة",
   "recurringUpdated": "تم تحديث المعاملة المتكررة",
+  "recurringCatchUpTitle": "{count, plural, =1{تسجيل دفعة فائتة واحدة؟} =2{تسجيل دفعتين فائتتين؟} few{تسجيل {count} دفعات فائتة؟} many{تسجيل {count} دفعة فائتة؟} other{تسجيل {count} دفعة فائتة؟}}",
+  "recurringCatchUpMessage": "تاريخ الاستحقاق التالي في الماضي. في المرة القادمة التي يُفتح فيها التطبيق، يسجّل كل دفعة مستحقة منذ ذلك الحين (حتى سنة إلى الوراء).",
   "recurringNewTitle": "معاملة متكررة جديدة",
   "recurringNewSubTitle": "اشتراك جديد",
   "recurringEditTitle": "تعديل المعاملة المتكررة",
@@ -5273,6 +5302,7 @@
   "importLoadCsv": "تحميل CSV",
   "@importLoadCsv": { "description": "Button to pick CSV file" },
   "importFailed": "فشل الاستيراد. يرجى التحقق من تنسيق الملف.",
+  "importFileEmpty": "هذا الملف فارغ، فلا يوجد ما يمكن استيراده.",
   "@importFailed": { "description": "Snackbar on CSV parse error" },
   "importFoundRows": "تم العثور على {count} صف في {fileName}",
   "@importFoundRows": {
@@ -5602,6 +5632,12 @@
   "billEveryoneEach": "الجميع · {amount} لكل شخص",
   "billOnly": "{name} فقط",
   "billItemsSharedNow": "بنود {name} أصبحت للجميع",
+  "billPersonRemoved": "أُزيل {name} من التقسيم",
+  "billNeedAccount": "أضف حسابًا أولًا — يُحفظ التقسيم كدفعة من أحد حساباتك.",
+  "billScanKeptItems": "لم يُعثر على أسعار في الإيصال. بقيت بنودك كما هي.",
+  "billReplaceItemsTitle": "استبدال بنودك؟",
+  "billReplaceItemsMessage": "{count, plural, =1{تحلّ بنود الإيصال محلّ البند الذي أدخلته.} =2{تحلّ بنود الإيصال محلّ البندين اللذين أدخلتهما.} few{تحلّ بنود الإيصال محلّ {count} بنود أدخلتها.} many{تحلّ بنود الإيصال محلّ {count} بندًا أدخلتها.} other{تحلّ بنود الإيصال محلّ {count} بند أدخلتها.}}",
+  "billReplaceItems": "استبدال",
   "billSetShare": "تحديد الحصّة",
   "billResetShare": "إعادة التقسيم بالتساوي",
   "billUnpricedLines": "أسطر بلا سعر: {count} — اضغط على أحدها لإضافته",

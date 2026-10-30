@@ -35,6 +35,10 @@ class CalculatorAmountField extends StatelessWidget {
   /// Font size (used when [style] is null).
   final double fontSize;
 
+  /// The currency's decimal places ([currencyDecimals]): results are rounded
+  /// to them and typing stops there. Null: no limit (e.g. a rate).
+  final int? decimals;
+
   const CalculatorAmountField({
     super.key,
     required this.value,
@@ -44,6 +48,7 @@ class CalculatorAmountField extends StatelessWidget {
     this.style,
     this.hintText,
     this.fontSize = 32,
+    this.decimals,
   });
 
   String _fmtDisplay(double v) {
@@ -114,7 +119,8 @@ class CalculatorAmountField extends StatelessWidget {
   }
 
   Future<void> _openCalculatorSheet(BuildContext context) async {
-    final result = await showCalculatorSheet(context, value);
+    final result =
+        await showCalculatorSheet(context, value, decimals: decimals);
     if (result != null) {
       onChanged(result);
     }
@@ -169,14 +175,19 @@ String formatCalcExpression(String expr) {
 /// Returns the confirmed amount, or null if dismissed.
 /// [title] and [subtitle] label what the amount is for (e.g. a bill whose
 /// amount is confirmed each time); without them the sheet is just the pad.
+/// [decimals]: the currency's decimal places ([currencyDecimals]) — the
+/// result is rounded to them and typing stops there; null for no limit.
 Future<double?> showCalculatorSheet(BuildContext context, double initialValue,
-    {String? title, String? subtitle}) {
+    {String? title, String? subtitle, int? decimals}) {
   return showModalBottomSheet<double>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (ctx) => _CalculatorSheet(
-        initialValue: initialValue, title: title, subtitle: subtitle),
+        initialValue: initialValue,
+        title: title,
+        subtitle: subtitle,
+        decimals: decimals),
   );
 }
 
@@ -188,8 +199,9 @@ class _CalculatorSheet extends StatefulWidget {
   final double initialValue;
   final String? title;
   final String? subtitle;
+  final int? decimals;
   const _CalculatorSheet(
-      {required this.initialValue, this.title, this.subtitle});
+      {required this.initialValue, this.title, this.subtitle, this.decimals});
 
   @override
   State<_CalculatorSheet> createState() => _CalculatorSheetState();
@@ -225,12 +237,24 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
 
   // ── Calculator logic ──
 
+  /// The number being typed: what follows the last operator.
+  String get _operand {
+    final i = _calcExpression.lastIndexOf(RegExp(r'[+\-×÷]'));
+    return i < 0 ? _calcExpression : _calcExpression.substring(i + 1);
+  }
+
   void _calcDigit(String d) {
+    final decimals = widget.decimals;
+    final fresh = _prefilled || _startNewOperand;
     // Block a second decimal point in the same operand — "1.2." can't be
     // parsed and would silently evaluate to 0, showing the user a wrong total.
-    if (d == '.' && !_prefilled && !_startNewOperand &&
-        _calcDisplay.contains('.')) {
-      return;
+    if (d == '.' && !fresh && _calcDisplay.contains('.')) return;
+    // A whole-number currency has no decimals; others stop at theirs.
+    if (d == '.' && decimals == 0) return;
+    if (d != '.' && !fresh && decimals != null) {
+      final operand = _operand;
+      final dot = operand.indexOf('.');
+      if (dot >= 0 && operand.length - dot - 1 >= decimals) return;
     }
     HapticFeedback.selectionClick();
     setState(() {
@@ -260,6 +284,8 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
   }
 
   void _calcOp(String op) {
+    // "50 ÷ 0": nothing to carry on from until it's fixed.
+    if (!_evalExpr(_calcExpression).isFinite) return;
     HapticFeedback.mediumImpact();
     setState(() {
       _prefilled = false;
@@ -270,20 +296,26 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
     });
   }
 
+  /// Removes the last character of the expression ("12+5" → "12+",
+  /// "12+" → "12") and shows the number now being typed.
   void _calcBackspace() {
     HapticFeedback.lightImpact();
     setState(() {
       _prefilled = false;
-      if (_calcDisplay.length > 1) {
-        _calcDisplay = _calcDisplay.substring(0, _calcDisplay.length - 1);
-        if (_calcExpression.isNotEmpty) {
-          _calcExpression =
-              _calcExpression.substring(0, _calcExpression.length - 1);
-        }
-      } else {
-        _calcDisplay = '0';
+      if (_calcExpression.isNotEmpty) {
+        _calcExpression =
+            _calcExpression.substring(0, _calcExpression.length - 1);
+      }
+      if (_calcExpression == '-' || _calcExpression == '0') {
         _calcExpression = '';
       }
+      final endsWithOp = _calcExpression.isNotEmpty &&
+          '+-×÷'.contains(_calcExpression[_calcExpression.length - 1]);
+      _startNewOperand = endsWithOp;
+      final operand = _operand;
+      _calcDisplay = endsWithOp
+          ? _calcExpression.substring(0, _calcExpression.length - 1)
+          : (operand.isEmpty ? '0' : operand);
       _amount = _evalExpr(_calcExpression);
     });
   }
@@ -293,21 +325,40 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
     setState(() {
       _calcDisplay = '0';
       _calcExpression = '';
+      _startNewOperand = false;
       _amount = 0;
     });
   }
 
+  /// [v] as calculator input ('.' decimal mark, no grouping): the
+  /// currency's decimals at most (all of them when unknown), no trailing
+  /// zeros.
   String _fmtCalc(double v) {
-    if (v == v.roundToDouble()) return v.toInt().toString();
-    return v.toStringAsFixed(2);
+    if (v == v.roundToDouble()) return v.toStringAsFixed(0);
+    var s = v.toStringAsFixed(widget.decimals ?? 10);
+    if (s.contains('.')) {
+      s = s.replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '');
+    }
+    return s;
   }
 
   /// The running result, with the user's separators (and a minus when a
-  /// subtraction goes below zero).
-  String _fmtResult(double v) =>
-      v < 0 ? '-${formatForDisplay(-v)}' : formatForDisplay(v);
+  /// subtraction goes below zero); a dash when there is none ("50 ÷ 0").
+  String _fmtResult(double v) => !v.isFinite
+      ? '–'
+      : v < 0
+          ? '-${formatForDisplay(-v)}'
+          : formatForDisplay(v);
 
+  /// [expr] worked out left to right, rounded to the currency's decimals
+  /// (10 when unknown: float noise only). Dividing by zero gives NaN — no
+  /// result, so Done stays off.
   double _evalExpr(String expr) {
+    final v = _evalRaw(expr);
+    return v.isFinite ? roundToDecimals(v, widget.decimals ?? 10) : v;
+  }
+
+  double _evalRaw(String expr) {
     if (expr.isEmpty) return 0;
     try {
       var e = expr.replaceAll('\u00D7', '*').replaceAll('\u00F7', '/');
@@ -323,11 +374,12 @@ class _CalculatorSheetState extends State<_CalculatorSheet> {
           op = p;
         } else {
           final n = double.tryParse(p) ?? 0;
+          if (op == '/' && n == 0) return double.nan;
           result = switch (op) {
             '+' => result + n,
             '-' => result - n,
             '*' => result * n,
-            '/' => n != 0 ? result / n : result,
+            '/' => result / n,
             _ => result + n,
           };
         }

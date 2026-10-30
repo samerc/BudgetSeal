@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../l10n/s_lookup.dart';
@@ -53,7 +55,27 @@ class PeriodResetService {
 
     // Batch-fetch all balances in one query instead of per-allocation
     final allocIds = allocs.map((a) => a.id).toList();
-    final allBalances = await ledgerDao.getAllBalances(allocIds);
+    final nowBalances = await ledgerDao.getAllBalances(allocIds);
+    // The reset may run late — the app lived in the background over the
+    // period boundary, or a second phone opens after syncing — when the new
+    // period's funding is already in. Only the leftover from before the
+    // period began is swept: min(balance now, balance at period start), per
+    // currency. Spending since then lowers it; new funding never raises it.
+    // (A phone with nothing left over writes no row, so another phone that
+    // syncs its new funding finds 0 at the period start and sweeps nothing.)
+    final startBalances =
+        await ledgerDao.balancesAt(householdId, currentPeriodStart);
+    final allBalances = <String, Map<String, double>>{
+      for (final id in allocIds)
+        id: {
+          for (final cur in {
+            ...?nowBalances[id]?.keys,
+            ...?startBalances[id]?.keys,
+          })
+            cur: math.min(nowBalances[id]?[cur] ?? 0,
+                startBalances[id]?[cur] ?? 0),
+        },
+    };
 
     int autoResetCount = 0;
     for (final alloc in allocs) {

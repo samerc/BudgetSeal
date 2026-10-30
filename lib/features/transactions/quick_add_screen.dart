@@ -197,16 +197,26 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
       ? _destId != null && _destCurrency != _currency
       : _currency != _baseCurrency;
 
-  double get _amount => _eval(_expr);
+  double get _amount => _value(_expr);
+
+  /// [expr]'s value rounded to the account currency's minor units ("10÷3"
+  /// is 3.33, not 3.333…); 0 while it can't be worked out ("50÷0").
+  double _value(String expr) {
+    final v = _eval(expr, currencyDecimals(_currency));
+    return v.isFinite ? v : 0;
+  }
+
+  /// The total divides by zero: no amount, and the display keeps the sum.
+  bool get _divByZero => !_eval(_expr, 2).isFinite;
 
   /// Item [i]'s amount; the first takes what the others leave of the total.
   double _itemAmount(int i) {
-    if (i > 0) return _eval(_items[i].expr);
+    if (i > 0) return _value(_items[i].expr);
     var rest = _amount;
     for (var j = 1; j < _items.length; j++) {
-      rest -= _eval(_items[j].expr);
+      rest -= _value(_items[j].expr);
     }
-    return rest;
+    return roundToDecimals(rest, currencyDecimals(_currency));
   }
 
   static bool _isMid(String e) {
@@ -511,8 +521,9 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     });
   }
 
-  /// Left-to-right, like the calculator sheet ("2+3×4" = 20).
-  static double _eval(String expr) {
+  /// Left-to-right, like the calculator sheet ("2+3×4" = 20), rounded to
+  /// [decimals]. Dividing by zero gives NaN (no amount).
+  static double _eval(String expr, int decimals) {
     var e = expr.replaceAll('×', '*').replaceAll('÷', '/');
     while (e.isNotEmpty && '+-*/'.contains(e[e.length - 1])) {
       e = e.substring(0, e.length - 1);
@@ -527,14 +538,15 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
         continue;
       }
       final n = double.tryParse(p) ?? 0;
+      if (op == '/' && n == 0) return double.nan;
       result = switch (op) {
         '-' => result - n,
         '*' => result * n,
-        '/' => n != 0 ? result / n : result,
+        '/' => result / n,
         _ => result + n,
       };
     }
-    return result;
+    return roundToDecimals(result, decimals);
   }
 
   /// [v] as keypad input: no grouping, no trailing zeros.
@@ -1006,7 +1018,9 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
       return;
     }
     if (amount > InputLimits.maxAmount) {
-      _snack(tr.commonSomethingWentWrong);
+      HapticFeedback.heavyImpact();
+      _snack(tr.txAmountTooLarge(
+          formatAmount(InputLimits.maxAmount, currency: _currency)));
       return;
     }
     if (_accountId == null) {
@@ -1294,7 +1308,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     final colors = ref.watch(txColorsProvider);
     final hasValue = _expr.isNotEmpty;
     final mid = _midCalculation;
-    final big = mid
+    final big = mid && !_divByZero
         ? formatForDisplay(_amount)
         : (hasValue ? formatCalcExpression(_expr) : '0');
     final color = !hasValue

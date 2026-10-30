@@ -161,7 +161,12 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
     final lastDay = DateTime(_targetYear, _targetMonth + 1, 0);
     final picked = await showDatePicker(
       context: context,
-      initialDate: _exactDate ?? firstDay,
+      // Only a date inside the target month (the picker asserts otherwise).
+      initialDate: _exactDate != null &&
+              !_exactDate!.isBefore(firstDay) &&
+              !DateUtils.dateOnly(_exactDate!).isAfter(lastDay)
+          ? _exactDate!
+          : firstDay,
       firstDate: firstDay,
       lastDate: lastDay,
     );
@@ -670,8 +675,12 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                         color: AppColors.tp(context))),
                 const Spacer(),
                 IconButton(
-                  onPressed: () =>
-                      setState(() => _targetYear = _targetYear - 1),
+                  // The exact date belongs to the old year: drop it, as
+                  // the month chips do.
+                  onPressed: () => setState(() {
+                    _targetYear = _targetYear - 1;
+                    _exactDate = null;
+                  }),
                   icon: Icon(AppIcons.caretLeft,
                       size: 20, color: AppColors.ts(context)),
                   visualDensity: VisualDensity.compact,
@@ -684,8 +693,12 @@ class _PlanPaymentScreenState extends ConsumerState<PlanPaymentScreen> {
                         fontWeight: FontWeight.w700,
                         color: AppColors.tp(context))),
                 IconButton(
-                  onPressed: () =>
-                      setState(() => _targetYear = _targetYear + 1),
+                  // The exact date belongs to the old year: drop it, as
+                  // the month chips do.
+                  onPressed: () => setState(() {
+                    _targetYear = _targetYear + 1;
+                    _exactDate = null;
+                  }),
                   icon: Icon(AppIcons.caretRight,
                       size: 20, color: AppColors.ts(context)),
                   visualDensity: VisualDensity.compact,

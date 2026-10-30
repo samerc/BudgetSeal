@@ -79,10 +79,28 @@ class RelayProvider implements CloudProvider {
 
   /// Joins the household [k] opens: it must exist and accept the key.
   Future<void> join(HouseholdKey k) async {
-    final r = await _send(k, 'GET', '/files');
-    if (r.statusCode != 200) throw _error(r);
+    await check(k);
     await _save(k);
   }
+
+  /// Checks that the household [k] opens exists and accepts the key,
+  /// without keeping the key (joining keeps it only once the household's
+  /// budget is in: [adopt]).
+  Future<void> check(HouseholdKey k) async {
+    final r = await _send(k, 'GET', '/files');
+    if (r.statusCode != 200) throw _error(r);
+  }
+
+  /// Makes [k] this phone's household key (after a join succeeded).
+  Future<void> adopt(HouseholdKey k) => _save(k);
+
+  /// The household [k] opens, read and written over this provider's
+  /// connection but with [k] held in memory only: nothing is saved, and
+  /// this phone's own key (if any) is left alone.
+  RelayProvider withKey(HouseholdKey k) =>
+      RelayProvider._unsaved(_client, k);
+
+  RelayProvider._unsaved(this._client, HouseholdKey k) : _key = k;
 
   Future<void> _save(HouseholdKey k) async {
     await _storage.write(key: _codeKey, value: k.code);
@@ -112,10 +130,17 @@ class RelayProvider implements CloudProvider {
     final k = await _require();
     final r = await _send(k, 'GET', '/files');
     if (r.statusCode != 200) throw _error(r);
-    final files = (jsonDecode(r.body) as Map)['files'] as List;
+    // Anything but the relay's list (a proxy's page, a cut-off answer)
+    // reads as a damaged file, not a crash.
+    final body = jsonDecode(r.body);
+    final files = body is Map ? body['files'] : null;
+    if (files is! List) {
+      throw const FormatException('Not a relay file list');
+    }
     return {
-      for (final f in files.cast<Map>())
-        f['name'] as String: '${f['version']}',
+      for (final f in files)
+        if (f is Map && f['name'] is String)
+          f['name'] as String: '${f['version']}',
     };
   }
 

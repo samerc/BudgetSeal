@@ -106,8 +106,8 @@ const kMaxNameLength = 100;
 /// Max characters for note fields (mirrors InputLimits.noteMaxLength).
 const kMaxNoteLength = 500;
 
-/// Max amount for any financial value.
-const kMaxAmount = 1e9;
+/// Max amount for any financial value (mirrors InputLimits.maxAmount).
+const kMaxAmount = 1e12;
 
 /// Extract a required non-empty String with length limit.
 String? requireStringLimited(Map<String, dynamic> body, String key,

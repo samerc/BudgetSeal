@@ -194,14 +194,17 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         return;
       }
 
-      // Staged: swapped in on the next launch, before the DB opens.
+      // Staged: swapped in on the next launch, before the DB opens. It
+      // refuses a cut-off or foreign database (InvalidBackupException).
       await AutoBackupService.restoreFromBackup(path);
       if (mounted) await _showRestartDialog();
     } catch (e) {
       debugPrint('[Backup] Restore failed: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(S.of(context).backupRestoreFailed),
+          content: Text(e is InvalidBackupException
+              ? S.of(context).backupInvalid
+              : S.of(context).backupRestoreFailed),
           behavior: SnackBarBehavior.floating,
         ));
       }
@@ -231,7 +234,9 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(S.of(context).backupRestoreFailed),
+            content: Text(e is InvalidBackupException
+                ? S.of(context).backupInvalid
+                : S.of(context).backupRestoreFailed),
             behavior: SnackBarBehavior.floating,
           ),
         );

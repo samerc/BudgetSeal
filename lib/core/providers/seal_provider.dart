@@ -10,7 +10,8 @@ import 'household_provider.dart';
 /// Ids of envelopes that are fully funded ("sealed"): a target is set, the
 /// envelope isn't below zero, and
 /// - spending envelopes: what was put in this period reaches the target
-///   (spending from it afterwards keeps the seal, overspending breaks it);
+///   (net of moves out and withdrawals, so an emptied envelope loses it;
+///   spending from it afterwards keeps the seal, overspending breaks it);
 /// - flexible envelopes: the balance reaches the target.
 /// Amounts in the envelope's target currency. Recomputed whenever the
 /// envelopes or their ledger change.
@@ -31,7 +32,8 @@ final sealedEnvelopesProvider = FutureProvider<Set<String>>((ref) async {
 });
 
 /// The seal rule, shared with the Web Companion: [funded] is what went into
-/// the envelope this period (`LedgerDao.fundedInPeriod`) by currency. With
+/// the envelope this period, net of what was moved or withdrawn out
+/// (`LedgerDao.fundedInPeriod`) by currency. With
 /// a second target in another currency, both must be met.
 bool isEnvelopeSealed(Allocation alloc, Map<String, double> balances,
     Map<String, double>? funded, String baseCurrency) {

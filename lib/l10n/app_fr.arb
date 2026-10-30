@@ -144,6 +144,7 @@
   "syncUseSyncedBudget": "Utiliser le budget synchronisé",
   "syncErrWrongPassword": "Mot de passe de synchronisation incorrect. Utilisez le même que sur votre autre appareil.",
   "syncErrCorrupt": "Le fichier de synchronisation est illisible. Synchronisez à nouveau depuis votre autre appareil.",
+  "syncErrTooNew": "Ce fichier a été créé par une version plus récente de BudgetSeal. Mettez l'application à jour, puis réessayez.",
   "syncErrSignedOut": "Vous avez été déconnecté de Google Drive. Reconnectez-vous pour continuer la synchronisation.",
   "syncErrGeneric": "La synchronisation n'a pas abouti. Réessayez dans un instant.",
   "syncErrBackupFailed": "Impossible de sauvegarder vos données actuelles : rien n'a été remplacé.",
@@ -513,6 +514,7 @@
   "upcomingPaidOnDayDesc": "L'enregistrer le jour où vous l'avez payé",
   "upcomingPosted": "Facture enregistrée",
   "upcomingSkipped": "Ignorée — prochaine date mise à jour",
+  "upcomingBillEnded": "Cette facture est terminée, elle n'est plus payée.",
   "recurringPostedN": "{n, plural, =1{1 élément récurrent enregistré} other{{n} éléments récurrents enregistrés}}",
   "objSummaryPerMonth": "Nécessaire par mois",
   "catLinkEnvelope": "Enveloppe",
@@ -561,6 +563,9 @@
   "allocCoverButton": "Couvrir",
   "allocMoveMenu": "Déplacer de l'argent",
   "allocMoveNotEnough": "{name} ne contient que {amount}.",
+  "allocMoveOverRta": "« Prêt à répartir » ne contient que {amount}. Il deviendra négatif.",
+  "allocRemoveMoneyBack": "Elle contient {amount}, qui retourne dans « Prêt à répartir ».",
+  "allocRemoveOverspent": "Elle est dépassée de {amount}, pris sur « Prêt à répartir ».",
   "allocMovedTo": "Déplacé vers {name}",
   "allocMovedFrom": "Déplacé depuis {name}",
   "allocMoveDone": "{amount} déplacé de {from} vers {to}",
@@ -731,6 +736,8 @@
   "syncErrNeedsPassword": "Le fichier de synchronisation est chiffré. Saisissez votre mot de passe de synchronisation dans Synchronisation cloud.",
   "travelExchangeNote": "Change de voyage → {currency}",
   "travelConvertBackNote": "Reconversion de voyage → {currency}",
+  "travelEnvelopeReturnedNote": "Voyage terminé : retour dans « Prêt à répartir »",
+  "acctConvertBackEnvelopes": "Vos enveloppes en contiennent {amount}. Ce montant retourne d'abord dans « Prêt à répartir ».",
   "healthUnallocShort": "Non alloué : {amount}",
   "reportsRecurringSummary": "{count} actives · {amount}/mois",
   "allocRevaluationNote": "Réévaluation : {amount} à {rate} (avant {oldRate})",
@@ -764,7 +771,12 @@
   "reportsTipSavingLow": "Votre taux d'épargne est faible ({percent} %). Essayez de mettre de côté au moins 10 à 20 %.",
   "reportsTipAgeLow": "{days, plural, =0{Votre argent ne reste même pas un jour avant d'être dépensé. Une réserve de 30 jours ou plus est plus saine.} =1{Votre argent ne reste qu'un jour avant d'être dépensé. Une réserve de 30 jours ou plus est plus saine.} other{Votre argent ne reste que {days} jours avant d'être dépensé. Une réserve de 30 jours ou plus est plus saine.}}",
   "txNoRateBetween": "Aucun taux de change de {from} vers {to}. Saisissez un taux pour ce montant, ou actualisez les taux dans Paramètres › Taux de change.",
+  "txAccountUnavailable": "Le compte de ce paiement est archivé ou supprimé. Déplacez-le d'abord vers un autre compte.",
   "acctArchiveNonZero": "Ce compte contient encore {amount}. Transférez-le vers un autre compte ou ajustez le solde à zéro, puis archivez-le : les comptes archivés ne comptent plus dans votre argent.",
+  "acctDeleteNonZero": "Ce compte contient encore {amount}. Le supprimer retirerait cet argent de « Prêt à répartir ». Transférez-le d'abord vers un autre compte ou ajustez le solde à zéro.",
+  "acctCurrencyLocked": "La devise ne peut plus changer une fois que le compte contient de l'argent ou des transactions. Pour une autre devise, ajoutez un nouveau compte.",
+  "acctBillsOffNote": "{n, plural, =1{Sa facture sera désactivée.} other{Ses {n} factures seront désactivées.}}",
+  "acctPlansDeletedNote": "{n, plural, =1{Son paiement planifié sera supprimé.} other{Ses {n} paiements planifiés seront supprimés.}}",
   "receiptPickFailed": "Impossible d'ajouter la photo. Vérifiez les autorisations de l'appareil photo et des photos.",
   "backupCloseApp": "Fermer l'application",
   "importSkippedRows": "{count} lignes ignorées (date ou montant illisible)",
@@ -1405,6 +1417,16 @@
   "txFormEnterAmount": "Saisissez un montant",
   "@txFormEnterAmount": {
     "description": "Validation error"
+  },
+  "txAmountTooLarge": "Ce montant est trop élevé. Une transaction peut aller jusqu'à {max}.",
+  "@txAmountTooLarge": {
+    "description": "Validation error: amount over the app's limit",
+    "placeholders": { "max": { "type": "String" } }
+  },
+  "txFormSetTransferRate": "Saisissez le taux de change de {from} vers {to}",
+  "@txFormSetTransferRate": {
+    "description": "Validation error: a transfer between two currencies has no rate",
+    "placeholders": { "from": { "type": "String" }, "to": { "type": "String" } }
   },
   "txFormSelectAccountItem": "Sélectionnez un compte pour l'élément {n}",
   "@txFormSelectAccountItem": {
@@ -3857,7 +3879,7 @@
   "@onboardInviteCode": {
     "description": "Field label"
   },
-  "onboardInviteHint": "PP-...",
+  "onboardInviteHint": "BS1-...",
   "@onboardInviteHint": {
     "description": "Field hint"
   },
@@ -3869,7 +3891,7 @@
   "@onboardEnterCodeError": {
     "description": "Validation"
   },
-  "onboardInvalidCodeError": "Code d'invitation invalide. Il doit commencer par PP-",
+  "onboardInvalidCodeError": "Code d'invitation invalide. Il doit commencer par BS1-",
   "@onboardInvalidCodeError": {
     "description": "Validation"
   },
@@ -3924,6 +3946,10 @@
   "relayErrServer": "La synchronisation du foyer est injoignable pour le moment. Réessayez plus tard.",
   "@relayErrServer": {
     "description": "Household sync error"
+  },
+  "relayEmptyHousehold": "Ce foyer n'a pas encore de budget. Demandez à la personne qui vous a invité d'ouvrir BudgetSeal et de synchroniser.",
+  "@relayEmptyHousehold": {
+    "description": "Joining a household whose creator never synced"
   },
   "householdSection": "Foyer",
   "@householdSection": {
@@ -5164,6 +5190,7 @@
   "catArchived": "Catégorie archivée",
   "catDeleteTitle": "Supprimer la catégorie ?",
   "catDeleteNoTx": "Cette catégorie n'a aucune transaction. Supprimer définitivement ?",
+  "catDeleteSubsKept": "{n, plural, =1{Sa sous-catégorie deviendra une catégorie principale.} other{Ses {n} sous-catégories deviendront des catégories principales.}}",
   "catDeleted": "Catégorie supprimée",
   "catNewTitle": "Nouvelle catégorie",
   "catEditTitle": "Modifier la catégorie",
@@ -5217,6 +5244,8 @@
   "recurringDeleted": "Transaction récurrente supprimée",
   "recurringCreated": "Transaction récurrente créée",
   "recurringUpdated": "Transaction récurrente mise à jour",
+  "recurringCatchUpTitle": "Enregistrer {count} paiements manqués ?",
+  "recurringCatchUpMessage": "La prochaine échéance est dans le passé. À la prochaine ouverture, l'app enregistre chaque paiement dû depuis (jusqu'à un an en arrière).",
   "recurringNewTitle": "Nouvelle transaction récurrente",
   "recurringNewSubTitle": "Nouvel abonnement",
   "recurringEditTitle": "Modifier la transaction récurrente",
@@ -5273,6 +5302,7 @@
   "importLoadCsv": "Charger CSV",
   "@importLoadCsv": { "description": "Button to pick CSV file" },
   "importFailed": "Échec de l'importation. Vérifiez le format du fichier.",
+  "importFileEmpty": "Ce fichier est vide : il n'y a rien à importer.",
   "@importFailed": { "description": "Snackbar on CSV parse error" },
   "importFoundRows": "{count} lignes trouvées dans {fileName}",
   "@importFoundRows": {
@@ -5602,6 +5632,12 @@
   "billEveryoneEach": "Tout le monde · {amount} chacun",
   "billOnly": "{name} seulement",
   "billItemsSharedNow": "Les articles de {name} sont maintenant partagés par tous",
+  "billPersonRemoved": "{name} retiré du partage",
+  "billNeedAccount": "Ajoutez d'abord un compte — le partage est enregistré comme un paiement depuis l'un de vos comptes.",
+  "billScanKeptItems": "Aucun prix trouvé sur le ticket. Vos articles sont conservés.",
+  "billReplaceItemsTitle": "Remplacer vos articles ?",
+  "billReplaceItemsMessage": "{count, plural, =1{Les articles du ticket remplacent l'article que vous avez saisi.} other{Les articles du ticket remplacent les {count} articles que vous avez saisis.}}",
+  "billReplaceItems": "Remplacer",
   "billSetShare": "Fixer la part",
   "billResetShare": "Répartir à nouveau également",
   "billUnpricedLines": "Lignes sans prix : {count} — touchez-en une pour l'ajouter",

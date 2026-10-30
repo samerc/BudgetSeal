@@ -158,6 +158,7 @@ class SyncNotifier extends Notifier<SyncState> {
       provider = relay;
     }
 
+    if (!ref.mounted) return;
     state = state.copyWith(
       activeProvider: provider,
       lastSyncTime: lastSync,
@@ -185,21 +186,38 @@ class SyncNotifier extends Notifier<SyncState> {
   /// Drive or a folder (one sync at a time), uploads everything sealed.
   /// The household key replaces the sync password, which every phone
   /// would otherwise need too.
+  /// The household is made first: offline (or refused), this throws with
+  /// Drive / the folder and the password still in place.
   Future<void> startHousehold() async {
+    await relay.connect();
     await _leaveOtherProvider();
     await SyncEncryption.clearPassword();
-    await relay.connect();
     await useConnectedProvider(relay);
     await initialUpload();
   }
 
   /// Joins the household [key] opens, replacing this phone's budget (after
   /// a backup). Throws [RelayException] when the relay refuses the key.
+  ///
+  /// Nothing is kept until the household's budget is in: the key is
+  /// checked and the budget downloaded with the key held in memory only.
+  /// When that fails (the state shows why), this phone keeps its budget,
+  /// its sync (Drive, folder, or the household it was in) and password.
   Future<void> joinHousehold(HouseholdKey key) async {
-    await relay.join(key);
-    await _leaveOtherProvider();
-    await SyncEncryption.clearPassword();
-    await restoreFromProvider(relay);
+    await relay.check(key);
+    // A sync in progress finishes first (it would otherwise be what
+    // _exclusive hands back, and the join would never run).
+    final running = _running;
+    if (running != null) {
+      try {
+        await running;
+      } catch (_) {}
+    }
+    await _exclusive(() => _restore(relay.withKey(key), commit: () async {
+          await _leaveOtherProvider();
+          await SyncEncryption.clearPassword();
+          await relay.adopt(key);
+        }, activeAs: relay));
   }
 
   Future<void> _leaveOtherProvider() async {
@@ -376,7 +394,10 @@ class SyncNotifier extends Notifier<SyncState> {
   Future<void> restoreFromProvider(CloudProvider provider) =>
       _exclusive(() => _restore(provider));
 
-  Future<void> _restore(CloudProvider provider) async {
+  /// [commit] runs once the data is replaced, before [activeAs] (default
+  /// [provider]) becomes the active provider.
+  Future<void> _restore(CloudProvider provider,
+      {Future<void> Function()? commit, CloudProvider? activeAs}) async {
     state = state.copyWith(status: SyncStatus.syncing);
     try {
       final store = ProviderLogStore(provider);
@@ -385,7 +406,10 @@ class SyncNotifier extends Notifier<SyncState> {
       if (!hasLogs && json == null) {
         state = state.copyWith(
           status: SyncStatus.error,
-          lastError: currentS().syncNoSyncFile,
+          // A household has no folder: its creator hasn't synced yet.
+          lastError: provider is RelayProvider
+              ? currentS().relayEmptyHousehold
+              : currentS().syncNoSyncFile,
         );
         return;
       }
@@ -409,6 +433,8 @@ class SyncNotifier extends Notifier<SyncState> {
         await _engine.restoreFromJson(json!);
         await _logSync.push(store);
       }
+      if (commit != null) await commit();
+      final active = activeAs ?? provider;
 
       // The restored household has its own UUID. Point the app at it —
       // restoreFromJson only writes DB rows, it does not set the active
@@ -427,11 +453,11 @@ class SyncNotifier extends Notifier<SyncState> {
       await HouseholdMembers.markJoined();
 
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_prefActiveProvider, _keyOf(provider));
+      await prefs.setString(_prefActiveProvider, _keyOf(active));
       await prefs.setString(_prefLastSync, DateTime.now().toIso8601String());
 
       state = state.copyWith(
-        activeProvider: provider,
+        activeProvider: active,
         status: SyncStatus.success,
         lastSyncTime: DateTime.now(),
         clearError: true,
@@ -483,6 +509,7 @@ String syncErrorText(Object e) {
   return switch (e) {
     SyncPasswordException(missing: true) => s.syncErrNeedsPassword,
     SyncPasswordException() => s.syncErrWrongPassword,
+    SyncFileTooNewException() => s.syncErrTooNew,
     FormatException() => s.syncErrCorrupt,
     CloudAuthException() || GoogleSignInException() => s.syncErrSignedOut,
     drive.DetailedApiRequestError(status: 401 || 403) => s.syncErrSignedOut,

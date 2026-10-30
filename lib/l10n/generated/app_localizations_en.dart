@@ -454,6 +454,10 @@ class SEn extends S {
       'The sync file couldn\'t be read. Sync again from your other device.';
 
   @override
+  String get syncErrTooNew =>
+      'This file was made by a newer version of BudgetSeal. Update the app, then try again.';
+
+  @override
   String get syncErrSignedOut =>
       'You were signed out of Google Drive. Connect again to keep syncing.';
 
@@ -1745,6 +1749,10 @@ class SEn extends S {
   String get upcomingSkipped => 'Skipped — next date updated';
 
   @override
+  String get upcomingBillEnded =>
+      'This bill has ended, so it isn\'t paid any more.';
+
+  @override
   String recurringPostedN(int n) {
     String _temp0 = intl.Intl.pluralLogic(
       n,
@@ -1927,6 +1935,21 @@ class SEn extends S {
   @override
   String allocMoveNotEnough(String name, String amount) {
     return '$name only has $amount.';
+  }
+
+  @override
+  String allocMoveOverRta(String amount) {
+    return 'Ready to assign only has $amount. It will go negative.';
+  }
+
+  @override
+  String allocRemoveMoneyBack(String amount) {
+    return 'It holds $amount, which goes back to Ready to assign.';
+  }
+
+  @override
+  String allocRemoveOverspent(String amount) {
+    return 'It is over by $amount, which comes out of Ready to assign.';
   }
 
   @override
@@ -2544,6 +2567,15 @@ class SEn extends S {
   }
 
   @override
+  String get travelEnvelopeReturnedNote =>
+      'Trip closed: back to Ready to assign';
+
+  @override
+  String acctConvertBackEnvelopes(String amount) {
+    return 'Your envelopes hold $amount of it. That goes back to Ready to assign first.';
+  }
+
+  @override
   String healthUnallocShort(String amount) {
     return 'Unallocated: $amount';
   }
@@ -2688,8 +2720,43 @@ class SEn extends S {
   }
 
   @override
+  String get txAccountUnavailable =>
+      'This payment\'s account is archived or deleted. Move it to another account first.';
+
+  @override
   String acctArchiveNonZero(String amount) {
     return 'This account still holds $amount. Transfer it to another account or adjust the balance to zero, then archive it — archived accounts no longer count toward your money.';
+  }
+
+  @override
+  String acctDeleteNonZero(String amount) {
+    return 'This account still holds $amount. Deleting it would take that money out of Ready to assign. Transfer it to another account or adjust the balance to zero first.';
+  }
+
+  @override
+  String get acctCurrencyLocked =>
+      'The currency can\'t change once the account has money or transactions in it. To use another currency, add a new account.';
+
+  @override
+  String acctBillsOffNote(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Its $n bills will be switched off.',
+      one: 'Its bill will be switched off.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String acctPlansDeletedNote(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Its $n planned payments will be deleted.',
+      one: 'Its planned payment will be deleted.',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -3216,6 +3283,16 @@ class SEn extends S {
 
   @override
   String get txFormEnterAmount => 'Enter an amount';
+
+  @override
+  String txAmountTooLarge(String max) {
+    return 'That amount is too large. One transaction can be at most $max.';
+  }
+
+  @override
+  String txFormSetTransferRate(String from, String to) {
+    return 'Enter the exchange rate from $from to $to';
+  }
 
   @override
   String txFormSelectAccountItem(int n) {
@@ -4394,6 +4471,17 @@ class SEn extends S {
   @override
   String get catDeleteNoTx =>
       'This category has no transactions. Delete permanently?';
+
+  @override
+  String catDeleteSubsKept(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Its $n subcategories will become top-level categories.',
+      one: 'Its subcategory will become a top-level category.',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get catDeleted => 'Category deleted';
@@ -6594,7 +6682,7 @@ class SEn extends S {
   String get onboardInviteCode => 'Invite code';
 
   @override
-  String get onboardInviteHint => 'PP-...';
+  String get onboardInviteHint => 'BS1-...';
 
   @override
   String get onboardJoinButton => 'Join household';
@@ -6604,7 +6692,7 @@ class SEn extends S {
 
   @override
   String get onboardInvalidCodeError =>
-      'Invalid invite code. It should start with PP-';
+      'Invalid invite code. It should start with BS1-';
 
   @override
   String get joinScanCode => 'Scan code';
@@ -6651,6 +6739,10 @@ class SEn extends S {
   @override
   String get relayErrServer =>
       'Household sync can\'t be reached right now. Try again later.';
+
+  @override
+  String get relayEmptyHousehold =>
+      'This household has no budget yet. Ask the person who invited you to open BudgetSeal and sync.';
 
   @override
   String get householdSection => 'Household';
@@ -7007,6 +7099,15 @@ class SEn extends S {
   String get recurringUpdated => 'Recurring transaction updated';
 
   @override
+  String recurringCatchUpTitle(int count) {
+    return 'Record $count missed payments?';
+  }
+
+  @override
+  String get recurringCatchUpMessage =>
+      'The next due date is in the past. Next time the app opens, it records every payment due since then (up to a year back).';
+
+  @override
   String get recurringNewTitle => 'New recurring transaction';
 
   @override
@@ -7123,6 +7224,10 @@ class SEn extends S {
 
   @override
   String get importFailed => 'Import failed. Please check the file format.';
+
+  @override
+  String get importFileEmpty =>
+      'This file is empty, so there\'s nothing to import.';
 
   @override
   String importFoundRows(int count, String fileName) {
@@ -7942,6 +8047,36 @@ class SEn extends S {
   String billItemsSharedNow(Object name) {
     return '$name\'s items are now shared by everyone';
   }
+
+  @override
+  String billPersonRemoved(Object name) {
+    return '$name removed from the split';
+  }
+
+  @override
+  String get billNeedAccount =>
+      'Add an account first — the split is saved as a payment from one of your accounts.';
+
+  @override
+  String get billScanKeptItems =>
+      'No prices found on the receipt. Your items are kept.';
+
+  @override
+  String get billReplaceItemsTitle => 'Replace your items?';
+
+  @override
+  String billReplaceItemsMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'The receipt\'s items replace the $count items you entered.',
+      one: 'The receipt\'s items replace the item you entered.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get billReplaceItems => 'Replace';
 
   @override
   String get billSetShare => 'Set share';

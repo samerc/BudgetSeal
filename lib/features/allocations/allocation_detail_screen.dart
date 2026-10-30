@@ -2041,12 +2041,35 @@ class _AllocationDetailScreenState
   // Archive
   // ---------------------------------------------------------------------------
 
+  /// What archiving or deleting does to the money this envelope holds (it
+  /// leaves every balance, so Ready to assign takes it back — or pays for
+  /// its overspending), as extra lines for the confirm dialog; empty when
+  /// it holds nothing.
+  String _moneyOnRemoveNote(S tr) {
+    final me = (ref.read(allocationsProvider).value ?? const [])
+        .where((a) => a.data.allocation.id == widget.allocationId)
+        .firstOrNull;
+    final balances = me?.balanceByCurrency ?? const <String, double>{};
+    final held = [
+      for (final e in balances.entries)
+        if (e.value > 0.005) formatAmount(e.value, currency: e.key),
+    ];
+    final over = [
+      for (final e in balances.entries)
+        if (e.value < -0.005) formatAmount(-e.value, currency: e.key),
+    ];
+    return [
+      if (held.isNotEmpty) '\n\n${tr.allocRemoveMoneyBack(held.join(', '))}',
+      if (over.isNotEmpty) '\n\n${tr.allocRemoveOverspent(over.join(', '))}',
+    ].join();
+  }
+
   Future<void> _confirmArchive() async {
     final tr = S.of(context);
     final confirmed = await showConfirmDialog(
       context,
       title: tr.allocArchiveTitle,
-      message: tr.allocArchiveMsg,
+      message: '${tr.allocArchiveMsg}${_moneyOnRemoveNote(tr)}',
       confirmLabel: tr.commonArchive,
       destructive: false,
     );
@@ -2109,7 +2132,7 @@ class _AllocationDetailScreenState
           title: Text(tr.allocDeleteTitle),
           content: Text(
             '${warnings.join('. ')}.\n\n'
-            '${tr.allocDeleteConsequences}',
+            '${tr.allocDeleteConsequences}${_moneyOnRemoveNote(tr)}',
           ),
           actions: [
             OutlinedButton(
@@ -2135,7 +2158,7 @@ class _AllocationDetailScreenState
       final confirmed = await showConfirmDialog(
         context,
         title: tr.allocDeleteNoLinksTitle,
-        message: tr.allocDeleteNoLinksMsg,
+        message: '${tr.allocDeleteNoLinksMsg}${_moneyOnRemoveNote(tr)}',
         confirmLabel: tr.commonDelete,
       );
       if (confirmed) action = 'delete';
@@ -2180,7 +2203,13 @@ class _AllocationDetailScreenState
 
   Future<void> _save() async {
     final name = _nameController.text.trim();
-    if (name.isEmpty) return;
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(S.of(context).objNameRequired),
+        behavior: SnackBarBehavior.floating,
+      ));
+      return;
+    }
     final householdId = ref.read(currentHouseholdIdProvider);
     if (householdId == null) return;
 

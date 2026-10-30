@@ -454,6 +454,10 @@ class SFr extends S {
       'Le fichier de synchronisation est illisible. Synchronisez à nouveau depuis votre autre appareil.';
 
   @override
+  String get syncErrTooNew =>
+      'Ce fichier a été créé par une version plus récente de BudgetSeal. Mettez l\'application à jour, puis réessayez.';
+
+  @override
   String get syncErrSignedOut =>
       'Vous avez été déconnecté de Google Drive. Reconnectez-vous pour continuer la synchronisation.';
 
@@ -1759,6 +1763,10 @@ class SFr extends S {
   String get upcomingSkipped => 'Ignorée — prochaine date mise à jour';
 
   @override
+  String get upcomingBillEnded =>
+      'Cette facture est terminée, elle n\'est plus payée.';
+
+  @override
   String recurringPostedN(int n) {
     String _temp0 = intl.Intl.pluralLogic(
       n,
@@ -1941,6 +1949,21 @@ class SFr extends S {
   @override
   String allocMoveNotEnough(String name, String amount) {
     return '$name ne contient que $amount.';
+  }
+
+  @override
+  String allocMoveOverRta(String amount) {
+    return '« Prêt à répartir » ne contient que $amount. Il deviendra négatif.';
+  }
+
+  @override
+  String allocRemoveMoneyBack(String amount) {
+    return 'Elle contient $amount, qui retourne dans « Prêt à répartir ».';
+  }
+
+  @override
+  String allocRemoveOverspent(String amount) {
+    return 'Elle est dépassée de $amount, pris sur « Prêt à répartir ».';
   }
 
   @override
@@ -2563,6 +2586,15 @@ class SFr extends S {
   }
 
   @override
+  String get travelEnvelopeReturnedNote =>
+      'Voyage terminé : retour dans « Prêt à répartir »';
+
+  @override
+  String acctConvertBackEnvelopes(String amount) {
+    return 'Vos enveloppes en contiennent $amount. Ce montant retourne d\'abord dans « Prêt à répartir ».';
+  }
+
+  @override
   String healthUnallocShort(String amount) {
     return 'Non alloué : $amount';
   }
@@ -2712,8 +2744,43 @@ class SFr extends S {
   }
 
   @override
+  String get txAccountUnavailable =>
+      'Le compte de ce paiement est archivé ou supprimé. Déplacez-le d\'abord vers un autre compte.';
+
+  @override
   String acctArchiveNonZero(String amount) {
     return 'Ce compte contient encore $amount. Transférez-le vers un autre compte ou ajustez le solde à zéro, puis archivez-le : les comptes archivés ne comptent plus dans votre argent.';
+  }
+
+  @override
+  String acctDeleteNonZero(String amount) {
+    return 'Ce compte contient encore $amount. Le supprimer retirerait cet argent de « Prêt à répartir ». Transférez-le d\'abord vers un autre compte ou ajustez le solde à zéro.';
+  }
+
+  @override
+  String get acctCurrencyLocked =>
+      'La devise ne peut plus changer une fois que le compte contient de l\'argent ou des transactions. Pour une autre devise, ajoutez un nouveau compte.';
+
+  @override
+  String acctBillsOffNote(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Ses $n factures seront désactivées.',
+      one: 'Sa facture sera désactivée.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String acctPlansDeletedNote(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Ses $n paiements planifiés seront supprimés.',
+      one: 'Son paiement planifié sera supprimé.',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -3243,6 +3310,16 @@ class SFr extends S {
 
   @override
   String get txFormEnterAmount => 'Saisissez un montant';
+
+  @override
+  String txAmountTooLarge(String max) {
+    return 'Ce montant est trop élevé. Une transaction peut aller jusqu\'à $max.';
+  }
+
+  @override
+  String txFormSetTransferRate(String from, String to) {
+    return 'Saisissez le taux de change de $from vers $to';
+  }
 
   @override
   String txFormSelectAccountItem(int n) {
@@ -4436,6 +4513,17 @@ class SFr extends S {
   @override
   String get catDeleteNoTx =>
       'Cette catégorie n\'a aucune transaction. Supprimer définitivement ?';
+
+  @override
+  String catDeleteSubsKept(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Ses $n sous-catégories deviendront des catégories principales.',
+      one: 'Sa sous-catégorie deviendra une catégorie principale.',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get catDeleted => 'Catégorie supprimée';
@@ -6673,7 +6761,7 @@ class SFr extends S {
   String get onboardInviteCode => 'Code d\'invitation';
 
   @override
-  String get onboardInviteHint => 'PP-...';
+  String get onboardInviteHint => 'BS1-...';
 
   @override
   String get onboardJoinButton => 'Rejoindre le foyer';
@@ -6683,7 +6771,7 @@ class SFr extends S {
 
   @override
   String get onboardInvalidCodeError =>
-      'Code d\'invitation invalide. Il doit commencer par PP-';
+      'Code d\'invitation invalide. Il doit commencer par BS1-';
 
   @override
   String get joinScanCode => 'Scanner le code';
@@ -6731,6 +6819,10 @@ class SFr extends S {
   @override
   String get relayErrServer =>
       'La synchronisation du foyer est injoignable pour le moment. Réessayez plus tard.';
+
+  @override
+  String get relayEmptyHousehold =>
+      'Ce foyer n\'a pas encore de budget. Demandez à la personne qui vous a invité d\'ouvrir BudgetSeal et de synchroniser.';
 
   @override
   String get householdSection => 'Foyer';
@@ -7091,6 +7183,15 @@ class SFr extends S {
   String get recurringUpdated => 'Transaction récurrente mise à jour';
 
   @override
+  String recurringCatchUpTitle(int count) {
+    return 'Enregistrer $count paiements manqués ?';
+  }
+
+  @override
+  String get recurringCatchUpMessage =>
+      'La prochaine échéance est dans le passé. À la prochaine ouverture, l\'app enregistre chaque paiement dû depuis (jusqu\'à un an en arrière).';
+
+  @override
   String get recurringNewTitle => 'Nouvelle transaction récurrente';
 
   @override
@@ -7209,6 +7310,10 @@ class SFr extends S {
   @override
   String get importFailed =>
       'Échec de l\'importation. Vérifiez le format du fichier.';
+
+  @override
+  String get importFileEmpty =>
+      'Ce fichier est vide : il n\'y a rien à importer.';
 
   @override
   String importFoundRows(int count, String fileName) {
@@ -8037,6 +8142,37 @@ class SFr extends S {
   String billItemsSharedNow(Object name) {
     return 'Les articles de $name sont maintenant partagés par tous';
   }
+
+  @override
+  String billPersonRemoved(Object name) {
+    return '$name retiré du partage';
+  }
+
+  @override
+  String get billNeedAccount =>
+      'Ajoutez d\'abord un compte — le partage est enregistré comme un paiement depuis l\'un de vos comptes.';
+
+  @override
+  String get billScanKeptItems =>
+      'Aucun prix trouvé sur le ticket. Vos articles sont conservés.';
+
+  @override
+  String get billReplaceItemsTitle => 'Remplacer vos articles ?';
+
+  @override
+  String billReplaceItemsMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Les articles du ticket remplacent les $count articles que vous avez saisis.',
+      one: 'Les articles du ticket remplacent l\'article que vous avez saisi.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get billReplaceItems => 'Remplacer';
 
   @override
   String get billSetShare => 'Fixer la part';

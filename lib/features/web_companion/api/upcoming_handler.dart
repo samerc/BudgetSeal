@@ -124,6 +124,10 @@ Handler recurringActionHandler(Ref ref, {required bool post}) {
       return ok({'success': true});
     } on CurrencyConversionException catch (e) {
       return badRequest('No exchange rate from ${e.from} to ${e.to}');
+    } on AccountUnavailableException {
+      return badRequest('The account is archived or deleted');
+    } on RecurringEndedException {
+      return badRequest('This bill has ended');
     } catch (e) {
       return serverError(e);
     }
@@ -357,6 +361,8 @@ Handler postPlannedHandler(Ref ref) {
           );
           posted++;
         } on CurrencyConversionException {
+          failed.add(id);
+        } on AccountUnavailableException {
           failed.add(id);
         }
       }

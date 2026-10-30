@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:image_picker/image_picker.dart';
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -65,6 +65,11 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
   double? _currentBalance;
   DateTime? _lastReconciled;
 
+  /// The currency can't change once the account has money or transactions:
+  /// every amount in it is in this currency, so a new code would turn $70
+  /// into 70 euros.
+  bool _currencyLocked = false;
+
   String get _reconciledKey => 'reconciled_${widget.accountId}';
 
   Future<void> _markReconciled() async {
@@ -107,8 +112,12 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       if (acc != null && mounted) {
         final calculator = BalanceCalculator(db);
         final balance = await calculator.accountBalance(acc.id);
+        final locked = acc.initialBalance != 0 ||
+            balance != 0 ||
+            await _hasTransactions(db, acc.id);
         if (!mounted) return;
         setState(() {
+          _currencyLocked = locked;
           _nameController.text = acc.name;
           _currencyController.text = acc.currency;
           _initialBalance = acc.initialBalance;
@@ -125,6 +134,20 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       debugPrint('[AccountDetail] Error loading: $e');
       if (mounted) setState(() => _loadFailed = true);
     }
+  }
+
+  /// Whether any transaction (posted or planned, as header, transfer
+  /// destination or split line) uses [accountId].
+  static Future<bool> _hasTransactions(AppDatabase db, String accountId) async {
+    final row = await db.customSelect(
+      'SELECT EXISTS(SELECT 1 FROM transactions WHERE deleted = 0 AND '
+      '(account_id = ?1 OR destination_account_id = ?1)) OR '
+      'EXISTS(SELECT 1 FROM transaction_lines l JOIN transactions t '
+      'ON t.id = l.transaction_id WHERE t.deleted = 0 AND l.account_id = ?1) '
+      'AS used',
+      variables: [Variable.withString(accountId)],
+    ).getSingle();
+    return row.read<bool>('used');
   }
 
   @override
@@ -457,13 +480,34 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                 context,
                 icon: AppIcons.currencyDollar,
                 title: l.acctCurrencySection,
-                child: CurrencyPickerField(
-                  label: l.acctSelectCurrency,
-                  value: _currencyController.text.isEmpty
-                      ? 'USD'
-                      : _currencyController.text,
-                  onChanged: (v) =>
-                      setState(() => _currencyController.text = v),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    IgnorePointer(
+                      ignoring: _currencyLocked,
+                      child: Opacity(
+                        opacity: _currencyLocked ? 0.6 : 1,
+                        child: CurrencyPickerField(
+                          label: l.acctSelectCurrency,
+                          value: _currencyController.text.isEmpty
+                              ? 'USD'
+                              : _currencyController.text,
+                          onChanged: (v) {
+                            if (_currencyLocked) return;
+                            setState(() => _currencyController.text = v);
+                          },
+                        ),
+                      ),
+                    ),
+                    if (_currencyLocked) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        l.acctCurrencyLocked,
+                        style: TextStyle(
+                            fontSize: 12, color: AppColors.ts(context)),
+                      ),
+                    ],
+                  ],
                 ),
               ),
 
@@ -847,6 +891,22 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             : 0;
     double receivedAmount = sameCurrencyAmount(destAccountId);
 
+    // Envelopes holding the wallet's currency are emptied back to Ready to
+    // assign when this is the last account in it (convertBack) — say so.
+    var envelopeMoney = 0.0;
+    final lastInCurrency = !accounts.any((a) =>
+        !a.archived && a.id != widget.accountId && a.currency == walletCurrency);
+    final hhId = ref.read(currentHouseholdIdProvider);
+    if (lastInCurrency && hhId != null) {
+      try {
+        envelopeMoney = await TravelAccountService.envelopeMoneyIn(
+            ref.read(databaseProvider), hhId, walletCurrency);
+      } catch (e) {
+        debugPrint('[AccountDetail] Envelope money check failed: $e');
+      }
+      if (!mounted) return;
+    }
+
     final tr = S.of(context);
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
@@ -858,8 +918,13 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             SheetTitle(
               tr.acctConvertBack,
-              subtitle: tr.acctConvertBackMsg(
-                  formatAmount(balance, currency: _currencyController.text)),
+              subtitle: [
+                tr.acctConvertBackMsg(
+                    formatAmount(balance, currency: _currencyController.text)),
+                if (envelopeMoney.abs() >= TravelAccountService.zeroThreshold(walletCurrency))
+                  tr.acctConvertBackEnvelopes(
+                      formatAmount(envelopeMoney, currency: walletCurrency)),
+              ].join('\n\n'),
               padding: const EdgeInsetsDirectional.only(top: 20),
             ),
             const SizedBox(height: 20),
@@ -932,6 +997,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
         toAccountId: destAccountId!,
         received: receivedAmount,
         note: tr.travelConvertBackNote(destAcc.currency),
+        envelopeNote: tr.travelEnvelopeReturnedNote,
       );
 
       ref.invalidate(accountsProvider);
@@ -974,7 +1040,15 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
   /// Archived accounts drop out of every balance, so archiving one that still
   /// holds money would silently pull that money out of Unallocated. Only
   /// allow it at zero; otherwise explain how to empty it first.
-  Future<bool> _canArchive() async {
+  Future<bool> _canArchive() {
+    final tr = S.of(context);
+    return _isAtZero(tr.acctArchiveTitle, tr.acctArchiveNonZero);
+  }
+
+  /// True when the account's balance is zero; otherwise explains (with
+  /// [message] given the balance) and returns false.
+  Future<bool> _isAtZero(
+      String title, String Function(String amount) message) async {
     final db = ref.read(databaseProvider);
     final acc = await AccountsDao(db).getById(widget.accountId);
     final balance =
@@ -987,9 +1061,8 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     await showDialog<void>(
       context: context,
       builder: (dctx) => AlertDialog(
-        title: Text(tr.acctArchiveTitle),
-        content: Text(tr.acctArchiveNonZero(
-            formatAmount(balance, currency: currency))),
+        title: Text(title),
+        content: Text(message(formatAmount(balance, currency: currency))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dctx),
@@ -1003,29 +1076,90 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
 
   Future<void> _confirmArchive() async {
     if (!await _canArchive() || !mounted) return;
+    final schedules = await _schedules();
+    if (!mounted) return;
     final tr = S.of(context);
     final confirmed = await showConfirmDialog(
       context,
       title: tr.acctArchiveConfirmTitle,
-      message: tr.acctArchiveMsg,
+      message: tr.acctArchiveMsg + _schedulesNote(tr, schedules),
       confirmLabel: tr.commonArchive,
       destructive: false,
     );
-    if (confirmed && mounted) await _archive();
+    if (confirmed && mounted) await _archive(schedules);
   }
 
-  /// Archives the account, says so, and leaves the screen.
-  Future<void> _archive() async {
+  /// Switched-on bills and planned payments that use this account: an
+  /// archived or deleted account can't pay them.
+  Future<({List<String> bills, List<String> plans})> _schedules() async {
+    final db = ref.read(databaseProvider);
+    final id = widget.accountId;
+    final bills = await (db.select(db.recurringTransactions)
+          ..where((r) =>
+              (r.accountId.equals(id) | r.destinationAccountId.equals(id)) &
+              r.deleted.equals(false) &
+              r.enabled.equals(true)))
+        .get();
+    final plans = await (db.select(db.transactions)
+          ..where((t) => t.status.equals('planned') & t.deleted.equals(false)))
+        .get();
+    final lines =
+        await db.transactionsDao.linesByTransaction(plans.map((t) => t.id));
+    return (
+      bills: [for (final b in bills) b.id],
+      plans: [
+        for (final t in plans)
+          if (t.accountId == id ||
+              t.destinationAccountId == id ||
+              (lines[t.id] ?? const <TransactionLine>[])
+                  .any((l) => l.accountId == id))
+            t.id
+      ],
+    );
+  }
+
+  /// "Its 2 bills will be switched off." for a confirm dialog (empty when
+  /// there are none). [plans] is false when the plans are already counted as
+  /// transactions being deleted.
+  String _schedulesNote(S tr, ({List<String> bills, List<String> plans}) s,
+      {bool plans = true}) {
+    final notes = [
+      if (s.bills.isNotEmpty) tr.acctBillsOffNote(s.bills.length),
+      if (plans && s.plans.isNotEmpty) tr.acctPlansDeletedNote(s.plans.length),
+    ];
+    return notes.isEmpty ? '' : '\n\n${notes.join(' ')}';
+  }
+
+  /// Switches off [billIds] (they stay in the Bills list, paused).
+  Future<void> _switchOffBills(AppDatabase db, List<String> billIds) async {
+    if (billIds.isEmpty) return;
+    await (db.update(db.recurringTransactions)
+          ..where((r) => r.id.isIn(billIds)))
+        .write(RecurringTransactionsCompanion(
+            enabled: const Value(false), lastModified: Value(DateTime.now())));
+  }
+
+  /// Archives the account (switching off its bills and deleting its planned
+  /// payments first), says so, and leaves the screen.
+  Future<void> _archive(
+      ({List<String> bills, List<String> plans}) schedules) async {
     final tr = S.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final name = _nameController.text;
     try {
       final db = ref.read(databaseProvider);
-      await (db.update(db.accounts)
-            ..where((a) => a.id.equals(widget.accountId)))
-          .write(AccountsCompanion(
-              archived: const Value(true),
-              lastModified: Value(DateTime.now())));
+      final engine = ref.read(allocationEngineProvider);
+      await db.transaction(() async {
+        for (final id in schedules.plans) {
+          await engine.deleteTransaction(id);
+        }
+        await _switchOffBills(db, schedules.bills);
+        await (db.update(db.accounts)
+              ..where((a) => a.id.equals(widget.accountId)))
+            .write(AccountsCompanion(
+                archived: const Value(true),
+                lastModified: Value(DateTime.now())));
+      });
       ref.invalidate(accountsProvider);
       ref.invalidate(accountsWithBalanceProvider);
       messenger.showSnackBar(SnackBar(
@@ -1070,18 +1204,30 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       ...accLines.map((l) => l.transactionId),
     };
 
+    final schedules = await _schedules();
     if (!mounted) return;
     final tr = S.of(context);
+    // Planned payments on this account are among refTxIds (deleted with it).
+    final billsNote = _schedulesNote(tr, schedules, plans: false);
 
     // ── No transactions: simple permanent delete ──
     if (refTxIds.isEmpty) {
+      // Like archive: an account that still holds money (an opening
+      // balance) can't just vanish — that money would leave Ready to
+      // assign, which may already be in envelopes.
+      if (!await _isAtZero(tr.acctDeleteConfirmTitle, tr.acctDeleteNonZero) ||
+          !mounted) {
+        return;
+      }
       final confirmed = await showConfirmDialog(
         context,
         title: tr.acctDeleteConfirmTitle,
-        message: tr.acctDeleteMsg,
+        message: tr.acctDeleteMsg + billsNote,
         confirmLabel: tr.allocDeletePermanently,
       );
-      if (confirmed && mounted) await _deleteAccount(const {});
+      if (confirmed && mounted) {
+        await _deleteAccount(const {}, schedules.bills);
+      }
       return;
     }
 
@@ -1112,8 +1258,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     if (!mounted || action == null || action == 'cancel') return;
 
     if (action == 'archive') {
-      if (!await _canArchive() || !mounted) return;
-      await _archive();
+      await _confirmArchive();
       return;
     }
 
@@ -1152,34 +1297,38 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     final confirmed = await showConfirmDialog(
       context,
       title: tr.acctDeleteConfirmTitle,
-      message: sharedCount > 0
-          ? tr.acctDeleteSharedMsg(sharedCount)
-          : tr.acctDeleteCountConfirm(refTxIds.length),
+      message: (sharedCount > 0
+              ? tr.acctDeleteSharedMsg(sharedCount)
+              : tr.acctDeleteCountConfirm(refTxIds.length)) +
+          billsNote,
       confirmLabel: tr.allocDeletePermanently,
     );
     if (!confirmed || !mounted) return;
-    await _deleteAccount(refTxIds);
+    await _deleteAccount(refTxIds, schedules.bills);
   }
 
   /// Soft-deletes [txIds] through the engine (ledger rows go too, so balances
   /// and sync stay correct), then the account; says so and leaves the screen.
   /// No Undo here: the account itself is gone, so `deleteTransactionsWithUndo`
   /// (which restores transactions into their account) doesn't fit.
-  Future<void> _deleteAccount(Set<String> txIds) async {
+  Future<void> _deleteAccount(Set<String> txIds, List<String> billIds) async {
     final tr = S.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final name = _nameController.text;
     try {
       final db = ref.read(databaseProvider);
       final engine = ref.read(allocationEngineProvider);
-      for (final id in txIds) {
-        await engine.deleteTransaction(id);
-      }
-      await (db.update(db.accounts)
-            ..where((a) => a.id.equals(widget.accountId)))
-          .write(AccountsCompanion(
-              deleted: const Value(true),
-              lastModified: Value(DateTime.now())));
+      await db.transaction(() async {
+        for (final id in txIds) {
+          await engine.deleteTransaction(id);
+        }
+        await _switchOffBills(db, billIds);
+        await (db.update(db.accounts)
+              ..where((a) => a.id.equals(widget.accountId)))
+            .write(AccountsCompanion(
+                deleted: const Value(true),
+                lastModified: Value(DateTime.now())));
+      });
       ref.invalidate(accountsProvider);
       ref.invalidate(accountsWithBalanceProvider);
       if (txIds.isNotEmpty) {
@@ -1213,7 +1362,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       );
       return;
     }
-    final currency = _currencyController.text.trim().toUpperCase();
+    var currency = _currencyController.text.trim().toUpperCase();
     if (currency.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(S.of(context).acctSelectCurrency), behavior: SnackBarBehavior.floating),
@@ -1228,6 +1377,18 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     try {
       final db = ref.read(databaseProvider);
       final id = _isNew ? const Uuid().v4() : widget.accountId;
+      if (!_isNew) {
+        // Never reinterpret existing amounts in another currency: once the
+        // account has money or transactions, the stored currency stays.
+        final stored = await AccountsDao(db).getById(id);
+        if (stored != null &&
+            stored.currency != currency &&
+            (stored.initialBalance != 0 ||
+                await BalanceCalculator(db).accountBalance(id) != 0 ||
+                await _hasTransactions(db, id))) {
+          currency = stored.currency;
+        }
+      }
       await AccountsDao(db).upsert(AccountsCompanion.insert(
         id: id,
         householdId: householdId,

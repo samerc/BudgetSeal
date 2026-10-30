@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:csv/csv.dart';
@@ -47,6 +48,21 @@ DateTime? parseImportDate(String s, {required bool dayFirst}) {
   if (y < 1900 || y > 2100 || mo < 1 || mo > 12) return null;
   if (d < 1 || d > DateTime(y, mo + 1, 0).day) return null;
   return DateTime(y, mo, d);
+}
+
+/// A picked CSV file's bytes as text: a UTF-8 BOM is dropped, UTF-8 is
+/// tried first, and a file that isn't valid UTF-8 (Excel on Windows saves
+/// Windows-1252 / Latin-1, "Café") is read as Latin-1 instead of failing.
+String decodeImportBytes(List<int> bytes) {
+  var b = bytes;
+  if (b.length >= 3 && b[0] == 0xEF && b[1] == 0xBB && b[2] == 0xBF) {
+    b = b.sublist(3);
+  }
+  try {
+    return utf8.decode(b);
+  } on FormatException {
+    return latin1.decode(b);
+  }
 }
 
 /// The role a CSV column can be assigned to. Banks that split money in and
@@ -123,15 +139,26 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       final path = file?.path;
       if (path == null) return;
 
-      final content = await File(path).readAsString();
-      final data = const CsvDecoder().convert(content);
-      if (data.isNotEmpty && mounted) {
-        setState(() {
-          _csvData = data;
-          _fileName = file!.name;
-          _columnRoles = _autoDetectRoles(data);
-        });
+      final content = decodeImportBytes(await File(path).readAsBytes());
+      final data = const CsvDecoder()
+          .convert(content)
+          .where((r) => r.any((c) => c.toString().trim().isNotEmpty))
+          .toList();
+      if (!mounted) return;
+      if (data.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(S.of(context).importFileEmpty),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
       }
+      setState(() {
+        _csvData = data;
+        _fileName = file!.name;
+        _columnRoles = _autoDetectRoles(data);
+      });
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -330,14 +357,19 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       final existing = await ref.read(transactionEntriesProvider.future);
       String dupKey(DateTime d, double amount, String type) =>
           '${d.year}-${d.month}-${d.day}|${amount.toStringAsFixed(2)}|$type';
-      final seen = <String>{};
+      // How many of each (day, amount, type) the account already has. A row
+      // matching one of them is a duplicate and uses it up, so two identical
+      // purchases in the file (two coffees) both import, while re-importing
+      // the same file adds nothing.
+      final existingCounts = <String, int>{};
       // Title → category from history ("STARBUCKS #12" ← "Starbucks").
       final titleCats = <(String, String)>[];
       for (final e in existing) {
         final local = e.tx.createdAt.toLocal();
         for (final l in e.lines) {
           if ((l.accountId ?? e.tx.accountId) == account.id) {
-            seen.add(dupKey(local, l.amount, e.tx.type));
+            final k = dupKey(local, l.amount, e.tx.type);
+            existingCounts[k] = (existingCounts[k] ?? 0) + 1;
           }
         }
         if (e.tx.type != 'transfer') {
@@ -391,7 +423,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
             ? row[descCol].toString().trim()
             : '';
         final amount = _rowAmount(row);
-        if (amount == null || amount == 0 || amount.abs() > 1e9) {
+        if (amount == null || amount == 0 || amount.abs() > InputLimits.maxAmount) {
           skipped++;
           continue;
         }
@@ -410,7 +442,9 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
 
         final type = amount > 0 ? 'income' : 'expense';
         final key = dupKey(date, amount.abs(), type);
-        if (!seen.add(key)) {
+        final left = existingCounts[key] ?? 0;
+        if (left > 0) {
+          existingCounts[key] = left - 1;
           duplicates++;
           continue;
         }

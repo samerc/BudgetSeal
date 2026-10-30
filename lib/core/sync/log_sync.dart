@@ -143,17 +143,12 @@ class LogSync {
   /// Replaces this phone's data with what the store's logs hold (joining
   /// a household, or connecting to another budget's folder): the most
   /// complete snapshot, then only the log files past it.
+  ///
+  /// Everything is downloaded and read first; only then is this phone's
+  /// data swapped for it, in one transaction. A dropped connection, a
+  /// timeout or a damaged file throws with nothing here changed.
   Future<int> replaceFrom(LogStore store) async {
-    await db.transaction(() async {
-      await db.customStatement('UPDATE sync_clock SET applying = 1 WHERE id = 1');
-      for (final t in opLogTables.reversed) {
-        await db.customStatement('DELETE FROM $t');
-      }
-      await db.customStatement('DELETE FROM sync_ops');
-      await db.customStatement('DELETE FROM sync_files');
-      await db.customStatement("DELETE FROM sync_meta");
-      await db.customStatement('UPDATE sync_clock SET applying = 0 WHERE id = 1');
-    });
+    final me = await _me();
     final files = await store.list();
     ({Map<String, int> covers, List<SyncOp> ops})? best;
     for (final name in files.keys) {
@@ -168,24 +163,46 @@ class LogSync {
         debugPrint('[LogSync] Skipping snapshot $name: $e');
       }
     }
-    var applied = 0;
-    if (best != null) {
-      applied = await apply(best.ops);
-      // Full files it covers needn't be read (a full file never changes).
+    // Full files the snapshot covers needn't be read (a full file never
+    // changes); the other phones' other files are read now.
+    final versions = <String, String>{};
+    final incoming = <SyncOp>[];
+    for (final MapEntry(key: name, value: version) in files.entries) {
+      final m = _name.firstMatch(name);
+      if (m == null) continue;
+      final held = best?.covers[m.group(1)!] ?? 0;
+      if ((int.parse(m.group(2)!) + 1) * chunkSize <= held) {
+        versions[name] = version;
+        continue;
+      }
+      if (m.group(1) == me) continue;
+      final raw = await store.read(name);
+      if (raw == null) continue;
+      incoming.addAll(_decode(await SyncEncryption.decrypt(raw)));
+      versions[name] = version;
+    }
+
+    final snap = best;
+    return db.transaction(() async {
+      await db.customStatement('UPDATE sync_clock SET applying = 1 WHERE id = 1');
+      for (final t in opLogTables.reversed) {
+        await db.customStatement('DELETE FROM $t');
+      }
+      await db.customStatement('DELETE FROM sync_ops');
+      await db.customStatement('DELETE FROM sync_files');
+      await db.customStatement("DELETE FROM sync_meta");
+      await db.customStatement('UPDATE sync_clock SET applying = 0 WHERE id = 1');
+      var applied = snap == null ? 0 : await apply(snap.ops);
+      applied += await apply(incoming);
       await db.batch((b) {
-        for (final MapEntry(key: name, value: version) in files.entries) {
-          final m = _name.firstMatch(name);
-          if (m == null) continue;
-          final held = best!.covers[m.group(1)!] ?? 0;
-          if ((int.parse(m.group(2)!) + 1) * chunkSize <= held) {
-            b.customStatement(
-                'INSERT OR REPLACE INTO sync_files (name, version) VALUES (?, ?)',
-                [name, version]);
-          }
+        for (final e in versions.entries) {
+          b.customStatement(
+              'INSERT OR REPLACE INTO sync_files (name, version) VALUES (?, ?)',
+              [e.key, e.value]);
         }
       });
-    }
-    return applied + await pull(store);
+      return applied;
+    });
   }
 
   /// Writes this phone's snapshot when the log has grown by

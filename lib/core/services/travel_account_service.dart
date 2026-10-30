@@ -113,9 +113,27 @@ class TravelAccountService {
     });
   }
 
+  /// What envelopes hold in [currency], summed (positive and negative
+  /// balances) — what [convertBack] would return to Ready to assign if the
+  /// wallet is the last account in that currency. Shown on the confirm sheet.
+  static Future<double> envelopeMoneyIn(
+      AppDatabase db, String householdId, String currency) async {
+    final envs =
+        await BalanceCalculator(db).allAllocationBalancesByCurrency(householdId);
+    var total = 0.0;
+    for (final m in envs.values) {
+      total += m[currency] ?? 0;
+    }
+    return total;
+  }
+
   /// Convert back & close: move the wallet's whole balance to
   /// [toAccountId] ([received] in that account's currency) and archive the
-  /// wallet, in one db transaction. The balance is read inside it; if it is
+  /// wallet, in one db transaction. If no other open account holds the
+  /// wallet's currency, envelopes holding that currency are first emptied
+  /// back to Ready to assign (overspent ones covered) — otherwise they would
+  /// keep money no account holds, and Ready to assign in that currency would
+  /// go negative. [envelopeNote] labels those ledger rows. The balance is read inside it; if it is
   /// no longer [expectedBalance] nothing happens and
   /// [TravelBalanceChangedException] is thrown (the rate the user typed was
   /// for the old amount) — archiving a wallet with money left would drop that
@@ -128,6 +146,7 @@ class TravelAccountService {
     required String toAccountId,
     required double received,
     required String note,
+    String envelopeNote = '',
   }) async {
     if (received <= 0) throw ArgumentError('received must be positive');
     await db.transaction(() async {
@@ -139,7 +158,39 @@ class TravelAccountService {
           balance <= 0) {
         throw TravelBalanceChangedException(balance);
       }
-      await AllocationEngine(db).recordTransfer(
+      final engine = AllocationEngine(db);
+      final otherInCurrency = await (db.select(db.accounts)
+            ..where((a) =>
+                a.householdId.equals(householdId) &
+                a.currency.equals(wallet.currency) &
+                a.id.equals(walletId).not() &
+                a.archived.equals(false) &
+                a.deleted.equals(false))
+            ..limit(1))
+          .getSingleOrNull();
+      if (otherInCurrency == null) {
+        final envs = await BalanceCalculator(db)
+            .allAllocationBalancesByCurrency(householdId);
+        for (final e in envs.entries) {
+          final held = e.value[wallet.currency] ?? 0;
+          if (held.abs() < zeroThreshold(wallet.currency)) continue;
+          if (held > 0) {
+            await engine.withdrawFromAllocation(
+                allocationId: e.key,
+                amount: held,
+                currency: wallet.currency,
+                note: envelopeNote);
+          } else {
+            await engine.fundAllocation(
+                allocationId: e.key,
+                amount: -held,
+                currency: wallet.currency,
+                deviceId: 'local',
+                note: envelopeNote);
+          }
+        }
+      }
+      await engine.recordTransfer(
         householdId: householdId,
         fromAccountId: walletId,
         toAccountId: toAccountId,

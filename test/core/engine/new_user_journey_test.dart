@@ -352,13 +352,13 @@ void main() {
       );
     });
 
-    test('absurdly large amount (> 1 billion) is rejected', () async {
+    test('absurdly large amount (> 1 trillion) is rejected', () async {
       expect(
         () => engine.recordTransaction(
           householdId: hh,
           accountId: checking,
           type: 'expense',
-          lines: [TxLine(amount: 2000000000, currency: 'USD', categoryId: groceriesCat, accountId: checking)],
+          lines: [TxLine(amount: 2e12, currency: 'USD', categoryId: groceriesCat, accountId: checking)],
           baseCurrency: 'USD',
           deviceId: 'device-A',
         ),

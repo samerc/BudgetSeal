@@ -28,11 +28,18 @@ enum LeftoverResolution { toUnallocated, toOtherAllocation, keep }
 /// Period definition: start day N → period runs day N to day N-1 of next month.
 /// e.g. start day 25 → period is 25th to 24th of next month.
 class PeriodEngine {
+  final AppDatabase _db;
   final LedgerDao _ledgerDao;
   final _uuid = const Uuid();
 
   PeriodEngine(AppDatabase db)
-      : _ledgerDao = LedgerDao(db);
+      : _db = db,
+        _ledgerDao = LedgerDao(db);
+
+  /// Runs several [resolveLeftover] calls as one database transaction, so a
+  /// review either applies every choice or none of them.
+  Future<T> inTransaction<T>(Future<T> Function() action) =>
+      _db.transaction(action);
 
   /// Returns true if today >= periodStartDay and a new period should begin.
   bool isNewPeriodDue(int periodStartDay, DateTime? lastPeriodStarted) {
@@ -64,6 +71,14 @@ class PeriodEngine {
     String? targetAllocationId,
   }) async {
     if (leftoverAmount.abs() < 0.005) return;
+    // "Move to another envelope" with none chosen must not silently do
+    // nothing (the envelope would stay pending while the screen says done).
+    if (resolution == LeftoverResolution.toOtherAllocation &&
+        leftoverAmount > 0 &&
+        (targetAllocationId == null || targetAllocationId == allocationId)) {
+      throw ArgumentError.value(targetAllocationId, 'targetAllocationId',
+          'Moving a leftover needs another envelope to move it to');
+    }
 
     // An overspent envelope (negative leftover): Ready to assign covers it,
     // or the debt carries into the new period.
@@ -100,7 +115,7 @@ class PeriodEngine {
         ));
 
       case LeftoverResolution.toOtherAllocation:
-        if (targetAllocationId == null) return;
+        final target = targetAllocationId!;
         // Debit source
         await _ledgerDao.appendEntry(AllocationLedgerCompanion.insert(
           id: _uuid.v4(),
@@ -114,7 +129,7 @@ class PeriodEngine {
         // Credit target
         await _ledgerDao.appendEntry(AllocationLedgerCompanion.insert(
           id: _uuid.v4(),
-          allocationId: targetAllocationId,
+          allocationId: target,
           entryType: 'funding',
           amount: leftoverAmount,
           currency: currency,

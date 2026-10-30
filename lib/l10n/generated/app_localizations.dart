@@ -969,6 +969,12 @@ abstract class S {
   /// **'The sync file couldn\'t be read. Sync again from your other device.'**
   String get syncErrCorrupt;
 
+  /// No description provided for @syncErrTooNew.
+  ///
+  /// In en, this message translates to:
+  /// **'This file was made by a newer version of BudgetSeal. Update the app, then try again.'**
+  String get syncErrTooNew;
+
   /// No description provided for @syncErrSignedOut.
   ///
   /// In en, this message translates to:
@@ -3183,6 +3189,12 @@ abstract class S {
   /// **'Skipped — next date updated'**
   String get upcomingSkipped;
 
+  /// Post now on a bill past its end date
+  ///
+  /// In en, this message translates to:
+  /// **'This bill has ended, so it isn\'t paid any more.'**
+  String get upcomingBillEnded;
+
   /// No description provided for @recurringPostedN.
   ///
   /// In en, this message translates to:
@@ -3470,6 +3482,24 @@ abstract class S {
   /// In en, this message translates to:
   /// **'{name} only has {amount}.'**
   String allocMoveNotEnough(String name, String amount);
+
+  /// Move money sheet: moving more than Ready to assign holds
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to assign only has {amount}. It will go negative.'**
+  String allocMoveOverRta(String amount);
+
+  /// Archive/delete envelope dialog: the money it holds
+  ///
+  /// In en, this message translates to:
+  /// **'It holds {amount}, which goes back to Ready to assign.'**
+  String allocRemoveMoneyBack(String amount);
+
+  /// Archive/delete envelope dialog: an overspent envelope
+  ///
+  /// In en, this message translates to:
+  /// **'It is over by {amount}, which comes out of Ready to assign.'**
+  String allocRemoveOverspent(String amount);
 
   /// No description provided for @allocMovedTo.
   ///
@@ -4492,6 +4522,18 @@ abstract class S {
   /// **'Travel convert back → {currency}'**
   String travelConvertBackNote(String currency);
 
+  /// Envelope ledger note when closing a travel wallet empties envelopes in its currency
+  ///
+  /// In en, this message translates to:
+  /// **'Trip closed: back to Ready to assign'**
+  String get travelEnvelopeReturnedNote;
+
+  /// Convert back & close sheet: envelopes holding the wallet currency
+  ///
+  /// In en, this message translates to:
+  /// **'Your envelopes hold {amount} of it. That goes back to Ready to assign first.'**
+  String acctConvertBackEnvelopes(String amount);
+
   /// No description provided for @healthUnallocShort.
   ///
   /// In en, this message translates to:
@@ -4690,11 +4732,41 @@ abstract class S {
   /// **'No exchange rate from {from} to {to}. Enter a rate for this amount, or refresh rates in Settings › Exchange rates.'**
   String txNoRateBetween(String from, String to);
 
+  /// Posting a bill or planned payment whose account is archived or deleted
+  ///
+  /// In en, this message translates to:
+  /// **'This payment\'s account is archived or deleted. Move it to another account first.'**
+  String get txAccountUnavailable;
+
   /// No description provided for @acctArchiveNonZero.
   ///
   /// In en, this message translates to:
   /// **'This account still holds {amount}. Transfer it to another account or adjust the balance to zero, then archive it — archived accounts no longer count toward your money.'**
   String acctArchiveNonZero(String amount);
+
+  /// No description provided for @acctDeleteNonZero.
+  ///
+  /// In en, this message translates to:
+  /// **'This account still holds {amount}. Deleting it would take that money out of Ready to assign. Transfer it to another account or adjust the balance to zero first.'**
+  String acctDeleteNonZero(String amount);
+
+  /// No description provided for @acctCurrencyLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'The currency can\'t change once the account has money or transactions in it. To use another currency, add a new account.'**
+  String get acctCurrencyLocked;
+
+  /// No description provided for @acctBillsOffNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Its bill will be switched off.} other{Its {n} bills will be switched off.}}'**
+  String acctBillsOffNote(int n);
+
+  /// No description provided for @acctPlansDeletedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Its planned payment will be deleted.} other{Its {n} planned payments will be deleted.}}'**
+  String acctPlansDeletedNote(int n);
 
   /// No description provided for @receiptPickFailed.
   ///
@@ -5631,6 +5703,18 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Enter an amount'**
   String get txFormEnterAmount;
+
+  /// Validation error: amount over the app's limit
+  ///
+  /// In en, this message translates to:
+  /// **'That amount is too large. One transaction can be at most {max}.'**
+  String txAmountTooLarge(String max);
+
+  /// Validation error: a transfer between two currencies has no rate
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the exchange rate from {from} to {to}'**
+  String txFormSetTransferRate(String from, String to);
 
   /// Validation error
   ///
@@ -7635,6 +7719,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'This category has no transactions. Delete permanently?'**
   String get catDeleteNoTx;
+
+  /// No description provided for @catDeleteSubsKept.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Its subcategory will become a top-level category.} other{Its {n} subcategories will become top-level categories.}}'**
+  String catDeleteSubsKept(int n);
 
   /// No description provided for @catDeleted.
   ///
@@ -11773,7 +11863,7 @@ abstract class S {
   /// Onboarding join text field hint
   ///
   /// In en, this message translates to:
-  /// **'PP-...'**
+  /// **'BS1-...'**
   String get onboardInviteHint;
 
   /// Onboarding join button
@@ -11791,7 +11881,7 @@ abstract class S {
   /// Onboarding join validation error
   ///
   /// In en, this message translates to:
-  /// **'Invalid invite code. It should start with PP-'**
+  /// **'Invalid invite code. It should start with BS1-'**
   String get onboardInvalidCodeError;
 
   /// Join sheet button
@@ -11871,6 +11961,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Household sync can\'t be reached right now. Try again later.'**
   String get relayErrServer;
+
+  /// Joining a household whose creator never synced
+  ///
+  /// In en, this message translates to:
+  /// **'This household has no budget yet. Ask the person who invited you to open BudgetSeal and sync.'**
+  String get relayEmptyHousehold;
 
   /// Cloud Sync section
   ///
@@ -12502,6 +12598,18 @@ abstract class S {
   /// **'Recurring transaction updated'**
   String get recurringUpdated;
 
+  /// Edit bill: next due moved back
+  ///
+  /// In en, this message translates to:
+  /// **'Record {count} missed payments?'**
+  String recurringCatchUpTitle(int count);
+
+  /// Edit bill: next due moved back
+  ///
+  /// In en, this message translates to:
+  /// **'The next due date is in the past. Next time the app opens, it records every payment due since then (up to a year back).'**
+  String get recurringCatchUpMessage;
+
   /// Add sheet title
   ///
   /// In en, this message translates to:
@@ -12699,6 +12807,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Import failed. Please check the file format.'**
   String get importFailed;
+
+  /// No description provided for @importFileEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is empty, so there\'s nothing to import.'**
+  String get importFileEmpty;
 
   /// Row count after loading CSV
   ///
@@ -13977,6 +14091,42 @@ abstract class S {
   /// In en, this message translates to:
   /// **'{name}\'s items are now shared by everyone'**
   String billItemsSharedNow(Object name);
+
+  /// Bill splitter: SnackBar after removing a person (with Undo)
+  ///
+  /// In en, this message translates to:
+  /// **'{name} removed from the split'**
+  String billPersonRemoved(Object name);
+
+  /// Bill splitter: Save with no account
+  ///
+  /// In en, this message translates to:
+  /// **'Add an account first — the split is saved as a payment from one of your accounts.'**
+  String get billNeedAccount;
+
+  /// Bill splitter: a scan without prices doesn't replace typed items
+  ///
+  /// In en, this message translates to:
+  /// **'No prices found on the receipt. Your items are kept.'**
+  String get billScanKeptItems;
+
+  /// Bill splitter: scanning a receipt with items already entered
+  ///
+  /// In en, this message translates to:
+  /// **'Replace your items?'**
+  String get billReplaceItemsTitle;
+
+  /// Bill splitter
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{The receipt\'s items replace the item you entered.} other{The receipt\'s items replace the {count} items you entered.}}'**
+  String billReplaceItemsMessage(int count);
+
+  /// Bill splitter: confirm button
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get billReplaceItems;
 
   /// Bill splitter
   ///

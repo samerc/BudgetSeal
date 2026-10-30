@@ -159,8 +159,10 @@ abstract final class InputLimits {
   /// Max characters for note/description fields
   static const int noteMaxLength = 500;
 
-  /// Max transaction/balance amount (1 billion)
-  static const double maxAmount = 1e9;
+  /// Max transaction/balance amount (1 trillion): high enough for a car in
+  /// Lebanese pounds or a house in Iranian rials; doubles stay exact to the
+  /// cent (or the 3rd decimal) well past it.
+  static const double maxAmount = 1e12;
 }
 
 /// Filled/Outlined buttons inside dialog actions. The theme makes them full

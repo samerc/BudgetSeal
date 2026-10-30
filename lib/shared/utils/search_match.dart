@@ -1,6 +1,8 @@
 // Activity search: accent- and Arabic-insensitive words that must all
 // match, plus amount filters (`>50`, `<20`, `>=10`, `<=5`, `=12.5`).
 
+import 'format_number.dart' show parseLooseAmount;
+
 const _latin = {
   'à': 'a', 'á': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'å': 'a', 'æ': 'ae',
   'ç': 'c', 'è': 'e', 'é': 'e', 'ê': 'e', 'ë': 'e', 'ì': 'i', 'í': 'i',
@@ -66,7 +68,8 @@ class SearchQuery {
 
   bool get isEmpty => words.isEmpty && amounts.isEmpty;
 
-  static final _amountRe = RegExp(r'^(>=|<=|>|<|=)(\d+(?:[.,]\d+)?)$');
+  // Digits are already ASCII (foldForSearch); ٫ ٬ are the Arabic marks.
+  static final _amountRe = RegExp(r'^(>=|<=|>|<|=)([\d.,٫٬]*\d)$');
 
   factory SearchQuery.parse(String input) {
     final words = <String>[];
@@ -74,9 +77,11 @@ class SearchQuery {
     for (final raw in foldForSearch(input).split(RegExp(r'\s+'))) {
       if (raw.isEmpty) continue;
       final m = _amountRe.firstMatch(raw);
-      if (m != null) {
-        amounts.add(
-            AmountTerm(m[1]!, double.parse(m[2]!.replaceAll(',', '.'))));
+      // The number is read like a typed amount: ">1,000" is a thousand,
+      // ">12,5" twelve and a half.
+      final value = m == null ? null : parseLooseAmount(m[2]!);
+      if (m != null && value != null) {
+        amounts.add(AmountTerm(m[1]!, value));
       } else {
         words.add(raw);
       }

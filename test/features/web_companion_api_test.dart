@@ -592,25 +592,25 @@ void main() {
       {'date': '2026-09-01', 'description': 'STARBUCKS', 'amount': -12.5}, // already there
       {'date': '2026-09-02', 'description': 'Starbucks #12 Main St', 'amount': -4.2},
       {'date': '2026-09-03', 'description': 'Payroll', 'amount': 900, 'category': 'salary'},
-      {'date': '2026-09-03', 'description': 'Payroll', 'amount': 900}, // same row twice
+      {'date': '2026-09-03', 'description': 'Payroll', 'amount': 900}, // a second identical payment
       {'date': 'soon', 'description': 'Bad date', 'amount': -1},
       {'date': '2026-09-04', 'description': 'Zero', 'amount': 0},
     ];
     final h = importCsvHandler(ref);
     final dry = await call(h, 'POST',
         body: {'accountId': 'usd', 'rows': rows, 'dryRun': true});
-    expect(dry['ready'], 2);
-    expect(dry['duplicates'], 2);
+    expect(dry['ready'], 3);
+    expect(dry['duplicates'], 1);
     expect(dry['skipped'], 2);
     expect(dry['categorized'], 2);
     expect((await balances())['usd'], -12.5);
 
     final done = await call(h, 'POST', body: {'accountId': 'usd', 'rows': rows});
-    expect(done['imported'], 2);
-    expect((await balances())['usd'], closeTo(-12.5 - 4.2 + 900, 1e-9));
+    expect(done['imported'], 3);
+    expect((await balances())['usd'], closeTo(-12.5 - 4.2 + 1800, 1e-9));
     final lines = await db.select(db.transactionLines).get();
     expect(lines.where((l) => l.amount == 4.2).single.categoryId, 'food');
-    expect(lines.where((l) => l.amount == 900).single.categoryId, 'pay');
+    expect(lines.where((l) => l.amount == 900).first.categoryId, 'pay');
 
     final again = await call(h, 'POST', body: {'accountId': 'usd', 'rows': rows});
     expect(again['imported'], 0);

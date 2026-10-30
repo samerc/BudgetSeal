@@ -147,6 +147,7 @@
   "syncUseSyncedBudget": "Use the synced budget",
   "syncErrWrongPassword": "Wrong sync password. Use the same password as on your other device.",
   "syncErrCorrupt": "The sync file couldn't be read. Sync again from your other device.",
+  "syncErrTooNew": "This file was made by a newer version of BudgetSeal. Update the app, then try again.",
   "syncErrSignedOut": "You were signed out of Google Drive. Connect again to keep syncing.",
   "syncErrGeneric": "Sync didn't finish. Please try again in a moment.",
   "syncErrBackupFailed": "Couldn't back up your current data, so nothing was replaced.",
@@ -589,6 +590,8 @@
   "upcomingPaidOnDayDesc": "Record it on the day you paid it",
   "upcomingPosted": "Bill posted",
   "upcomingSkipped": "Skipped — next date updated",
+  "upcomingBillEnded": "This bill has ended, so it isn't paid any more.",
+  "@upcomingBillEnded": { "description": "Post now on a bill past its end date" },
   "recurringPostedN": "{n, plural, =1{1 recurring item posted} other{{n} recurring items posted}}",
   "@recurringPostedN": {"placeholders": {"n": {"type": "int"}}},
   "objSummaryPerMonth": "Needed per month",
@@ -650,6 +653,12 @@
   "allocMoveMenu": "Move money",
   "allocMoveNotEnough": "{name} only has {amount}.",
   "@allocMoveNotEnough": {"placeholders": {"name": {"type": "String"}, "amount": {"type": "String"}}},
+  "allocMoveOverRta": "Ready to assign only has {amount}. It will go negative.",
+  "@allocMoveOverRta": {"description": "Move money sheet: moving more than Ready to assign holds", "placeholders": {"amount": {"type": "String"}}},
+  "allocRemoveMoneyBack": "It holds {amount}, which goes back to Ready to assign.",
+  "@allocRemoveMoneyBack": {"description": "Archive/delete envelope dialog: the money it holds", "placeholders": {"amount": {"type": "String"}}},
+  "allocRemoveOverspent": "It is over by {amount}, which comes out of Ready to assign.",
+  "@allocRemoveOverspent": {"description": "Archive/delete envelope dialog: an overspent envelope", "placeholders": {"amount": {"type": "String"}}},
   "allocMovedTo": "Moved to {name}",
   "@allocMovedTo": {"placeholders": {"name": {"type": "String"}}},
   "allocMovedFrom": "Moved from {name}",
@@ -958,6 +967,10 @@
   "@travelExchangeNote": {"placeholders": {"currency": {"type": "String"}}},
   "travelConvertBackNote": "Travel convert back → {currency}",
   "@travelConvertBackNote": {"placeholders": {"currency": {"type": "String"}}},
+  "travelEnvelopeReturnedNote": "Trip closed: back to Ready to assign",
+  "@travelEnvelopeReturnedNote": {"description": "Envelope ledger note when closing a travel wallet empties envelopes in its currency"},
+  "acctConvertBackEnvelopes": "Your envelopes hold {amount} of it. That goes back to Ready to assign first.",
+  "@acctConvertBackEnvelopes": {"description": "Convert back & close sheet: envelopes holding the wallet currency", "placeholders": {"amount": {"type": "String"}}},
   "healthUnallocShort": "Unallocated: {amount}",
   "@healthUnallocShort": {"placeholders": {"amount": {"type": "String"}}},
   "reportsRecurringSummary": "{count} active · {amount}/month",
@@ -1012,8 +1025,17 @@
   "@reportsTipAgeLow": {"placeholders": {"days": {"type": "int"}}},
   "txNoRateBetween": "No exchange rate from {from} to {to}. Enter a rate for this amount, or refresh rates in Settings › Exchange rates.",
   "@txNoRateBetween": { "placeholders": { "from": { "type": "String" }, "to": { "type": "String" } } },
+  "txAccountUnavailable": "This payment's account is archived or deleted. Move it to another account first.",
+  "@txAccountUnavailable": { "description": "Posting a bill or planned payment whose account is archived or deleted" },
   "acctArchiveNonZero": "This account still holds {amount}. Transfer it to another account or adjust the balance to zero, then archive it — archived accounts no longer count toward your money.",
   "@acctArchiveNonZero": { "placeholders": { "amount": { "type": "String" } } },
+  "acctDeleteNonZero": "This account still holds {amount}. Deleting it would take that money out of Ready to assign. Transfer it to another account or adjust the balance to zero first.",
+  "@acctDeleteNonZero": { "placeholders": { "amount": { "type": "String" } } },
+  "acctCurrencyLocked": "The currency can't change once the account has money or transactions in it. To use another currency, add a new account.",
+  "acctBillsOffNote": "{n, plural, =1{Its bill will be switched off.} other{Its {n} bills will be switched off.}}",
+  "@acctBillsOffNote": { "placeholders": { "n": { "type": "int" } } },
+  "acctPlansDeletedNote": "{n, plural, =1{Its planned payment will be deleted.} other{Its {n} planned payments will be deleted.}}",
+  "@acctPlansDeletedNote": { "placeholders": { "n": { "type": "int" } } },
   "receiptPickFailed": "Couldn't add the photo. Check camera and photo permissions.",
   "backupCloseApp": "Close app",
   "importSkippedRows": "{count} rows skipped (unreadable date or amount)",
@@ -1675,6 +1697,16 @@
   "txFormEnterAmount": "Enter an amount",
   "@txFormEnterAmount": {
     "description": "Validation error"
+  },
+  "txAmountTooLarge": "That amount is too large. One transaction can be at most {max}.",
+  "@txAmountTooLarge": {
+    "description": "Validation error: amount over the app's limit",
+    "placeholders": { "max": { "type": "String" } }
+  },
+  "txFormSetTransferRate": "Enter the exchange rate from {from} to {to}",
+  "@txFormSetTransferRate": {
+    "description": "Validation error: a transfer between two currencies has no rate",
+    "placeholders": { "from": { "type": "String" }, "to": { "type": "String" } }
   },
   "txFormSelectAccountItem": "Select an account for item {n}",
   "@txFormSelectAccountItem": {
@@ -2696,6 +2728,8 @@
   "catArchived": "Category archived",
   "catDeleteTitle": "Delete category?",
   "catDeleteNoTx": "This category has no transactions. Delete permanently?",
+  "catDeleteSubsKept": "{n, plural, =1{Its subcategory will become a top-level category.} other{Its {n} subcategories will become top-level categories.}}",
+  "@catDeleteSubsKept": { "placeholders": { "n": { "type": "int" } } },
   "catDeleted": "Category deleted",
   "catNewTitle": "New category",
   "catEditTitle": "Edit category",
@@ -5230,7 +5264,7 @@
   "@onboardInviteCode": {
     "description": "Onboarding join text field label"
   },
-  "onboardInviteHint": "PP-...",
+  "onboardInviteHint": "BS1-...",
   "@onboardInviteHint": {
     "description": "Onboarding join text field hint"
   },
@@ -5242,7 +5276,7 @@
   "@onboardEnterCodeError": {
     "description": "Onboarding join validation error"
   },
-  "onboardInvalidCodeError": "Invalid invite code. It should start with PP-",
+  "onboardInvalidCodeError": "Invalid invite code. It should start with BS1-",
   "@onboardInvalidCodeError": {
     "description": "Onboarding join validation error"
   },
@@ -5297,6 +5331,10 @@
   "relayErrServer": "Household sync can't be reached right now. Try again later.",
   "@relayErrServer": {
     "description": "Household sync error"
+  },
+  "relayEmptyHousehold": "This household has no budget yet. Ask the person who invited you to open BudgetSeal and sync.",
+  "@relayEmptyHousehold": {
+    "description": "Joining a household whose creator never synced"
   },
   "householdSection": "Household",
   "@householdSection": {
@@ -5737,6 +5775,10 @@
   "@recurringCreated": { "description": "Create success snackbar" },
   "recurringUpdated": "Recurring transaction updated",
   "@recurringUpdated": { "description": "Update success snackbar" },
+  "recurringCatchUpTitle": "Record {count} missed payments?",
+  "@recurringCatchUpTitle": { "description": "Edit bill: next due moved back", "placeholders": { "count": { "type": "int" } } },
+  "recurringCatchUpMessage": "The next due date is in the past. Next time the app opens, it records every payment due since then (up to a year back).",
+  "@recurringCatchUpMessage": { "description": "Edit bill: next due moved back" },
   "recurringNewTitle": "New recurring transaction",
   "@recurringNewTitle": { "description": "Add sheet title" },
   "recurringNewSubTitle": "New subscription",
@@ -5810,6 +5852,7 @@
   "@importLoadCsv": { "description": "Button to pick CSV file" },
   "importFailed": "Import failed. Please check the file format.",
   "@importFailed": { "description": "Snackbar on CSV parse error" },
+  "importFileEmpty": "This file is empty, so there's nothing to import.",
   "importFoundRows": "Found {count} rows in {fileName}",
   "@importFoundRows": {
     "description": "Row count after loading CSV",
@@ -6297,6 +6340,18 @@
   "@billOnly": { "description": "Bill splitter" },
   "billItemsSharedNow": "{name}'s items are now shared by everyone",
   "@billItemsSharedNow": { "description": "Bill splitter" },
+  "billPersonRemoved": "{name} removed from the split",
+  "@billPersonRemoved": { "description": "Bill splitter: SnackBar after removing a person (with Undo)" },
+  "billNeedAccount": "Add an account first — the split is saved as a payment from one of your accounts.",
+  "@billNeedAccount": { "description": "Bill splitter: Save with no account" },
+  "billScanKeptItems": "No prices found on the receipt. Your items are kept.",
+  "@billScanKeptItems": { "description": "Bill splitter: a scan without prices doesn't replace typed items" },
+  "billReplaceItemsTitle": "Replace your items?",
+  "@billReplaceItemsTitle": { "description": "Bill splitter: scanning a receipt with items already entered" },
+  "billReplaceItemsMessage": "{count, plural, =1{The receipt's items replace the item you entered.} other{The receipt's items replace the {count} items you entered.}}",
+  "@billReplaceItemsMessage": { "description": "Bill splitter", "placeholders": { "count": { "type": "int" } } },
+  "billReplaceItems": "Replace",
+  "@billReplaceItems": { "description": "Bill splitter: confirm button" },
   "billSetShare": "Set share",
   "@billSetShare": { "description": "Bill splitter" },
   "billResetShare": "Split it evenly again",

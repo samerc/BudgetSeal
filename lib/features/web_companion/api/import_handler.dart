@@ -14,7 +14,8 @@ import '_validation.dart';
 // { accountId, dryRun?, rows: [{ date: 'YYYY-MM-DD', description, amount
 // (signed: + income, − expense), category? }] } — the browser reads the CSV
 // and maps the columns; the rules here are the app's import_screen.dart:
-// rows already in the account (same day, amount and type) are skipped, a
+// rows already in the account (same day, amount and type) are skipped — one
+// per match, so identical rows within the file all import — a
 // category is matched by name or guessed from past titles, and every row goes
 // through recordTransaction in the account's currency. dryRun only counts.
 
@@ -65,23 +66,21 @@ Handler importCsvHandler(Ref ref) {
                 t.status.isNull() &
                 t.type.isIn(['income', 'expense'])))
           .get();
-      final lines = txs.isEmpty
-          ? <TransactionLine>[]
-          : await (db.select(db.transactionLines)
-                ..where((l) => l.transactionId.isIn(txs.map((t) => t.id))))
-              .get();
-      final byTx = <String, List<TransactionLine>>{};
-      for (final l in lines) {
-        (byTx[l.transactionId] ??= []).add(l);
-      }
-      final seen = <String>{};
+      // Chunked: a long history passes SQLite's bound-variable limit.
+      final byTx =
+          await db.transactionsDao.linesByTransaction(txs.map((t) => t.id));
+      // How many of each key the account already has: a row matching one
+      // uses it up, so identical rows in one file (two bus fares) all import
+      // while re-importing the same file adds nothing.
+      final existing = <String, int>{};
       final titleCats = <(String, String)>[];
       for (final t in txs) {
         final local = t.createdAt.toLocal();
         final txLines = byTx[t.id] ?? const <TransactionLine>[];
         for (final l in txLines) {
           if ((l.accountId ?? t.accountId) == accountId) {
-            seen.add(_dupKey(local, l.amount, t.type));
+            final k = _dupKey(local, l.amount, t.type);
+            existing[k] = (existing[k] ?? 0) + 1;
           }
         }
         final title = (t.note.contains(' — ') ? t.note.split(' — ').first : t.note)
@@ -123,13 +122,20 @@ Handler importCsvHandler(Ref ref) {
           skipped++;
           continue;
         }
+        // A real calendar day only: DateTime.parse rolls Feb 30 into March.
         final day = DateTime.tryParse(dateStr);
-        if (day == null) {
+        if (day == null ||
+            day.year != int.parse(dateStr.substring(0, 4)) ||
+            day.month != int.parse(dateStr.substring(5, 7)) ||
+            day.day != int.parse(dateStr.substring(8, 10))) {
           skipped++;
           continue;
         }
         final type = amount > 0 ? 'income' : 'expense';
-        if (!seen.add(_dupKey(day, amount.abs(), type))) {
+        final key = _dupKey(day, amount.abs(), type);
+        final left = existing[key] ?? 0;
+        if (left > 0) {
+          existing[key] = left - 1;
           duplicates++;
           continue;
         }

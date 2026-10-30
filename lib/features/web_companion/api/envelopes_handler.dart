@@ -1,4 +1,4 @@
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
@@ -90,8 +90,14 @@ Handler fundEnvelopeHandler(Ref ref) {
 
     try {
       final alloc = await db.allocationsDao.getById(id);
-      if (alloc == null || alloc.householdId != householdId) {
+      if (alloc == null ||
+          alloc.householdId != householdId ||
+          alloc.deleted ||
+          alloc.archived) {
         return notFound('Envelope not found');
+      }
+      if (!await _hasAccountIn(db, householdId, currency.toUpperCase())) {
+        return badRequest('No account in that currency');
       }
 
       final engine = ref.read(allocationEngineProvider);
@@ -108,6 +114,21 @@ Handler fundEnvelopeHandler(Ref ref) {
       return serverError(e);
     }
   };
+}
+
+/// Envelope money only exists in a currency some open account holds: a typo
+/// ("UDS") would otherwise start a new, negative Ready to assign.
+Future<bool> _hasAccountIn(
+    AppDatabase db, String householdId, String currency) async {
+  final a = await (db.select(db.accounts)
+        ..where((a) =>
+            a.householdId.equals(householdId) &
+            a.currency.equals(currency) &
+            a.deleted.equals(false) &
+            a.archived.equals(false))
+        ..limit(1))
+      .getSingleOrNull();
+  return a != null;
 }
 
 // ── POST /api/envelopes/move ──────────────────────────────────────────────────
@@ -156,6 +177,13 @@ Handler moveEnvelopeMoneyHandler(Ref ref) {
             alloc.archived) {
           return notFound('Envelope not found');
         }
+      }
+
+      // From Ready to assign: only in a currency an account holds. (Out of an
+      // envelope is fine — the engine checks the envelope holds it.)
+      if (fromId == null &&
+          !await _hasAccountIn(db, householdId, currency.toUpperCase())) {
+        return badRequest('No account in that currency');
       }
 
       final note = truncate(optString(body, 'note') ?? '', kMaxNoteLength);

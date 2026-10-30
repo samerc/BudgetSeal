@@ -14,12 +14,16 @@ class AmountField extends StatefulWidget {
   /// Defaults to "0.00" with the user's decimal separator.
   final String? hintText;
 
+  /// The currency's decimal places; see [CalculatorAmountField.decimals].
+  final int? decimals;
+
   const AmountField({
     super.key,
     required this.controller,
     this.onChanged,
     this.fontSize = 32,
     this.hintText,
+    this.decimals,
   });
 
   @override
@@ -68,6 +72,7 @@ class _AmountFieldState extends State<AmountField> {
       value: _value,
       fontSize: widget.fontSize,
       hintText: widget.hintText,
+      decimals: widget.decimals,
       onChanged: (newValue) {
         setState(() => _value = newValue);
         setAmountText(widget.controller, newValue);
@@ -78,13 +83,17 @@ class _AmountFieldState extends State<AmountField> {
 }
 
 /// Write a calculator result into an amount controller ('' for zero,
-/// no trailing ".00" for whole numbers). Parsing elsewhere expects '.'.
+/// no trailing zeros, every decimal kept so a 3-decimal currency's 1.125
+/// stays 1.125). Parsing elsewhere expects '.'.
 void setAmountText(TextEditingController controller, double value) {
   if (value == 0) {
     controller.text = '';
   } else if (value == value.roundToDouble()) {
-    controller.text = value.toInt().toString();
+    controller.text = value.toStringAsFixed(0);
   } else {
-    controller.text = value.toStringAsFixed(2);
+    controller.text = value
+        .toStringAsFixed(10)
+        .replaceFirst(RegExp(r'0+$'), '')
+        .replaceFirst(RegExp(r'\.$'), '');
   }
 }

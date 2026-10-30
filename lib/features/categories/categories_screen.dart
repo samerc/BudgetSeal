@@ -1,4 +1,4 @@
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -305,7 +305,14 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       envelopeName = alloc?.name;
     }
 
+    final subCount = (await (db.select(db.categories)
+              ..where((c) => c.parentId.equals(cat.id) & c.deleted.equals(false)))
+            .get())
+        .length;
+
     if (!mounted) return;
+    final subsNote =
+        subCount > 0 ? '\n\n${S.of(context).catDeleteSubsKept(subCount)}' : '';
 
     final warnings = <String>[];
     if (totalTx > 0) {
@@ -323,7 +330,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text(tr.catDeleteTitle),
-          content: Text(tr.catDeleteWarning(warningText)),
+          content: Text(tr.catDeleteWarning(warningText) + subsNote),
           actions: [
             OutlinedButton(
               style: DialogButtons.outlined,
@@ -347,7 +354,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       final confirmed = await showConfirmDialog(
         context,
         title: tr.catDeleteTitle,
-        message: tr.catDeleteNoTx,
+        message: tr.catDeleteNoTx + subsNote,
         confirmLabel: tr.commonDelete,
       );
       if (confirmed) action = 'delete';
@@ -369,10 +376,20 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         ));
         show(tr.catArchived);
       } else if (action == 'delete') {
-        await (db.update(db.categories)..where((c) => c.id.equals(cat.id)))
-            .write(CategoriesCompanion(
-                deleted: const Value(true),
-                lastModified: Value(DateTime.now())));
+        await db.transaction(() async {
+          await (db.update(db.categories)..where((c) => c.id.equals(cat.id)))
+              .write(CategoriesCompanion(
+                  deleted: const Value(true),
+                  lastModified: Value(DateTime.now())));
+          // Its subcategories stay, as top-level categories — otherwise they
+          // hang off a deleted group and no list shows them again.
+          await (db.update(db.categories)
+                ..where((c) =>
+                    c.parentId.equals(cat.id) & c.deleted.equals(false)))
+              .write(CategoriesCompanion(
+                  parentId: const Value(null),
+                  lastModified: Value(DateTime.now())));
+        });
         ref.invalidate(categoriesProvider);
         ref.invalidate(allocationsProvider);
         show(tr.catDeleted);
@@ -437,11 +454,20 @@ class _CategoriesSliver extends ConsumerWidget {
       for (final a in allocations) a.data.allocation.id: a.data.allocation.name
     };
 
-    // Separate groups and subcategories
-    final groups = categories.where((c) => c.parentId == null).toList();
+    // Separate groups and subcategories. A category whose parent isn't
+    // listed (deleted or archived, or a grandchild from old data) shows as
+    // a group, so it can still be edited.
+    final ids = {for (final c in categories) c.id};
+    final topIds = {
+      for (final c in categories)
+        if (c.parentId == null || !ids.contains(c.parentId)) c.id
+    };
+    bool isSub(Category c) =>
+        c.parentId != null && topIds.contains(c.parentId);
+    final groups = categories.where((c) => !isSub(c)).toList();
     final subsByParent = <String, List<Category>>{};
     for (final cat in categories) {
-      if (cat.parentId != null) {
+      if (isSub(cat)) {
         subsByParent.putIfAbsent(cat.parentId!, () => []).add(cat);
       }
     }
@@ -942,19 +968,31 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
       final id = _isNew ? const Uuid().v4() : widget.existing!.id;
       final colorHex = _colorToHex(_color);
 
-      await db.into(db.categories).insertOnConflictUpdate(
-            CategoriesCompanion(
-              id: Value(id),
-              householdId: Value(householdId),
-              name: Value(name),
-              transactionType: Value(_type),
-              parentId: Value(_parentId),
-              defaultAccountId: Value(_defaultAccountId),
-              icon: Value(_emoji),
-              colorHex: Value(colorHex),
-              lastModified: Value(DateTime.now()),
-            ),
-          );
+      await db.transaction(() async {
+        await db.into(db.categories).insertOnConflictUpdate(
+              CategoriesCompanion(
+                id: Value(id),
+                householdId: Value(householdId),
+                name: Value(name),
+                transactionType: Value(_type),
+                parentId: Value(_parentId),
+                defaultAccountId: Value(_defaultAccountId),
+                icon: Value(_emoji),
+                colorHex: Value(colorHex),
+                lastModified: Value(DateTime.now()),
+              ),
+            );
+        // Only two levels: a group that becomes a subcategory takes its own
+        // subcategories along under the new parent, rather than leaving
+        // them as grandchildren the list can't show.
+        if (!_isNew && _parentId != null) {
+          await (db.update(db.categories)
+                ..where((c) => c.parentId.equals(id) & c.deleted.equals(false)))
+              .write(CategoriesCompanion(
+                  parentId: Value(_parentId),
+                  lastModified: Value(DateTime.now())));
+        }
+      });
 
       ref.invalidate(categoriesProvider);
       if (mounted) {

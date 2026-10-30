@@ -14,6 +14,7 @@ import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/design_tokens.dart';
 import '../../shared/utils/calendar_days.dart';
 import '../../shared/utils/format_number.dart';
+import '../../shared/utils/save_errors.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/widgets/confirm_dialog.dart';
 import '../../shared/widgets/empty_state.dart';
@@ -238,6 +239,9 @@ class _PlannedPaymentsScreenState
   /// Plans being posted right now: a second tap (or Post all) waits out.
   final _posting = <String>{};
 
+  /// Why the last post failed (an archived account…), for its SnackBar.
+  Object? _lastPostError;
+
   /// Posts a planned item silently (no SnackBar, no _load).
   /// Returns true on success, false on failure.
   Future<bool> _postItemSilent(_PlannedItem item) async {
@@ -265,6 +269,7 @@ class _PlannedPaymentsScreenState
       return true;
     } catch (e) {
       debugPrint('[PlannedPayments] Error posting: $e');
+      _lastPostError = e;
       return false;
     } finally {
       _posting.remove(item.tx.id);
@@ -285,7 +290,8 @@ class _PlannedPaymentsScreenState
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(S.of(context).plannedPostFailed),
+          content: Text(txSaveErrorText(S.of(context), _lastPostError ?? '',
+              fallback: S.of(context).plannedPostFailed)),
           behavior: SnackBarBehavior.floating,
         ),
       );

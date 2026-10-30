@@ -454,6 +454,10 @@ class SAr extends S {
       'تعذّرت قراءة ملف المزامنة. زامن مجددًا من جهازك الآخر.';
 
   @override
+  String get syncErrTooNew =>
+      'أُنشئ هذا الملف بإصدار أحدث من BudgetSeal. حدّث التطبيق ثم حاول مجددًا.';
+
+  @override
   String get syncErrSignedOut =>
       'تم تسجيل خروجك من Google Drive. اتصل مجددًا لمتابعة المزامنة.';
 
@@ -1744,6 +1748,9 @@ class SAr extends S {
   String get upcomingSkipped => 'تم التخطي — حُدّث الموعد التالي';
 
   @override
+  String get upcomingBillEnded => 'انتهت هذه الفاتورة، فلم تعد تُدفع.';
+
+  @override
   String recurringPostedN(int n) {
     String _temp0 = intl.Intl.pluralLogic(
       n,
@@ -1933,6 +1940,21 @@ class SAr extends S {
   @override
   String allocMoveNotEnough(String name, String amount) {
     return '$name فيه $amount فقط.';
+  }
+
+  @override
+  String allocMoveOverRta(String amount) {
+    return 'في «جاهز للتوزيع» $amount فقط، وسيصبح بالسالب.';
+  }
+
+  @override
+  String allocRemoveMoneyBack(String amount) {
+    return 'فيه $amount، وسيعود إلى «جاهز للتوزيع».';
+  }
+
+  @override
+  String allocRemoveOverspent(String amount) {
+    return 'تجاوز بمقدار $amount، وسيُخصم من «جاهز للتوزيع».';
   }
 
   @override
@@ -2545,6 +2567,15 @@ class SAr extends S {
   }
 
   @override
+  String get travelEnvelopeReturnedNote =>
+      'انتهت الرحلة: عاد إلى «جاهز للتوزيع»';
+
+  @override
+  String acctConvertBackEnvelopes(String amount) {
+    return 'أظرفك تحتفظ بـ$amount منه، وسيعود أولاً إلى «جاهز للتوزيع».';
+  }
+
+  @override
   String healthUnallocShort(String amount) {
     return 'غير مخصص: $amount';
   }
@@ -2696,8 +2727,49 @@ class SAr extends S {
   }
 
   @override
+  String get txAccountUnavailable =>
+      'حساب هذه الدفعة مؤرشف أو محذوف. انقلها إلى حساب آخر أولًا.';
+
+  @override
   String acctArchiveNonZero(String amount) {
     return 'لا يزال هذا الحساب يحتوي على $amount. حوّله إلى حساب آخر أو اضبط الرصيد على صفر، ثم أرشفه — الحسابات المؤرشفة لا تُحتسب ضمن أموالك.';
+  }
+
+  @override
+  String acctDeleteNonZero(String amount) {
+    return 'لا يزال هذا الحساب يحتوي على $amount. حذفه سيُخرج هذا المبلغ من «جاهز للتوزيع». حوّله إلى حساب آخر أو اضبط الرصيد على صفر أولاً.';
+  }
+
+  @override
+  String get acctCurrencyLocked =>
+      'لا يمكن تغيير العملة بعد أن يحتوي الحساب على مال أو معاملات. لاستخدام عملة أخرى، أضف حساباً جديداً.';
+
+  @override
+  String acctBillsOffNote(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'سيتم إيقاف فواتيره الـ$n.',
+      many: 'سيتم إيقاف فواتيره الـ$n.',
+      few: 'سيتم إيقاف فواتيره الـ$n.',
+      two: 'سيتم إيقاف فاتورتيه.',
+      one: 'سيتم إيقاف فاتورته.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String acctPlansDeletedNote(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'سيتم حذف دفعاته المخطط لها الـ$n.',
+      many: 'سيتم حذف دفعاته المخطط لها الـ$n.',
+      few: 'سيتم حذف دفعاته المخطط لها الـ$n.',
+      two: 'سيتم حذف دفعتيه المخطط لهما.',
+      one: 'سيتم حذف دفعته المخطط لها.',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -3226,6 +3298,16 @@ class SAr extends S {
 
   @override
   String get txFormEnterAmount => 'أدخل مبلغاً';
+
+  @override
+  String txAmountTooLarge(String max) {
+    return 'هذا المبلغ كبير جداً. الحد الأقصى للمعاملة الواحدة هو $max.';
+  }
+
+  @override
+  String txFormSetTransferRate(String from, String to) {
+    return 'أدخل سعر الصرف من $from إلى $to';
+  }
 
   @override
   String txFormSelectAccountItem(int n) {
@@ -4414,6 +4496,20 @@ class SAr extends S {
 
   @override
   String get catDeleteNoTx => 'هذه الفئة ليس لها معاملات. حذف نهائي؟';
+
+  @override
+  String catDeleteSubsKept(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'ستصبح فئاتها الفرعية الـ$n فئات رئيسية.',
+      many: 'ستصبح فئاتها الفرعية الـ$n فئات رئيسية.',
+      few: 'ستصبح فئاتها الفرعية الـ$n فئات رئيسية.',
+      two: 'ستصبح فئتاها الفرعيتان فئتين رئيسيتين.',
+      one: 'ستصبح فئتها الفرعية فئة رئيسية.',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get catDeleted => 'تم حذف الفئة';
@@ -6602,7 +6698,7 @@ class SAr extends S {
   String get onboardInviteCode => 'رمز الدعوة';
 
   @override
-  String get onboardInviteHint => 'PP-...';
+  String get onboardInviteHint => 'BS1-...';
 
   @override
   String get onboardJoinButton => 'الانضمام للأسرة';
@@ -6611,7 +6707,8 @@ class SAr extends S {
   String get onboardEnterCodeError => 'الرجاء إدخال رمز الدعوة';
 
   @override
-  String get onboardInvalidCodeError => 'رمز دعوة غير صالح. يجب أن يبدأ بـ PP-';
+  String get onboardInvalidCodeError =>
+      'رمز دعوة غير صالح. يجب أن يبدأ بـ BS1-';
 
   @override
   String get joinScanCode => 'مسح الرمز';
@@ -6654,6 +6751,10 @@ class SAr extends S {
   @override
   String get relayErrServer =>
       'تعذّر الوصول إلى مزامنة الأسرة الآن. حاول لاحقًا.';
+
+  @override
+  String get relayEmptyHousehold =>
+      'لا توجد ميزانية في هذه الأسرة بعد. اطلب من الشخص الذي دعاك أن يفتح BudgetSeal ويُجري المزامنة.';
 
   @override
   String get householdSection => 'الأسرة';
@@ -7005,6 +7106,24 @@ class SAr extends S {
   String get recurringUpdated => 'تم تحديث المعاملة المتكررة';
 
   @override
+  String recurringCatchUpTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تسجيل $count دفعة فائتة؟',
+      many: 'تسجيل $count دفعة فائتة؟',
+      few: 'تسجيل $count دفعات فائتة؟',
+      two: 'تسجيل دفعتين فائتتين؟',
+      one: 'تسجيل دفعة فائتة واحدة؟',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recurringCatchUpMessage =>
+      'تاريخ الاستحقاق التالي في الماضي. في المرة القادمة التي يُفتح فيها التطبيق، يسجّل كل دفعة مستحقة منذ ذلك الحين (حتى سنة إلى الوراء).';
+
+  @override
   String get recurringNewTitle => 'معاملة متكررة جديدة';
 
   @override
@@ -7125,6 +7244,9 @@ class SAr extends S {
 
   @override
   String get importFailed => 'فشل الاستيراد. يرجى التحقق من تنسيق الملف.';
+
+  @override
+  String get importFileEmpty => 'هذا الملف فارغ، فلا يوجد ما يمكن استيراده.';
 
   @override
   String importFoundRows(int count, String fileName) {
@@ -7954,6 +8076,39 @@ class SAr extends S {
   String billItemsSharedNow(Object name) {
     return 'بنود $name أصبحت للجميع';
   }
+
+  @override
+  String billPersonRemoved(Object name) {
+    return 'أُزيل $name من التقسيم';
+  }
+
+  @override
+  String get billNeedAccount =>
+      'أضف حسابًا أولًا — يُحفظ التقسيم كدفعة من أحد حساباتك.';
+
+  @override
+  String get billScanKeptItems =>
+      'لم يُعثر على أسعار في الإيصال. بقيت بنودك كما هي.';
+
+  @override
+  String get billReplaceItemsTitle => 'استبدال بنودك؟';
+
+  @override
+  String billReplaceItemsMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تحلّ بنود الإيصال محلّ $count بند أدخلتها.',
+      many: 'تحلّ بنود الإيصال محلّ $count بندًا أدخلتها.',
+      few: 'تحلّ بنود الإيصال محلّ $count بنود أدخلتها.',
+      two: 'تحلّ بنود الإيصال محلّ البندين اللذين أدخلتهما.',
+      one: 'تحلّ بنود الإيصال محلّ البند الذي أدخلته.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get billReplaceItems => 'استبدال';
 
   @override
   String get billSetShare => 'تحديد الحصّة';

@@ -534,6 +534,9 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
         .toList();
     final index = _people.indexOf(name);
     final fixedBackup = Map<String, double>.from(_fixed);
+    // Every item's people as they were — Undo puts them all back (shared
+    // items too, not only the ones that were theirs alone).
+    final peopleBackup = {for (final i in _items) i: Set.of(i.people)};
     setState(() {
       _people.remove(name);
       _fixed.clear();
@@ -543,11 +546,15 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
       if (_painting == name) _painting = null;
       if (_payer == name) _payer = null;
     });
-    if (solo.isEmpty) return;
+    // Nothing of theirs to put back: no Undo needed.
+    final hadItems = peopleBackup.values.any((p) => p.contains(name));
+    if (!hadItems && !fixedBackup.containsKey(name)) return;
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
       ..showSnackBar(SnackBar(
-        content: Text(tr.billItemsSharedNow(name)),
+        content: Text(solo.isNotEmpty
+            ? tr.billItemsSharedNow(name)
+            : tr.billPersonRemoved(name)),
         behavior: SnackBarBehavior.floating,
         persist: false,
         action: SnackBarAction(
@@ -556,11 +563,11 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
             if (!mounted || _people.contains(name)) return;
             setState(() {
               _people.insert(math.min(index, _people.length), name);
-              for (final i in solo) {
-                i.people
+              peopleBackup.forEach((item, people) {
+                item.people
                   ..clear()
-                  ..add(name);
-              }
+                  ..addAll(people);
+              });
               _fixed
                 ..clear()
                 ..addAll(fixedBackup);
@@ -836,6 +843,31 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     setState(() => _scanning = true);
     final result = await OcrService.scanReceipt(path, currency: _billCurrency);
     if (!mounted) return;
+    // Items already typed are replaced only by a receipt that has prices,
+    // and only when the user says so — a blurry or blank scan loses nothing.
+    if (_items.isNotEmpty) {
+      final tr = S.of(context);
+      if (!result.lines.any((l) => l.hasPrice)) {
+        setState(() => _scanning = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(tr.billScanKeptItems),
+          behavior: SnackBarBehavior.floating,
+        ));
+        return;
+      }
+      final replace = await showConfirmDialog(
+        context,
+        title: tr.billReplaceItemsTitle,
+        message: tr.billReplaceItemsMessage(_items.length),
+        confirmLabel: tr.billReplaceItems,
+        destructive: false,
+      );
+      if (!mounted) return;
+      if (!replace) {
+        setState(() => _scanning = false);
+        return;
+      }
+    }
     setState(() {
       _scanning = false;
       _ocr = result;
@@ -1071,6 +1103,19 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     final mode = _effectiveMode;
     final records = mode != _PaidMode.other;
     if (records && _accountId == null) {
+      // No account to pay from (none made yet, or all archived): say so
+      // instead of opening an empty picker.
+      final usable = (ref.read(accountsProvider).value ?? const <Account>[])
+          .where((a) => !a.archived);
+      if (usable.isEmpty) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(
+            content: Text(tr.billNeedAccount),
+            behavior: SnackBarBehavior.floating,
+          ));
+        return;
+      }
       await _pickAccount();
       if (_accountId == null || !mounted) return;
     }

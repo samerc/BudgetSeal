@@ -32,17 +32,29 @@ class HouseholdKey {
   final Uint8List secret;
   final String relayUrl;
 
+  /// `BS1-`, the secret (32 bytes = 43 base64url characters), then maybe
+  /// `.` and the relay's address; whatever follows is the rest of the text.
+  static final _codePattern =
+      RegExp(r'BS1-([A-Za-z0-9_-]{43})(?:\.([A-Za-z0-9_-]+))?(.*)$');
+
   /// The code from an invite, or null when it isn't one (a `PP-` code is a
-  /// Google Drive invite from before the relay: [isOldInvite]).
+  /// Google Drive invite from before the relay: [isOldInvite]). [code] may
+  /// be the whole shared message, end with a full stop, or be broken over
+  /// lines by a chat app: spaces and line breaks are dropped and the code
+  /// is found inside the text.
   static HouseholdKey? fromCode(String code) {
-    final c = code.trim();
-    if (!c.startsWith(_codePrefix)) return null;
-    final parts = c.substring(_codePrefix.length).split('.');
+    final m = _codePattern.firstMatch(code.replaceAll(RegExp(r'\s'), ''));
+    if (m == null) return null;
+    // A full stop after the code ends the sentence; `.` and anything that
+    // isn't a relay address is a damaged code.
+    final rest = m.group(3)!;
+    if (rest.startsWith('.') && rest.length > 1) return null;
     try {
-      final secret = base64Url.decode(base64Url.normalize(parts[0]));
+      final secret = base64Url.decode(base64Url.normalize(m.group(1)!));
       if (secret.length != 32) return null;
-      final url = parts.length > 1
-          ? utf8.decode(base64Url.decode(base64Url.normalize(parts[1])))
+      final u = m.group(2);
+      final url = u != null
+          ? utf8.decode(base64Url.decode(base64Url.normalize(u)))
           : defaultRelayUrl;
       if (!url.startsWith('https://')) return null;
       return HouseholdKey(Uint8List.fromList(secret), relayUrl: url);
@@ -51,7 +63,11 @@ class HouseholdKey {
     }
   }
 
-  static bool isOldInvite(String code) => code.trim().startsWith('PP-');
+  /// A Google Drive invite (`PP-…`) from before the relay, alone or inside
+  /// a pasted message.
+  static bool isOldInvite(String code) =>
+      fromCode(code) == null &&
+      RegExp(r'(^|[^A-Za-z0-9])PP-[A-Za-z0-9]').hasMatch(code.trim());
 
   String get code {
     final s = base64Url.encode(secret).replaceAll('=', '');

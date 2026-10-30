@@ -1,4 +1,5 @@
-import 'package:drift/drift.dart' show OrderingTerm;
+import 'package:drift/drift.dart'
+    show BooleanExpressionOperators, ComparableExpr, OrderingTerm;
 import 'package:flutter/material.dart';
 
 import '../../core/engine/recurring_engine.dart' show recurringAmountOn;
@@ -69,6 +70,10 @@ class _UpcomingBillsScreenState
             ..where((r) => r.householdId.equals(householdId))
             ..where((r) => r.enabled.equals(true))
             ..where((r) => r.deleted.equals(false))
+            // A finished series keeps its last nextDueDate — it isn't due
+            // (as Home's bill boxes).
+            ..where((r) =>
+                r.endDate.isNull() | r.nextDueDate.isSmallerOrEqual(r.endDate))
             ..orderBy([(r) => OrderingTerm.asc(r.nextDueDate)]))
           .get();
 

@@ -178,7 +178,15 @@ class AutoBackupService {
   /// `budgetseal.db.restore` and swapped in on the next launch, before the
   /// database opens — overwriting the live file under an open connection
   /// corrupts it. The caller must ask the user to restart.
+  ///
+  /// Throws [InvalidBackupException], with nothing staged, when the file
+  /// isn't a whole BudgetSeal backup ([backupHouseholdId]): a cut-off
+  /// download or another app's database would otherwise replace the budget
+  /// and stop the app from starting.
   static Future<void> restoreFromBackup(String backupPath) async {
+    if (await backupHouseholdId(backupPath) == null) {
+      throw const InvalidBackupException();
+    }
     final appDir = await getApplicationDocumentsDirectory();
     final dbFile = File(p.join(appDir.path, 'budgetseal.db'));
 
@@ -203,8 +211,9 @@ class AutoBackupService {
   }
 
   /// Checks a picked file is a BudgetSeal backup: under 100 MB, an SQLite
-  /// file, with a household. Returns that household's id (the first one),
-  /// or null when the file isn't usable. Opens it read-only.
+  /// file that passes `PRAGMA integrity_check` (a cut-off copy doesn't),
+  /// with a household. Returns that household's id (the first one), or
+  /// null when the file isn't usable. Opens it read-only.
   static Future<String?> backupHouseholdId(String path) async {
     try {
       final file = File(path);
@@ -215,6 +224,12 @@ class AutoBackupService {
       }
       final db = sqlite3.open(path, mode: OpenMode.readOnly);
       try {
+        final check = db.select('PRAGMA integrity_check');
+        if (check.length != 1 || check.first.values.first != 'ok') {
+          debugPrint('[AutoBackup] Damaged backup: '
+              '${check.take(3).map((r) => r.values.first).join('; ')}');
+          return null;
+        }
         final rows = db.select('SELECT id FROM households LIMIT 1');
         return rows.isEmpty ? null : rows.first['id'] as String?;
       } finally {
@@ -244,6 +259,13 @@ class AutoBackupService {
     if (!dir.existsSync()) dir.createSync(recursive: true);
     return dir;
   }
+}
+
+/// The file picked to restore isn't a whole BudgetSeal backup.
+class InvalidBackupException implements Exception {
+  const InvalidBackupException();
+  @override
+  String toString() => 'InvalidBackupException';
 }
 
 class BackupFile {
