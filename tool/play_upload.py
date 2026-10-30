@@ -12,6 +12,11 @@ BUDGETSEAL_PLAY_KEY (default C:/Users/Samer/Documents/keys/budgetseal-play.json)
       language: en-US.txt, ar.txt, fr-FR.txt) and sends it for review.
       --draft leaves it as a draft in Play Console instead.
 
+  python tool/play_upload.py images --icon docs/store_assets/icon_512.png \
+      --feature docs/store_assets/feature_graphic.png --screenshots a.png b.png …
+      Replaces the en-US listing's icon, feature graphic and phone screenshots
+      (the screenshots in the order given).
+
 Needs: pip install google-api-python-client google-auth
 """
 
@@ -89,6 +94,34 @@ def upload(api, aab, track, notes_dir, draft, name):
     print(f"{'Saved as a draft on' if draft else 'Sent for review on'} {track}: {code}")
 
 
+def images(api, language, icon, feature, screenshots):
+    """Replaces the listing's icon, feature graphic and phone screenshots."""
+    edits = api.edits()
+    edit_id = edits.insert(packageName=PACKAGE, body={}).execute()['id']
+    try:
+        def put(kind, path):
+            edits.images().upload(
+                packageName=PACKAGE, editId=edit_id, language=language,
+                imageType=kind, media_body=MediaFileUpload(path, mimetype='image/png')).execute()
+            print(f'{kind}: {pathlib.Path(path).name}')
+
+        if icon:
+            put('icon', icon)
+        if feature:
+            put('featureGraphic', feature)
+        if screenshots:
+            # Upload replaces nothing: clear the old set, then add in order.
+            edits.images().deleteall(packageName=PACKAGE, editId=edit_id,
+                                     language=language, imageType='phoneScreenshots').execute()
+            for s in screenshots:
+                put('phoneScreenshots', s)
+        edits.commit(packageName=PACKAGE, editId=edit_id).execute()
+    except Exception:
+        edits.delete(packageName=PACKAGE, editId=edit_id).execute()
+        raise
+    print('Store listing images sent for review')
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument('--key', default=os.environ.get('BUDGETSEAL_PLAY_KEY', DEFAULT_KEY))
@@ -100,11 +133,18 @@ def main():
     up.add_argument('--notes-dir', required=True)
     up.add_argument('--name', help='Release name (Play uses the version name if empty)')
     up.add_argument('--draft', action='store_true')
+    im = sub.add_parser('images')
+    im.add_argument('--language', default='en-US')
+    im.add_argument('--icon')
+    im.add_argument('--feature')
+    im.add_argument('--screenshots', nargs='+', help='Phone screenshots, in store order')
     args = p.parse_args()
 
     api = service(args.key)
     if args.cmd == 'status':
         status(api)
+    elif args.cmd == 'images':
+        images(api, args.language, args.icon, args.feature, args.screenshots)
     else:
         upload(api, args.aab, args.track, args.notes_dir, args.draft, args.name)
 
