@@ -1574,6 +1574,11 @@ class SFr extends S {
   }
 
   @override
+  String billReceiptRate(Object rate) {
+    return 'Le reçu applique $rate — l’utiliser';
+  }
+
+  @override
   String billCurrencySwitched(String currency) {
     return 'Facture passée en $currency, comme sur le ticket';
   }

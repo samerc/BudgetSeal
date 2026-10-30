@@ -458,6 +458,7 @@
   "billSharePaidBy": "دفعها {name}",
   "billReceiptMatch": "يطابق مجموع الإيصال ({total})",
   "billCurrencyHint": "يبدو أنه بـ{currency} — تبديل؟",
+  "billReceiptRate": "الإيصال يعتمد {rate} — استخدمه",
   "billCurrencySwitched": "تم تحويل الفاتورة إلى {currency} كما في الإيصال",
   "billReceiptDiff": "مجموع البنود {items} · مجموع الإيصال {total}",
   "webShortcutRefresh": "إعادة التحميل من الهاتف",

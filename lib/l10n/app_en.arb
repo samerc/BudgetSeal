@@ -526,6 +526,8 @@
   "@billReceiptMatch": {"placeholders": {"total": {"type": "String"}}},
   "billCurrencyHint": "Looks like {currency} — switch?",
   "@billCurrencyHint": {"placeholders": {"currency": {"type": "String"}}},
+  "billReceiptRate": "The receipt uses {rate} — use it",
+  "@billReceiptRate": {"description": "Bill splitter: under the rate, the rate the receipt prints (its total in both currencies); tap to use it", "placeholders": {"rate": {}}},
   "billCurrencySwitched": "Bill switched to {currency}, as on the receipt",
   "@billCurrencySwitched": {"placeholders": {"currency": {"type": "String"}}},
   "billReceiptDiff": "Items add up to {items} · receipt total {total}",

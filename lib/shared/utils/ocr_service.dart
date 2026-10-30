@@ -279,6 +279,22 @@ class OcrService {
       parsed.removeAt(i + 1);
     }
 
+    // 4c. A column-header row ("Qty  Description  Total") opens the table:
+    // nothing above it is an item or a charge (a delivery slip's name,
+    // address, floor, phone — and its "Delivery" title).
+    final tableIdx = parsed.indexWhere((p) => _isTableHeader(p.text));
+    if (tableIdx >= 0) {
+      parsed[tableIdx].toOther();
+      for (var i = 0; i < tableIdx; i++) {
+        final k = parsed[i].kind;
+        if (k == OcrLineKind.item ||
+            k == OcrLineKind.tax ||
+            k == OcrLineKind.discount) {
+          parsed[i].toOther();
+        }
+      }
+    }
+
     // 5. Nothing after the grand total is an item (payment, change, thanks).
     var grandIdx = -1;
     for (var i = 0; i < parsed.length; i++) {
@@ -299,7 +315,14 @@ class OcrService {
         if (p.kind == OcrLineKind.item && p.amount != null && !p.weak) p,
     ];
     final firstStrong = strong.isEmpty ? -1 : parsed.indexOf(strong.first);
-    final rights = [for (final p in strong) p.row.right]..sort();
+    var rights = [for (final p in strong) p.row.right]..sort();
+    if (rights.length < 3) {
+      // Every price bare ("150000"): the column is where most of them end.
+      rights = [
+        for (final p in parsed)
+          if (p.kind == OcrLineKind.item && p.amount != null) p.row.right,
+      ]..sort();
+    }
     final column = rights.length >= 3 ? rights[rights.length ~/ 2] : null;
     for (var i = 0; i < parsed.length; i++) {
       final p = parsed[i];
@@ -383,9 +406,13 @@ class OcrService {
     }
 
     // Above the first priced item is the header (shop name, address, VAT
-    // number): no items waiting for a price, no tax.
-    final firstPriced = out.indexWhere(
-        (p) => p.kind == OcrLineKind.item && p.amount != null);
+    // number): no items waiting for a price, no tax. With a column-header
+    // row (4c) the table starts there instead — a "Delivery charge" listed
+    // before the first dish is a charge, not header.
+    final firstPriced = tableIdx >= 0
+        ? 0
+        : out.indexWhere(
+            (p) => p.kind == OcrLineKind.item && p.amount != null);
     for (var i = 0; i < (firstPriced < 0 ? 0 : firstPriced); i++) {
       final k = out[i].kind;
       if (k == OcrLineKind.item || k == OcrLineKind.tax) out[i].toOther();
@@ -731,9 +758,11 @@ class OcrService {
     }
 
     // Strip a leading product/barcode code: "2745P", "37470", "SKU123".
-    // Only a token with a digit — "Pizza margherita" keeps its first word.
+    // Only a capitals-and-digits token with a digit, not starting with a
+    // word — "Pizza margherita" keeps its first word, and so does
+    // "Comb0300g fries" (Combo300g, an O read as 0).
     name = name.replaceAll(
-        RegExp(r'^(?=[A-Z]*\d)[\dA-Z]{3,13}\s+', caseSensitive: false), '');
+        RegExp(r'^(?![A-Z]{4})(?=[A-Z]*\d)[\dA-Z]{3,13}\s+'), '');
 
     // Extract trailing quantity: "AVOCADO EXTRA  2" or "Mango  3"
     // Only treat as quantity if value is 2-20 (1 is noise, >20 is likely a code)
@@ -861,6 +890,61 @@ class OcrService {
   };
 
   /// Symbols that name one currency.
+  /// "Qty  Description  Total", "Item  Price", "Désignation  Qté  Montant":
+  /// two or more column names and no digits.
+  static bool _isTableHeader(String text) {
+    final lower = text.toLowerCase();
+    if (RegExp(r'\d').hasMatch(lower)) return false;
+    final words = lower.split(RegExp(r'[^a-zà-ÿ.]+')).where((w) => w.isNotEmpty);
+    return words.isNotEmpty &&
+        words.every(_columnWords.contains) &&
+        words.toSet().length >= 2;
+  }
+
+  static const _columnWords = {
+    'qty', 'qte', 'qté', 'quantity', 'quantité', 'description', 'desc',
+    'item', 'items', 'article', 'articles', 'désignation', 'designation',
+    'price', 'prix', 'p.u', 'pu', 'unit', 'total', 'amount', 'montant',
+    'amt', 'value', 'valeur',
+  };
+
+  /// The rate a receipt prints when it gives its total in two currencies
+  /// ("TOTAL LL: 2,265,000" and "TOTAL \$: 25.17"): how much of [other] one
+  /// [bill] unit is (25.17 / 2,265,000), or null when it doesn't print both.
+  static double? printedRate(OcrResult r,
+      {required String bill, required String other}) {
+    if (bill == other) return null;
+    final byCurrency = <String, double>{};
+    for (final l in r.lines) {
+      if (l.kind != OcrLineKind.total || l.parsedAmount == null) continue;
+      final c = _totalCurrency(l.text);
+      final v = l.parsedAmount!.abs();
+      if (c == null || v <= 0) continue;
+      if (v > (byCurrency[c] ?? 0)) byCurrency[c] = v;
+    }
+    final b = byCurrency[bill], o = byCurrency[other];
+    return b == null || o == null ? null : o / b;
+  }
+
+  /// The currency a total line names ("TOTAL LL:", "Total \$", "TOTAL USD").
+  static String? _totalCurrency(String text) {
+    final lower = text.toLowerCase();
+    if (RegExp(r'(^|[^a-z])(ll|l\.l\.?|lbp)([^a-z]|$)').hasMatch(lower) ||
+        lower.contains('ل.ل')) {
+      return 'LBP';
+    }
+    if (lower.contains('\$') ||
+        RegExp(r'(^|[^a-z])usd([^a-z]|$)').hasMatch(lower)) {
+      return 'USD';
+    }
+    if (lower.contains('€') ||
+        RegExp(r'(^|[^a-z])eur([^a-z]|$)').hasMatch(lower)) {
+      return 'EUR';
+    }
+    final iso = RegExp(r'(^|[^A-Za-z])([A-Z]{3})([^A-Za-z]|$)').firstMatch(text);
+    return iso?.group(2);
+  }
+
   static const _currencySymbols = {
     'ل.ل': 'LBP', 'l.l': 'LBP', 'l.l.': 'LBP', '€': 'EUR', '£': 'GBP',
     'د.إ': 'AED', 'us\$': 'USD',

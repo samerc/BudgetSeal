@@ -1563,6 +1563,11 @@ class SAr extends S {
   }
 
   @override
+  String billReceiptRate(Object rate) {
+    return 'الإيصال يعتمد $rate — استخدمه';
+  }
+
+  @override
   String billCurrencySwitched(String currency) {
     return 'تم تحويل الفاتورة إلى $currency كما في الإيصال';
   }

@@ -388,6 +388,29 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
     });
   }
 
+  /// The rate the scanned receipt prints (its total in both currencies),
+  /// as shown in the rate row's direction, rounded like the app's rates; null
+  /// when it prints none or it's already the rate in use.
+  double? _receiptRateShown() {
+    final ocr = _ocr;
+    if (ocr == null || _billCurrency == _baseCurrency) return null;
+    final rate = OcrService.printedRate(ocr,
+        bill: _billCurrency, other: _baseCurrency);
+    if (rate == null || rate <= 0) return null;
+    final shown = roundRate(_rateInverted ? 1.0 / rate : rate);
+    final current = parseLooseAmount(_rateCtrl.text);
+    if (current != null && (current - shown).abs() <= shown * 1e-9) {
+      return null;
+    }
+    return shown;
+  }
+
+  void _useReceiptRate(double shown) => setState(() {
+        _exchangeRate = _rateInverted ? 1.0 / shown : shown;
+        _rateCtrl.text = formatRateForInput(shown);
+        _fixed.clear();
+      });
+
   void _onRateTyped(String v) {
     final r = parseLooseAmount(v) ?? 0;
     if (r > 0) _exchangeRate = _rateInverted ? 1.0 / r : r;
@@ -1784,6 +1807,31 @@ class _BillSplitterScreenState extends ConsumerState<BillSplitterScreen> {
                   ),
                 ),
             ]),
+            // "TOTAL LL 2,265,000 / TOTAL \$ 25.17": the shop's own rate.
+            if (_receiptRateShown() case final shown?)
+              Tappable(
+                onTap: () => _useReceiptRate(shown),
+                borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(children: [
+                    Icon(AppIcons.receipt,
+                        size: 16, color: AppColors.accentText(context)),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                          tr.billReceiptRate(
+                              '1 ${_rateInverted ? _baseCurrency : _billCurrency}'
+                              ' = ${formatNumber(shown, decimals: shown >= 100 ? 0 : 4)}'
+                              ' ${_rateInverted ? _billCurrency : _baseCurrency}'),
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.accentText(context))),
+                    ),
+                  ]),
+                ),
+              ),
             // Everyone pays in the base currency (an LBP bill paid in USD).
             if (_canSplitInBase)
               Row(children: [

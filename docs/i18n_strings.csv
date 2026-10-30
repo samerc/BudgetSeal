@@ -2107,6 +2107,7 @@ bill_share_header,,Bill split · total {total},تقسيم فاتورة · الم
 bill_share_paid_by,,Paid by {name},دفعها {name},Payé par {name}
 bill_receipt_match,,Matches the receipt total ({total}),يطابق مجموع الإيصال ({total}),Correspond au total du ticket ({total})
 bill_currency_hint,Under the bill total after a scan,Looks like {currency} — switch?,يبدو أنه بـ{currency} — تبديل؟,Semble être en {currency} — changer ?
+bill_receipt_rate,"Bill splitter: under the rate, the rate the receipt prints (its total in both currencies); tap to use it",The receipt uses {rate} — use it,الإيصال يعتمد {rate} — استخدمه,Le reçu applique {rate} — l’utiliser
 bill_currency_switched,SnackBar after a scan,"Bill switched to {currency}, as on the receipt",تم تحويل الفاتورة إلى {currency} كما في الإيصال,"Facture passée en {currency}, comme sur le ticket"
 bill_receipt_diff,,Items add up to {items} · receipt total {total},مجموع البنود {items} · مجموع الإيصال {total},Les articles font {items} · total du ticket {total}
 

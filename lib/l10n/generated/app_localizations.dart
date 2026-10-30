@@ -2853,6 +2853,12 @@ abstract class S {
   /// **'Looks like {currency} — switch?'**
   String billCurrencyHint(String currency);
 
+  /// Bill splitter: under the rate, the rate the receipt prints (its total in both currencies); tap to use it
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt uses {rate} — use it'**
+  String billReceiptRate(Object rate);
+
   /// No description provided for @billCurrencySwitched.
   ///
   /// In en, this message translates to:

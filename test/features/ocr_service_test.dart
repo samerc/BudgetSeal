@@ -626,6 +626,78 @@ void main() {
         ('Lemonade', 4.0, 1),
       ]);
     });
+
+    test('a real delivery slip: address header, bare prices, two totals '
+        '(ML Kit output, Oct 30 2026)', () {
+      // Above the "Qty Description Total" row: the customer's name, company,
+      // phones, street, floor ("Flr: 4") and the shop's phone beside the end
+      // of its address ("…iye  76696698") — none of it items, and the
+      // "Delivery" title isn't a charge. Every price is bare ("150000"), so
+      // there's no "real" price to fence the header with. "Combo300g" was
+      // read "Comb0300g". (Phones replaced; layout kept.)
+      OcrRawLine l(String text, double left, double top, double right,
+              double bottom, double angle, double h) =>
+          OcrRawLine(
+              text: text,
+              rect: ui.Rect.fromLTRB(left, top, right, bottom),
+              angle: angle,
+              height: h);
+      final res = OcrService.parseLines([
+        l('Name: l', 29, 212, 285, 314, 0.1935, 55.1),
+        l('Fam.:0', 29, 315, 255, 400, 0.1368, 55.6),
+        l('Comp: uil gal4', 23, 414, 531, 558, 0.1616, 64.0),
+        l('Tel:01000001-01000002', 17, 512, 804, 705, 0.1735, 58.1),
+        l('Str: il', 24, 722, 394, 837, 0.1489, 61.8),
+        l('Delivery', 590, 198, 970, 353, 0.1985, 83.7),
+        l('Tel:01000003-70000004', 19, 613, 802, 804, 0.1716, 57.9),
+        l('Flr: 4', 50, 824, 201, 908, 0.1409, 64.8),
+        l('Apt: lA', 24, 920, 579, 1071, 0.1550, 66.9),
+        l('ye', 838, -1, 914, 48, 0.1889, 36.9),
+        l('76000000', 634, 27, 931, 133, 0.2061, 47.1),
+        l('30-10-2026 12:39', 516, 1416, 1038, 1533, 0.1275, 51.5),
+        l('CHECK# 106647', 527, 1514, 1027, 1629, 0.1271, 52.5),
+        l('Order Nb. 20008', 435, 1583, 1120, 1736, 0.1120, 77.5),
+        l('Qty Description', 162, 1863, 635, 1973, 0.0963, 65.4),
+        l('1 Delivery Charge 1', 257, 2067, 809, 2184, 0.0897, 68.4),
+        l('2 HALF&HALF', 230, 2170, 678, 2257, 0.0811, 51.2),
+        l('2 half hotdog', 227, 2264, 618, 2359, 0.0932, 59.3),
+        l('2 Half escalope', 224, 2362, 697, 2466, 0.0897, 62.3),
+        l('1 Comb0300g fries', 255, 2467, 793, 2568, 0.0674, 65.2),
+        l('TOTAL LL: 2,265,000', 273, 2665, 1251, 2825, 0.0689, 93.3),
+        l('TOTAL \$: 25.17', 406, 2793, 1130, 2920, 0.0612, 83.2),
+        l('Cash LL:2265000', 474, 3014, 1117, 3108, 0.0390, 69.1),
+        l('We appreciate your visit!', 420, 3232, 1111, 3313, 0.0305, 60.0),
+        l('Thank yQu', 632, 3325, 920, 3404, 0.0706, 59.2),
+        l('Powered by OmegaPOs com', 364, 3525, 1175, 3595, 0.0111, 61.0),
+        l('Total', 1330, 1988, 1461, 2049, 0.0713, 52.2),
+        l('150000', 1264, 2169, 1460, 2234, 0.0836, 49.3),
+        l('180000', 1265, 2264, 1462, 2329, 0.0780, 50.2),
+        l('810000', 1261, 2358, 1463, 2423, 0.0810, 49.3),
+        l('720000', 1259, 2452, 1464, 2518, 0.0848, 49.3),
+        l('405000', 1263, 2550, 1462, 2612, 0.0459, 53.1),
+      ], imageWidth: 1703, imageHeight: 3748, currency: 'LBP');
+      expect(_items(res), [
+        ('HALF&HALF', 180000.0, 2),
+        ('half hotdog', 810000.0, 2),
+        ('Half escalope', 720000.0, 2),
+        ('Comb0300g fries', 405000.0, 1),
+      ]);
+      // The delivery charge is shared like a service charge; with it the
+      // items match the receipt.
+      expect(res.taxTotal, 150000);
+      expect(res.receiptTotal, 2265000);
+      expect(
+          _items(res).fold<double>(0, (s, i) => s + i.$2) + res.taxTotal!,
+          2265000);
+      // No header line waits for a price.
+      expect(
+          res.lines.where((x) => x.kind == OcrLineKind.item && !x.hasPrice),
+          isEmpty);
+      // The rate the shop used: 25.17 / 2,265,000.
+      expect(OcrService.printedRate(res, bill: 'LBP', other: 'USD'),
+          closeTo(25.17 / 2265000, 1e-12));
+      expect(OcrService.printedRate(res, bill: 'LBP', other: 'EUR'), isNull);
+    });
   });
 
   group('OcrService receipt currency', () {

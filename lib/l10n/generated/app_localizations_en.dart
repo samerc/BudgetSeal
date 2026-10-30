@@ -1565,6 +1565,11 @@ class SEn extends S {
   }
 
   @override
+  String billReceiptRate(Object rate) {
+    return 'The receipt uses $rate — use it';
+  }
+
+  @override
   String billCurrencySwitched(String currency) {
     return 'Bill switched to $currency, as on the receipt';
   }
