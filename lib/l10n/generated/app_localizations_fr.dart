@@ -2356,6 +2356,9 @@ class SFr extends S {
   String get forecastReserved => 'Gardé pour les fonds d’épargne';
 
   @override
+  String get forecastSaved => 'Mis de côté pour vos objectifs';
+
+  @override
   String get forecastUpcoming => 'À venir';
 
   @override

@@ -128,6 +128,22 @@ void main() {
     expect(f.safeToSpend, closeTo((2000 - 400 - 300) / 29, 1e-9));
   });
 
+  test('savings goals are not safe to spend; each currency its own',
+      () async {
+    final f = buildForecast(
+      now: now,
+      cash: {'USD': 2000, 'EUR': 500},
+      recurring: await recurring([
+        ('Salary', 'income', 2000, DateTime(2026, 11, 25)),
+      ]),
+      savings: {'USD': 1200, 'EUR': -50},
+    );
+    expect(f['USD']!.saved, 1200);
+    expect(f['USD']!.safeToSpend, closeTo((2000 - 1200) / 29, 1e-9));
+    // A negative savings balance never adds money.
+    expect(f['EUR']!.saved, 0);
+  });
+
   test('falling short: safe to spend is 0 and says by how much', () async {
     final f = buildForecast(
       now: now,

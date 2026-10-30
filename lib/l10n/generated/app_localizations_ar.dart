@@ -2338,6 +2338,9 @@ class SAr extends S {
   String get forecastReserved => 'محفوظ للصناديق الادخارية';
 
   @override
+  String get forecastSaved => 'محفوظ لأهداف الادخار';
+
+  @override
   String get forecastUpcoming => 'القادم';
 
   @override

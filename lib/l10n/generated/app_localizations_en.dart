@@ -2338,6 +2338,9 @@ class SEn extends S {
   String get forecastReserved => 'Kept for sinking funds';
 
   @override
+  String get forecastSaved => 'Kept for savings goals';
+
+  @override
   String get forecastUpcoming => 'Coming up';
 
   @override

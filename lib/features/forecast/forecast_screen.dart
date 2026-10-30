@@ -183,6 +183,8 @@ class _ForecastScreenState extends ConsumerState<ForecastScreen> {
                       (tr.forecastDue, money(-f.dueBefore)),
                       if (f.reserved > 0.005)
                         (tr.forecastReserved, money(-f.reserved)),
+                      if (f.saved > 0.005)
+                        (tr.forecastSaved, money(-f.saved)),
                     ])
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2),

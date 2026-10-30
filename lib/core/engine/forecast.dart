@@ -77,10 +77,14 @@ class CurrencyForecast {
   /// what's still to set aside this period.
   final double reserved;
 
+  /// Money in savings envelopes: it has a job (a goal), so it isn't
+  /// counted as safe to spend.
+  final double saved;
+
   /// Days from today to the next income (at least 1).
   final int daysLeft;
 
-  /// Per day until the next income: cash − due − reserved, ÷ days; never
+  /// Per day until the next income: cash − due − reserved − saved, ÷ days; never
   /// below 0 ([short] says by how much it falls short).
   final double safeToSpend;
   final double short;
@@ -96,6 +100,7 @@ class CurrencyForecast {
     required this.nextIncome,
     required this.dueBefore,
     required this.reserved,
+    this.saved = 0,
     required this.daysLeft,
     required this.safeToSpend,
     required this.short,
@@ -121,6 +126,7 @@ Map<String, CurrencyForecast> buildForecast({
   List<RecurringTransaction> recurring = const [],
   List<PlannedPart> planned = const [],
   List<ForecastFund> funds = const [],
+  Map<String, double> savings = const {},
   List<PastIncome> pastIncome = const [],
   int days = 90,
 }) {
@@ -215,7 +221,8 @@ Map<String, CurrencyForecast> buildForecast({
       reserved += math.max(0, (f.balances[c] ?? 0) - paidBefore) +
           (f.thisPeriod[c] ?? 0);
     }
-    final free = start - dueBefore - reserved;
+    final saved = math.max(0.0, savings[c] ?? 0);
+    final free = start - dueBefore - reserved - saved;
     out[c] = CurrencyForecast(
       currency: c,
       start: start,
@@ -227,6 +234,7 @@ Map<String, CurrencyForecast> buildForecast({
       nextIncome: next,
       dueBefore: dueBefore,
       reserved: reserved,
+      saved: saved,
       daysLeft: daysLeft,
       safeToSpend: math.max(0, free) / daysLeft,
       short: free < 0 ? -free : 0,

@@ -672,6 +672,7 @@
   "forecastCashNow": "Sur vos comptes",
   "forecastDue": "À payer d’ici là",
   "forecastReserved": "Gardé pour les fonds d’épargne",
+  "forecastSaved": "Mis de côté pour vos objectifs",
   "forecastUpcoming": "À venir",
   "forecastEstimate": "Revenu habituel (estimation)",
   "forecastEmpty": "Ajoutez une facture ou un revenu récurrent, ou un paiement prévu, pour voir ce qui arrive.",

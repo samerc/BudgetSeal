@@ -186,7 +186,7 @@ class DemoBudget {
             id: 'pay', householdId: hh, type: 'income', amount: 3200,
             currency: base, accountId: 'checking', frequency: 'monthly',
             categoryId: const Value('salary'), title: const Value('Salary'),
-            nextDueDate: today.add(const Duration(days: 16))));
+            nextDueDate: DateTime(today.year, today.month + 1, 1)));
   }
 
   /// Opening balances + income, and what was funded: Ready to assign is

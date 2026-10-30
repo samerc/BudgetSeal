@@ -4137,6 +4137,12 @@ abstract class S {
   /// **'Kept for sinking funds'**
   String get forecastReserved;
 
+  /// Forecast: money in savings envelopes, left out of safe to spend
+  ///
+  /// In en, this message translates to:
+  /// **'Kept for savings goals'**
+  String get forecastSaved;
+
   /// Forecast: the next 90 days and safe to spend today
   ///
   /// In en, this message translates to:

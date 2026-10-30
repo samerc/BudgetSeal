@@ -854,6 +854,8 @@
   "@forecastDue": {"description": "Forecast: the next 90 days and safe to spend today"},
   "forecastReserved": "Kept for sinking funds",
   "@forecastReserved": {"description": "Forecast: the next 90 days and safe to spend today"},
+  "forecastSaved": "Kept for savings goals",
+  "@forecastSaved": {"description": "Forecast: money in savings envelopes, left out of safe to spend"},
   "forecastUpcoming": "Coming up",
   "@forecastUpcoming": {"description": "Forecast: the next 90 days and safe to spend today"},
   "forecastEstimate": "Usual income (estimate)",

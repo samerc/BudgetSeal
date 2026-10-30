@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shared/utils/note_text.dart';
 import '../engine/forecast.dart';
 import 'accounts_provider.dart';
+import 'allocations_provider.dart';
 import 'database_provider.dart';
 import 'household_provider.dart';
 import 'sinking_fund_provider.dart';
@@ -50,6 +51,16 @@ final forecastProvider =
       ForecastFund(f.balances, f.thisPeriod, f.plan.upcoming),
   ];
 
+  // Savings envelopes' money has a goal: not safe to spend.
+  final savings = <String, double>{};
+  for (final a in await ref.watch(allocationsProvider.future)) {
+    final env = a.data.allocation;
+    if (env.type != 'saving' || env.archived) continue;
+    a.balanceByCurrency.forEach((c, v) {
+      if (v > 0) savings[c] = (savings[c] ?? 0) + v;
+    });
+  }
+
   final since = DateTime.now().subtract(const Duration(days: 92));
   final pastIncome = [
     for (final r in await db.customSelect(
@@ -72,6 +83,7 @@ final forecastProvider =
     recurring: recurring,
     planned: planned,
     funds: funds,
+    savings: savings,
     pastIncome: pastIncome,
   );
 });

@@ -1879,6 +1879,7 @@ forecast_lowest,Forecast: the next 90 days and safe to spend today,Lowest {amoun
 forecast_cash_now,Forecast: the next 90 days and safe to spend today,In your accounts,في حساباتك,Sur vos comptes
 forecast_due,Forecast: the next 90 days and safe to spend today,Due before then,مستحق قبل ذلك,À payer d’ici là
 forecast_reserved,Forecast: the next 90 days and safe to spend today,Kept for sinking funds,محفوظ للصناديق الادخارية,Gardé pour les fonds d’épargne
+forecast_saved,Forecast: the next 90 days and safe to spend today,Kept for savings goals,محفوظ لأهداف الادخار,Mis de côté pour vos objectifs
 forecast_upcoming,Forecast: the next 90 days and safe to spend today,Coming up,القادم,À venir
 forecast_estimate,Forecast: the next 90 days and safe to spend today,Usual income (estimate),الدخل المعتاد (تقدير),Revenu habituel (estimation)
 forecast_empty,Forecast: the next 90 days and safe to spend today,"Add a recurring bill or income, or a planned payment, to see what’s coming.",أضف فاتورة أو دخلًا متكررًا، أو دفعة مخطَّطة، لترى ما هو قادم.,"Ajoutez une facture ou un revenu récurrent, ou un paiement prévu, pour voir ce qui arrive."
